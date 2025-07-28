@@ -46,9 +46,9 @@ def test_parsing():
     parsed_trips = []
     for i, block in enumerate(blocks, 1):
         trip = parse_trip_block(block)
-        if trip and trip.get('id'):
+        if trip and trip.get('trip_id'):
             parsed_trips.append(trip)
-            print(f"Block {i} -> Trip {trip['id']}: {trip['routing']}")
+            print(f"Block {i} -> Trip {trip['trip_id']}: {trip['routing']}")
     
     print(f"\nDirect block parsing found {len(parsed_trips)} trips")
     
@@ -57,7 +57,7 @@ def test_parsing():
     
     print(f"Found {len(trips)} trips:")
     for i, trip in enumerate(trips, 1):
-        print(f"{i}. Trip {trip['id']}: {trip['duration']} days, {trip['routing']}, {trip['credit_hours']} hours")
+        print(f"{i}. Trip {trip['trip_id']}: {trip['days']} days, {trip['routing']}, {trip['credit_hours']} hours")
         print(f"   Dates: {trip['dates']}, Weekend: {trip['includes_weekend']}")
     
     return trips

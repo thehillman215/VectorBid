@@ -21,7 +21,7 @@ def parse_schedule_file(file_path: str, file_extension: str) -> List[Dict[str, A
         file_extension: File extension (.pdf, .csv, .txt)
     
     Returns:
-        List of trip dictionaries with keys: id, duration, dates, routing, credit_hours, includes_weekend
+        List of trip dictionaries with keys: trip_id, days, dates, routing, credit_hours, includes_weekend
     """
     try:
         if file_extension == '.pdf':
@@ -52,10 +52,14 @@ def parse_pdf_schedule(file_path: str) -> List[Dict[str, Any]]:
         for page_num in range(len(doc)):
             page = doc[page_num]
             try:
+                # Try the standard PyMuPDF method
                 page_text = page.get_text()
-            except AttributeError:
-                # Fallback for different PyMuPDF versions
-                page_text = str(page.get_text() if hasattr(page, 'get_text') else "")
+            except (AttributeError, TypeError):
+                try:
+                    # Fallback for different PyMuPDF versions
+                    page_text = page.getText() if hasattr(page, 'getText') else ""
+                except:
+                    page_text = ""
             all_text += page_text + "\n"
         
         doc.close()
@@ -113,8 +117,8 @@ def extract_trip_from_row(row: Dict[str, str]) -> Dict[str, Any]:
     
     # Map common CSV column names to our fields
     field_mappings = {
-        'id': ['id', 'trip_id', 'tripid', 'trip id', 'number', 'trip_number'],
-        'duration': ['duration', 'days', 'length', 'trip_length'],
+        'trip_id': ['id', 'trip_id', 'tripid', 'trip id', 'number', 'trip_number'],
+        'days': ['duration', 'days', 'length', 'trip_length'],
         'dates': ['dates', 'date', 'period', 'schedule', 'start_date', 'end_date'],
         'routing': ['routing', 'route', 'cities', 'destinations', 'legs'],
         'credit_hours': ['credit_hours', 'credit', 'hours', 'time', 'flying_time', 'flight_time'],
@@ -132,7 +136,7 @@ def extract_trip_from_row(row: Dict[str, str]) -> Dict[str, Any]:
                 break
         
         if value:
-            if field == 'duration':
+            if field == 'days':
                 trip[field] = extract_duration(value)
             elif field == 'credit_hours':
                 trip[field] = extract_credit_hours(value)
@@ -146,9 +150,9 @@ def extract_trip_from_row(row: Dict[str, str]) -> Dict[str, Any]:
         trip['includes_weekend'] = check_weekend_from_dates(trip['dates'])
     
     # Only return trip if we have at least an ID
-    if 'id' in trip:
+    if 'trip_id' in trip:
         # Set defaults for missing fields
-        trip.setdefault('duration', 0)
+        trip.setdefault('days', 0)
         trip.setdefault('dates', 'Unknown')
         trip.setdefault('routing', 'Unknown')
         trip.setdefault('credit_hours', 0.0)
@@ -189,7 +193,7 @@ def parse_airline_schedule_text(text: str) -> List[Dict[str, Any]]:
     
     for block in trip_blocks:
         trip = parse_trip_block(block)
-        if trip and trip.get('id'):
+        if trip and trip.get('trip_id') and trip.get('trip_id') != 'Unknown':
             trips.append(trip)
     
     # If no trips found from blocks, try line-by-line parsing with patterns
@@ -265,25 +269,25 @@ def parse_trip_block(block: str) -> Dict[str, Any]:
     # Extract trip ID
     trip_id_match = re.search(r'(?:trip|pairing|sequence)\s*(\d+)|^(\d{2,4})', block, re.IGNORECASE)
     if trip_id_match:
-        trip['id'] = trip_id_match.group(1) or trip_id_match.group(2)
+        trip['trip_id'] = trip_id_match.group(1) or trip_id_match.group(2)
     
     # Extract duration/days - look for patterns like "4-Day Trip" or date ranges
     duration_patterns = [
         r'(\d+)[-\s]*day',
         r'(\d+)D\b',
-        r'(\d{1,2}[A-Z]{3})\s*[-\s]+\s*(\d{1,2}[A-Z]{3})',  # Date range like 12NOV - 15NOV
+        r'(\d{1,2}[A-Z]{3})\s*[-–\s]+\s*(\d{1,2}[A-Z]{3})',  # Date range like 12NOV - 15NOV
     ]
     
     for pattern in duration_patterns:
         duration_match = re.search(pattern, block, re.IGNORECASE)
         if duration_match:
             if len(duration_match.groups()) == 1:
-                trip['duration'] = int(duration_match.group(1))
+                trip['days'] = int(duration_match.group(1))
             else:
                 # Calculate duration from date range
                 start_date, end_date = duration_match.groups()
-                trip['duration'] = calculate_duration_from_dates(start_date, end_date)
-                trip['dates'] = f"{start_date} - {end_date}"
+                trip['days'] = calculate_duration_from_dates(start_date, end_date)
+                trip['dates'] = f"{start_date} – {end_date}"
             break
     
     # Extract routing (airport codes) - look for patterns like IAH-SFO-IAH
@@ -306,22 +310,38 @@ def parse_trip_block(block: str) -> Dict[str, Any]:
         if 'routing' in trip:
             break
     
-    # Extract credit hours - look for patterns like 18:30
-    credit_match = re.search(r'(\d{1,2}):(\d{2})', block)
-    if credit_match:
-        hours = int(credit_match.group(1))
-        minutes = int(credit_match.group(2))
-        trip['credit_hours'] = hours + (minutes / 60.0)
+    # Extract credit hours - look for patterns like 18:30, "Credit 18:30", etc.
+    credit_patterns = [
+        r'(?:credit\s*)?(\d{1,2}):(\d{2})',  # "Credit 18:30" or just "18:30"
+        r'credit\s*hours?\s*(\d{1,2}):(\d{2})',  # "Credit Hours 18:30"
+        r'(\d{1,2}):(\d{2})\s*(?:credit|hrs?)',  # "18:30 credit"
+    ]
     
-    # Extract dates if not already found
+    for pattern in credit_patterns:
+        credit_match = re.search(pattern, block, re.IGNORECASE)
+        if credit_match:
+            hours = int(credit_match.group(1))
+            minutes = int(credit_match.group(2))
+            trip['credit_hours'] = hours + (minutes / 60.0)
+            break
+    
+    # Extract dates if not already found - also handle en-dash and other variations
     if 'dates' not in trip:
-        date_match = re.search(r'(\d{1,2}[A-Z]{3})\s*[-\s]+\s*(\d{1,2}[A-Z]{3})', block)
-        if date_match:
-            start_date, end_date = date_match.groups()
-            trip['dates'] = f"{start_date} - {end_date}"
-            # Also calculate duration if not already set
-            if 'duration' not in trip:
-                trip['duration'] = calculate_duration_from_dates(start_date, end_date)
+        date_patterns = [
+            r'(\d{1,2}[A-Z]{3})\s*[-–\s]+\s*(\d{1,2}[A-Z]{3})',  # Standard date range
+            r'(\d{1,2}[A-Z]{3})\s*-\s*(\d{1,2}[A-Z]{3})',  # Hyphen separated
+            r'(\d{1,2}[A-Z]{3})\s+(\d{1,2}[A-Z]{3})',  # Space separated
+        ]
+        
+        for pattern in date_patterns:
+            date_match = re.search(pattern, block)
+            if date_match:
+                start_date, end_date = date_match.groups()
+                trip['dates'] = f"{start_date} – {end_date}"
+                # Also calculate duration if not already set
+                if 'days' not in trip:
+                    trip['days'] = calculate_duration_from_dates(start_date, end_date)
+                break
     
     # Check for weekend inclusion
     if 'dates' in trip:
@@ -331,8 +351,9 @@ def parse_trip_block(block: str) -> Dict[str, Any]:
         weekend_indicators = ['sat', 'sun', 'weekend', 'sat/sun']
         trip['includes_weekend'] = any(indicator in block.lower() for indicator in weekend_indicators)
     
-    # Set defaults for missing fields
-    trip.setdefault('duration', 0)
+    # Set defaults for missing fields using the correct field names
+    trip.setdefault('trip_id', 'Unknown')
+    trip.setdefault('days', 0)
     trip.setdefault('dates', 'Unknown')
     trip.setdefault('routing', 'Unknown')
     trip.setdefault('credit_hours', 0.0)
@@ -371,8 +392,8 @@ def parse_lines_with_patterns(lines: List[str], patterns: List[str]) -> List[Dic
                     credit_hours = parse_credit_time(credit_time)
                     
                     trip = {
-                        'id': trip_id,
-                        'duration': duration,
+                        'trip_id': trip_id,
+                        'days': duration,
                         'dates': dates,
                         'routing': routing.strip(),
                         'credit_hours': credit_hours,
@@ -405,8 +426,8 @@ def extract_basic_trips(text: str) -> List[Dict[str, Any]]:
     # Limit to reasonable number of trips
     for trip_id in unique_trip_ids[:20]:
         trips.append({
-            'id': trip_id,
-            'duration': 0,
+            'trip_id': trip_id,
+            'days': 0,
             'dates': 'Unknown',
             'routing': 'Unknown',
             'credit_hours': 0.0,

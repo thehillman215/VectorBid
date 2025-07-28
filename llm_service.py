@@ -32,8 +32,8 @@ def rank_trips_with_ai(trips: List[Dict[str, Any]], preferences: str) -> List[Di
         trips_summary = []
         for trip in trips:
             summary = {
-                'id': trip['id'],
-                'duration': trip['duration'],
+                'trip_id': trip['trip_id'],
+                'days': trip['days'],
                 'dates': trip['dates'],
                 'routing': trip['routing'],
                 'credit_hours': trip['credit_hours'],
@@ -92,7 +92,7 @@ Rank ALL trips from best (rank 1) to worst, with each trip having a unique rank 
         ranked_trips = result.get('ranked_trips', [])
         
         # Validate that we have rankings for all trips
-        trip_ids = {trip['id'] for trip in trips}
+        trip_ids = {trip['trip_id'] for trip in trips}
         ranked_ids = {item['trip_id'] for item in ranked_trips}
         
         # Add any missing trips at the end
@@ -116,12 +116,12 @@ Rank ALL trips from best (rank 1) to worst, with each trip having a unique rank 
     except json.JSONDecodeError as e:
         logging.error(f"Failed to parse AI response as JSON: {str(e)}")
         # Fallback: return trips in original order with generic comments
-        return [{'trip_id': trip['id'], 'comment': 'AI ranking unavailable'} for trip in trips]
+        return [{'trip_id': trip['trip_id'], 'comment': 'AI ranking unavailable'} for trip in trips]
     
     except Exception as e:
         logging.error(f"Error calling OpenAI API: {str(e)}")
         # Fallback: return trips in original order with error message
-        return [{'trip_id': trip['id'], 'comment': f'Error in AI ranking: {str(e)}'} for trip in trips]
+        return [{'trip_id': trip['trip_id'], 'comment': f'Error in AI ranking: {str(e)}'} for trip in trips]
 
 
 def test_openai_connection():
