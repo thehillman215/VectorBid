@@ -10,7 +10,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <i class="fas fa-vector-square me-2"></i>
                 VectorBid
             </a>
@@ -68,7 +68,7 @@
                                 Supported formats: PDF, CSV, and text files.
                             </p>
 
-                            <form method="POST" action="{{ url_for('process_schedule') }}" enctype="multipart/form-data">
+                            <form method="POST" action="{{ url_for('main.process_schedule') }}" enctype="multipart/form-data">
                                 <div class="mb-4">
                                     <label for="schedule_file" class="form-label">
                                         <i class="fas fa-file me-2"></i>
