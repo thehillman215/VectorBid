@@ -149,12 +149,12 @@ def download_ranking():
             comment = ranked_trip.get('comment', '')
             
             # Find the corresponding trip details
-            trip_details = next((t for t in trips if t['id'] == trip_id), {})
+            trip_details = next((t for t in trips if t['trip_id'] == trip_id), {})
             
             writer.writerow([
                 i,
                 trip_id,
-                trip_details.get('duration', 'N/A'),
+                trip_details.get('days', 'N/A'),
                 trip_details.get('dates', 'N/A'),
                 trip_details.get('routing', 'N/A'),
                 trip_details.get('credit_hours', 'N/A'),
