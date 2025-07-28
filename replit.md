@@ -1,6 +1,6 @@
 # Overview
 
-This is a Flask-based web application that helps airline pilots analyze and rank their trip bids based on personal preferences. The application allows pilots to upload their schedule files (PDF, CSV, or TXT format), input their preferences in natural language, and receive AI-powered rankings of available trips using OpenAI's GPT-4o model.
+VectorBid is a Flask-based web application that helps airline pilots analyze and rank their trip bids based on personal preferences. The application allows pilots to upload their schedule files (PDF, CSV, or TXT format), input their preferences in natural language, and receive AI-powered rankings of available trips using OpenAI's GPT-4o model.
 
 # User Preferences
 
@@ -116,3 +116,10 @@ Preferred communication style: Simple, everyday language.
   - Multiple parsing strategies with intelligent fallbacks
   - Improved weekend detection and duration calculation
 - **Rationale**: Real airline schedules require sophisticated parsing to handle varied formatting, multi-line data, and airline-specific conventions
+
+### VectorBid Application Branding (Updated: July 28, 2025)
+- **Change**: Renamed application from "Pilot Schedule Bidding Assistant" to "VectorBid"
+- **Updates**: Modified all UI templates, navigation, titles, and branding elements
+- **Icon**: Changed from plane icon to vector-square icon to reflect the "Vector" branding
+- **Tagline**: "AI-powered pilot schedule bidding assistant"
+- **Impact**: Complete rebrand across all user-facing components while maintaining functionality
