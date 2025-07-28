@@ -70,7 +70,7 @@ def process_schedule():
     top_trips.sort(key=lambda x: x.get('rank', 99))
 
     session['ranked_trips'] = top_trips  # store for download
-    return render_template('results.html', trips=top_trips, preferences=preferences)
+    return render_template('results.html', trips=top_trips, preferences=preferences, user=current_user if current_user.is_authenticated else None)
 
 
 @bp.get('/download_csv')
