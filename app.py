@@ -1,37 +1,47 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
+
+"""VectorBid Flask Application Factory"""
 import os
-from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
+from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+db = SQLAlchemy()
+
+def create_app():
+    """Create and configure the Flask app."""
+    # Load environment variables from .env in dev
+    load_dotenv()
+
+    app = Flask(__name__, static_folder='static', template_folder='templates')
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+    # Secret key
+    app.config['SECRET_KEY'] = os.environ.get('SESSION_SECRET', 'dev-secret')
+
+    # Database config
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///vectorbid.db')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    # Logging
+    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+    logging.basicConfig(level=getattr(logging, log_level))
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+
+    # Initialise extensions
+    db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
+
+    # Register blueprints
+    from routes import bp as main_bp
+    app.register_blueprint(main_bp)
+
+    return app
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-db = SQLAlchemy(model_class=Base)
-
-# Create the app
-app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET")
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for to generate with https
-
-# Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-}
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# Initialize the app with the extension
-db.init_app(app)
-
-with app.app_context():
-    # Make sure to import the models here or their tables won't be created
-    import models  # noqa: F401
-    db.create_all()
+if __name__ == '__main__':
+    app = create_app()
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

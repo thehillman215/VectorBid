@@ -1,137 +1,67 @@
-import json
+
+"""OpenAI integration: rank trips by preferences and return top N."""
 import os
+import json
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict
 
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
 
-# the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-# do not change this unless explicitly requested by the user
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
-    logging.error("OPENAI_API_KEY environment variable not set")
-    raise ValueError("OpenAI API key is required")
+    logging.warning('OPENAI_API_KEY not set – LLM ranking disabled.')
 
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+SYSTEM_PROMPT = """You are VectorBid, an AI assistant that helps airline pilots choose bid trips.
+Rank trips based on how well they satisfy the pilot's stated preferences.
+Only return the **top 10** trips as JSON in this exact schema:
+[
+  { "rank": 1, "trip_id": "1234", "comment": "why it's ranked here" },
+  ...
+]
+"""
+
+def _summarize_trip(trip: Dict) -> str:
+    return (
+        f"Trip {trip['trip_id']}: {trip['days']}-day, "
+        f"{trip['credit_hours']} credit hrs, "
+        f"{'includes weekend' if trip['includes_weekend'] else 'weekday only'}, "
+        f"routing {trip['routing']}"
+    )
 
 
-def rank_trips_with_ai(trips: List[Dict[str, Any]], preferences: str) -> List[Dict[str, Any]]:
-    """
-    Use OpenAI to rank trips based on user preferences.
-    
-    Args:
-        trips: List of trip dictionaries
-        preferences: Natural language preferences from the user
-    
-    Returns:
-        List of ranked trips with AI comments
-    """
+def rank_trips_with_ai(trips: List[Dict], preferences: str) -> List[Dict]:
+    if not OPENAI_API_KEY:
+        raise RuntimeError('OPENAI_API_KEY missing – cannot call OpenAI.')
+
+    # Summarize trips (max 50 to keep tokens under control)
+    summaries = [_summarize_trip(t) for t in trips[:50]]
+    user_prompt = (
+        f"Pilot preferences: {preferences}\n\n"
+        f"Available trips:\n" +
+        "\n".join(summaries)
+    )
+
     try:
-        # Prepare the trips data for the AI
-        trips_summary = []
-        for trip in trips:
-            summary = {
-                'trip_id': trip['trip_id'],
-                'days': trip['days'],
-                'dates': trip['dates'],
-                'routing': trip['routing'],
-                'credit_hours': trip['credit_hours'],
-                'includes_weekend': trip['includes_weekend']
-            }
-            trips_summary.append(summary)
-        
-        # Create the prompt for ranking
-        system_prompt = """You are an expert airline pilot schedule assistant. You help pilots rank their trip bids based on their personal preferences and quality of life factors.
-
-Your task is to analyze the provided trips and rank them according to the pilot's stated preferences. Consider factors like:
-- Trip duration and layover quality
-- Weekend and time off preferences  
-- Route preferences and destinations
-- Work-life balance factors
-- Credit hours and pay considerations
-- Commuting and positioning needs
-
-Provide a ranking with brief explanations for why each trip fits or doesn't fit the pilot's preferences."""
-
-        user_prompt = f"""Please rank these pilot trips based on the following preferences: "{preferences}"
-
-Available trips:
-{json.dumps(trips_summary, indent=2)}
-
-Please respond with JSON in this exact format:
-{{
-  "ranked_trips": [
-    {{
-      "trip_id": "trip_id_here",
-      "rank": 1,
-      "comment": "Brief explanation of why this trip ranks here based on the preferences"
-    }}
-  ]
-}}
-
-Rank ALL trips from best (rank 1) to worst, with each trip having a unique rank number."""
-
-        # Call OpenAI API
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
+        response = client.chat.completions.create(
+            model='gpt-4o-mini',
+            temperature=0,
+            max_tokens=800,
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
+                { "role": "system", "content": SYSTEM_PROMPT },
+                { "role": "user", "content": user_prompt }
             ],
-            response_format={"type": "json_object"},
-            temperature=0.3,  # Lower temperature for more consistent rankings
-            max_tokens=2000
+            response_format={ "type": "json_object" }
         )
-        
-        # Parse the response
-        response_content = response.choices[0].message.content
-        if not response_content:
-            raise ValueError("Empty response from OpenAI")
-        result = json.loads(response_content)
-        ranked_trips = result.get('ranked_trips', [])
-        
-        # Validate that we have rankings for all trips
-        trip_ids = {trip['trip_id'] for trip in trips}
-        ranked_ids = {item['trip_id'] for item in ranked_trips}
-        
-        # Add any missing trips at the end
-        missing_ids = trip_ids - ranked_ids
-        max_rank = max([item.get('rank', 0) for item in ranked_trips], default=0)
-        
-        for trip_id in missing_ids:
-            max_rank += 1
-            ranked_trips.append({
-                'trip_id': trip_id,
-                'rank': max_rank,
-                'comment': 'No specific ranking provided by AI'
-            })
-        
-        # Sort by rank and return
-        ranked_trips.sort(key=lambda x: x.get('rank', 999))
-        
-        # Format for frontend (remove rank field, order represents ranking)
-        return [{'trip_id': item['trip_id'], 'comment': item['comment']} for item in ranked_trips]
-        
-    except json.JSONDecodeError as e:
-        logging.error(f"Failed to parse AI response as JSON: {str(e)}")
-        # Fallback: return trips in original order with generic comments
-        return [{'trip_id': trip['trip_id'], 'comment': 'AI ranking unavailable'} for trip in trips]
-    
-    except Exception as e:
-        logging.error(f"Error calling OpenAI API: {str(e)}")
-        # Fallback: return trips in original order with error message
-        return [{'trip_id': trip['trip_id'], 'comment': f'Error in AI ranking: {str(e)}'} for trip in trips]
+    except OpenAIError as exc:
+        logging.error(f'OpenAI API error: {exc}')
+        raise
 
-
-def test_openai_connection():
-    """Test the OpenAI API connection"""
+    content = response.choices[0].message.content
     try:
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": "Hello, this is a test."}],
-            max_tokens=10
-        )
-        return True, "OpenAI connection successful"
-    except Exception as e:
-        return False, f"OpenAI connection failed: {str(e)}"
+        ranked_list = json.loads(content)
+        return ranked_list
+    except json.JSONDecodeError:
+        logging.error('Could not decode LLM JSON output. Raw content:\n%s', content)
+        raise
