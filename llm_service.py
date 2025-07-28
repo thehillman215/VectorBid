@@ -61,6 +61,9 @@ def rank_trips_with_ai(trips: List[Dict], preferences: str) -> List[Dict]:
     content = response.choices[0].message.content
     logging.debug(f"OpenAI response content: {content}")
     
+    if not content:
+        raise ValueError("Empty response from OpenAI")
+    
     try:
         data = json.loads(content)
         

@@ -24,7 +24,7 @@
                         {{ user.first_name or user.email or 'Pilot' }}
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('index') }}">
+                        <li><a class="dropdown-item" href="{{ url_for('main.index') }}">
                             <i class="fas fa-home me-2"></i>New Analysis
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
@@ -48,7 +48,7 @@
                                 <i class="fas fa-list-ol me-2"></i>
                                 Trip Rankings
                             </h2>
-                            <a href="{{ url_for('download_ranking') }}" class="btn btn-outline-primary">
+                            <a href="{{ url_for('main.download_csv') }}" class="btn btn-outline-primary">
                                 <i class="fas fa-download me-2"></i>
                                 Download CSV
                             </a>
@@ -58,7 +58,7 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <h6 class="text-muted mb-2">Schedule File:</h6>
-                                <p class="mb-3"><i class="fas fa-file me-2"></i>{{ filename }}</p>
+                                <p class="mb-3"><i class="fas fa-file me-2"></i>Uploaded PDF</p>
                                 
                                 <h6 class="text-muted mb-2">Your Preferences:</h6>
                                 <p class="mb-0">"{{ preferences }}"</p>
@@ -78,65 +78,62 @@
         <!-- Trip rankings -->
         <div class="row">
             <div class="col-12">
-                {% for ranked_trip in ranking %}
-                    {% set trip_details = trips | selectattr('id', 'equalto', ranked_trip.trip_id) | first %}
-                    {% if trip_details %}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-1 text-center">
-                                        <div class="badge bg-primary fs-6 p-2 rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                            {{ loop.index }}
-                                        </div>
+                {% for trip in trips %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1 text-center">
+                                    <div class="badge bg-primary fs-6 p-2 rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                        {{ trip.rank }}
                                     </div>
-                                    
-                                    <div class="col-md-2">
-                                        <h5 class="mb-1">Trip {{ trip_details.id }}</h5>
-                                        <small class="text-muted">
-                                            <i class="fas fa-clock me-1"></i>
-                                            {{ trip_details.duration }} day{{ 's' if trip_details.duration != 1 else '' }}
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <h5 class="mb-1">Trip {{ trip.trip_id }}</h5>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ trip.days }} day{{ 's' if trip.days != 1 else '' }}
+                                    </small>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ trip.dates }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        {% if trip.includes_weekend %}
+                                            <i class="fas fa-calendar-check text-warning me-1"></i>
+                                            Includes Weekend
+                                        {% else %}
+                                            <i class="fas fa-calendar text-success me-1"></i>
+                                            Weekdays Only
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-route me-1"></i>
+                                        {{ trip.routing }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-hourglass-half me-1"></i>
+                                        {{ trip.credit_hours }} hrs
+                                    </small>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="alert alert-{{ 'success' if trip.rank <= 3 else 'info' if trip.rank <= 5 else 'secondary' }} mb-0 py-2">
+                                        <small>
+                                            <i class="fas fa-comment me-1"></i>
+                                            {{ trip.comment }}
                                         </small>
-                                    </div>
-                                    
-                                    <div class="col-md-3">
-                                        <h6 class="mb-1">
-                                            <i class="fas fa-calendar me-1"></i>
-                                            {{ trip_details.dates }}
-                                        </h6>
-                                        <small class="text-muted">
-                                            {% if trip_details.includes_weekend %}
-                                                <i class="fas fa-calendar-check text-warning me-1"></i>
-                                                Includes Weekend
-                                            {% else %}
-                                                <i class="fas fa-calendar text-success me-1"></i>
-                                                Weekdays Only
-                                            {% endif %}
-                                        </small>
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                        <h6 class="mb-1">
-                                            <i class="fas fa-route me-1"></i>
-                                            {{ trip_details.routing }}
-                                        </h6>
-                                        <small class="text-muted">
-                                            <i class="fas fa-hourglass-half me-1"></i>
-                                            {{ trip_details.credit_hours }} hrs
-                                        </small>
-                                    </div>
-                                    
-                                    <div class="col-md-4">
-                                        <div class="alert alert-{{ 'success' if loop.index <= 3 else 'info' if loop.index <= (trips|length * 0.5) else 'secondary' }} mb-0 py-2">
-                                            <small>
-                                                <i class="fas fa-comment me-1"></i>
-                                                {{ ranked_trip.comment }}
-                                            </small>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    {% endif %}
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -159,8 +156,8 @@
     <footer class="bg-dark text-light py-4 mt-5">
         <div class="container text-center">
             <p class="mb-0">
-                <i class="fas fa-plane me-2"></i>
-                Pilot Schedule Bidding Assistant - Making schedule bidding smarter
+                <i class="fas fa-vector-square me-2"></i>
+                VectorBid - AI-powered pilot schedule bidding assistant
             </p>
         </div>
     </footer>
