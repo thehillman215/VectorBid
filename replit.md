@@ -106,7 +106,13 @@ Preferred communication style: Simple, everyday language.
 - **Solution**: OpenAI GPT-4o with structured prompting for trip analysis
 - **Rationale**: Natural language processing allows flexible preference input and provides human-like reasoning
 
-### File Processing Architecture
-- **Problem**: Support multiple schedule file formats from different airlines
-- **Solution**: Modular parser system with format-specific handlers
-- **Rationale**: Extensible design allows easy addition of new file formats
+### Enhanced File Processing Architecture (Updated: July 28, 2025)
+- **Problem**: Support real airline bid packages with complex formatting from airlines like United
+- **Solution**: Multi-layered parsing system with block detection, pattern matching, and robust fallbacks
+- **Features**:
+  - Block-based trip extraction for structured documents
+  - Enhanced regex patterns for United Airlines and similar formats
+  - Support for date ranges (12NOV-15NOV), routing codes (IAH-SFO-IAH), and time formats (18:30)
+  - Multiple parsing strategies with intelligent fallbacks
+  - Improved weekend detection and duration calculation
+- **Rationale**: Real airline schedules require sophisticated parsing to handle varied formatting, multi-line data, and airline-specific conventions

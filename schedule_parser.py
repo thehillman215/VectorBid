@@ -38,7 +38,7 @@ def parse_schedule_file(file_path: str, file_extension: str) -> List[Dict[str, A
 
 
 def parse_pdf_schedule(file_path: str) -> List[Dict[str, Any]]:
-    """Parse PDF schedule using PyMuPDF"""
+    """Parse PDF schedule using PyMuPDF with improved airline format detection"""
     if fitz is None:
         raise ImportError("PyMuPDF is required for PDF parsing")
     
@@ -46,16 +46,22 @@ def parse_pdf_schedule(file_path: str) -> List[Dict[str, Any]]:
     
     try:
         doc = fitz.open(file_path)
-        text = ""
+        all_text = ""
         
         # Extract text from all pages
-        for page in doc:
-            text += page.get_text() if hasattr(page, 'get_text') else ""
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            try:
+                page_text = page.get_text()
+            except AttributeError:
+                # Fallback for different PyMuPDF versions
+                page_text = str(page.get_text() if hasattr(page, 'get_text') else "")
+            all_text += page_text + "\n"
         
         doc.close()
         
-        # Parse the extracted text
-        trips = parse_schedule_text(text)
+        # Parse the extracted text with enhanced airline format detection
+        trips = parse_airline_schedule_text(all_text)
         
     except Exception as e:
         raise Exception(f"Failed to parse PDF: {str(e)}")
@@ -95,7 +101,7 @@ def parse_text_schedule(file_path: str) -> List[Dict[str, Any]]:
         with open(file_path, 'r', encoding='utf-8') as file:
             text = file.read()
         
-        return parse_schedule_text(text)
+        return parse_airline_schedule_text(text)
         
     except Exception as e:
         raise Exception(f"Failed to parse text file: {str(e)}")
@@ -152,64 +158,302 @@ def extract_trip_from_row(row: Dict[str, str]) -> Dict[str, Any]:
     return {}
 
 
-def parse_schedule_text(text: str) -> List[Dict[str, Any]]:
-    """Parse schedule from plain text using pattern matching"""
+def parse_airline_schedule_text(text: str) -> List[Dict[str, Any]]:
+    """Parse airline schedule text with enhanced pattern recognition for real bid packages"""
     trips = []
     
-    # Split text into lines for processing
+    # Keep original text for block extraction (preserve line structure)
+    original_text = text
     lines = text.split('\n')
     
-    # Patterns to match trip information
+    # Enhanced patterns for airline bid packages
     trip_patterns = [
-        # Pattern for trip lines like "Trip 123: 3 days, Jan 15-17, DFW-LAX-DFW, 12.5 hrs"
-        r'(?:trip|pairing|sequence)\s*(\w+)[:;,]?\s*(\d+)\s*days?\s*,?\s*([^,]+?)\s*,?\s*([^,]+?)\s*,?\s*([\d.]+)\s*(?:hrs?|hours?)',
-        # Pattern for tabular data
-        r'(\w+)\s+(\d+)\s+([^\s]+(?:\s+[^\s]+)*?)\s+([^\s]+(?:\s+[^\s]+)*?)\s+([\d.]+)',
+        # United Airlines style: "Trip 105" "4-Day Trip" "IAH-SFO-IAH" "18:30"
+        r'(?:trip|pairing|sequence)\s*(\d+).*?(\d+)[-\s]*day.*?([A-Z]{3}(?:[-\s]*[A-Z]{3})+).*?(\d{1,2}:\d{2})',
+        
+        # Alternative format: "105" "4 Day" "12NOV-15NOV" "IAH-SFO-IAH" "18:30"
+        r'(\d{2,4})\s+(\d+)\s*day.*?(\d{1,2}[A-Z]{3}[-\s]*\d{1,2}[A-Z]{3}).*?([A-Z]{3}(?:[-\s]*[A-Z]{3})+).*?(\d{1,2}:\d{2})',
+        
+        # Compact format: "105 4D IAH-SFO-IAH 18:30"
+        r'(\d{2,4})\s+(\d+)D?\s+([A-Z]{3}(?:[-\s]*[A-Z]{3})+)\s+(\d{1,2}:\d{2})',
+        
+        # Date range format: "Trip 105: 12NOV - 15NOV, IAH-SFO-IAH, 18:30"
+        r'(?:trip|pairing)\s*(\d+).*?(\d{1,2}[A-Z]{3}\s*[-\s]+\s*\d{1,2}[A-Z]{3}).*?([A-Z]{3}(?:[-\s]*[A-Z]{3})+).*?(\d{1,2}:\d{2})',
+        
+        # Tabular format with possible multi-line breaks
+        r'(\d{2,4})\s+.*?(\d+)[-\s]*(?:day|d)\s+.*?([A-Z]{3}(?:[-\s]*[A-Z]{3})+).*?(\d{1,2}:\d{2})',
     ]
+    
+    # Try to find trip blocks in the text (use original text with line structure)
+    trip_blocks = extract_trip_blocks(original_text)
+    
+    for block in trip_blocks:
+        trip = parse_trip_block(block)
+        if trip and trip.get('id'):
+            trips.append(trip)
+    
+    # If no trips found from blocks, try line-by-line parsing with patterns
+    if not trips:
+        # For pattern matching, use normalized text
+        normalized_text = re.sub(r'\s+', ' ', text)
+        trips = parse_lines_with_patterns([normalized_text], trip_patterns)
+    
+    # Final fallback: extract basic trip IDs and try to find associated data
+    if not trips:
+        trips = extract_basic_trips(original_text)
+    
+    return trips
+
+
+def extract_trip_blocks(text: str) -> List[str]:
+    """Extract individual trip blocks from the text"""
+    blocks = []
+    
+    # Look for trip separators or headers
+    trip_separators = [
+        r'(?:^|\n)\s*(?:trip|pairing|sequence)\s*\d+',
+        r'(?:^|\n)\s*\d{2,4}\s+(?:\d+[-\s]*day|\d+D)',
+        r'(?:^|\n)\s*\d{2,4}\s+.*?[A-Z]{3}',
+    ]
+    
+    # Try to split text by trip indicators
+    for separator_pattern in trip_separators:
+        matches = list(re.finditer(separator_pattern, text, re.IGNORECASE | re.MULTILINE))
+        if len(matches) >= 1:  # Changed from > 1 to >= 1
+            for i, match in enumerate(matches):
+                start = match.start()
+                end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+                block = text[start:end].strip()
+                if len(block) > 10:  # Minimum block size
+                    blocks.append(block)
+            break
+    
+    # If no blocks found with separators, try to extract based on "Trip XXX" patterns
+    if not blocks:
+        lines = text.split('\n')
+        current_block = []
+        in_trip = False
+        
+        for line in lines:
+            line = line.strip()
+            # Check if this line starts a new trip
+            if re.match(r'trip\s+\d+', line, re.IGNORECASE):
+                # Save previous block if exists
+                if current_block:
+                    blocks.append('\n'.join(current_block))
+                # Start new block
+                current_block = [line]
+                in_trip = True
+            elif in_trip and line:
+                # Add line to current trip block
+                current_block.append(line)
+            elif in_trip and not line:
+                # Empty line might signal end of trip, but continue for now
+                current_block.append(line)
+        
+        # Don't forget the last block
+        if current_block:
+            blocks.append('\n'.join(current_block))
+    
+    return blocks
+
+
+def parse_trip_block(block: str) -> Dict[str, Any]:
+    """Parse an individual trip block to extract trip information"""
+    trip = {}
+    
+    # Extract trip ID
+    trip_id_match = re.search(r'(?:trip|pairing|sequence)\s*(\d+)|^(\d{2,4})', block, re.IGNORECASE)
+    if trip_id_match:
+        trip['id'] = trip_id_match.group(1) or trip_id_match.group(2)
+    
+    # Extract duration/days - look for patterns like "4-Day Trip" or date ranges
+    duration_patterns = [
+        r'(\d+)[-\s]*day',
+        r'(\d+)D\b',
+        r'(\d{1,2}[A-Z]{3})\s*[-\s]+\s*(\d{1,2}[A-Z]{3})',  # Date range like 12NOV - 15NOV
+    ]
+    
+    for pattern in duration_patterns:
+        duration_match = re.search(pattern, block, re.IGNORECASE)
+        if duration_match:
+            if len(duration_match.groups()) == 1:
+                trip['duration'] = int(duration_match.group(1))
+            else:
+                # Calculate duration from date range
+                start_date, end_date = duration_match.groups()
+                trip['duration'] = calculate_duration_from_dates(start_date, end_date)
+                trip['dates'] = f"{start_date} - {end_date}"
+            break
+    
+    # Extract routing (airport codes) - look for patterns like IAH-SFO-IAH
+    # Need to be careful not to match date patterns like "12NOV"
+    routing_patterns = [
+        r'\b([A-Z]{3}(?:[-\s]*[A-Z]{3}){1,4})\b',  # Standard format like IAH-SFO-IAH (1-5 airports)
+    ]
+    
+    for pattern in routing_patterns:
+        # Find all potential routing matches
+        routing_matches = re.findall(pattern, block)
+        for potential_routing in routing_matches:
+            # Filter out matches that contain date patterns
+            if not re.search(r'\d+[A-Z]{3}', potential_routing):
+                routing = potential_routing
+                # Clean up routing format
+                routing = re.sub(r'[-\s]+', '-', routing)
+                trip['routing'] = routing
+                break
+        if 'routing' in trip:
+            break
+    
+    # Extract credit hours - look for patterns like 18:30
+    credit_match = re.search(r'(\d{1,2}):(\d{2})', block)
+    if credit_match:
+        hours = int(credit_match.group(1))
+        minutes = int(credit_match.group(2))
+        trip['credit_hours'] = hours + (minutes / 60.0)
+    
+    # Extract dates if not already found
+    if 'dates' not in trip:
+        date_match = re.search(r'(\d{1,2}[A-Z]{3})\s*[-\s]+\s*(\d{1,2}[A-Z]{3})', block)
+        if date_match:
+            start_date, end_date = date_match.groups()
+            trip['dates'] = f"{start_date} - {end_date}"
+            # Also calculate duration if not already set
+            if 'duration' not in trip:
+                trip['duration'] = calculate_duration_from_dates(start_date, end_date)
+    
+    # Check for weekend inclusion
+    if 'dates' in trip:
+        trip['includes_weekend'] = check_weekend_from_dates(trip['dates'])
+    else:
+        # Look for weekend indicators in the block
+        weekend_indicators = ['sat', 'sun', 'weekend', 'sat/sun']
+        trip['includes_weekend'] = any(indicator in block.lower() for indicator in weekend_indicators)
+    
+    # Set defaults for missing fields
+    trip.setdefault('duration', 0)
+    trip.setdefault('dates', 'Unknown')
+    trip.setdefault('routing', 'Unknown')
+    trip.setdefault('credit_hours', 0.0)
+    trip.setdefault('includes_weekend', False)
+    
+    return trip
+
+
+def parse_lines_with_patterns(lines: List[str], patterns: List[str]) -> List[Dict[str, Any]]:
+    """Parse lines using regex patterns"""
+    trips = []
     
     for line in lines:
         line = line.strip()
-        if not line:
+        if len(line) < 10:  # Skip very short lines
             continue
             
-        for pattern in trip_patterns:
+        for pattern in patterns:
             match = re.search(pattern, line, re.IGNORECASE)
             if match:
                 try:
-                    trip_id = match.group(1)
-                    duration = int(match.group(2))
-                    dates = match.group(3).strip()
-                    routing = match.group(4).strip()
-                    credit_hours = float(match.group(5))
+                    groups = match.groups()
+                    
+                    dates = 'Unknown'  # Default value
+                    
+                    if len(groups) == 4:  # trip_id, duration, routing, credit_hours
+                        trip_id, duration_str, routing, credit_time = groups
+                        duration = extract_duration_from_string(duration_str)
+                    elif len(groups) == 5:  # trip_id, duration, dates, routing, credit_hours
+                        trip_id, duration_str, dates, routing, credit_time = groups
+                        duration = extract_duration_from_string(duration_str)
+                    else:
+                        continue
+                    
+                    # Parse credit hours
+                    credit_hours = parse_credit_time(credit_time)
                     
                     trip = {
                         'id': trip_id,
                         'duration': duration,
                         'dates': dates,
-                        'routing': routing,
+                        'routing': routing.strip(),
                         'credit_hours': credit_hours,
                         'includes_weekend': check_weekend_from_dates(dates)
                     }
                     trips.append(trip)
                     break
+                    
                 except (ValueError, IndexError):
                     continue
     
-    # If no patterns matched, try to extract basic information
-    if not trips:
-        # Look for any numbers that might be trip IDs
-        trip_ids = re.findall(r'\b\d{2,4}\b', text)
-        for i, trip_id in enumerate(trip_ids[:10]):  # Limit to first 10 potential trips
-            trips.append({
-                'id': trip_id,
-                'duration': 0,
-                'dates': 'Unknown',
-                'routing': 'Unknown',
-                'credit_hours': 0.0,
-                'includes_weekend': False
-            })
+    return trips
+
+
+def extract_basic_trips(text: str) -> List[Dict[str, Any]]:
+    """Extract basic trip information as fallback"""
+    trips = []
+    
+    # Look for potential trip IDs (2-4 digit numbers)
+    trip_ids = re.findall(r'\b(\d{2,4})\b', text)
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_trip_ids = []
+    for trip_id in trip_ids:
+        if trip_id not in seen:
+            seen.add(trip_id)
+            unique_trip_ids.append(trip_id)
+    
+    # Limit to reasonable number of trips
+    for trip_id in unique_trip_ids[:20]:
+        trips.append({
+            'id': trip_id,
+            'duration': 0,
+            'dates': 'Unknown',
+            'routing': 'Unknown',
+            'credit_hours': 0.0,
+            'includes_weekend': False
+        })
     
     return trips
+
+
+def calculate_duration_from_dates(start_date: str, end_date: str) -> int:
+    """Calculate trip duration from date strings like '12NOV' and '15NOV'"""
+    try:
+        # Extract day numbers
+        start_match = re.search(r'(\d+)', start_date)
+        end_match = re.search(r'(\d+)', end_date)
+        
+        if start_match and end_match:
+            start_day = int(start_match.group(1))
+            end_day = int(end_match.group(1))
+            
+            # Simple calculation assuming same month
+            duration = end_day - start_day + 1
+            return max(1, duration)
+    except:
+        pass
+    return 1
+
+
+def extract_duration_from_string(duration_str: str) -> int:
+    """Extract duration from various string formats"""
+    # Look for numbers followed by 'day' or 'd'
+    match = re.search(r'(\d+)', duration_str)
+    if match:
+        return int(match.group(1))
+    return 0
+
+
+def parse_credit_time(credit_time: str) -> float:
+    """Parse credit time in HH:MM format to decimal hours"""
+    try:
+        if ':' in credit_time:
+            hours, minutes = credit_time.split(':')
+            return int(hours) + (int(minutes) / 60.0)
+        else:
+            return float(credit_time)
+    except:
+        return 0.0
 
 
 def extract_duration(value: str) -> int:
