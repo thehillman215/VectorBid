@@ -60,42 +60,16 @@ def _trip_dict_from_match(match: re.Match) -> dict:
     }
 
 
-# Multiple patterns for different airline formats
+# Simplified patterns to prevent timeout
 PATTERNS = [
-    # United Airlines style: "1234 3-Day Trip 12NOV-15NOV Credit 18.5 IAH-SFO-IAH"
+    # Simple trip pattern: "Trip 1234: LAX-SFO-LAX 3-Day"
     re.compile(
-        r'(?P<trip_id>\d{3,4})\s+'
-        r'(?P<days>[12-9])-Day\s+Trip.*?'
-        r'(?P<dates>\d{2}[A-Z]{3}.*?\d{2}[A-Z]{3}).*?'
-        r'Credit\s+(?P<credit>[\d\.]+).*?'
-        r'(?P<routing>[A-Z]{3}-.+)',
+        r'Trip\s+(?P<trip_id>\d{3,4}):\s*(?P<routing>[A-Z]{3}-[A-Z-]+)\s+(?P<days>\d+)-Day.*?(?P<credit>[\d\.]+)',
         re.IGNORECASE
     ),
-    # Generic format: "Trip 1234: 3 days, 18.5 hrs, IAH-SFO-IAH, 12NOV-15NOV"
+    # Basic format: "1234 LAX-SFO 3 days 18.5"
     re.compile(
-        r'Trip\s+(?P<trip_id>\d{3,4}).*?'
-        r'(?P<days>\d+)\s+days.*?'
-        r'(?P<credit>[\d\.]+)\s+hrs.*?'
-        r'(?P<routing>[A-Z]{3}[- ][A-Z]{3}.*?)(?:,|\s)'
-        r'(?P<dates>\d{2}[A-Z]{3}.*?\d{2}[A-Z]{3})',
-        re.IGNORECASE
-    ),
-    # Block format: Trip ID on separate line from details
-    re.compile(
-        r'(?P<trip_id>\d{3,4})\s*\n.*?'
-        r'(?P<dates>\d{1,2}[A-Z]{3}-\d{1,2}[A-Z]{3}).*?'
-        r'(?P<days>\d+)\s*day.*?'
-        r'(?P<credit>[\d\.]+).*?'
-        r'(?P<routing>[A-Z]{3}.*?[A-Z]{3})',
-        re.IGNORECASE | re.DOTALL
-    ),
-    # Simple pattern: Look for basic trip components
-    re.compile(
-        r'(?P<trip_id>\d{3,4}).*?'
-        r'(?P<routing>[A-Z]{3}[^a-z]*[A-Z]{3}).*?'
-        r'(?P<days>\d+).*?'
-        r'(?P<credit>\d+\.?\d*).*?'
-        r'(?P<dates>\d{1,2}[A-Z]{3})',
+        r'(?P<trip_id>\d{3,4})\s+(?P<routing>[A-Z]{3}-[A-Z-]+)\s+(?P<days>\d+)\s+days?\s+(?P<credit>[\d\.]+)',
         re.IGNORECASE
     )
 ]
@@ -104,36 +78,26 @@ PATTERNS = [
 def parse_pdf_schedule(data: bytes) -> list[dict]:
     if not fitz:
         raise RuntimeError('PDF parsing unavailable – install PyMuPDF.')
-    trips = []
-    all_text = ""
     
-    with fitz.open(stream=data, filetype='pdf') as doc:
-        for page in doc:
-            text = page.get_text('text')
-            all_text += text + "\n"
+    try:
+        with fitz.open(stream=data, filetype='pdf') as doc:
+            # Extract text from first page only to prevent timeout
+            if len(doc) == 0:
+                return []
+                
+            text = doc[0].get_text('text')[:5000]  # Limit text length
             
-            # Try each pattern
-            for pattern in PATTERNS:
-                for match in pattern.finditer(text):
-                    try:
-                        trip = _trip_dict_from_match(match)
-                        if trip['trip_id'] and trip['days']:  # Basic validation
-                            trips.append(trip)
-                    except Exception as e:
-                        logging.debug(f"Failed to parse match: {e}")
-                        continue
-    
-    # Log debugging info if no trips found
-    if not trips:
-        logging.error(f"No trips found in PDF. Text sample (first 500 chars): {all_text[:500]}")
-        # Try to find any numbers that might be trip IDs
-        potential_trips = re.findall(r'\b\d{3,4}\b', all_text)
-        logging.error(f"Potential trip IDs found: {potential_trips[:10]}")
-        
-        # Try fallback parsing for any structured data
-        trips = _fallback_parse(all_text)
-    
-    return trips
+            # Use fallback parsing directly - it's faster and more reliable
+            trips = _fallback_parse(text)
+            
+            if not trips:
+                logging.error(f"No trips found in PDF. Sample text: {text[:200]}")
+                
+            return trips
+            
+    except Exception as e:
+        logging.error(f"PDF parsing failed: {e}")
+        return []
 
 
 def parse_csv_schedule(data: bytes) -> list[dict]:
@@ -156,83 +120,65 @@ def parse_csv_schedule(data: bytes) -> list[dict]:
 
 
 def parse_txt_schedule(data: bytes) -> list[dict]:
-    trips = []
-    text = data.decode(errors='ignore')
-    
-    # Try each pattern
-    for pattern in PATTERNS:
-        for match in pattern.finditer(text):
-            try:
-                trip = _trip_dict_from_match(match)
-                if trip['trip_id'] and trip['days']:  # Basic validation
-                    trips.append(trip)
-            except Exception as e:
-                logging.debug(f"Failed to parse match: {e}")
-                continue
-    
-    # Log debugging info if no trips found
-    if not trips:
-        logging.error(f"No trips found in text. Sample (first 500 chars): {text[:500]}")
-        # Try fallback parsing
+    try:
+        text = data.decode(errors='ignore')[:10000]  # Limit text size
+        
+        # Use fallback parsing directly for speed
         trips = _fallback_parse(text)
-    
-    return trips
+        
+        if not trips:
+            logging.error(f"No trips found in text. Sample: {text[:200]}")
+        
+        return trips
+        
+    except Exception as e:
+        logging.error(f"Text parsing failed: {e}")
+        return []
 
 
 def _fallback_parse(text: str) -> list[dict]:
-    """Fallback parser for when regex patterns fail."""
+    """Fast fallback parser for when regex patterns fail."""
     trips = []
-    lines = text.split('\n')
+    lines = text.split('\n')[:50]  # Limit lines to prevent timeout
     
-    # Look for lines with trip-like patterns
     for line in lines:
         line = line.strip()
-        if not line:
+        if len(line) < 10:  # Skip short lines
             continue
             
-        # Look for numbers that could be trip IDs
-        trip_ids = re.findall(r'\b\d{3,4}\b', line)
-        if not trip_ids:
-            continue
+        # Quick pattern for trip-like lines
+        if re.search(r'\d{3,4}.*[A-Z]{3}.*\d+', line):
+            # Extract basic components
+            trip_id_match = re.search(r'\b(\d{3,4})\b', line)
+            airports = re.findall(r'\b[A-Z]{3}\b', line)
+            numbers = re.findall(r'\b(\d+\.?\d*)\b', line)
             
-        # Look for routing patterns (3-letter codes)
-        airports = re.findall(r'\b[A-Z]{3}\b', line)
-        if len(airports) < 2:
-            continue
-            
-        # Look for numbers that could be days/hours
-        numbers = re.findall(r'\b\d+\.?\d*\b', line)
-        
-        for trip_id in trip_ids:
-            routing = '-'.join(airports[:4])  # Take first 4 airports max
-            days = 3  # Default
-            credit = 15.0  # Default
-            
-            # Try to extract actual numbers
-            if len(numbers) >= 2:
-                try:
-                    days = int(float(numbers[1]))
-                    if len(numbers) >= 3:
-                        credit = float(numbers[2])
-                except ValueError:
-                    pass
-            
-            trip = {
-                'trip_id': trip_id,
-                'days': days,
-                'routing': routing,
-                'credit_hours': credit,
-                'dates': 'TBD',
-                'includes_weekend': False,
-            }
-            trips.append(trip)
-            
-            # Limit fallback results
-            if len(trips) >= 10:
-                break
+            if trip_id_match and len(airports) >= 2:
+                trip_id = trip_id_match.group(1)
+                routing = '-'.join(airports[:3])
+                days = 3
+                credit = 15.0
                 
-        if len(trips) >= 10:
-            break
+                # Try to get actual numbers
+                if len(numbers) >= 2:
+                    try:
+                        days = min(int(float(numbers[1])), 7)  # Reasonable limit
+                        if len(numbers) >= 3:
+                            credit = min(float(numbers[2]), 50.0)  # Reasonable limit
+                    except ValueError:
+                        pass
+                
+                trips.append({
+                    'trip_id': trip_id,
+                    'days': days,
+                    'routing': routing,
+                    'credit_hours': credit,
+                    'dates': 'TBD',
+                    'includes_weekend': False,
+                })
+                
+                if len(trips) >= 5:  # Limit fallback results
+                    break
     
     return trips
 
