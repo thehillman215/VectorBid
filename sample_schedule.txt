@@ -1,0 +1,25 @@
+United Airlines Pilot Schedule - December 2024
+
+Trip 1234: LAX-SFO-LAX 3-Day Trip 15NOV-17NOV Credit 18.5 hours
+Trip 1235: IAH-DEN-PHX-IAH 4-Day Trip 18NOV-21NOV Credit 22.0 hours  
+Trip 1236: ORD-BOS-ORD 2-Day Trip 19NOV-20NOV Credit 12.5 hours
+Trip 1237: DFW-LAX-SFO-DFW 5-Day Trip 22NOV-26NOV Credit 28.5 hours
+Trip 1238: JFK-MIA-JFK 3-Day Trip 25NOV-27NOV Credit 16.0 hours
+
+Alternative Format:
+1239 4-Day Trip 12DEC-15DEC Credit 24.0 SEA-LAX-SFO-SEA
+1240 3-Day Trip 14DEC-16DEC Credit 19.5 ATL-ORD-DEN-ATL
+1241 2-Day Trip 16DEC-17DEC Credit 11.0 BOS-DCA-BOS
+
+Block Format:
+1242
+12DEC-15DEC
+4 days
+26.5 credit hours
+LAX-NRT-ICN-LAX
+
+1243  
+14DEC-16DEC
+3 days
+18.0 credit hours
+SFO-FRA-LHR-SFO
