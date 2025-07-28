@@ -5,6 +5,7 @@ import io
 import json
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file
+from flask_login import current_user
 
 from schedule_parser import parse_schedule_file
 from llm_service import rank_trips_with_ai
@@ -13,7 +14,7 @@ bp = Blueprint('main', __name__)
 
 @bp.get('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', user=current_user if current_user.is_authenticated else None)
 
 
 @bp.post('/process')
