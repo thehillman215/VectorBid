@@ -123,3 +123,13 @@ Preferred communication style: Simple, everyday language.
 - **Icon**: Changed from plane icon to vector-square icon to reflect the "Vector" branding
 - **Tagline**: "AI-powered pilot schedule bidding assistant"
 - **Impact**: Complete rebrand across all user-facing components while maintaining functionality
+
+### Application Debugging and Deployment Fix (Updated: July 28, 2025)
+- **Problem**: Application failing to start due to missing dotenv dependency and routing configuration issues
+- **Solution**: 
+  - Removed dotenv dependency and restructured app.py to follow Flask development guidelines
+  - Fixed blueprint routing issues in templates (url_for calls)
+  - Properly registered Replit Auth blueprint in main application
+  - Simplified main.py structure according to best practices
+- **Result**: Application now starts successfully and serves the VectorBid interface correctly
+- **Status**: Ready for deployment
