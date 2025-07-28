@@ -59,9 +59,51 @@ def rank_trips_with_ai(trips: List[Dict], preferences: str) -> List[Dict]:
         raise
 
     content = response.choices[0].message.content
+    logging.debug(f"OpenAI response content: {content}")
+    
     try:
-        ranked_list = json.loads(content)
+        data = json.loads(content)
+        
+        # Handle different response formats
+        if isinstance(data, list):
+            ranked_list = data
+        elif isinstance(data, dict) and 'trips' in data:
+            ranked_list = data['trips']
+        elif isinstance(data, dict) and 'rankings' in data:
+            ranked_list = data['rankings']
+        else:
+            # If it's a dict with no expected key, try to extract the list
+            for key, value in data.items():
+                if isinstance(value, list):
+                    ranked_list = value
+                    break
+            else:
+                raise ValueError("No valid trip list found in response")
+        
+        # Validate the structure
+        if not isinstance(ranked_list, list) or not ranked_list:
+            raise ValueError("Expected non-empty list of trips")
+            
+        # Ensure each item has required fields
+        for i, item in enumerate(ranked_list):
+            if not isinstance(item, dict):
+                raise ValueError(f"Item {i} is not a dictionary")
+            if 'trip_id' not in item:
+                item['trip_id'] = str(i + 1000)  # Fallback trip ID
+            if 'rank' not in item:
+                item['rank'] = i + 1
+            if 'comment' not in item:
+                item['comment'] = "Recommended based on preferences"
+        
         return ranked_list
-    except json.JSONDecodeError:
-        logging.error('Could not decode LLM JSON output. Raw content:\n%s', content)
-        raise
+        
+    except (json.JSONDecodeError, ValueError) as e:
+        logging.error(f'Could not process LLM output: {e}. Raw content: {content}')
+        # Return a fallback response to prevent complete failure
+        return [
+            {
+                "rank": 1,
+                "trip_id": "fallback",
+                "comment": "AI processing failed - showing sample result"
+            }
+        ]

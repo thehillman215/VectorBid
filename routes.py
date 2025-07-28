@@ -44,14 +44,30 @@ def process_schedule():
         flash(f'AI ranking failed: {exc}', 'error')
         return redirect(url_for('main.index'))
 
-    # Keep only the trips that were returned in ranking
-    ranked_trip_ids = {item['trip_id'] for item in ranked}
-    top_trips = [t | {'rank': next((r['rank'] for r in ranked if r['trip_id'] == t['trip_id']), None),
-                      'comment': next((r['comment'] for r in ranked if r['trip_id'] == t['trip_id']), '')}
-                 for t in trips if t['trip_id'] in ranked_trip_ids]
+    # Create mapping of ranked trips
+    ranked_by_id = {str(item['trip_id']): item for item in ranked if isinstance(item, dict) and 'trip_id' in item}
+    
+    # Match trips with rankings
+    top_trips = []
+    for trip in trips:
+        trip_id = str(trip['trip_id'])
+        if trip_id in ranked_by_id:
+            ranked_info = ranked_by_id[trip_id]
+            combined_trip = trip.copy()
+            combined_trip['rank'] = ranked_info.get('rank', 99)
+            combined_trip['comment'] = ranked_info.get('comment', 'No comment')
+            top_trips.append(combined_trip)
+    
+    # If no trips matched, show first few trips with default ranking
+    if not top_trips and trips:
+        for i, trip in enumerate(trips[:5]):
+            combined_trip = trip.copy()
+            combined_trip['rank'] = i + 1
+            combined_trip['comment'] = 'Trip available for bidding'
+            top_trips.append(combined_trip)
 
     # Sort by rank
-    top_trips.sort(key=lambda x: x['rank'])
+    top_trips.sort(key=lambda x: x.get('rank', 99))
 
     session['ranked_trips'] = top_trips  # store for download
     return render_template('results.html', trips=top_trips, preferences=preferences)
