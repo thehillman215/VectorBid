@@ -22,7 +22,7 @@ from models import OAuth, User
 
 class UserSessionStorage(BaseStorage):
 
-    def get(self, blueprint):
+    def get(self, blueprint):  # type: ignore
         try:
             oauth_record = db.session.query(OAuth).filter_by(
                 user_id=current_user.get_id(),

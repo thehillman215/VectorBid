@@ -58,7 +58,7 @@ def create_app() -> Flask:
     db.init_app(app)
     if login_manager:
         login_manager.init_app(app)
-        login_manager.login_view = 'replit_auth.login'
+        login_manager.login_view = 'replit_auth.login'  # type: ignore
         
         # User loader function
         @login_manager.user_loader

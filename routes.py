@@ -27,7 +27,8 @@ def process_schedule():
         return redirect(url_for('main.index'))
 
     try:
-        raw_trips = parse_schedule(uploaded.read(), uploaded.filename)
+        filename = uploaded.filename or 'unknown.txt'
+        raw_trips = parse_schedule(uploaded.read(), filename)
         # Convert new parser format to expected format for compatibility
         trips = []
         for trip in raw_trips:
