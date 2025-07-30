@@ -1,5 +1,5 @@
+from extensions import db  # ✅ import the already-created SQLAlchemy object
 from datetime import datetime
-from app import db
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from flask_login import UserMixin
 from sqlalchemy import UniqueConstraint
@@ -31,7 +31,7 @@ class OAuth(OAuthConsumerMixin, db.Model):
         'browser_session_key',
         'provider',
         name='uq_user_browser_session_key_provider',
-    ),)
+    ), )
 
 
 class ScheduleData(db.Model):
@@ -43,5 +43,5 @@ class ScheduleData(db.Model):
     trips_data = db.Column(db.Text, nullable=False)  # JSON string
     ranking_results = db.Column(db.Text, nullable=False)  # JSON string
     created_at = db.Column(db.DateTime, default=datetime.now)
-    
+
     user = db.relationship(User, backref='schedules')
