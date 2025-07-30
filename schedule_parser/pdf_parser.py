@@ -1,5 +1,4 @@
 import re, io
-import fitz  # PyMuPDF
 
 _TRIP_RE = re.compile(
     r"(?P<id>\d{3,4})\s+"
@@ -8,9 +7,10 @@ _TRIP_RE = re.compile(
 
 
 def parse_pdf(blob: bytes) -> list[dict]:
+    import fitz  # PyMuPDF imported only when needed
     trips: list[dict] = []
     with fitz.open(stream=blob, filetype="pdf") as pdf:
-        text = "\n".join(page.get_text() for page in pdf)
+        text = "\n".join(page.get_text() for page in pdf)  # type: ignore
     for m in _TRIP_RE.finditer(text):
         trips.append({
             "id": m["id"],

@@ -145,3 +145,17 @@ Preferred communication style: Simple, everyday language.
 - **Result**: PyMuPDF imports successfully, PDF creation and reading functionality restored
 - **Testing**: Verified fitz import works and PDF document creation/parsing functions correctly
 - **Status**: PyMuPDF dependency resolved - PDF parsing functionality fully operational
+
+### Deferred PyMuPDF Import Architecture (Updated: July 30, 2025)
+- **Problem**: PyMuPDF import errors could break the entire parser even when only CSV/TXT parsing was needed
+- **Solution**: 
+  - Refactored schedule_parser to use lazy loading of PyMuPDF
+  - Moved `import fitz` inside `parse_pdf()` function to load only when PDF parsing is required
+  - Maintained backward compatibility with existing `parse_schedule(bytes, filename)` interface
+  - Added proper type hints and error handling for deferred imports
+- **Benefits**: 
+  - Application remains functional even if PyMuPDF dependencies are missing
+  - Faster startup time when PDF parsing isn't needed
+  - Better error isolation - PDF import failures don't affect CSV/TXT parsing
+- **Testing**: All tests pass, including CSV parsing without PyMuPDF loaded
+- **Status**: Production ready - robust parser with optional PDF support
