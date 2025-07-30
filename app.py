@@ -58,6 +58,13 @@ def create_app() -> Flask:
     db.init_app(app)
     if login_manager:
         login_manager.init_app(app)
+        login_manager.login_view = 'replit_auth.login'
+        
+        # User loader function
+        @login_manager.user_loader
+        def load_user(user_id):
+            from models import User
+            return User.query.get(user_id)
 
     # ---------- Database tables --------------------------------------------
     with app.app_context():
