@@ -135,3 +135,13 @@ Preferred communication style: Simple, everyday language.
 - **Result**: Application processes PDFs successfully and displays AI-ranked results without errors
 - **Testing**: Full pipeline confirmed working with sample schedule files and live OpenAI integration
 - **Status**: Production ready - handles real airline PDFs and provides intelligent trip rankings
+
+### PyMuPDF Library Dependency Fix (Updated: July 30, 2025)
+- **Problem**: ImportError: libstdc++.so.6 cannot open shared object file when importing PyMuPDF (fitz)
+- **Solution**: 
+  - Installed gcc system dependency to provide libstdc++.so.6 runtime library
+  - Installed glibc system dependency for additional C runtime support
+  - Restarted application workflow to refresh environment with new libraries
+- **Result**: PyMuPDF imports successfully, PDF creation and reading functionality restored
+- **Testing**: Verified fitz import works and PDF document creation/parsing functions correctly
+- **Status**: PyMuPDF dependency resolved - PDF parsing functionality fully operational
