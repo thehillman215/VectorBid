@@ -7,7 +7,7 @@ import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file
 from flask_login import current_user
 
-from schedule_parser import parse_schedule_file
+from schedule_parser import parse_schedule
 from llm_service import rank_trips_with_ai
 
 bp = Blueprint('main', __name__)
@@ -27,7 +27,20 @@ def process_schedule():
         return redirect(url_for('main.index'))
 
     try:
-        trips = parse_schedule_file(uploaded)
+        raw_trips = parse_schedule(uploaded.read(), uploaded.filename)
+        # Convert new parser format to expected format for compatibility
+        trips = []
+        for trip in raw_trips:
+            formatted_trip = {
+                'trip_id': trip.get('id', ''),
+                'days': trip.get('days', 0),
+                'credit_hours': trip.get('credit', 0.0),
+                'routing': trip.get('routing', ''),
+                'dates': trip.get('dates', ''),
+                'includes_weekend': trip.get('includes_weekend', False),
+                'raw': trip.get('raw', '')
+            }
+            trips.append(formatted_trip)
     except Exception as exc:
         logging.exception('Parsing error')
         flash(f'Error parsing schedule: {exc}', 'error')
