@@ -1,42 +1,22 @@
-"""
-Bid-packet helper wrappers around the storage layer.
-"""
-
+"""Bid packet storage service."""
+import os
 from pathlib import Path
-from datetime import datetime
-from typing import BinaryIO
-
-from storage import disk_storage
 
 
-def _key(month_tag: str) -> str:
+def save_bid_packet(month_tag: str, file_stream) -> None:
+    """Save a bid packet PDF to storage.
+    
+    Args:
+        month_tag: Six-digit YYYYMM format
+        file_stream: File stream to save
     """
-    Map a yyyymm tag -> storage key.
-    Example: "202508" -> "bid_packets/202508.pdf"
-    """
-    return f"bid_packets/{month_tag}.pdf"
-
-
-def save_bid_packet(month_tag: str, fp: BinaryIO) -> None:
-    """
-    Persist the uploaded PDF so pilots can fetch it later.
-
-    `month_tag` must be a six-digit string YYYYMM.
-    """
-    if not (len(month_tag) == 6 and month_tag.isdigit()):
-        raise ValueError("month_tag must be YYYYMM (e.g. 202508)")
-
-    disk_storage.save(_key(month_tag), fp)
-
-
-def latest_tag() -> str | None:
-    """
-    Return the newest YYYYMM tag we have stored, or None.
-    (LocalDisk backend has no listing API yet; stub for later.)
-    """
-    # TODO: implement once storage backend supports listing.
-    return None
-
-
-def exists(month_tag: str) -> bool:
-    return disk_storage.exists(_key(month_tag))
+    # Create bids directory if it doesn't exist
+    bids_dir = Path("bids")
+    bids_dir.mkdir(exist_ok=True)
+    
+    # Save the file
+    filename = f"bid_{month_tag}.pdf"
+    filepath = bids_dir / filename
+    
+    with open(filepath, 'wb') as f:
+        f.write(file_stream.read())

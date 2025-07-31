@@ -3,8 +3,6 @@ import sys
 import logging
 
 from flask import Flask, render_template, request, redirect, url_for  # and any others you need
-
-app = Flask(__name__)  # ← this must exist **before** routes & app.run()
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -86,6 +84,13 @@ def create_app() -> Flask:
     except ModuleNotFoundError:
         logging.info("replit_auth not configured; skipping auth blueprint")
 
+    # Register admin blueprint
+    try:
+        from admin import bp as admin_bp
+        app.register_blueprint(admin_bp)
+    except ModuleNotFoundError:
+        logging.warning("admin blueprint not found; skipping")
+
     return app
 
 
@@ -94,6 +99,6 @@ def create_app() -> Flask:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app = create_app()
+    PORT = int(os.getenv("PORT", 8080))
+    app.run(host="0.0.0.0", port=PORT, debug=True)

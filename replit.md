@@ -159,3 +159,16 @@ Preferred communication style: Simple, everyday language.
   - Better error isolation - PDF import failures don't affect CSV/TXT parsing
 - **Testing**: All tests pass, including CSV parsing without PyMuPDF loaded
 - **Status**: Production ready - robust parser with optional PDF support
+
+### Admin Endpoint for Bid Packet Management (Updated: July 31, 2025)
+- **Feature**: Added administrative endpoint for uploading monthly bid packet PDFs
+- **Implementation**:
+  - Created new admin blueprint with `/admin/upload-bid` POST endpoint
+  - Token-based protection using query parameter `?token=letmein`
+  - Form-data fields: `month_tag` (YYYYMM format) and `file` (PDF upload)
+  - File storage service in `services/bids.py` saves PDFs to local `bids/` directory
+  - Returns JSON response: `{"status":"ok","stored":"202508"}`
+- **Security**: Protected by simple token authentication to prevent unauthorized uploads
+- **Structure**: Fixed Flask app creation to use factory pattern consistently
+- **Testing**: Verified file upload, token protection, and method validation work correctly
+- **Status**: Production ready - admin can upload monthly bid packets via API
