@@ -261,6 +261,32 @@
                 .map(el => el.textContent.trim());
             document.getElementById('fleet-input').value = selected.join(',');
         }
+        
+        // Initialize form state when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize seat selection from profile data
+            const seatInput = document.getElementById('seat-input');
+            if (seatInput && seatInput.value) {
+                const selectedSeat = seatInput.value;
+                document.querySelectorAll('.seat-option').forEach(option => {
+                    if (option.getAttribute('onclick') && option.getAttribute('onclick').includes(selectedSeat)) {
+                        option.classList.add('selected');
+                    }
+                });
+            }
+            
+            // Initialize fleet selection from profile data
+            const fleetInput = document.getElementById('fleet-input');
+            if (fleetInput && fleetInput.value) {
+                const selectedFleet = fleetInput.value.split(',').map(f => f.trim()).filter(f => f);
+                document.querySelectorAll('.fleet-chip').forEach(chip => {
+                    const chipText = chip.textContent.trim();
+                    if (selectedFleet.includes(chipText)) {
+                        chip.classList.add('selected');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
