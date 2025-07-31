@@ -59,7 +59,7 @@ def create_app() -> Flask:
     if login_manager:
         login_manager.init_app(app)
         login_manager.login_view = 'replit_auth.login'  # type: ignore
-        
+
         # User loader function
         @login_manager.user_loader
         def load_user(user_id):
@@ -92,9 +92,6 @@ def create_app() -> Flask:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    application = create_app()
-    application.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 8080)),
-        debug=True,
-    )
+    import os
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=True)
