@@ -102,7 +102,7 @@ def get_matching_bid_packet(profile: dict) -> dict | None:
                 'month_tag': bid_packet.month_tag,
                 'filename': bid_packet.filename,
                 'file_size': bid_packet.file_size,
-                'upload_date': bid_packet.created_at,
+                'upload_date': bid_packet.uploaded_at,
                 'matches_profile': True,  # Will be more sophisticated matching logic
                 'content': bid_packet.pdf_data
             }
