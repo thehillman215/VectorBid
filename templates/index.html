@@ -121,6 +121,11 @@
                                    data-test-id="test-drag-drop-btn">
                                     <i class="fas fa-arrows-alt me-2"></i>Test Drag & Drop
                                 </a>
+                                {% else %}
+                                <a href="{{ url_for('main.test_results') }}" class="btn btn-outline-success ms-2" 
+                                   data-test-id="quick-test-results-btn">
+                                    <i class="fas fa-vial me-2"></i>Quick Test Results
+                                </a>
                                 {% endif %}
                             </div>
                         </div>

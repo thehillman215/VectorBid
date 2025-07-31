@@ -1,855 +1,1045 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-bs-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bid Analysis Results - VectorBid</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .rank-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .score-circle {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 12px;
-            color: white;
-        }
-
-        .score-excellent { background: #28a745; }
-        .score-good { background: #17a2b8; }
-        .score-fair { background: #ffc107; color: #000; }
-        .score-poor { background: #dc3545; }
-
-        .trip-highlights .badge {
-            font-size: 11px;
-        }
-
-        .progress-sm {
-            height: 4px;
-        }
-
-        .percentile-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .percentile-suffix {
-            font-size: 1rem;
-            color: #6c757d;
-        }
-
-        .pbs-code {
-            background: #212529;
-            border: 1px solid #495057;
-            border-radius: 4px;
-            padding: 1rem;
-            position: relative;
-            max-height: 400px;
-            overflow-y: auto;
-            color: #f8f9fa;
-            font-family: 'Courier New', monospace;
-        }
-
-        .copy-code-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-
-        .text-purple { color: #6f42c1; }
-        .btn-purple { 
-            background-color: #6f42c1; 
-            border-color: #6f42c1; 
-            color: white;
-        }
-
-        .trip-item {
-            border-left: 4px solid #007bff;
-            padding-left: 15px;
-            cursor: move;
-            transition: all 0.3s ease;
-            background-color: var(--bs-body-bg);
-        }
-
-        .trip-item:hover {
-            background-color: var(--bs-gray-100);
-            border-left-color: #0056b3;
-            transform: translateX(5px);
-        }
-
-        .trip-item.dragging {
-            opacity: 0.6;
-            transform: rotate(2deg);
-            z-index: 1000;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-        }
-
-        .trip-item.drag-over {
-            border-top: 3px solid #007bff;
-            margin-top: 5px;
-        }
-
-        .sortable-container {
-            min-height: 200px;
-        }
-
-        .drag-handle {
-            cursor: grab;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .drag-handle:hover {
-            color: #007bff;
-        }
-
-        .ranking-controls {
-            margin-bottom: 20px;
-        }
-
-        .manual-reorder {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .ai-reasoning {
-            background-color: rgba(13, 110, 253, 0.1);
-            border-radius: 6px;
-            padding: 8px;
-        }
-
-        .toast-notification {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .metric-card {
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-2px);
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="fas fa-paper-plane me-2"></i>VectorBid
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{{ url_for('main.index') }}">
-                    <i class="fas fa-home me-1"></i>Dashboard
-                </a>
-                <a class="nav-link" href="/?test=true">
-                    <i class="fas fa-sign-out-alt me-1"></i>Back to Dashboard
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid mt-4">
-        <!-- Header Section with Better Metrics -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h2 class="mb-1">
-                                    <i class="fas fa-chart-line me-2"></i>
-                                    Your Optimized Bid Strategy
-                                </h2>
-                                <p class="mb-0 opacity-75">
-                                    {% if analysis.bid_package %}
-                                        {{ analysis.bid_package.filename }} • 
-                                    {% endif %}
-                                    {{ analysis.total_trips or ranked_trips|length }} trips analyzed •
-                                    Generated just now
-                                </p>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <div class="btn-group">
-                                    <button class="btn btn-light" onclick="downloadBidList()">
-                                        <i class="fas fa-download me-2"></i>Export PBS Instructions
-                                    </button>
-                                    <button class="btn btn-outline-light" onclick="downloadCSV()">
-                                        <i class="fas fa-file-csv me-2"></i>CSV
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Key Metrics Dashboard -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-center metric-card">
-                    <div class="card-body">
-                        <div class="text-success mb-2">
-                            <i class="fas fa-bullseye fa-2x"></i>
-                        </div>
-                        <h4 class="text-success mb-1">{{ analysis.optimization_score or 85 }}%</h4>
-                        <small class="text-muted">Preference Match Score</small>
-                        <div class="progress mt-2">
-                            <div class="progress-bar bg-success" style="width: {{ analysis.optimization_score or 85 }}%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card text-center metric-card">
-                    <div class="card-body">
-                        <div class="text-info mb-2">
-                            <i class="fas fa-filter fa-2x"></i>
-                        </div>
-                        <h4 class="text-info mb-1">{{ analysis.pbs_filters_found or 4 }}</h4>
-                        <small class="text-muted">Optimal PBS Filters Found</small>
-                        <div class="mt-2">
-                            <span class="badge bg-info">{{ analysis.filter_efficiency or 80 }}% Efficient</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card text-center metric-card">
-                    <div class="card-body">
-                        <div class="text-warning mb-2">
-                            <i class="fas fa-percentage fa-2x"></i>
-                        </div>
-                        <h4 class="text-warning mb-1">{{ analysis.success_probability or 72 }}%</h4>
-                        <small class="text-muted">Estimated Success Rate</small>
-                        <div class="mt-2">
-                            <span class="badge bg-warning text-dark">{{ analysis.seniority_category or 'Mid-Seniority' }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card text-center metric-card">
-                    <div class="card-body">
-                        <div class="text-purple mb-2">
-                            <i class="fas fa-copy fa-2x"></i>
-                        </div>
-                        <h4 class="text-purple mb-1">Ready</h4>
-                        <small class="text-muted">PBS Instructions</small>
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-purple" onclick="copyPBSInstructions()">
-                                <i class="fas fa-copy me-1"></i>Copy to PBS
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analysis Breakdown -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <!-- Trip Rankings -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list-ol me-2"></i>
-                                Trip Rankings
-                                <small class="text-muted ms-2" id="ranking-mode-indicator">(AI Recommended)</small>
-                            </h5>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-secondary active" onclick="showView('ranking')" data-view="ranking">
-                                    <i class="fas fa-list me-1"></i>Ranking
-                                </button>
-                                <button class="btn btn-outline-secondary" onclick="showView('pbs-code')" data-view="pbs-code">
-                                    <i class="fas fa-code me-1"></i>PBS Code
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body" id="ranking-view">
-                        <!-- Ranking Controls -->
-                        <div class="manual-reorder">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-arrows-alt me-2"></i>
-                                        Customize Your Ranking
-                                    </h6>
-                                    <small class="text-muted">
-                                        Drag trips up or down to adjust your personal preferences. Changes are automatically saved.
-                                    </small>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="resetToAIRanking()" data-test-id="reset-ranking-btn">
-                                        <i class="fas fa-undo me-1"></i>Reset to AI
-                                    </button>
-                                    <button class="btn btn-sm btn-success" onclick="saveCustomRanking()" data-test-id="save-ranking-btn">
-                                        <i class="fas fa-save me-1"></i>Save Changes
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sortable Trip List -->
-                        <div class="sortable-container" id="trip-rankings" data-test-id="sortable-trip-list">
-                            {% for trip in ranked_trips[:20] %}
-                            <div class="trip-item border-bottom pb-3 mb-3" data-trip-id="{{ trip.trip_id or trip.pairing_id or loop.index }}" draggable="true">
-                                <div class="row align-items-center">
-                                    <div class="col-auto">
-                                        <div class="drag-handle" data-test-id="drag-handle-{{ loop.index }}">
-                                            <i class="fas fa-grip-vertical"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="rank-badge" data-rank="{{ loop.index }}">{{ loop.index }}</div>
-                                    </div>
-                                <div class="col-md-3">
-                                    <h6 class="mb-1">{{ trip.pairing_id or trip.trip_id or ('Trip ' + loop.index|string) }}</h6>
-                                    <small class="text-muted">
-                                        {{ trip.aircraft or 'Aircraft' }} • {{ trip.credit_hours or trip.hours or '0' }}h
-                                    </small>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="route-display">
-                                        {{ trip.routing or trip.route or 'Route info' }}
-                                    </div>
-                                    <small class="text-muted">{{ trip.dates or 'Date range' }}</small>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="score-display">
-                                        {% set score = trip.score or (10 - loop.index//3) %}
-                                        {% set score_category = 'excellent' if score >= 8 else 'good' if score >= 6 else 'fair' if score >= 4 else 'poor' %}
-                                        <div class="score-circle score-{{ score_category }}">
-                                            {{ score }}/10
-                                        </div>
-                                    </div>
-                                </div>
-                                    <div class="col-auto">
-                                        <button class="btn btn-sm btn-outline-info" onclick="showTripDetails('{{ trip.pairing_id or trip.trip_id }}')">
-                                            <i class="fas fa-info-circle"></i> Details
-                                        </button>
-                                    </div>
-                                </div>
-                            
-                            <!-- Trip highlights -->
-                            <div class="row mt-2">
-                                <div class="col-12">
-                                    <div class="trip-highlights">
-                                        {% if trip.includes_weekend %}
-                                            <span class="badge bg-success me-1">
-                                                <i class="fas fa-calendar-week me-1"></i>Weekend
-                                            </span>
-                                        {% endif %}
-                                        {% if trip.days and trip.days <= 2 %}
-                                            <span class="badge bg-info me-1">
-                                                <i class="fas fa-clock me-1"></i>Short Trip
-                                            </span>
-                                        {% endif %}
-                                        {% if trip.credit_hours and trip.credit_hours >= 25 %}
-                                            <span class="badge bg-warning me-1">
-                                                <i class="fas fa-coins me-1"></i>High Credit
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    {% if trip.comment or trip.reasoning %}
-                                    <div class="ai-reasoning mt-2">
-                                        <small class="text-muted">
-                                            <i class="fas fa-robot me-1"></i>
-                                            <strong>Why this ranking:</strong> {{ trip.comment or trip.reasoning or 'Matches your specified preferences and constraints.' }}
-                                        </small>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        
-                        {% if ranked_trips|length > 20 %}
-                        <div class="text-center mt-3">
-                            <button class="btn btn-outline-primary" onclick="showAllTrips()">
-                                <i class="fas fa-plus me-2"></i>Show All {{ ranked_trips|length }} Trips
-                            </button>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- PBS Code View (Hidden by default) -->
-                    <div class="card-body d-none" id="pbs-code-view">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Instructions:</strong> Copy this PBS code and paste it into your airline's bidding system.
-                        </div>
-                        
-                        <div class="code-container position-relative">
-                            <pre class="pbs-code"><code id="pbs-code-content">{{ analysis.pbs_instructions or generate_sample_pbs(ranked_trips) }}</code></pre>
-                            <button class="btn btn-sm btn-primary copy-code-btn" onclick="copyPBSCode()">
-                                <i class="fas fa-copy me-1"></i>Copy PBS Code
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <!-- Analysis Summary -->
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <i class="fas fa-chart-pie me-2"></i>
-                            Bid Analysis Summary
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        {% set high_count = analysis.high_preference_count or (ranked_trips[:5]|length) %}
-                        {% set medium_count = analysis.medium_preference_count or (ranked_trips[5:15]|length) %}
-                        {% set low_count = analysis.low_preference_count or (ranked_trips[15:]|length) %}
-                        {% set total = ranked_trips|length %}
-                        
-                        <div class="analysis-metric mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span>High-Preference Trips:</span>
-                                <strong class="text-success">{{ high_count }}</strong>
-                            </div>
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-success" style="width: {{ (high_count / total * 100) if total > 0 else 0 }}%"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="analysis-metric mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span>Medium-Preference Trips:</span>
-                                <strong class="text-warning">{{ medium_count }}</strong>
-                            </div>
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-warning" style="width: {{ (medium_count / total * 100) if total > 0 else 0 }}%"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="analysis-metric mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span>Low-Preference Trips:</span>
-                                <strong class="text-danger">{{ low_count }}</strong>
-                            </div>
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-danger" style="width: {{ (low_count / total * 100) if total > 0 else 0 }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Seniority Impact -->
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <i class="fas fa-users me-2"></i>
-                            Seniority Impact Analysis
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="seniority-summary">
-                            <div class="text-center mb-3">
-                                <div class="seniority-percentile">
-                                    <span class="percentile-number">{{ analysis.seniority_percentile or 65 }}</span>
-                                    <span class="percentile-suffix">%ile</span>
-                                </div>
-                                <small class="text-muted">{{ analysis.seniority_category or 'Mid-Seniority' }}</small>
-                            </div>
-                            
-                            <div class="probability-breakdown">
-                                {% set top_prob = analysis.top_trips_probability or 52 %}
-                                {% set weekend_prob = analysis.weekend_probability or 68 %}
-                                {% set layover_prob = analysis.premium_layover_probability or 45 %}
-                                
-                                <div class="prob-item mb-2">
-                                    <span>Top 10 trips:</span>
-                                    <div class="float-end">
-                                        <span class="badge bg-{{ 'success' if top_prob >= 70 else 'warning' if top_prob >= 40 else 'danger' }}">
-                                            {{ top_prob }}%
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="prob-item mb-2">
-                                    <span>Weekend trips:</span>
-                                    <div class="float-end">
-                                        <span class="badge bg-{{ 'success' if weekend_prob >= 70 else 'warning' if weekend_prob >= 40 else 'danger' }}">
-                                            {{ weekend_prob }}%
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="prob-item mb-2">
-                                    <span>Premium layovers:</span>
-                                    <div class="float-end">
-                                        <span class="badge bg-{{ 'success' if layover_prob >= 70 else 'warning' if layover_prob >= 40 else 'danger' }}">
-                                            {{ layover_prob }}%
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="alert alert-light mt-3">
-                                <small>
-                                    <i class="fas fa-lightbulb me-1"></i>
-                                    <strong>Strategy Tip:</strong> {{ analysis.seniority_recommendation or 'Good chance - consider having backup options for highly desirable trips.' }}
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <i class="fas fa-bolt me-2"></i>
-                            Quick Actions
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary" onclick="copyPBSInstructions()">
-                                <i class="fas fa-copy me-2"></i>Copy PBS Instructions
-                            </button>
-                            <a href="{{ url_for('main.download_csv') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-file-csv me-2"></i>Export Trip List CSV
-                            </a>
-                            <hr>
-                            <a href="{{ url_for('main.onboarding', step=1) }}" class="btn btn-outline-warning">
-                                <i class="fas fa-sliders me-2"></i>Adjust Preferences
-                            </a>
-                            <a href="{{ url_for('main.index') }}" class="btn btn-outline-info">
-                                <i class="fas fa-refresh me-2"></i>Analyze New Package
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Enhanced JavaScript for results page
-        
-        function showView(viewType) {
-            // Hide all views
-            document.getElementById('ranking-view').classList.add('d-none');
-            document.getElementById('pbs-code-view').classList.add('d-none');
-            
-            // Show selected view
-            document.getElementById(viewType + '-view').classList.remove('d-none');
-            
-            // Update button states
-            document.querySelectorAll('.btn-group .btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-view="${viewType}"]`).classList.add('active');
-        }
-
-        function copyPBSInstructions() {
-            const pbsContent = document.getElementById('pbs-code-content');
-            let pbsText = '';
-            
-            if (pbsContent) {
-                pbsText = pbsContent.textContent;
-            } else {
-                // Generate fallback PBS instructions
-                pbsText = generateFallbackPBS();
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Trip Rankings - VectorBid</title>
+        <link
+            href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            rel="stylesheet"
+        />
+        <style>
+            /* Enhanced Visual Variables */
+            :root {
+                --primary-gradient: linear-gradient(
+                    135deg,
+                    #667eea 0%,
+                    #764ba2 100%
+                );
+                --success-gradient: linear-gradient(
+                    135deg,
+                    #4facfe 0%,
+                    #00f2fe 100%
+                );
+                --warning-gradient: linear-gradient(
+                    135deg,
+                    #f093fb 0%,
+                    #f5576c 100%
+                );
+                --card-bg: rgba(255, 255, 255, 0.05);
+                --card-border: rgba(255, 255, 255, 0.1);
+                --hover-bg: rgba(255, 255, 255, 0.1);
+                --text-primary: #ffffff;
+                --text-secondary: rgba(255, 255, 255, 0.7);
+                --rank-excellent: #4facfe;
+                --rank-good: #51cf66;
+                --rank-fair: #ffd43b;
+                --rank-poor: #ff6b6b;
             }
-            
-            navigator.clipboard.writeText(pbsText).then(() => {
-                showToast('PBS instructions copied to clipboard!', 'success');
-            }).catch(() => {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = pbsText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                showToast('PBS instructions copied to clipboard!', 'success');
-            });
-        }
 
-        function copyPBSCode() {
-            copyPBSInstructions();
-        }
-
-        function generateFallbackPBS() {
-            const trips = {{ ranked_trips[:15] | tojson | safe }};
-            let pbs = "PAIRING PREFERENCES (in order):\n";
-            trips.forEach((trip, index) => {
-                const tripId = trip.pairing_id || trip.trip_id || `Trip${index + 1}`;
-                pbs += `${(index + 1).toString().padStart(2, ' ')}. ${tripId}\n`;
-            });
-            return pbs;
-        }
-
-        function showTripDetails(pairingId) {
-            // Show modal with detailed trip information
-            alert(`Trip details for ${pairingId} - Feature coming soon!`);
-        }
-
-        function showToast(message, type = 'info') {
-            // Simple toast notification
-            const toast = document.createElement('div');
-            toast.className = `alert alert-${type} toast-notification`;
-            toast.innerHTML = `<i class="fas fa-check-circle me-2"></i>${message}`;
-            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        function showAllTrips() {
-            // Expand to show all trips - simple implementation
-            const hiddenTrips = document.querySelectorAll('.trip-item.d-none');
-            hiddenTrips.forEach(trip => trip.classList.remove('d-none'));
-            
-            // Hide the show more button
-            const showMoreBtn = document.querySelector('[onclick="showAllTrips()"]');
-            if (showMoreBtn) {
-                showMoreBtn.style.display = 'none';
+            body {
+                background: var(--primary-gradient);
+                min-height: 100vh;
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    sans-serif;
             }
-        }
 
-        function downloadBidList() {
-            const pbsText = document.getElementById('pbs-code-content')?.textContent || generateFallbackPBS();
-            const element = document.createElement('a');
-            const file = new Blob([pbsText], {type: 'text/plain'});
-            element.href = URL.createObjectURL(file);
-            element.download = 'vectorbid-pbs-instructions.txt';
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-            showToast('PBS instructions downloaded!', 'success');
-        }
-
-        function downloadCSV() {
-            // This will use the existing CSV download route
-            window.location.href = "{{ url_for('main.download_csv') }}";
-        }
-
-        // Drag and Drop Functionality
-        let draggedElement = null;
-        let originalRanking = [];
-
-        function initializeDragAndDrop() {
-            const tripItems = document.querySelectorAll('.trip-item');
-            
-            // Store original ranking for reset functionality
-            originalRanking = Array.from(tripItems).map(item => ({
-                id: item.dataset.tripId,
-                html: item.outerHTML
-            }));
-            
-            tripItems.forEach(item => {
-                item.addEventListener('dragstart', handleDragStart);
-                item.addEventListener('dragover', handleDragOver);
-                item.addEventListener('drop', handleDrop);
-                item.addEventListener('dragend', handleDragEnd);
-                item.addEventListener('dragenter', handleDragEnter);
-                item.addEventListener('dragleave', handleDragLeave);
-            });
-        }
-
-        function handleDragStart(e) {
-            draggedElement = this;
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.outerHTML);
-        }
-
-        function handleDragOver(e) {
-            if (e.preventDefault) {
-                e.preventDefault();
+            /* Enhanced Navbar */
+            .navbar {
+                background: rgba(0, 0, 0, 0.3) !important;
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid var(--card-border);
             }
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
 
-        function handleDragEnter(e) {
-            if (this !== draggedElement) {
-                this.classList.add('drag-over');
+            .navbar-brand {
+                font-weight: 700;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
             }
-        }
 
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over');
-        }
-
-        function handleDrop(e) {
-            if (e.stopPropagation) {
-                e.stopPropagation();
+            /* Main Container */
+            .main-container {
+                padding: 2rem 0;
+                min-height: calc(100vh - 80px);
             }
-            
-            if (draggedElement !== this) {
-                const container = document.getElementById('trip-rankings');
-                const items = Array.from(container.children);
-                const draggedIndex = items.indexOf(draggedElement);
-                const targetIndex = items.indexOf(this);
-                
-                if (draggedIndex < targetIndex) {
-                    container.insertBefore(draggedElement, this.nextSibling);
-                } else {
-                    container.insertBefore(draggedElement, this);
+
+            /* Enhanced Cards */
+            .results-card {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 20px;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+                margin-bottom: 2rem;
+            }
+
+            .card-header-enhanced {
+                background: rgba(255, 255, 255, 0.02);
+                border-bottom: 1px solid var(--card-border);
+                padding: 1.5rem 2rem;
+            }
+
+            .card-body-enhanced {
+                padding: 2rem;
+            }
+
+            /* Results Header */
+            .results-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .results-title {
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: 700;
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .results-subtitle {
+                color: var(--text-secondary);
+                font-size: 1.1rem;
+            }
+
+            /* Summary Stats */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 16px;
+                padding: 1.5rem;
+                text-align: center;
+                transition: all 0.3s ease;
+            }
+
+            .stat-card:hover {
+                background: var(--hover-bg);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            }
+
+            .stat-value {
+                font-size: 2rem;
+                font-weight: 700;
+                background: var(--success-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-label {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            /* Trip Rankings */
+            .trip-item {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 16px;
+                margin-bottom: 1rem;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                cursor: grab;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .trip-item:hover {
+                background: var(--hover-bg);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+
+            .trip-item.dragging {
+                opacity: 0.7;
+                transform: rotate(2deg) scale(1.02);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+                cursor: grabbing;
+            }
+
+            .trip-item.drag-over {
+                border-color: var(--rank-excellent);
+                background: rgba(79, 172, 254, 0.1);
+                transform: translateY(-1px);
+            }
+
+            .trip-header {
+                display: flex;
+                align-items: center;
+                padding: 1.5rem;
+                gap: 1.5rem;
+            }
+
+            /* Rank Badge */
+            .rank-badge {
+                min-width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                font-size: 1.2rem;
+                position: relative;
+                flex-shrink: 0;
+            }
+
+            .rank-badge.rank-1,
+            .rank-badge.rank-2,
+            .rank-badge.rank-3 {
+                background: var(--success-gradient);
+                color: white;
+            }
+
+            .rank-badge.rank-4,
+            .rank-badge.rank-5,
+            .rank-badge.rank-6 {
+                background: linear-gradient(135deg, #51cf66, #ffd43b);
+                color: white;
+            }
+
+            .rank-badge.rank-7,
+            .rank-badge.rank-8,
+            .rank-badge.rank-9,
+            .rank-badge.rank-10 {
+                background: var(--warning-gradient);
+                color: white;
+            }
+
+            .rank-badge.rank-high {
+                background: rgba(255, 107, 107, 0.2);
+                border: 2px solid #ff6b6b;
+                color: #ff6b6b;
+            }
+
+            /* Trip Info */
+            .trip-main-info {
+                flex: 1;
+            }
+
+            .trip-title {
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 0.25rem;
+            }
+
+            .trip-details {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .trip-detail {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+            }
+
+            .trip-detail i {
+                color: #667eea;
+                width: 16px;
+            }
+
+            .trip-comment {
+                background: rgba(79, 172, 254, 0.1);
+                border-left: 3px solid var(--rank-excellent);
+                padding: 0.75rem 1rem;
+                margin-top: 1rem;
+                border-radius: 0 8px 8px 0;
+            }
+
+            .trip-comment-text {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                margin: 0;
+            }
+
+            /* Action Buttons */
+            .action-buttons {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .btn-enhanced {
+                border-radius: 12px;
+                font-weight: 600;
+                padding: 0.875rem 2rem;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: none;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-primary-enhanced {
+                background: var(--primary-gradient);
+                color: white;
+            }
+
+            .btn-primary-enhanced:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
+            .btn-success-enhanced {
+                background: var(--success-gradient);
+                color: white;
+            }
+
+            .btn-success-enhanced:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4);
+                color: white;
+            }
+
+            .btn-outline-enhanced {
+                border: 2px solid var(--card-border);
+                color: var(--text-secondary);
+                background: transparent;
+            }
+
+            .btn-outline-enhanced:hover {
+                background: var(--hover-bg);
+                border-color: rgba(255, 255, 255, 0.4);
+                color: var(--text-primary);
+                transform: translateY(-2px);
+            }
+
+            /* Drag Instructions */
+            .drag-instructions {
+                background: rgba(79, 172, 254, 0.1);
+                border: 1px solid rgba(79, 172, 254, 0.3);
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                margin-bottom: 2rem;
+                text-align: center;
+            }
+
+            .drag-instructions i {
+                color: var(--rank-excellent);
+                font-size: 1.2rem;
+                margin-right: 0.5rem;
+            }
+
+            /* Loading States */
+            .loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                backdrop-filter: blur(5px);
+            }
+
+            .loading-content {
+                text-align: center;
+                color: white;
+            }
+
+            .loading-spinner {
+                width: 60px;
+                height: 60px;
+                border: 4px solid rgba(255, 255, 255, 0.1);
+                border-left: 4px solid var(--rank-excellent);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 1rem;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
                 }
-                
-                updateRankingNumbers();
-                updateRankingIndicator('Custom');
-                showToast('Trip ranking updated! Remember to save your changes.', 'info');
-            }
-            
-            this.classList.remove('drag-over');
-            return false;
-        }
-
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
-            
-            // Remove drag-over class from all items
-            document.querySelectorAll('.trip-item').forEach(item => {
-                item.classList.remove('drag-over');
-            });
-            
-            draggedElement = null;
-        }
-
-        function updateRankingNumbers() {
-            const tripItems = document.querySelectorAll('.trip-item');
-            tripItems.forEach((item, index) => {
-                const rankBadge = item.querySelector('.rank-badge');
-                if (rankBadge) {
-                    rankBadge.textContent = index + 1;
-                    rankBadge.dataset.rank = index + 1;
+                100% {
+                    transform: rotate(360deg);
                 }
-            });
-        }
-
-        function updateRankingIndicator(mode) {
-            const indicator = document.getElementById('ranking-mode-indicator');
-            if (indicator) {
-                indicator.textContent = mode === 'AI' ? '(AI Recommended)' : '(Custom Ranking)';
-                indicator.className = mode === 'AI' ? 'text-muted ms-2' : 'text-success ms-2';
             }
-        }
 
-        function resetToAIRanking() {
-            if (confirm('Reset to original AI ranking? This will lose your custom changes.')) {
-                const container = document.getElementById('trip-rankings');
-                container.innerHTML = '';
-                
-                originalRanking.forEach(trip => {
-                    container.innerHTML += trip.html;
-                });
-                
-                // Reinitialize drag and drop for new elements
+            /* Toast Notifications */
+            .toast-container {
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                z-index: 9998;
+            }
+
+            .toast-notification {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                margin-bottom: 1rem;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            }
+
+            .toast-notification.show {
+                transform: translateX(0);
+            }
+
+            .toast-success {
+                border-left: 4px solid var(--rank-good);
+            }
+
+            .toast-warning {
+                border-left: 4px solid #ffd43b;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .main-container {
+                    padding: 1rem 0;
+                }
+
+                .card-body-enhanced {
+                    padding: 1.5rem;
+                }
+
+                .trip-header {
+                    padding: 1rem;
+                    gap: 1rem;
+                }
+
+                .trip-details {
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+
+                .results-title {
+                    font-size: 2rem;
+                }
+
+                .action-buttons {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .btn-enhanced {
+                    padding: 0.75rem 1.5rem;
+                }
+
+                .stats-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 1rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .rank-badge {
+                    min-width: 40px;
+                    height: 40px;
+                    font-size: 1rem;
+                }
+
+                .trip-title {
+                    font-size: 1.1rem;
+                }
+            }
+
+            /* Animation Classes */
+            .fade-in {
+                animation: fadeIn 0.6s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .slide-in {
+                animation: slideIn 0.4s ease-out;
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Enhanced Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                    <i class="fas fa-vector-square me-2"></i>VectorBid
+                </a>
+
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle"
+                            href="#"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                        >
+                            <i class="fas fa-user-circle me-1"></i>
+                            {% if user %}Pilot{% endif %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a
+                                    class="dropdown-item"
+                                    href="{{ url_for('main.index') }}"
+                                >
+                                    <i class="fas fa-home me-2"></i>Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    class="dropdown-item"
+                                    href="{{ url_for('main.onboarding') }}"
+                                >
+                                    <i class="fas fa-user-edit me-2"></i>Update
+                                    Profile
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <a
+                                    class="dropdown-item"
+                                    href="{{ url_for('replit_auth.logout') }}"
+                                >
+                                    <i class="fas fa-sign-out-alt me-2"></i
+                                    >Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Container -->
+        <div class="container main-container">
+            <!-- Results Header -->
+            <div class="results-header fade-in">
+                <h1 class="results-title">
+                    <i class="fas fa-trophy me-3"></i>Your Trip Rankings
+                </h1>
+                <p class="results-subtitle">
+                    AI-powered analysis of your monthly bid package
+                </p>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="stats-grid fade-in">
+                <div class="stat-card">
+                    <div class="stat-value">
+                        {{ trips|length if trips else 0 }}
+                    </div>
+                    <div class="stat-label">
+                        <i class="fas fa-plane me-1"></i>Trips Analyzed
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">
+                        {{ ((trips|selectattr('includes_weekend', 'equalto',
+                        false)|list)|length) if trips else 0 }}
+                    </div>
+                    <div class="stat-label">
+                        <i class="fas fa-calendar-check me-1"></i>Weekend-Free
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">
+                        {{
+                        "%.1f"|format(trips|sum(attribute='credit_hours')|float)
+                        if trips else 0 }}
+                    </div>
+                    <div class="stat-label">
+                        <i class="fas fa-clock me-1"></i>Total Hours
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">
+                        {{ ((trips|map(attribute='days')|sum) /
+                        (trips|length))|round(1) if trips else 0 }}
+                    </div>
+                    <div class="stat-label">
+                        <i class="fas fa-calendar-alt me-1"></i>Avg Trip Length
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons fade-in">
+                <a
+                    href="{{ url_for('main.download_csv') }}"
+                    class="btn btn-success-enhanced"
+                >
+                    <i class="fas fa-download me-2"></i>Download CSV
+                </a>
+                <button
+                    class="btn btn-primary-enhanced"
+                    onclick="copyTopTrips()"
+                >
+                    <i class="fas fa-copy me-2"></i>Copy Top 10
+                </button>
+                <button
+                    class="btn btn-outline-enhanced"
+                    onclick="resetRanking()"
+                >
+                    <i class="fas fa-undo me-2"></i>Reset AI Ranking
+                </button>
+            </div>
+
+            <!-- Main Results Card -->
+            <div class="results-card fade-in">
+                <div class="card-header-enhanced">
+                    <div
+                        class="d-flex justify-content-between align-items-center"
+                    >
+                        <h3 class="mb-0">
+                            <i class="fas fa-list-ol me-2"></i>Trip Rankings
+                            <small
+                                class="text-muted ms-2"
+                                id="ranking-mode-indicator"
+                                >(AI Recommended)</small
+                            >
+                        </h3>
+                        <div class="btn-group btn-group-sm">
+                            <button
+                                class="btn btn-outline-light active"
+                                onclick="showRankingView()"
+                                id="ranking-btn"
+                            >
+                                <i class="fas fa-list me-1"></i>Ranking
+                            </button>
+                            <button
+                                class="btn btn-outline-light"
+                                onclick="showTableView()"
+                                id="table-btn"
+                            >
+                                <i class="fas fa-table me-1"></i>Table
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body-enhanced">
+                    <!-- Drag Instructions -->
+                    <div class="drag-instructions">
+                        <i class="fas fa-hand-paper"></i>
+                        <strong>Drag to Reorder:</strong> Click and drag trips
+                        to customize your ranking. Changes are saved
+                        automatically.
+                    </div>
+
+                    <!-- Trip Rankings -->
+                    <div id="trip-rankings" class="trip-rankings">
+                        {% for trip in trips %}
+                        <div
+                            class="trip-item slide-in"
+                            data-trip-id="{{ trip.trip_id }}"
+                            draggable="true"
+                            style="animation-delay: {{ loop.index0 * 0.1 }}s"
+                        >
+                            <div class="trip-header">
+                                <!-- Rank Badge -->
+                                <div
+                                    class="rank-badge rank-{{ trip.rank if trip.rank <= 10 else 'high' }}"
+                                >
+                                    {{ trip.rank }}
+                                </div>
+
+                                <!-- Trip Info -->
+                                <div class="trip-main-info">
+                                    <h4 class="trip-title">
+                                        Trip {{ trip.trip_id }} {% if trip.rank
+                                        <= 3 %}
+                                        <i
+                                            class="fas fa-star text-warning ms-2"
+                                            title="Top Choice"
+                                        ></i>
+                                        {% endif %}
+                                    </h4>
+
+                                    <div class="trip-details">
+                                        <div class="trip-detail">
+                                            <i class="fas fa-calendar-day"></i>
+                                            <span
+                                                >{{ trip.days }} day{{ 's' if
+                                                trip.days != 1 else '' }}</span
+                                            >
+                                        </div>
+
+                                        <div class="trip-detail">
+                                            <i class="fas fa-route"></i>
+                                            <span
+                                                >{{ trip.routing or 'Route info'
+                                                }}</span
+                                            >
+                                        </div>
+
+                                        <div class="trip-detail">
+                                            <i class="fas fa-clock"></i>
+                                            <span
+                                                >{{ trip.credit_hours or '0' }}h
+                                                credit</span
+                                            >
+                                        </div>
+
+                                        <div class="trip-detail">
+                                            <i
+                                                class="fas fa-calendar-check"
+                                            ></i>
+                                            <span>
+                                                {% if trip.includes_weekend %}
+                                                <span class="text-warning"
+                                                    >Includes weekend</span
+                                                >
+                                                {% else %}
+                                                <span class="text-success"
+                                                    >Weekend-free</span
+                                                >
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        {% if trip.dates %}
+                                        <div class="trip-detail">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span>{{ trip.dates }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if trip.comment %}
+                                    <div class="trip-comment">
+                                        <p class="trip-comment-text">
+                                            <i class="fas fa-robot me-2"></i>
+                                            <strong>AI Analysis:</strong> {{
+                                            trip.comment }}
+                                        </p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container" id="toast-container"></div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay" style="display: none">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h5>Saving your custom ranking...</h5>
+                <p class="text-muted">This will only take a moment</p>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Drag and Drop Functionality
+            let draggedElement = null;
+            let originalRanking = [];
+
+            document.addEventListener("DOMContentLoaded", function () {
                 initializeDragAndDrop();
-                updateRankingIndicator('AI');
-                showToast('Ranking reset to AI recommendations', 'success');
-            }
-        }
 
-        function saveCustomRanking() {
-            const tripItems = document.querySelectorAll('.trip-item');
-            const customRanking = Array.from(tripItems).map((item, index) => ({
-                trip_id: item.dataset.tripId,
-                custom_rank: index + 1
-            }));
-            
-            // Here you would normally send this to the server
-            // For now, we'll just show a success message
-            console.log('Custom ranking to save:', customRanking);
-            showToast('Custom ranking saved successfully!', 'success');
-            
-            // Send to server with fetch
-            fetch('/save-custom-ranking', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(customRanking)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Custom ranking saved successfully!', 'success');
-                } else {
-                    showToast('Failed to save ranking: ' + data.error, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error saving ranking:', error);
-                showToast('Error saving ranking', 'error');
+                // Add entrance animations with stagger
+                const tripItems = document.querySelectorAll(".trip-item");
+                tripItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.opacity = "1";
+                        item.style.transform = "translateX(0)";
+                    }, index * 100);
+                });
             });
-        }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Show ranking view by default
-            showView('ranking');
-            
-            // Initialize drag and drop functionality
-            initializeDragAndDrop();
-        });
-    </script>
+            function initializeDragAndDrop() {
+                const tripItems = document.querySelectorAll(".trip-item");
 
-    <!-- Jinja2 macro for generating sample PBS -->
-    {% macro generate_sample_pbs(trips) %}
-GROUP 1 - PREFERRED PAIRINGS:
-{% for trip in trips[:10] %}
-  AWARD {{ trip.pairing_id or trip.trip_id or ('TRIP' + loop.index|string) }}
-{% endfor %}
+                // Store original ranking
+                originalRanking = Array.from(tripItems).map((item) => ({
+                    id: item.dataset.tripId,
+                    element: item.cloneNode(true),
+                }));
 
-GROUP 2 - CONDITIONAL AWARDS:
-  AWARD PAIRINGS IF LAYOVER > 12:00
-  AWARD PAIRINGS IF AIRCRAFT = {{ trips[0].aircraft or 'A320' }}
-  AWARD PAIRINGS IF DEPARTURE_TIME > 08:00
+                tripItems.forEach((item) => {
+                    item.addEventListener("dragstart", handleDragStart);
+                    item.addEventListener("dragover", handleDragOver);
+                    item.addEventListener("drop", handleDrop);
+                    item.addEventListener("dragend", handleDragEnd);
+                    item.addEventListener("dragenter", handleDragEnter);
+                    item.addEventListener("dragleave", handleDragLeave);
+                });
+            }
 
-GROUP 3 - AVOID CRITERIA:
-  AVOID PAIRINGS IF CREDIT_TIME > 100
-  AVOID PAIRINGS IF LAYOVER < 10:00
-    {% endmacro %}
-</body>
+            function handleDragStart(e) {
+                draggedElement = this;
+                this.classList.add("dragging");
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/html", this.outerHTML);
+            }
+
+            function handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = "move";
+                return false;
+            }
+
+            function handleDragEnter(e) {
+                if (this !== draggedElement) {
+                    this.classList.add("drag-over");
+                }
+            }
+
+            function handleDragLeave(e) {
+                this.classList.remove("drag-over");
+            }
+
+            function handleDrop(e) {
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+
+                if (draggedElement !== this) {
+                    const container = document.getElementById("trip-rankings");
+                    const items = Array.from(container.children);
+                    const draggedIndex = items.indexOf(draggedElement);
+                    const targetIndex = items.indexOf(this);
+
+                    if (draggedIndex < targetIndex) {
+                        container.insertBefore(
+                            draggedElement,
+                            this.nextSibling,
+                        );
+                    } else {
+                        container.insertBefore(draggedElement, this);
+                    }
+
+                    updateRankingNumbers();
+                    updateRankingIndicator("Custom");
+                    showToast(
+                        "Trip ranking updated! Changes saved automatically.",
+                        "success",
+                    );
+                    saveCustomRanking();
+                }
+
+                return false;
+            }
+
+            function handleDragEnd(e) {
+                this.classList.remove("dragging");
+                // Clean up drag-over classes
+                document.querySelectorAll(".drag-over").forEach((item) => {
+                    item.classList.remove("drag-over");
+                });
+            }
+
+            function updateRankingNumbers() {
+                const tripItems = document.querySelectorAll(".trip-item");
+                tripItems.forEach((item, index) => {
+                    const rankBadge = item.querySelector(".rank-badge");
+                    const newRank = index + 1;
+
+                    // Update rank number
+                    rankBadge.textContent = newRank;
+
+                    // Update rank badge styling
+                    rankBadge.className = `rank-badge rank-${newRank <= 10 ? newRank : "high"}`;
+
+                    // Update star icon for top 3
+                    const starIcon = item.querySelector(".fa-star");
+                    if (newRank <= 3 && !starIcon) {
+                        const title = item.querySelector(".trip-title");
+                        title.innerHTML +=
+                            '<i class="fas fa-star text-warning ms-2" title="Top Choice"></i>';
+                    } else if (newRank > 3 && starIcon) {
+                        starIcon.remove();
+                    }
+                });
+            }
+
+            function updateRankingIndicator(mode) {
+                const indicator = document.getElementById(
+                    "ranking-mode-indicator",
+                );
+                if (mode === "Custom") {
+                    indicator.textContent = "(Custom Order)";
+                    indicator.className = "text-warning ms-2";
+                } else {
+                    indicator.textContent = "(AI Recommended)";
+                    indicator.className = "text-muted ms-2";
+                }
+            }
+
+            function resetRanking() {
+                if (
+                    confirm(
+                        "Reset to AI-recommended ranking? This will undo your custom changes.",
+                    )
+                ) {
+                    showLoadingOverlay();
+
+                    setTimeout(() => {
+                        const container =
+                            document.getElementById("trip-rankings");
+                        container.innerHTML = "";
+
+                        originalRanking.forEach((item) => {
+                            container.appendChild(item.element.cloneNode(true));
+                        });
+
+                        initializeDragAndDrop();
+                        updateRankingIndicator("AI");
+                        hideLoadingOverlay();
+                        showToast(
+                            "Ranking reset to AI recommendations",
+                            "success",
+                        );
+                    }, 1000);
+                }
+            }
+
+            function copyTopTrips() {
+                const tripItems = document.querySelectorAll(".trip-item");
+                const topTrips = Array.from(tripItems)
+                    .slice(0, 10)
+                    .map((item, index) => {
+                        const tripId = item.dataset.tripId;
+                        return `${index + 1}. Trip ${tripId}`;
+                    });
+
+                const text = topTrips.join("\n");
+                navigator.clipboard
+                    .writeText(text)
+                    .then(() => {
+                        showToast(
+                            "Top 10 trips copied to clipboard!",
+                            "success",
+                        );
+                    })
+                    .catch(() => {
+                        showToast("Could not copy to clipboard", "warning");
+                    });
+            }
+
+            function saveCustomRanking() {
+                const tripItems = document.querySelectorAll(".trip-item");
+                const customRanking = Array.from(tripItems).map(
+                    (item, index) => ({
+                        trip_id: item.dataset.tripId,
+                        rank: index + 1,
+                    }),
+                );
+
+                // Here you would typically send to server
+                // For now, we'll just store in localStorage as a demo
+                localStorage.setItem(
+                    "vectorbid_custom_ranking",
+                    JSON.stringify(customRanking),
+                );
+            }
+
+            function showToast(message, type = "success") {
+                const container = document.getElementById("toast-container");
+                const toast = document.createElement("div");
+                toast.className = `toast-notification toast-${type}`;
+                toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === "success" ? "check-circle" : "exclamation-triangle"} me-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+                container.appendChild(toast);
+
+                // Trigger show animation
+                setTimeout(() => toast.classList.add("show"), 100);
+
+                // Auto remove after 4 seconds
+                setTimeout(() => {
+                    toast.classList.remove("show");
+                    setTimeout(() => container.removeChild(toast), 300);
+                }, 4000);
+            }
+
+            function showLoadingOverlay() {
+                document.getElementById("loading-overlay").style.display =
+                    "flex";
+            }
+
+            function hideLoadingOverlay() {
+                document.getElementById("loading-overlay").style.display =
+                    "none";
+            }
+
+            function showRankingView() {
+                document.getElementById("ranking-btn").classList.add("active");
+                document.getElementById("table-btn").classList.remove("active");
+                // Implementation would switch views
+            }
+
+            function showTableView() {
+                document.getElementById("table-btn").classList.add("active");
+                document
+                    .getElementById("ranking-btn")
+                    .classList.remove("active");
+                // Implementation would switch to table view
+            }
+        </script>
+    </body>
 </html>

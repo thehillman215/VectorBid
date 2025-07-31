@@ -3,339 +3,576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pilot Profile Setup - VectorBid</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Welcome to VectorBid - Setup</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .progress-step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        /* Root Variables for Consistency */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: var(--bs-body-bg);
+            --border-color: var(--bs-border-color);
+            --text-muted: var(--bs-secondary-color);
+        }
+
+        /* Main Container */
+        .onboarding-container {
+            min-height: 100vh;
+            background: var(--primary-gradient);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            margin: 0 auto;
+            padding: 1rem;
         }
-        
-        .progress-step.active {
-            background: #007bff;
-            color: white;
+
+        /* Card Styling */
+        .onboarding-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
         }
-        
-        .progress-step.completed {
-            background: #28a745;
-            color: white;
+
+        /* Progress Bar */
+        .progress-bar-container {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 1rem 0;
         }
-        
-        .progress-step.pending {
-            background: #6c757d;
-            color: white;
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+            border-radius: 3px;
         }
-        
-        .seat-option, .persona-card {
-            border: 2px solid transparent;
+
+        /* Step Content */
+        .step-content {
+            min-height: 400px;
+            padding: 2rem;
+        }
+
+        /* Form Controls */
+        .form-control, .form-select {
+            background: var(--bs-body-bg);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
-            padding: 20px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: var(--bs-body-bg);
+        }
+
+        /* Fleet Chips */
+        .fleet-chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .fleet-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.25rem;
+            background: var(--bs-secondary);
+            border: 2px solid transparent;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .fleet-chip:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .fleet-chip.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Position Options */
+        .position-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .seat-option {
+            background: var(--bs-secondary);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 2rem 1rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: var(--bs-body-bg);
-            border-color: var(--bs-border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
         }
-        
-        .seat-option:hover, .persona-card:hover {
-            border-color: #007bff;
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.15);
-        }
-        
-        .seat-option.selected, .persona-card.selected {
-            border-color: #007bff;
-            background-color: rgba(0, 123, 255, 0.1);
-        }
-        
-        .fleet-chip {
-            display: inline-block;
-            padding: 8px 16px;
-            margin: 4px;
-            border: 2px solid var(--bs-border-color);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: var(--bs-body-bg);
-        }
-        
-        .fleet-chip:hover {
-            border-color: #007bff;
-        }
-        
-        .fleet-chip.selected {
-            background-color: #007bff;
+
+        .seat-option:hover {
+            background: #667eea;
             color: white;
-            border-color: #007bff;
+            transform: translateY(-2px);
         }
-        
-        .seniority-preview {
-            background: rgba(0, 123, 255, 0.1);
-            border: 1px solid rgba(0, 123, 255, 0.2);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
+
+        .seat-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
-        
-        .probability-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: 500;
+
+        .seat-option i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
-        
-        .prob-high { background-color: #28a745; color: white; }
-        .prob-medium { background-color: #ffc107; color: #000; }
-        .prob-low { background-color: #dc3545; color: white; }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid var(--bs-secondary);
+            color: var(--bs-secondary);
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--bs-secondary);
+            color: white;
+        }
+
+        /* Hidden Inputs */
+        .radio-input, .checkbox-input {
+            display: none;
+        }
+
+        /* Feature Cards for Step 3 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: var(--bs-body-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .feature-card i {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .onboarding-container {
+                padding: 0.5rem;
+            }
+            
+            .step-content {
+                padding: 1.5rem;
+                min-height: 350px;
+            }
+            
+            .position-options {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .seat-option {
+                padding: 1.5rem 1rem;
+                min-height: 100px;
+            }
+            
+            .fleet-chips-container {
+                justify-content: center;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Form Validation */
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-test-id="navbar">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="fas fa-paper-plane me-2"></i>VectorBid
-            </a>
-        </div>
-    </nav>
+    <div class="onboarding-container">
+        <div class="onboarding-card">
+            <!-- Header -->
+            <div class="card-header text-center py-4">
+                <i class="fas fa-vector-square fa-3x text-primary mb-3"></i>
+                <h2 class="mb-2">Welcome to VectorBid</h2>
+                <p class="text-muted">Let's set up your pilot profile</p>
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="text-center mb-4">
-                            <h2>
-                                <i class="fas fa-user-cog me-2"></i>
-                                Pilot Profile Setup
-                            </h2>
-                            <p class="text-muted">Let's set up your profile for personalized bid analysis</p>
-                        </div>
+                <!-- Progress Bar -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ (step / 3 * 100) }}%"></div>
+                </div>
+                <small class="text-muted">Step {{ step }} of 3</small>
+            </div>
+
+            <!-- Step Content -->
+            <div class="step-content">
+                {% if step == 1 %}
+                    <!-- Step 1: Basic Info -->
+                    <div class="text-center mb-4">
+                        <h4><i class="fas fa-user-pilot me-2"></i>Basic Information</h4>
+                        <p class="text-muted">Tell us about your airline and position</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step1-form">
+                        <input type="hidden" name="step" value="1">
+                        {% if request.args.get('test') == 'true' %}
+                        <input type="hidden" name="test" value="true">
+                        {% endif %}
                         
-                        <!-- Progress indicator -->
-                        <div class="row text-center mb-4">
-                            <div class="col-4">
-                                <div class="progress-step {{ 'active' if step == 1 else 'completed' if step > 1 else 'pending' }}">
-                                    1
-                                </div>
-                                <small class="d-block mt-2">Basic Info</small>
+                        <!-- Airline -->
+                        <div class="mb-3">
+                            <label for="airline" class="form-label">
+                                <i class="fas fa-plane me-2"></i>Airline
+                            </label>
+                            <select class="form-select" id="airline" name="airline" data-test-id="airline-select" required>
+                                <option value="">Select your airline...</option>
+                                <option value="United" {{ 'selected' if profile.airline == 'United' else '' }}>United Airlines</option>
+                                <option value="Delta" {{ 'selected' if profile.airline == 'Delta' else '' }}>Delta Air Lines</option>
+                                <option value="Southwest" {{ 'selected' if profile.airline == 'Southwest' else '' }}>Southwest Airlines</option>
+                                <option value="Alaska" {{ 'selected' if profile.airline == 'Alaska' else '' }}>Alaska Airlines</option>
+                                <option value="Other" {{ 'selected' if profile.airline == 'Other' else '' }}>Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Base -->
+                        <div class="mb-3">
+                            <label for="base" class="form-label">
+                                <i class="fas fa-map-marker-alt me-2"></i>Home Base
+                            </label>
+                            <input type="text" class="form-control" id="base" name="base" 
+                                   data-test-id="base-input"
+                                   placeholder="e.g., ORD, LAX, DFW..." 
+                                   value="{{ profile.base or '' }}" required>
+                            <div class="form-text">Enter your base airport code</div>
+                        </div>
+
+                        <!-- Position -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-id-badge me-2"></i>Position
+                            </label>
+                            <div class="position-options">
+                                <label for="captain" class="seat-option {{ 'selected' if profile.position == 'CA' else '' }}" 
+                                       data-test-id="captain-option">
+                                    <input type="radio" id="captain" name="position" value="CA" class="radio-input"
+                                           {{ 'checked' if profile.position == 'CA' else '' }}>
+                                    <i class="fas fa-user-tie"></i>
+                                    <strong>Captain</strong>
+                                    <small class="text-muted">Left seat</small>
+                                </label>
+                                <label for="first-officer" class="seat-option {{ 'selected' if profile.position == 'FO' else '' }}" 
+                                       data-test-id="first-officer-option">
+                                    <input type="radio" id="first-officer" name="position" value="FO" class="radio-input"
+                                           {{ 'checked' if profile.position == 'FO' else '' }}>
+                                    <i class="fas fa-user"></i>
+                                    <strong>First Officer</strong>
+                                    <small class="text-muted">Right seat</small>
+                                </label>
                             </div>
-                            <div class="col-4">
-                                <div class="progress-step {{ 'active' if step == 2 else 'completed' if step > 2 else 'pending' }}">
-                                    2
-                                </div>
-                                <small class="d-block mt-2">Experience</small>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary" data-test-id="step1-submit-btn">
+                                Next <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                {% elif step == 2 %}
+                    <!-- Step 2: Fleet & Seniority -->
+                    <div class="text-center mb-4">
+                        <h4><i class="fas fa-planes me-2"></i>Fleet & Seniority</h4>
+                        <p class="text-muted">What aircraft are you qualified on?</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step2-form">
+                        <input type="hidden" name="step" value="2">
+                        {% if request.args.get('test') == 'true' %}
+                        <input type="hidden" name="test" value="true">
+                        {% endif %}
+                        <input type="hidden" name="fleet" id="fleet-input" data-test-id="fleet-input" 
+                               value="{{ profile.fleet | join(',') if profile.fleet else '' }}">
+                        
+                        <!-- Fleet Selection -->
+                        <div class="mb-4" data-test-id="fleet-selection">
+                            <label class="form-label">
+                                <i class="fas fa-plane me-2"></i>Aircraft Types
+                            </label>
+                            <div class="form-text mb-3">Select all that apply</div>
+                            
+                            <div class="fleet-chips-container">
+                                <div class="fleet-chip" data-fleet="737" data-test-id="fleet-chip-737">737</div>
+                                <div class="fleet-chip" data-fleet="320" data-test-id="fleet-chip-320">A320</div>
+                                <div class="fleet-chip" data-fleet="757/767" data-test-id="fleet-chip-757767">757/767</div>
+                                <div class="fleet-chip" data-fleet="787" data-test-id="fleet-chip-787">787</div>
+                                <div class="fleet-chip" data-fleet="777" data-test-id="fleet-chip-777">777</div>
+                                <div class="fleet-chip" data-fleet="Bus" data-test-id="fleet-chip-bus">A330/350</div>
                             </div>
-                            <div class="col-4">
-                                <div class="progress-step {{ 'active' if step == 3 else 'pending' }}">
-                                    3
-                                </div>
-                                <small class="d-block mt-2">Preferences</small>
+                            <div id="fleet-error" class="invalid-feedback" style="display: none;">
+                                Please select at least one aircraft type.
                             </div>
+                        </div>
+
+                        <!-- Seniority -->
+                        <div class="mb-4">
+                            <label for="seniority" class="form-label">
+                                <i class="fas fa-sort-numeric-up me-2"></i>Seniority Number
+                            </label>
+                            <input type="number" class="form-control" id="seniority" name="seniority" 
+                                   data-test-id="seniority-input"
+                                   placeholder="e.g., 1250" value="{{ profile.seniority or '' }}" required>
+                            <div class="form-text">Your current seniority number</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.onboarding', step=1) }}{% if request.args.get('test') == 'true' %}?test=true{% endif %}" class="btn btn-outline-secondary" 
+                               data-test-id="step2-back-btn">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                            <button type="submit" class="btn btn-primary" data-test-id="step2-submit-btn">
+                                Next <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                {% elif step == 3 %}
+                    <!-- Step 3: Complete -->
+                    <div class="text-center mb-4">
+                        <h4><i class="fas fa-check-circle text-success me-2"></i>You're All Set!</h4>
+                        <p class="text-muted">Here's what VectorBid will do for you</p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <i class="fas fa-magic"></i>
+                            <h6>AI-Powered Rankings</h6>
+                            <p class="text-muted mb-0">Get intelligent trip rankings based on your preferences</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-calendar"></i>
+                            <h6>Auto-Matching</h6>
+                            <p class="text-muted mb-0">We'll automatically find bid packages for your profile</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-download"></i>
+                            <h6>Export Results</h6>
+                            <p class="text-muted mb-0">Download your rankings as CSV for easy reference</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-shield-alt"></i>
+                            <h6>Secure & Private</h6>
+                            <p class="text-muted mb-0">Your data is processed securely and stored privately</p>
                         </div>
                     </div>
+
+                    <form method="POST" action="{{ url_for('main.onboarding_submit') }}">
+                        <input type="hidden" name="step" value="3">
+                        {% if request.args.get('test') == 'true' %}
+                        <input type="hidden" name="test" value="true">
+                        {% endif %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.onboarding', step=2) }}{% if request.args.get('test') == 'true' %}?test=true{% endif %}" class="btn btn-outline-secondary"
+                               data-test-id="step3-back-btn">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg" data-test-id="step3-complete-btn">
+                                <i class="fas fa-rocket me-2"></i>Get Started!
+                            </button>
+                        </div>
+                    </form>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Position Selection Logic
+            document.querySelectorAll('.seat-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.seat-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
                     
-                    <div class="card-body">
-                        {% if step == 1 %}
-                            <!-- Step 1: Enhanced Basic Information -->
-                            <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step1-form">
-                                <input type="hidden" name="step" value="1">
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Check the radio button
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = true;
+                });
+            });
 
-                                <h4 class="mb-4">
-                                    <i class="fas fa-plane me-2"></i>Basic Information
-                                </h4>
+            // Fleet Selection Logic
+            const fleetInput = document.getElementById('fleet-input');
+            const selectedFleets = new Set();
+            
+            // Initialize with existing data
+            if (fleetInput && fleetInput.value) {
+                const existingFleets = fleetInput.value.split(',').filter(f => f.trim());
+                existingFleets.forEach(fleet => {
+                    selectedFleets.add(fleet.trim());
+                    const chip = document.querySelector(`[data-fleet="${fleet.trim()}"]`);
+                    if (chip) chip.classList.add('selected');
+                });
+            }
 
-                                <div class="mb-4">
-                                    <label class="form-label">Airline *</label>
-                                    <select class="form-select" name="airline" data-test-id="airline-select" required onchange="updateSeniorityValidation()">
-                                        <option value="">Select your airline</option>
-                                        <option value="United" {{ 'selected' if profile.airline == 'United' }}>United Airlines</option>
-                                        <option value="Delta" {{ 'selected' if profile.airline == 'Delta' }}>Delta Air Lines</option>
-                                        <option value="American" {{ 'selected' if profile.airline == 'American' }}>American Airlines</option>
-                                        <option value="Southwest" {{ 'selected' if profile.airline == 'Southwest' }}>Southwest Airlines</option>
-                                        <option value="Alaska" {{ 'selected' if profile.airline == 'Alaska' }}>Alaska Airlines</option>
-                                        <option value="Other" {{ 'selected' if profile.airline == 'Other' }}>Other</option>
-                                    </select>
-                                </div>
+            // Fleet chip click handlers
+            document.querySelectorAll('.fleet-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    const fleet = this.getAttribute('data-fleet');
+                    
+                    if (this.classList.contains('selected')) {
+                        // Deselect
+                        this.classList.remove('selected');
+                        selectedFleets.delete(fleet);
+                    } else {
+                        // Select
+                        this.classList.add('selected');
+                        selectedFleets.add(fleet);
+                    }
+                    
+                    // Update hidden input
+                    if (fleetInput) {
+                        fleetInput.value = Array.from(selectedFleets).join(',');
+                    }
+                    
+                    // Clear error state
+                    const fleetError = document.getElementById('fleet-error');
+                    if (fleetError) {
+                        fleetError.style.display = 'none';
+                        fleetInput.classList.remove('is-invalid');
+                    }
+                });
+            });
 
-                                <div class="mb-4">
-                                    <label class="form-label">Base Airport *</label>
-                                    <input type="text" class="form-control" name="base" data-test-id="base-input" 
-                                           placeholder="e.g. IAH, DEN, LAX" value="{{ profile.base or '' }}" required>
-                                    <small class="form-text text-muted">Enter your home base airport code</small>
-                                </div>
+            // Form Validation
+            const step2Form = document.getElementById('step2-form');
+            if (step2Form) {
+                step2Form.addEventListener('submit', function(e) {
+                    if (selectedFleets.size === 0) {
+                        e.preventDefault();
+                        
+                        // Show error
+                        const fleetError = document.getElementById('fleet-error');
+                        if (fleetError) {
+                            fleetError.style.display = 'block';
+                            fleetInput.classList.add('is-invalid');
+                        }
+                        
+                        // Scroll to error
+                        document.querySelector('[data-test-id="fleet-selection"]').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        
+                        return false;
+                    }
+                });
+            }
 
-                                <div class="mb-4">
-                                    <label class="form-label">Position *</label>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <div class="seat-option {{ 'selected' if profile.seat == 'CA' }}" 
-                                                 data-test-id="captain-option" onclick="selectSeat('CA')">
-                                                <i class="fas fa-user-tie fa-2x mb-2"></i>
-                                                <h5>Captain</h5>
-                                                <p class="text-muted mb-0">Left seat</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <div class="seat-option {{ 'selected' if profile.seat == 'FO' }}" 
-                                                 data-test-id="first-officer-option" onclick="selectSeat('FO')">
-                                                <i class="fas fa-user fa-2x mb-2"></i>
-                                                <h5>First Officer</h5>
-                                                <p class="text-muted mb-0">Right seat</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="seat" id="seat-input" data-test-id="seat-input" 
-                                           value="{{ profile.seat or '' }}" required>
-                                </div>
-
-                                <div class="d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary btn-lg" data-test-id="step1-submit-btn">
-                                        Next <i class="fas fa-arrow-right ms-2"></i>
-                                    </button>
-                                </div>
-                            </form>
-
-                        {% elif step == 2 %}
-                            <!-- Step 2: Enhanced Fleet & Seniority -->
-                            <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step2-form">
-                                <input type="hidden" name="step" value="2">
-
-                                <h4 class="mb-4">
-                                    <i class="fas fa-plane-departure me-2"></i>Fleet & Experience
-                                </h4>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Aircraft Fleet *</label>
-                                    <p class="text-muted">Select all aircraft types you're qualified on</p>
-                                    <div id="fleet-selection" data-test-id="fleet-selection">
-                                        {% for aircraft in ['737', '320', '757/767', '787', 'A350', 'A330', 'CRJ', 'ERJ', 'Other'] %}
-                                            <span class="fleet-chip {{ 'selected' if aircraft in (profile.fleet or []) }}" 
-                                                  data-test-id="fleet-chip-{{ aircraft|replace('/', '-') }}"
-                                                  onclick="toggleFleet('{{ aircraft }}')">
-                                                {{ aircraft }}
-                                            </span>
-                                        {% endfor %}
-                                    </div>
-                                    <input type="hidden" name="fleet" id="fleet-input" data-test-id="fleet-input" 
-                                           value="{{ profile.fleet|join(',') if profile.fleet }}">
-                                    <small class="form-text text-muted">Select all aircraft you're current qualified on</small>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Seniority Number *</label>
-                                    <input type="number" class="form-control" name="seniority" data-test-id="seniority-input"
-                                           placeholder="e.g. 1250" value="{{ profile.seniority or '' }}" 
-                                           required min="1" max="20000" onchange="updateSeniorityPreview()">
-                                    <small class="form-text text-muted">Your current seniority number at your airline</small>
-                                    
-                                    <!-- Seniority validation feedback -->
-                                    <div id="seniority-validation" class="mt-2" style="display: none;">
-                                        <div class="alert alert-warning" role="alert">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                            <span id="validation-message"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Hire Date (Optional)</label>
-                                    <input type="date" class="form-control" name="hire_date" 
-                                           value="{{ profile.hire_date or '' }}" onchange="updateSeniorityPreview()">
-                                    <small class="form-text text-muted">Helps validate seniority and estimate career progression</small>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Years in Current Position (Optional)</label>
-                                    <input type="number" class="form-control" name="years_at_position" 
-                                           placeholder="e.g. 5" value="{{ profile.years_at_position or '' }}" 
-                                           min="0" max="40">
-                                    <small class="form-text text-muted">Years as Captain/First Officer</small>
-                                </div>
-
-                                <!-- Seniority Analysis Preview -->
-                                <div id="seniority-preview" class="seniority-preview" style="display: none;">
-                                    <h6><i class="fas fa-chart-line me-2"></i>Seniority Analysis Preview</h6>
-                                    <div class="row text-center">
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <span id="percentile-display" class="h4 text-primary">--</span>
-                                                <small class="d-block text-muted">Percentile</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <span id="category-display" class="badge bg-secondary">--</span>
-                                                <small class="d-block text-muted mt-1">Seniority Level</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <span id="success-rate-display" class="h5 text-success">--%</span>
-                                                <small class="d-block text-muted">Success Rate</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row mt-3">
-                                        <div class="col-12">
-                                            <h6 class="small mb-2">Probability for Popular Trip Types:</h6>
-                                            <div class="d-flex flex-wrap gap-2">
-                                                <span>Weekend Trips: <span id="weekend-prob" class="probability-badge prob-medium">--%</span></span>
-                                                <span>Premium Layovers: <span id="layover-prob" class="probability-badge prob-medium">--%</span></span>
-                                                <span>Short Trips: <span id="short-prob" class="probability-badge prob-medium">--%</span></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-between">
-                                    <a href="{{ url_for('main.onboarding', step=1) }}" class="btn btn-outline-secondary" 
-                                       data-test-id="step2-back-btn">
-                                        <i class="fas fa-arrow-left me-2"></i>Back
-                                    </a>
-                                    <button type="submit" class="btn btn-primary btn-lg" data-test-id="step2-submit-btn">
-                                        Next <i class="fas fa-arrow-right ms-2"></i>
-                                    </button>
-                                </div>
-                            </form>
-
-                        {% elif step == 3 %}
-                            <!-- Step 3: Enhanced Persona Selection -->
-                            <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step3-form">
-                                <input type="hidden" name="step" value="3">
-
-                                <h4 class="mb-4">
-                                    <i class="fas fa-masks-theater me-2"></i>Choose Your Flying Style
-                                </h4>
-                                
-                                <p class="text-muted mb-4">
-                                    Select a persona that matches your flying preferences. You can also add custom instructions below to personalize further.
-                                </p>
-
-                                <!-- Enhanced Persona Grid (3x4) -->
-                                <div class="row mb-4">
-                                    <!-- Row 1 -->
-                                    <div class="col-md-4 mb-3">
-                                        <div class="persona-card {{ 'selected' if profile.persona == 'work_life_balance' }}" 
-                                             onclick="selectPersona('work_life_balance')">
-                                            <div class="text-center">
-                                                <i class="fas fa-balance-scale fa-2x text-primary mb-2"></i>
-                                                <h6>Work-Life Balance</h6>
-                                                <small class="text-muted">Weekends off, predictable schedules, family time priority</small>
-                                                <input type="radio" name="persona" value="work_life_balance" class="d-none"
-                                                       {{ 'checked' if profile.persona == 'work_life_balance' }}>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-4 mb-3">
-                                        <div class="persona-card {{ 'selected' if profile.persona == 'credit_hunter' }}" 
-                                             onclick="selectPersona('credit_hunter')">
+            // Loading state for form submissions
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                        this.classList.add('loading');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

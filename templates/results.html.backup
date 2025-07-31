@@ -3,83 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip Rankings - VectorBid</title>
-    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>Bid Analysis Results - VectorBid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .dark-mode-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+        .rank-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .score-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+
+        .score-excellent { background: #28a745; }
+        .score-good { background: #17a2b8; }
+        .score-fair { background: #ffc107; color: #000; }
+        .score-poor { background: #dc3545; }
+
+        .trip-highlights .badge {
+            font-size: 11px;
+        }
+
+        .progress-sm {
+            height: 4px;
+        }
+
+        .percentile-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .percentile-suffix {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+
+        .pbs-code {
+            background: #212529;
+            border: 1px solid #495057;
+            border-radius: 4px;
+            padding: 1rem;
+            position: relative;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #f8f9fa;
+            font-family: 'Courier New', monospace;
+        }
+
+        .copy-code-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .text-purple { color: #6f42c1; }
+        .btn-purple { 
+            background-color: #6f42c1; 
+            border-color: #6f42c1; 
+            color: white;
+        }
+
+        .trip-item {
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            cursor: move;
+            transition: all 0.3s ease;
+            background-color: var(--bs-body-bg);
+        }
+
+        .trip-item:hover {
+            background-color: var(--bs-gray-100);
+            border-left-color: #0056b3;
+            transform: translateX(5px);
+        }
+
+        .trip-item.dragging {
+            opacity: 0.6;
+            transform: rotate(2deg);
             z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .trip-item.drag-over {
+            border-top: 3px solid #007bff;
+            margin-top: 5px;
+        }
+
+        .sortable-container {
+            min-height: 200px;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .drag-handle:hover {
+            color: #007bff;
+        }
+
+        .ranking-controls {
+            margin-bottom: 20px;
+        }
+
+        .manual-reorder {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ai-reasoning {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .toast-notification {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .metric-card {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <!-- Dark Mode Toggle -->
-    <button class="btn btn-outline-secondary dark-mode-toggle" id="darkModeToggle" type="button">
-        <i class="fas fa-moon" id="darkModeIcon"></i>
-    </button>
-    
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="fas fa-vector-square me-2"></i>
-                VectorBid
+                <i class="fas fa-paper-plane me-2"></i>VectorBid
             </a>
-            
             <div class="navbar-nav ms-auto">
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                        {% if user.profile_image_url %}
-                            <img src="{{ user.profile_image_url }}" alt="Profile" class="rounded-circle me-2" width="24" height="24" style="object-fit: cover;">
-                        {% endif %}
-                        {{ user.first_name or user.email or 'Pilot' }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('main.index') }}">
-                            <i class="fas fa-home me-2"></i>New Analysis
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('replit_auth.logout') }}">
-                            <i class="fas fa-sign-out-alt me-2"></i>Logout
-                        </a></li>
-                    </ul>
-                </div>
+                <a class="nav-link" href="{{ url_for('main.index') }}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+                <a class="nav-link" href="/?test=true">
+                    <i class="fas fa-sign-out-alt me-1"></i>Back to Dashboard
+                </a>
             </div>
         </div>
     </nav>
 
-    <main class="container my-5">
-        <!-- Header with summary -->
+    <div class="container-fluid mt-4">
+        <!-- Header Section with Better Metrics -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="card-title mb-0">
-                                <i class="fas fa-list-ol me-2"></i>
-                                Trip Rankings
-                            </h2>
-                            <a href="{{ url_for('main.download_csv') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-download me-2"></i>
-                                Download CSV
-                            </a>
-                        </div>
-                    </div>
+                <div class="card bg-primary text-white">
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row align-items-center">
                             <div class="col-md-8">
-                                <h6 class="text-muted mb-2">Schedule File:</h6>
-                                <p class="mb-3"><i class="fas fa-file me-2"></i>Uploaded PDF</p>
-                                
-                                <h6 class="text-muted mb-2">Your Preferences:</h6>
-                                <p class="mb-0">"{{ preferences }}"</p>
+                                <h2 class="mb-1">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Your Optimized Bid Strategy
+                                </h2>
+                                <p class="mb-0 opacity-75">
+                                    {% if analysis.bid_package %}
+                                        {{ analysis.bid_package.filename }} • 
+                                    {% endif %}
+                                    {{ analysis.total_trips or ranked_trips|length }} trips analyzed •
+                                    Generated just now
+                                </p>
                             </div>
-                            <div class="col-md-4">
-                                <div class="text-center">
-                                    <h3 class="text-primary mb-0">{{ trips|length }}</h3>
-                                    <p class="text-muted mb-0">Trips Analyzed</p>
+                            <div class="col-md-4 text-end">
+                                <div class="btn-group">
+                                    <button class="btn btn-light" onclick="downloadBidList()">
+                                        <i class="fas fa-download me-2"></i>Export PBS Instructions
+                                    </button>
+                                    <button class="btn btn-outline-light" onclick="downloadCSV()">
+                                        <i class="fas fa-file-csv me-2"></i>CSV
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -88,125 +218,638 @@
             </div>
         </div>
 
-        <!-- Trip rankings -->
-        <div class="row">
-            <div class="col-12">
-                {% for trip in trips %}
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-1 text-center">
-                                    <div class="badge bg-primary fs-6 p-2 rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                        {{ trip.rank }}
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-2">
-                                    <h5 class="mb-1">Trip {{ trip.trip_id }}</h5>
-                                    <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>
-                                        {{ trip.days }} day{{ 's' if trip.days != 1 else '' }}
-                                    </small>
-                                </div>
-                                
-                                <div class="col-md-3">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        {{ trip.dates }}
-                                    </h6>
-                                    <small class="text-muted">
-                                        {% if trip.includes_weekend %}
-                                            <i class="fas fa-calendar-check text-warning me-1"></i>
-                                            Includes Weekend
-                                        {% else %}
-                                            <i class="fas fa-calendar text-success me-1"></i>
-                                            Weekdays Only
-                                        {% endif %}
-                                    </small>
-                                </div>
-                                
-                                <div class="col-md-2">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-route me-1"></i>
-                                        {{ trip.routing }}
-                                    </h6>
-                                    <small class="text-muted">
-                                        <i class="fas fa-hourglass-half me-1"></i>
-                                        {{ trip.credit_hours }} hrs
-                                    </small>
-                                </div>
-                                
-                                <div class="col-md-4">
-                                    <div class="alert alert-{{ 'success' if trip.rank <= 3 else 'info' if trip.rank <= 5 else 'secondary' }} mb-0 py-2">
-                                        <small>
-                                            <i class="fas fa-comment me-1"></i>
-                                            {{ trip.comment }}
-                                        </small>
-                                    </div>
-                                </div>
+        <!-- Key Metrics Dashboard -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center metric-card">
+                    <div class="card-body">
+                        <div class="text-success mb-2">
+                            <i class="fas fa-bullseye fa-2x"></i>
+                        </div>
+                        <h4 class="text-success mb-1">{{ analysis.optimization_score or 85 }}%</h4>
+                        <small class="text-muted">Preference Match Score</small>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-success" style="width: {{ analysis.optimization_score or 85 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-center metric-card">
+                    <div class="card-body">
+                        <div class="text-info mb-2">
+                            <i class="fas fa-filter fa-2x"></i>
+                        </div>
+                        <h4 class="text-info mb-1">{{ analysis.pbs_filters_found or 4 }}</h4>
+                        <small class="text-muted">Optimal PBS Filters Found</small>
+                        <div class="mt-2">
+                            <span class="badge bg-info">{{ analysis.filter_efficiency or 80 }}% Efficient</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-center metric-card">
+                    <div class="card-body">
+                        <div class="text-warning mb-2">
+                            <i class="fas fa-percentage fa-2x"></i>
+                        </div>
+                        <h4 class="text-warning mb-1">{{ analysis.success_probability or 72 }}%</h4>
+                        <small class="text-muted">Estimated Success Rate</small>
+                        <div class="mt-2">
+                            <span class="badge bg-warning text-dark">{{ analysis.seniority_category or 'Mid-Seniority' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-center metric-card">
+                    <div class="card-body">
+                        <div class="text-purple mb-2">
+                            <i class="fas fa-copy fa-2x"></i>
+                        </div>
+                        <h4 class="text-purple mb-1">Ready</h4>
+                        <small class="text-muted">PBS Instructions</small>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-purple" onclick="copyPBSInstructions()">
+                                <i class="fas fa-copy me-1"></i>Copy to PBS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Breakdown -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <!-- Trip Rankings -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list-ol me-2"></i>
+                                Trip Rankings
+                                <small class="text-muted ms-2" id="ranking-mode-indicator">(AI Recommended)</small>
+                            </h5>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary active" onclick="showView('ranking')" data-view="ranking">
+                                    <i class="fas fa-list me-1"></i>Ranking
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="showView('pbs-code')" data-view="pbs-code">
+                                    <i class="fas fa-code me-1"></i>PBS Code
+                                </button>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
+                    
+                    <div class="card-body" id="ranking-view">
+                        <!-- Ranking Controls -->
+                        <div class="manual-reorder">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-arrows-alt me-2"></i>
+                                        Customize Your Ranking
+                                    </h6>
+                                    <small class="text-muted">
+                                        Drag trips up or down to adjust your personal preferences. Changes are automatically saved.
+                                    </small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="resetToAIRanking()" data-test-id="reset-ranking-btn">
+                                        <i class="fas fa-undo me-1"></i>Reset to AI
+                                    </button>
+                                    <button class="btn btn-sm btn-success" onclick="saveCustomRanking()" data-test-id="save-ranking-btn">
+                                        <i class="fas fa-save me-1"></i>Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sortable Trip List -->
+                        <div class="sortable-container" id="trip-rankings" data-test-id="sortable-trip-list">
+                            {% for trip in ranked_trips[:20] %}
+                            <div class="trip-item border-bottom pb-3 mb-3" data-trip-id="{{ trip.trip_id or trip.pairing_id or loop.index }}" draggable="true">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <div class="drag-handle" data-test-id="drag-handle-{{ loop.index }}">
+                                            <i class="fas fa-grip-vertical"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="rank-badge" data-rank="{{ loop.index }}">{{ loop.index }}</div>
+                                    </div>
+                                <div class="col-md-3">
+                                    <h6 class="mb-1">{{ trip.pairing_id or trip.trip_id or ('Trip ' + loop.index|string) }}</h6>
+                                    <small class="text-muted">
+                                        {{ trip.aircraft or 'Aircraft' }} • {{ trip.credit_hours or trip.hours or '0' }}h
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="route-display">
+                                        {{ trip.routing or trip.route or 'Route info' }}
+                                    </div>
+                                    <small class="text-muted">{{ trip.dates or 'Date range' }}</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="score-display">
+                                        {% set score = trip.score or (10 - loop.index//3) %}
+                                        {% set score_category = 'excellent' if score >= 8 else 'good' if score >= 6 else 'fair' if score >= 4 else 'poor' %}
+                                        <div class="score-circle score-{{ score_category }}">
+                                            {{ score }}/10
+                                        </div>
+                                    </div>
+                                </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showTripDetails('{{ trip.pairing_id or trip.trip_id }}')">
+                                            <i class="fas fa-info-circle"></i> Details
+                                        </button>
+                                    </div>
+                                </div>
+                            
+                            <!-- Trip highlights -->
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <div class="trip-highlights">
+                                        {% if trip.includes_weekend %}
+                                            <span class="badge bg-success me-1">
+                                                <i class="fas fa-calendar-week me-1"></i>Weekend
+                                            </span>
+                                        {% endif %}
+                                        {% if trip.days and trip.days <= 2 %}
+                                            <span class="badge bg-info me-1">
+                                                <i class="fas fa-clock me-1"></i>Short Trip
+                                            </span>
+                                        {% endif %}
+                                        {% if trip.credit_hours and trip.credit_hours >= 25 %}
+                                            <span class="badge bg-warning me-1">
+                                                <i class="fas fa-coins me-1"></i>High Credit
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    {% if trip.comment or trip.reasoning %}
+                                    <div class="ai-reasoning mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-robot me-1"></i>
+                                            <strong>Why this ranking:</strong> {{ trip.comment or trip.reasoning or 'Matches your specified preferences and constraints.' }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if ranked_trips|length > 20 %}
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-primary" onclick="showAllTrips()">
+                                <i class="fas fa-plus me-2"></i>Show All {{ ranked_trips|length }} Trips
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- PBS Code View (Hidden by default) -->
+                    <div class="card-body d-none" id="pbs-code-view">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Instructions:</strong> Copy this PBS code and paste it into your airline's bidding system.
+                        </div>
+                        
+                        <div class="code-container position-relative">
+                            <pre class="pbs-code"><code id="pbs-code-content">{{ analysis.pbs_instructions or generate_sample_pbs(ranked_trips) }}</code></pre>
+                            <button class="btn btn-sm btn-primary copy-code-btn" onclick="copyPBSCode()">
+                                <i class="fas fa-copy me-1"></i>Copy PBS Code
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Analysis Summary -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Bid Analysis Summary
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% set high_count = analysis.high_preference_count or (ranked_trips[:5]|length) %}
+                        {% set medium_count = analysis.medium_preference_count or (ranked_trips[5:15]|length) %}
+                        {% set low_count = analysis.low_preference_count or (ranked_trips[15:]|length) %}
+                        {% set total = ranked_trips|length %}
+                        
+                        <div class="analysis-metric mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>High-Preference Trips:</span>
+                                <strong class="text-success">{{ high_count }}</strong>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-success" style="width: {{ (high_count / total * 100) if total > 0 else 0 }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-metric mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Medium-Preference Trips:</span>
+                                <strong class="text-warning">{{ medium_count }}</strong>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-warning" style="width: {{ (medium_count / total * 100) if total > 0 else 0 }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-metric mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Low-Preference Trips:</span>
+                                <strong class="text-danger">{{ low_count }}</strong>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-danger" style="width: {{ (low_count / total * 100) if total > 0 else 0 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seniority Impact -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-users me-2"></i>
+                            Seniority Impact Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="seniority-summary">
+                            <div class="text-center mb-3">
+                                <div class="seniority-percentile">
+                                    <span class="percentile-number">{{ analysis.seniority_percentile or 65 }}</span>
+                                    <span class="percentile-suffix">%ile</span>
+                                </div>
+                                <small class="text-muted">{{ analysis.seniority_category or 'Mid-Seniority' }}</small>
+                            </div>
+                            
+                            <div class="probability-breakdown">
+                                {% set top_prob = analysis.top_trips_probability or 52 %}
+                                {% set weekend_prob = analysis.weekend_probability or 68 %}
+                                {% set layover_prob = analysis.premium_layover_probability or 45 %}
+                                
+                                <div class="prob-item mb-2">
+                                    <span>Top 10 trips:</span>
+                                    <div class="float-end">
+                                        <span class="badge bg-{{ 'success' if top_prob >= 70 else 'warning' if top_prob >= 40 else 'danger' }}">
+                                            {{ top_prob }}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="prob-item mb-2">
+                                    <span>Weekend trips:</span>
+                                    <div class="float-end">
+                                        <span class="badge bg-{{ 'success' if weekend_prob >= 70 else 'warning' if weekend_prob >= 40 else 'danger' }}">
+                                            {{ weekend_prob }}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="prob-item mb-2">
+                                    <span>Premium layovers:</span>
+                                    <div class="float-end">
+                                        <span class="badge bg-{{ 'success' if layover_prob >= 70 else 'warning' if layover_prob >= 40 else 'danger' }}">
+                                            {{ layover_prob }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-light mt-3">
+                                <small>
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    <strong>Strategy Tip:</strong> {{ analysis.seniority_recommendation or 'Good chance - consider having backup options for highly desirable trips.' }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>
+                            Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="copyPBSInstructions()">
+                                <i class="fas fa-copy me-2"></i>Copy PBS Instructions
+                            </button>
+                            <a href="{{ url_for('main.download_csv') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-file-csv me-2"></i>Export Trip List CSV
+                            </a>
+                            <hr>
+                            <a href="{{ url_for('main.onboarding', step=1) }}" class="btn btn-outline-warning">
+                                <i class="fas fa-sliders me-2"></i>Adjust Preferences
+                            </a>
+                            <a href="{{ url_for('main.index') }}" class="btn btn-outline-info">
+                                <i class="fas fa-refresh me-2"></i>Analyze New Package
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Action buttons -->
-        <div class="row mt-4">
-            <div class="col-12 text-center">
-                <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary me-3">
-                    <i class="fas fa-plus me-2"></i>
-                    Analyze Another Schedule
-                </a>
-                <a href="{{ url_for('main.download_csv') }}" class="btn btn-primary">
-                    <i class="fas fa-download me-2"></i>
-                    Download Rankings as CSV
-                </a>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">
-                <i class="fas fa-vector-square me-2"></i>
-                VectorBid - AI-powered pilot schedule bidding assistant
-            </p>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Dark Mode Toggle Functionality
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const darkModeIcon = document.getElementById('darkModeIcon');
-        const htmlElement = document.documentElement;
-
-        // Check for saved theme preference or default to dark mode
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        // Enhanced JavaScript for results page
         
-        function setTheme(theme) {
-            if (theme === 'dark') {
-                htmlElement.setAttribute('data-bs-theme', 'dark');
-                darkModeIcon.className = 'fas fa-sun';
-                darkModeToggle.title = 'Switch to light mode';
-            } else {
-                htmlElement.setAttribute('data-bs-theme', 'light');
-                darkModeIcon.className = 'fas fa-moon';
-                darkModeToggle.title = 'Switch to dark mode';
-            }
-            localStorage.setItem('theme', theme);
+        function showView(viewType) {
+            // Hide all views
+            document.getElementById('ranking-view').classList.add('d-none');
+            document.getElementById('pbs-code-view').classList.add('d-none');
+            
+            // Show selected view
+            document.getElementById(viewType + '-view').classList.remove('d-none');
+            
+            // Update button states
+            document.querySelectorAll('.btn-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${viewType}"]`).classList.add('active');
         }
 
-        // Initialize theme
-        setTheme(savedTheme);
+        function copyPBSInstructions() {
+            const pbsContent = document.getElementById('pbs-code-content');
+            let pbsText = '';
+            
+            if (pbsContent) {
+                pbsText = pbsContent.textContent;
+            } else {
+                // Generate fallback PBS instructions
+                pbsText = generateFallbackPBS();
+            }
+            
+            navigator.clipboard.writeText(pbsText).then(() => {
+                showToast('PBS instructions copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = pbsText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('PBS instructions copied to clipboard!', 'success');
+            });
+        }
 
-        // Toggle theme on button click
-        darkModeToggle.addEventListener('click', () => {
-            const currentTheme = htmlElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            setTheme(newTheme);
+        function copyPBSCode() {
+            copyPBSInstructions();
+        }
+
+        function generateFallbackPBS() {
+            const trips = {{ ranked_trips[:15] | tojson | safe }};
+            let pbs = "PAIRING PREFERENCES (in order):\n";
+            trips.forEach((trip, index) => {
+                const tripId = trip.pairing_id || trip.trip_id || `Trip${index + 1}`;
+                pbs += `${(index + 1).toString().padStart(2, ' ')}. ${tripId}\n`;
+            });
+            return pbs;
+        }
+
+        function showTripDetails(pairingId) {
+            // Show modal with detailed trip information
+            alert(`Trip details for ${pairingId} - Feature coming soon!`);
+        }
+
+        function showToast(message, type = 'info') {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} toast-notification`;
+            toast.innerHTML = `<i class="fas fa-check-circle me-2"></i>${message}`;
+            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function showAllTrips() {
+            // Expand to show all trips - simple implementation
+            const hiddenTrips = document.querySelectorAll('.trip-item.d-none');
+            hiddenTrips.forEach(trip => trip.classList.remove('d-none'));
+            
+            // Hide the show more button
+            const showMoreBtn = document.querySelector('[onclick="showAllTrips()"]');
+            if (showMoreBtn) {
+                showMoreBtn.style.display = 'none';
+            }
+        }
+
+        function downloadBidList() {
+            const pbsText = document.getElementById('pbs-code-content')?.textContent || generateFallbackPBS();
+            const element = document.createElement('a');
+            const file = new Blob([pbsText], {type: 'text/plain'});
+            element.href = URL.createObjectURL(file);
+            element.download = 'vectorbid-pbs-instructions.txt';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            showToast('PBS instructions downloaded!', 'success');
+        }
+
+        function downloadCSV() {
+            // This will use the existing CSV download route
+            window.location.href = "{{ url_for('main.download_csv') }}";
+        }
+
+        // Drag and Drop Functionality
+        let draggedElement = null;
+        let originalRanking = [];
+
+        function initializeDragAndDrop() {
+            const tripItems = document.querySelectorAll('.trip-item');
+            
+            // Store original ranking for reset functionality
+            originalRanking = Array.from(tripItems).map(item => ({
+                id: item.dataset.tripId,
+                html: item.outerHTML
+            }));
+            
+            tripItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.outerHTML);
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedElement !== this) {
+                const container = document.getElementById('trip-rankings');
+                const items = Array.from(container.children);
+                const draggedIndex = items.indexOf(draggedElement);
+                const targetIndex = items.indexOf(this);
+                
+                if (draggedIndex < targetIndex) {
+                    container.insertBefore(draggedElement, this.nextSibling);
+                } else {
+                    container.insertBefore(draggedElement, this);
+                }
+                
+                updateRankingNumbers();
+                updateRankingIndicator('Custom');
+                showToast('Trip ranking updated! Remember to save your changes.', 'info');
+            }
+            
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            
+            // Remove drag-over class from all items
+            document.querySelectorAll('.trip-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+            
+            draggedElement = null;
+        }
+
+        function updateRankingNumbers() {
+            const tripItems = document.querySelectorAll('.trip-item');
+            tripItems.forEach((item, index) => {
+                const rankBadge = item.querySelector('.rank-badge');
+                if (rankBadge) {
+                    rankBadge.textContent = index + 1;
+                    rankBadge.dataset.rank = index + 1;
+                }
+            });
+        }
+
+        function updateRankingIndicator(mode) {
+            const indicator = document.getElementById('ranking-mode-indicator');
+            if (indicator) {
+                indicator.textContent = mode === 'AI' ? '(AI Recommended)' : '(Custom Ranking)';
+                indicator.className = mode === 'AI' ? 'text-muted ms-2' : 'text-success ms-2';
+            }
+        }
+
+        function resetToAIRanking() {
+            if (confirm('Reset to original AI ranking? This will lose your custom changes.')) {
+                const container = document.getElementById('trip-rankings');
+                container.innerHTML = '';
+                
+                originalRanking.forEach(trip => {
+                    container.innerHTML += trip.html;
+                });
+                
+                // Reinitialize drag and drop for new elements
+                initializeDragAndDrop();
+                updateRankingIndicator('AI');
+                showToast('Ranking reset to AI recommendations', 'success');
+            }
+        }
+
+        function saveCustomRanking() {
+            const tripItems = document.querySelectorAll('.trip-item');
+            const customRanking = Array.from(tripItems).map((item, index) => ({
+                trip_id: item.dataset.tripId,
+                custom_rank: index + 1
+            }));
+            
+            // Here you would normally send this to the server
+            // For now, we'll just show a success message
+            console.log('Custom ranking to save:', customRanking);
+            showToast('Custom ranking saved successfully!', 'success');
+            
+            // Send to server with fetch
+            fetch('/save-custom-ranking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customRanking)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Custom ranking saved successfully!', 'success');
+                } else {
+                    showToast('Failed to save ranking: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving ranking:', error);
+                showToast('Error saving ranking', 'error');
+            });
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show ranking view by default
+            showView('ranking');
+            
+            // Initialize drag and drop functionality
+            initializeDragAndDrop();
         });
     </script>
+
+    <!-- Jinja2 macro for generating sample PBS -->
+    {% macro generate_sample_pbs(trips) %}
+GROUP 1 - PREFERRED PAIRINGS:
+{% for trip in trips[:10] %}
+  AWARD {{ trip.pairing_id or trip.trip_id or ('TRIP' + loop.index|string) }}
+{% endfor %}
+
+GROUP 2 - CONDITIONAL AWARDS:
+  AWARD PAIRINGS IF LAYOVER > 12:00
+  AWARD PAIRINGS IF AIRCRAFT = {{ trips[0].aircraft or 'A320' }}
+  AWARD PAIRINGS IF DEPARTURE_TIME > 08:00
+
+GROUP 3 - AVOID CRITERIA:
+  AVOID PAIRINGS IF CREDIT_TIME > 100
+  AVOID PAIRINGS IF LAYOVER < 10:00
+    {% endmacro %}
 </body>
 </html>

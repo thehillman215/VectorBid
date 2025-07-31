@@ -511,8 +511,14 @@ def save_custom_ranking():
         return {"success": True, "message": "Custom ranking saved successfully"}
         
     except Exception as e:
-        app.logger.error(f"Save ranking error: {str(e)}")
+        current_app.logger.error(f"Save ranking error: {str(e)}")
         return {"error": f"Failed to save ranking: {str(e)}"}, 500
+
+
+@bp.get("/test-results")
+def test_results():
+    """Quick test route for results page - bypasses authentication and shows sample data."""
+    return render_template("results_minimal.html")
 
 
 @bp.route("/welcome", methods=["GET", "POST"])
