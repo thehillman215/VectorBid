@@ -31,8 +31,8 @@ def index():
     if user_id:
         profile = get_profile(user_id)
         if not profile.get('profile_completed', False):
-            # First redirect to how-to page for new users
-            return redirect(url_for('main.how_to'))
+            # First redirect to wizard for new users
+            return redirect(url_for('welcome.wizard_start'))
     
     return render_template(
         "index.html", user=current_user if current_user.is_authenticated else None
@@ -42,6 +42,14 @@ def index():
 @bp.get("/how-to")
 def how_to():
     """Full-page how-to guide for new users."""
+    # Check if user has already seen the how-to guide
+    user_id = request.headers.get("X-Replit-User-Id")
+    if user_id:
+        # If they've completed profile, go to main app
+        profile = get_profile(user_id)
+        if profile.get('profile_completed', False):
+            return redirect(url_for('main.index'))
+    
     return render_template("how_to.html")
 
 
