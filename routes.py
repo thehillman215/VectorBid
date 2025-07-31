@@ -21,27 +21,22 @@ from schedule_parser import parse_schedule
 from llm_service import rank_trips_with_ai
 from services.db import get_profile, save_profile
 from services.bids import get_matching_bid_packet
+from auth_helpers import get_current_user_id, requires_onboarding
 
 bp = Blueprint("main", __name__)
 
 
 @bp.get("/")
+@requires_onboarding
 def index():
-    # Apply profile requirement check
-    user_id = request.headers.get("X-Replit-User-Id")
-    if user_id:
-        profile = get_profile(user_id)
-        if not profile or not profile.get('profile_completed', False):
-            # First redirect to how-to page for new users
-            return redirect(url_for('main.how_to'))
-    
+    # Get authenticated user
+    user_id = get_current_user_id()
     # Get profile data and matching bid package for authenticated users
     profile = None
     bid_package = None
     if user_id:
         profile = get_profile(user_id)
-        if profile and profile.get('profile_completed', False):
-            bid_package = get_matching_bid_packet(profile)
+        bid_package = get_matching_bid_packet(profile)
     
     return render_template(
         "index.html", 
@@ -57,14 +52,73 @@ def how_to():
     return render_template("how_to.html")
 
 
+@bp.route("/onboarding")
+@bp.route("/onboarding/<int:step>")
+def onboarding(step=1):
+    """Onboarding wizard for new users."""
+    user_id = get_current_user_id()
+    if not user_id:
+        return redirect(url_for('replit_auth.login'))
+    
+    # Get current profile
+    profile = get_profile(user_id)
+    
+    # If already onboarded, redirect to main
+    if profile.get('onboard_complete', False):
+        return redirect(url_for('main.index'))
+    
+    # Handle step navigation
+    step = max(1, min(3, step))
+    
+    return render_template("onboarding.html", step=step, profile=profile)
+
+
+@bp.post("/onboarding")
+def onboarding_submit():
+    """Handle onboarding form submissions."""
+    user_id = get_current_user_id()
+    if not user_id:
+        return redirect(url_for('replit_auth.login'))
+    
+    step = int(request.form.get('step', 1))
+    profile = get_profile(user_id)
+    
+    if step == 1:
+        # Save basic info
+        save_profile(user_id, {
+            'airline': request.form.get('airline'),
+            'base': request.form.get('base'),
+            'seat': request.form.get('seat'),
+        })
+        return redirect(url_for('main.onboarding', step=2))
+        
+    elif step == 2:
+        # Save fleet and seniority
+        fleet_str = request.form.get('fleet', '')
+        fleet = [f.strip() for f in fleet_str.split(',') if f.strip()]
+        
+        save_profile(user_id, {
+            'fleet': fleet,
+            'seniority': int(request.form.get('seniority', 0)),
+        })
+        return redirect(url_for('main.onboarding', step=3))
+        
+    elif step == 3:
+        # Complete onboarding
+        save_profile(user_id, {
+            'onboard_complete': True,
+            'profile_completed': True,  # Legacy compatibility
+        })
+        flash("Welcome to VectorBid! Your profile is now set up.", "success")
+        return redirect(url_for('main.index'))
+    
+    return redirect(url_for('main.onboarding'))
+
+
 @bp.post("/process")
+@requires_onboarding
 def process_schedule():
-    # Apply profile requirement check
-    user_id = request.headers.get("X-Replit-User-Id")
-    if user_id:
-        profile = get_profile(user_id)
-        if not profile.get('profile_completed', False):
-            return redirect(url_for('welcome.wizard_start'))
+    user_id = get_current_user_id()
     
     uploaded = request.files.get("schedule_file")
     preferences = request.form.get("preferences", "").strip()

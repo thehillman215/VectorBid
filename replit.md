@@ -222,6 +222,23 @@ Preferred communication style: Simple, everyday language.
 - **Benefits**: Simplified database operations, reduced PostgreSQL dependency, better integration with Replit platform
 - **Status**: Implemented - user profiles now stored in Replit DB with enhanced data structure
 
+### Streamlined 3-Step Onboarding System (Updated: July 31, 2025)
+- **Feature**: Lightweight onboarding wizard replacing complex 4-step profile setup
+- **Implementation**:
+  - Created `auth_helpers.py` with `requires_onboarding` decorator for middleware protection
+  - Built responsive 3-step onboarding wizard in `/onboarding` route
+  - Step 1: Airline, base, position (CA/FO) with interactive seat selection
+  - Step 2: Fleet selection (multi-select chips) and seniority number
+  - Step 3: Feature tour and completion with `onboard_complete = true` flag
+  - Added comprehensive test suite covering redirect flow and completion workflow
+- **User Experience**: 
+  - Beautiful gradient design with progress indicator
+  - Interactive fleet chips and position cards
+  - Automatic redirect for incomplete onboarding
+  - Instant access to dashboard after completion
+- **Technical**: Uses `onboard_complete` boolean in profile storage to track completion status
+- **Status**: Production ready - streamlined onboarding with comprehensive test coverage
+
 ### Automatic Bid Package Matching System (Updated: July 31, 2025)
 - **Major Workflow Change**: Eliminated manual bid package selection - system automatically matches pilots to appropriate packages
 - **Implementation**:
