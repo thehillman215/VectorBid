@@ -59,3 +59,22 @@ class BidPacket(db.Model):
 
     def __repr__(self):
         return f"<BidPacket {self.month_tag} ({self.file_size} bytes)>"
+
+
+class UserProfile(db.Model):
+    __tablename__ = "user_profiles"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey(User.id), nullable=False, unique=True)
+    airline = db.Column(db.String, nullable=True)
+    fleet = db.Column(db.Text, nullable=True)  # JSON string for list of aircraft types
+    seat = db.Column(db.String(2), nullable=True)  # "CA" or "FO"
+    base = db.Column(db.String, nullable=True)  # Home base airport code
+    seniority = db.Column(db.Integer, nullable=True)  # Seniority number
+    profile_completed = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    user = db.relationship(User, backref="profile")
+
+    def __repr__(self):
+        return f"<UserProfile {self.user_id} ({self.airline or 'No airline'}, {self.seat or 'No seat'})>"

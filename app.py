@@ -8,7 +8,8 @@ from flask import (
     request,
     redirect,
     url_for,
-)  # and any others you need
+)
+from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -81,6 +82,37 @@ def create_app() -> Flask:
         import models  # noqa: F401 – side-effect: define tables
 
         db.create_all()
+
+    # ---------- Helper Functions --------------------------------------------
+    
+    def get_current_user_id():
+        """Get current user ID from Replit headers."""
+        return request.headers.get("X-Replit-User-Id")
+    
+    def require_profile(f):
+        """Decorator to require completed profile before accessing routes."""
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            user_id = get_current_user_id()
+            if not user_id:
+                return redirect(url_for('replit_auth.login'))
+            
+            from services.db import get_profile
+            profile = get_profile(user_id)
+            
+            if not profile.get('profile_completed', False):
+                return redirect(url_for('main.welcome'))
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    
+    # Store helper functions in app context for access by blueprints
+    @app.context_processor
+    def inject_helpers():
+        return {
+            'get_current_user_id': get_current_user_id,
+            'require_profile': require_profile
+        }
 
     # ---------- Blueprints --------------------------------------------------
     try:

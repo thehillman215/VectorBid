@@ -13,17 +13,26 @@ from flask import (
     flash,
     session,
     send_file,
+    current_app,
 )
 from flask_login import current_user
 
 from schedule_parser import parse_schedule
 from llm_service import rank_trips_with_ai
+from services.db import get_profile, save_profile
 
 bp = Blueprint("main", __name__)
 
 
 @bp.get("/")
 def index():
+    # Apply profile requirement check
+    user_id = request.headers.get("X-Replit-User-Id")
+    if user_id:
+        profile = get_profile(user_id)
+        if not profile.get('profile_completed', False):
+            return redirect(url_for('main.welcome'))
+    
     return render_template(
         "index.html", user=current_user if current_user.is_authenticated else None
     )
@@ -31,6 +40,13 @@ def index():
 
 @bp.post("/process")
 def process_schedule():
+    # Apply profile requirement check
+    user_id = request.headers.get("X-Replit-User-Id")
+    if user_id:
+        profile = get_profile(user_id)
+        if not profile.get('profile_completed', False):
+            return redirect(url_for('main.welcome'))
+    
     uploaded = request.files.get("schedule_file")
     preferences = request.form.get("preferences", "").strip()
 
@@ -110,6 +126,12 @@ def process_schedule():
 
 @bp.get("/download_csv")
 def download_csv():
+    # Apply profile requirement check
+    user_id = request.headers.get("X-Replit-User-Id")
+    if user_id:
+        profile = get_profile(user_id)
+        if not profile.get('profile_completed', False):
+            return redirect(url_for('main.welcome'))
     trips = session.get("ranked_trips")
     if not trips:
         flash("No ranked trips to download.", "error")
@@ -137,3 +159,38 @@ def download_csv():
         as_attachment=True,
         download_name="vectorbid_ranked_trips.csv",
     )
+
+
+@bp.route("/welcome", methods=["GET", "POST"])
+def welcome():
+    """Profile setup page for new users."""
+    user_id = request.headers.get("X-Replit-User-Id")
+    if not user_id:
+        return redirect(url_for('replit_auth.login'))
+    
+    if request.method == "GET":
+        # Load existing profile data
+        profile = get_profile(user_id)
+        return render_template("welcome.html", profile=profile)
+    
+    # Handle POST - save profile data
+    profile_data = {
+        "airline": request.form.get("airline", "").strip() or None,
+        "fleet": request.form.getlist("fleet"),  # Multiple selections
+        "seat": request.form.get("seat", "").strip() or None,
+        "base": request.form.get("base", "").strip() or None,
+        "seniority": None,
+        "profile_completed": True
+    }
+    
+    # Parse seniority as integer
+    seniority_str = request.form.get("seniority", "").strip()
+    if seniority_str and seniority_str.isdigit():
+        profile_data["seniority"] = int(seniority_str)
+    
+    if save_profile(user_id, profile_data):
+        flash("Profile setup completed successfully!", "success")
+        return redirect(url_for("main.index"))
+    else:
+        flash("Error saving profile. Please try again.", "error")
+        return redirect(url_for("main.welcome"))
