@@ -198,13 +198,16 @@ Preferred communication style: Simple, everyday language.
 - **HTMX Features**: No-reload form submission, real-time validation, smooth step transitions
 - **Status**: Production ready - new users complete profile setup before accessing main features
 
-### Intro.js Guided Tour Integration (Updated: July 31, 2025)
-- **Feature**: Interactive user onboarding with guided tour functionality
+### User Workflow Restructuring (Updated: July 31, 2025)
+- **Major Change**: Restructured from pilot-upload to admin-upload workflow model
+- **New User Journey**: How-to guide → Profile setup → Persona selection → Main application
 - **Implementation**:
-  - Added Intro.js CDN integration to templates/index.html
-  - Defined 5 data-intro steps: Upload, Preferences, Rank, Download, Help
-  - Automatic tour launch for first-time users with localStorage persistence
-  - Tour steps cover: file upload, preference input, AI analysis, results download, help access
-- **User Experience**: First-time visitors get automatic guided tour, returning users skip tour
-- **Storage**: Uses localStorage.getItem("tour_done") to track completion state
-- **Status**: Production ready - new users receive comprehensive onboarding experience
+  - Created comprehensive how-to guide page explaining 4-step process
+  - Extended wizard to 4 steps: Airline → Fleet/Position → Base/Seniority → Flying Style Personas
+  - Added 4 predefined personas: Work-Life Balance, Credit Hunter, Adventure Seeker, Commuter Friendly
+  - Custom persona option with natural language input field
+  - Updated database models to store persona and custom_preferences fields
+  - Modified routing to redirect new users to how-to page first
+- **Terminology**: Changed "flying style" to "bid style" throughout application
+- **UI Cleanup**: Removed redundant Intro.js tutorial popup in favor of comprehensive how-to guide
+- **Status**: Production ready - complete user onboarding system with persona-based preferences
