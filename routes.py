@@ -40,7 +40,7 @@ def index():
     
     return render_template(
         "index.html", 
-        user=user_id,  # Pass user_id as user variable
+        user=user_id if user_id else None,  # Pass user_id as user variable, but handle None case
         profile=profile,
         bid_package=bid_package
     )
