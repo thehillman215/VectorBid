@@ -31,7 +31,7 @@ def index():
     if user_id:
         profile = get_profile(user_id)
         if not profile.get('profile_completed', False):
-            return redirect(url_for('main.welcome'))
+            return redirect(url_for('welcome.wizard_start'))
     
     return render_template(
         "index.html", user=current_user if current_user.is_authenticated else None
@@ -45,7 +45,7 @@ def process_schedule():
     if user_id:
         profile = get_profile(user_id)
         if not profile.get('profile_completed', False):
-            return redirect(url_for('main.welcome'))
+            return redirect(url_for('welcome.wizard_start'))
     
     uploaded = request.files.get("schedule_file")
     preferences = request.form.get("preferences", "").strip()
@@ -131,7 +131,7 @@ def download_csv():
     if user_id:
         profile = get_profile(user_id)
         if not profile.get('profile_completed', False):
-            return redirect(url_for('main.welcome'))
+            return redirect(url_for('welcome.wizard_start'))
     trips = session.get("ranked_trips")
     if not trips:
         flash("No ranked trips to download.", "error")
@@ -188,9 +188,5 @@ def welcome():
     if seniority_str and seniority_str.isdigit():
         profile_data["seniority"] = int(seniority_str)
     
-    if save_profile(user_id, profile_data):
-        flash("Profile setup completed successfully!", "success")
-        return redirect(url_for("main.index"))
-    else:
-        flash("Error saving profile. Please try again.", "error")
-        return redirect(url_for("main.welcome"))
+    # This route is now handled by the welcome wizard
+    return redirect(url_for("welcome.wizard_start"))

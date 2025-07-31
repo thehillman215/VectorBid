@@ -137,6 +137,14 @@ def create_app() -> Flask:
     except ModuleNotFoundError:
         logging.warning("admin blueprint not found; skipping")
 
+    # Register welcome wizard blueprint
+    try:
+        from welcome.routes import welcome_bp
+
+        app.register_blueprint(welcome_bp)
+    except ModuleNotFoundError:
+        logging.warning("welcome blueprint not found; skipping")
+
     return app
 
 

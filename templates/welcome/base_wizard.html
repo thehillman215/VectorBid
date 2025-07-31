@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid - Profile Setup Wizard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .wizard-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            min-height: 600px;
+        }
+        .wizard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .progress-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .fleet-chip {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        .fleet-chip:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        .fleet-chip.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        .fleet-chip input[type="checkbox"] {
+            display: none;
+        }
+        .seat-option {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .seat-option:hover {
+            border-color: #667eea;
+            background: #e9ecef;
+        }
+        .seat-option.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        .seat-option input[type="radio"] {
+            display: none;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        #wizard-content {
+            min-height: 400px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin: 0 10px;
+        }
+        .step-circle.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .step-circle.completed {
+            background: #28a745;
+            color: white;
+        }
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: #dee2e6;
+        }
+        .step-line.completed {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="wizard-container p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-plane wizard-header display-4 mb-3"></i>
+                        <h1 class="wizard-header mb-2">Welcome to VectorBid</h1>
+                        <p class="text-muted">Let's set up your pilot profile in 3 easy steps</p>
+                    </div>
+
+                    <!-- Progress Steps -->
+                    <div class="step-indicator">
+                        <div class="step-circle active" id="step-1">1</div>
+                        <div class="step-line" id="line-1"></div>
+                        <div class="step-circle" id="step-2">2</div>
+                        <div class="step-line" id="line-2"></div>
+                        <div class="step-circle" id="step-3">3</div>
+                    </div>
+
+                    <!-- Dynamic Content Area -->
+                    <div id="wizard-content">
+                        {% include 'welcome/step1.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle fleet chip selection
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('fleet-chip') || e.target.closest('.fleet-chip')) {
+                const chip = e.target.classList.contains('fleet-chip') ? e.target : e.target.closest('.fleet-chip');
+                const checkbox = chip.querySelector('input[type="checkbox"]');
+                
+                checkbox.checked = !checkbox.checked;
+                chip.classList.toggle('selected', checkbox.checked);
+            }
+        });
+
+        // Handle seat option selection
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('seat-option') || e.target.closest('.seat-option')) {
+                const option = e.target.classList.contains('seat-option') ? e.target : e.target.closest('.seat-option');
+                const radio = option.querySelector('input[type="radio"]');
+                
+                // Clear all seat selections
+                document.querySelectorAll('.seat-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Select this option
+                radio.checked = true;
+                option.classList.add('selected');
+            }
+        });
+
+        // Update progress indicators
+        document.addEventListener('htmx:afterSwap', function(e) {
+            if (e.detail.target.id === 'wizard-content') {
+                // Determine current step from content
+                let currentStep = 1;
+                if (e.detail.target.innerHTML.includes('step2')) currentStep = 2;
+                else if (e.detail.target.innerHTML.includes('step3')) currentStep = 3;
+                
+                // Update step indicators
+                for (let i = 1; i <= 3; i++) {
+                    const stepCircle = document.getElementById(`step-${i}`);
+                    const stepLine = document.getElementById(`line-${i}`);
+                    
+                    if (i < currentStep) {
+                        stepCircle.classList.remove('active');
+                        stepCircle.classList.add('completed');
+                        if (stepLine) stepLine.classList.add('completed');
+                    } else if (i === currentStep) {
+                        stepCircle.classList.remove('completed');
+                        stepCircle.classList.add('active');
+                    } else {
+                        stepCircle.classList.remove('active', 'completed');
+                        if (stepLine) stepLine.classList.remove('completed');
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
