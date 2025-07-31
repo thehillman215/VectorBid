@@ -28,23 +28,27 @@ bp = Blueprint("main", __name__)
 
 @bp.get("/")
 def index():
-    # Get authenticated user
-    user_id = get_current_user_id()
+    # Always use test user for open testing
+    user_id = '44040350'
     
-    # Test mode: if URL has ?test=true, use test user ID
-    if request.args.get('test') == 'true':
-        user_id = '44040350'
-    
-    # If user is not authenticated (no header), show public page
-    if not user_id:
-        return render_template("index.html", user=None, profile=None, bid_package=None)
-    
-    # Check if user has completed onboarding
+    # Get profile and create default if doesn't exist
     profile = get_profile(user_id)
-    if not profile.get('onboard_complete', False):
-        return redirect(url_for('main.onboarding'))
+    if not profile:
+        # Create a default profile for testing
+        default_profile = {
+            'airline': 'United Airlines',
+            'base': 'Denver (DEN)',
+            'seat': 'Captain',
+            'fleet': ['737', '787'],
+            'seniority': 'Mid-level',
+            'persona': 'quality_of_life',
+            'onboard_complete': True,
+            'profile_completed': True
+        }
+        save_profile(user_id, default_profile)
+        profile = default_profile
     
-    # Get matching bid package for authenticated users
+    # Get matching bid package
     bid_package = get_matching_bid_packet(profile)
     
     return render_template(
@@ -398,22 +402,13 @@ def build_preferences_from_profile(profile):
 @bp.route("/results")
 def results():
     """Display trip ranking results."""
-    # Apply profile requirement check
-    user_id = get_current_user_id()
+    # Always use test user for open testing
+    user_id = '44040350'
     
-    # Test mode: if URL has ?test=true, use test user ID
-    if request.args.get('test') == 'true':
-        user_id = '44040350'
-    
-    if user_id:
-        profile = get_profile(user_id)
-        if not profile or not profile.get('profile_completed', False):
-            return redirect(url_for('welcome.wizard_start'))
-    
+    # Always create sample data for testing
     if 'ranked_trips' not in session:
-        # For testing purposes, create sample trip data
-        if request.args.get('test') == 'true':
-            session['ranked_trips'] = [
+        # Create sample trip data for open testing
+        session['ranked_trips'] = [
                 {
                     'trip_id': 'UA101',
                     'pairing_id': 'UA101',
@@ -475,14 +470,11 @@ def results():
                     'comment': 'European route with excellent credit hours'
                 }
             ]
-            session['trip_analysis'] = {
+        session['trip_analysis'] = {
                 'total_trips': 5,
                 'optimization_score': 87,
                 'bid_package': {'filename': 'Sample_Bid_Package.pdf'}
             }
-        else:
-            flash("No analysis results found. Please analyze a bid package first.", "error")
-            return redirect(url_for('main.index'))
     
     return render_template("results_minimal.html", 
                          ranked_trips=session['ranked_trips'],

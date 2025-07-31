@@ -6,18 +6,15 @@ from services.db import get_profile
 
 
 def get_current_user_id():
-    """Get current user ID from Replit headers."""
+    """Get current user ID from Replit headers or use test user for open testing."""
     from flask import request
-    return request.headers.get("X-Replit-User-Id")
+    # For open testing, always return a test user ID
+    return request.headers.get("X-Replit-User-Id") or '44040350'
 
 def requires_onboarding(f):
-    """Decorator to check if user has completed onboarding."""
+    """Decorator to check if user has completed onboarding - disabled for open testing."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        user_id = get_current_user_id()
-        if user_id:
-            profile = get_profile(user_id)
-            if not profile.get('onboard_complete', False):
-                return redirect(url_for('main.onboarding'))
+        # Skip onboarding check for open testing
         return f(*args, **kwargs)
     return decorated_function
