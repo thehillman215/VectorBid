@@ -204,7 +204,7 @@ def download_csv():
     if user_id:
         profile = get_profile(user_id)
         if not profile.get('profile_completed', False):
-            return redirect(url_for('welcome.wizard_start'))
+            return redirect(url_for('main.onboarding'))
     trips = session.get("ranked_trips")
     if not trips:
         flash("No ranked trips to download.", "error")
@@ -374,5 +374,10 @@ def welcome():
     if seniority_str and seniority_str.isdigit():
         profile_data["seniority"] = int(seniority_str)
     
-    # This route is now handled by the welcome wizard
-    return redirect(url_for("welcome.wizard_start"))
+    try:
+        save_profile(user_id, profile_data)
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for("main.index"))
+    except Exception as e:
+        flash(f"Error saving profile: {str(e)}", "error")
+        return render_template("welcome.html", profile=get_profile(user_id))
