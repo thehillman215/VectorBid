@@ -55,17 +55,13 @@ def how_to():
 @bp.route("/onboarding")
 @bp.route("/onboarding/<int:step>")
 def onboarding(step=1):
-    """Onboarding wizard for new users."""
+    """Onboarding wizard for new users and profile updates."""
     user_id = get_current_user_id()
     if not user_id:
         return redirect(url_for('replit_auth.login'))
     
     # Get current profile
     profile = get_profile(user_id)
-    
-    # If already onboarded, redirect to main
-    if profile.get('onboard_complete', False):
-        return redirect(url_for('main.index'))
     
     # Handle step navigation
     step = max(1, min(3, step))
@@ -105,11 +101,19 @@ def onboarding_submit():
         
     elif step == 3:
         # Complete onboarding
+        profile = get_profile(user_id)
+        was_already_complete = profile.get('onboard_complete', False)
+        
         save_profile(user_id, {
             'onboard_complete': True,
             'profile_completed': True,  # Legacy compatibility
         })
-        flash("Welcome to VectorBid! Your profile is now set up.", "success")
+        
+        if was_already_complete:
+            flash("Profile updated successfully!", "success")
+        else:
+            flash("Welcome to VectorBid! Your profile is now set up.", "success")
+        
         return redirect(url_for('main.index'))
     
     return redirect(url_for('main.onboarding'))
