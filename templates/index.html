@@ -67,60 +67,6 @@
                         </div>
                     </div>
 
-                    <!-- Current Bid Package -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title mb-0">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Current Month Bid Package
-                            </h2>
-                        </div>
-                        <div class="card-body">
-                            {% if bid_package %}
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h5 class="text-primary">
-                                            <i class="fas fa-file-pdf me-2"></i>
-                                            {{ bid_package.filename }}
-                                        </h5>
-                                        <p class="text-muted mb-2">
-                                            <i class="fas fa-calendar me-1"></i>
-                                            Month: {{ bid_package.month_tag[:4] }}-{{ bid_package.month_tag[4:] }}
-                                            &nbsp;&nbsp;
-                                            <i class="fas fa-weight me-1"></i>
-                                            Size: {{ "%.1f"|format(bid_package.file_size / 1024) }} KB
-                                            &nbsp;&nbsp;
-                                            <i class="fas fa-clock me-1"></i>
-                                            Uploaded: {{ bid_package.upload_date.strftime('%B %d, %Y') }}
-                                        </p>
-                                        <p class="text-success">
-                                            <i class="fas fa-check-circle me-1"></i>
-                                            Matches your profile: {{ profile.airline or 'Any Airline' }} - {{ profile.seat or 'Any Position' }} - {{ profile.base or 'Any Base' }}
-                                        </p>
-                                    </div>
-                                    <div class="col-md-4 text-center">
-                                        <form method="POST" action="{{ url_for('main.analyze_bid_package') }}">
-                                            <input type="hidden" name="month_tag" value="{{ bid_package.month_tag }}">
-                                            <button type="submit" class="btn btn-primary btn-lg">
-                                                <i class="fas fa-magic me-2"></i>
-                                                Analyze with AI
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <div class="text-center py-5">
-                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                    <h5 class="text-muted">No bid package available</h5>
-                                    <p class="text-muted">
-                                        The current month's bid package hasn't been uploaded yet.<br>
-                                        Please check back later or contact your administrator.
-                                    </p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
                     <!-- Profile Summary -->
                     <div class="card mt-4">
                         <div class="card-header">
@@ -165,6 +111,64 @@
                                     <i class="fas fa-edit me-2"></i>Update Profile
                                 </a>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Bid Package -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h2 class="card-title mb-0">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Current Month Bid Package
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            {% if bid_package %}
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="text-primary">
+                                            <i class="fas fa-file-pdf me-2"></i>
+                                            {{ bid_package.filename }}
+                                        </h5>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            Month: {{ bid_package.month_tag[:4] }}-{{ bid_package.month_tag[4:] }}
+                                            &nbsp;&nbsp;
+                                            <i class="fas fa-weight me-1"></i>
+                                            Size: {{ "%.1f"|format(bid_package.file_size / 1024) }} KB
+                                            &nbsp;&nbsp;
+                                            <i class="fas fa-clock me-1"></i>
+                                            Uploaded: {{ bid_package.upload_date.strftime('%B %d, %Y') }}
+                                        </p>
+                                        <p class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Matches your profile: {{ profile.airline or 'Any Airline' }} - {{ profile.seat or 'Any Position' }} - {{ profile.base or 'Any Base' }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <form method="POST" action="{{ url_for('main.analyze_bid_package') }}">
+                                            <input type="hidden" name="month_tag" value="{{ bid_package.month_tag }}">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-magic me-2"></i>
+                                                Analyze with AI
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No bid package available</h5>
+                                    <p class="text-muted">
+                                        {% if not profile or not profile.profile_completed %}
+                                            Complete your pilot profile first to see available bid packages.
+                                        {% else %}
+                                            The current month's bid package hasn't been uploaded yet.<br>
+                                            Please check back later or contact your administrator.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
