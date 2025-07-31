@@ -181,3 +181,30 @@ Preferred communication style: Simple, everyday language.
 - **Docker Containerization**: Production-ready Docker image with multi-stage build, health checks, and metadata labels
 - **Code Quality Tools**: Integrated ruff formatter, bandit security scanner, and pytest with coverage reporting
 - **Status**: Production ready - admin can upload monthly bid packets via secure API with full test coverage, database persistence, complete API documentation, and automated CI/CD pipeline
+
+### User Profile Management System with HTMX Wizard (Updated: July 31, 2025)
+- **Feature**: Complete user profile system with multi-step welcome wizard
+- **Implementation**:
+  - Created UserProfile model with airline, fleet, seat, base, seniority, and profile_completed fields
+  - Built get_current_user_id() helper function for X-Replit-User-Id header authentication
+  - Added profile requirement checks to all main routes with redirect to welcome wizard
+  - Implemented HTMX-powered 3-step wizard in welcome/routes.py blueprint
+  - Created responsive wizard templates with progress indicators and interactive UI
+  - Session-based data storage throughout wizard progression with JSON fleet handling
+- **Wizard Flow**: 
+  - Step 1: Airline dropdown (United, Delta, Southwest, Alaska, Other)
+  - Step 2: Fleet multiselect chips (737, 320, 757/767, 787, Bus) + position radio (CA/FO)
+  - Step 3: Base text input + seniority number with profile summary
+- **HTMX Features**: No-reload form submission, real-time validation, smooth step transitions
+- **Status**: Production ready - new users complete profile setup before accessing main features
+
+### Intro.js Guided Tour Integration (Updated: July 31, 2025)
+- **Feature**: Interactive user onboarding with guided tour functionality
+- **Implementation**:
+  - Added Intro.js CDN integration to templates/index.html
+  - Defined 5 data-intro steps: Upload, Preferences, Rank, Download, Help
+  - Automatic tour launch for first-time users with localStorage persistence
+  - Tour steps cover: file upload, preference input, AI analysis, results download, help access
+- **User Experience**: First-time visitors get automatic guided tour, returning users skip tour
+- **Storage**: Uses localStorage.getItem("tour_done") to track completion state
+- **Status**: Production ready - new users receive comprehensive onboarding experience
