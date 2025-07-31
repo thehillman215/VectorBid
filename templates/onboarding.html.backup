@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilot Profile Setup - VectorBid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto;
+        }
+        
+        .progress-step.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .progress-step.pending {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .seat-option, .persona-card {
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bs-body-bg);
+            border-color: var(--bs-border-color);
+        }
+        
+        .seat-option:hover, .persona-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.15);
+        }
+        
+        .seat-option.selected, .persona-card.selected {
+            border-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        
+        .fleet-chip {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            border: 2px solid var(--bs-border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bs-body-bg);
+        }
+        
+        .fleet-chip:hover {
+            border-color: #007bff;
+        }
+        
+        .fleet-chip.selected {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .seniority-preview {
+            background: rgba(0, 123, 255, 0.1);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .probability-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .prob-high { background-color: #28a745; color: white; }
+        .prob-medium { background-color: #ffc107; color: #000; }
+        .prob-low { background-color: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-test-id="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-paper-plane me-2"></i>VectorBid
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="text-center mb-4">
+                            <h2>
+                                <i class="fas fa-user-cog me-2"></i>
+                                Pilot Profile Setup
+                            </h2>
+                            <p class="text-muted">Let's set up your profile for personalized bid analysis</p>
+                        </div>
+                        
+                        <!-- Progress indicator -->
+                        <div class="row text-center mb-4">
+                            <div class="col-4">
+                                <div class="progress-step {{ 'active' if step == 1 else 'completed' if step > 1 else 'pending' }}">
+                                    1
+                                </div>
+                                <small class="d-block mt-2">Basic Info</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="progress-step {{ 'active' if step == 2 else 'completed' if step > 2 else 'pending' }}">
+                                    2
+                                </div>
+                                <small class="d-block mt-2">Experience</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="progress-step {{ 'active' if step == 3 else 'pending' }}">
+                                    3
+                                </div>
+                                <small class="d-block mt-2">Preferences</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        {% if step == 1 %}
+                            <!-- Step 1: Enhanced Basic Information -->
+                            <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step1-form">
+                                <input type="hidden" name="step" value="1">
+
+                                <h4 class="mb-4">
+                                    <i class="fas fa-plane me-2"></i>Basic Information
+                                </h4>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Airline *</label>
+                                    <select class="form-select" name="airline" data-test-id="airline-select" required onchange="updateSeniorityValidation()">
+                                        <option value="">Select your airline</option>
+                                        <option value="United" {{ 'selected' if profile.airline == 'United' }}>United Airlines</option>
+                                        <option value="Delta" {{ 'selected' if profile.airline == 'Delta' }}>Delta Air Lines</option>
+                                        <option value="American" {{ 'selected' if profile.airline == 'American' }}>American Airlines</option>
+                                        <option value="Southwest" {{ 'selected' if profile.airline == 'Southwest' }}>Southwest Airlines</option>
+                                        <option value="Alaska" {{ 'selected' if profile.airline == 'Alaska' }}>Alaska Airlines</option>
+                                        <option value="Other" {{ 'selected' if profile.airline == 'Other' }}>Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Base Airport *</label>
+                                    <input type="text" class="form-control" name="base" data-test-id="base-input" 
+                                           placeholder="e.g. IAH, DEN, LAX" value="{{ profile.base or '' }}" required>
+                                    <small class="form-text text-muted">Enter your home base airport code</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Position *</label>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="seat-option {{ 'selected' if profile.seat == 'CA' }}" 
+                                                 data-test-id="captain-option" onclick="selectSeat('CA')">
+                                                <i class="fas fa-user-tie fa-2x mb-2"></i>
+                                                <h5>Captain</h5>
+                                                <p class="text-muted mb-0">Left seat</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="seat-option {{ 'selected' if profile.seat == 'FO' }}" 
+                                                 data-test-id="first-officer-option" onclick="selectSeat('FO')">
+                                                <i class="fas fa-user fa-2x mb-2"></i>
+                                                <h5>First Officer</h5>
+                                                <p class="text-muted mb-0">Right seat</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="seat" id="seat-input" data-test-id="seat-input" 
+                                           value="{{ profile.seat or '' }}" required>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary btn-lg" data-test-id="step1-submit-btn">
+                                        Next <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </form>
+
+                        {% elif step == 2 %}
+                            <!-- Step 2: Enhanced Fleet & Seniority -->
+                            <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step2-form">
+                                <input type="hidden" name="step" value="2">
+
+                                <h4 class="mb-4">
+                                    <i class="fas fa-plane-departure me-2"></i>Fleet & Experience
+                                </h4>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Aircraft Fleet *</label>
+                                    <p class="text-muted">Select all aircraft types you're qualified on</p>
+                                    <div id="fleet-selection" data-test-id="fleet-selection">
+                                        {% for aircraft in ['737', '320', '757/767', '787', 'A350', 'A330', 'CRJ', 'ERJ', 'Other'] %}
+                                            <span class="fleet-chip {{ 'selected' if aircraft in (profile.fleet or []) }}" 
+                                                  data-test-id="fleet-chip-{{ aircraft|replace('/', '-') }}"
+                                                  onclick="toggleFleet('{{ aircraft }}')">
+                                                {{ aircraft }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                    <input type="hidden" name="fleet" id="fleet-input" data-test-id="fleet-input" 
+                                           value="{{ profile.fleet|join(',') if profile.fleet }}">
+                                    <small class="form-text text-muted">Select all aircraft you're current qualified on</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Seniority Number *</label>
+                                    <input type="number" class="form-control" name="seniority" data-test-id="seniority-input"
+                                           placeholder="e.g. 1250" value="{{ profile.seniority or '' }}" 
+                                           required min="1" max="20000" onchange="updateSeniorityPreview()">
+                                    <small class="form-text text-muted">Your current seniority number at your airline</small>
+                                    
+                                    <!-- Seniority validation feedback -->
+                                    <div id="seniority-validation" class="mt-2" style="display: none;">
+                                        <div class="alert alert-warning" role="alert">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <span id="validation-message"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Hire Date (Optional)</label>
+                                    <input type="date" class="form-control" name="hire_date" 
+                                           value="{{ profile.hire_date or '' }}" onchange="updateSeniorityPreview()">
+                                    <small class="form-text text-muted">Helps validate seniority and estimate career progression</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Years in Current Position (Optional)</label>
+                                    <input type="number" class="form-control" name="years_at_position" 
+                                           placeholder="e.g. 5" value="{{ profile.years_at_position or '' }}" 
+                                           min="0" max="40">
+                                    <small class="form-text text-muted">Years as Captain/First Officer</small>
+                                </div>
+
+                                <!-- Seniority Analysis Preview -->
+                                <div id="seniority-preview" class="seniority-preview" style="display: none;">
+                                    <h6><i class="fas fa-chart-line me-2"></i>Seniority Analysis Preview</h6>
+                                    <div class="row text-center">
+                                        <div class="col-md-4">
+                                            <div class="mb-2">
+                                                <span id="percentile-display" class="h4 text-primary">--</span>
+                                                <small class="d-block text-muted">Percentile</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-2">
+                                                <span id="category-display" class="badge bg-secondary">--</span>
+                                                <small class="d-block text-muted mt-1">Seniority Level</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-2">
+                                                <span id="success-rate-display" class="h5 text-success">--%</span>
+                                                <small class="d-block text-muted">Success Rate</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <h6 class="small mb-2">Probability for Popular Trip Types:</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <span>Weekend Trips: <span id="weekend-prob" class="probability-badge prob-medium">--%</span></span>
+                                                <span>Premium Layovers: <span id="layover-prob" class="probability-badge prob-medium">--%</span></span>
+                                                <span>Short Trips: <span id="short-prob" class="probability-badge prob-medium">--%</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('main.onboarding', step=1) }}" class="btn btn-outline-secondary" 
+                                       data-test-id="step2-back-btn">
+                                        <i class="fas fa-arrow-left me-2"></i>Back
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg" data-test-id="step2-submit-btn">
+                                        Next <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </form>
+
+                        {% elif step == 3 %}
+                            <!-- Step 3: Enhanced Persona Selection -->
+                            <form method="POST" action="{{ url_for('main.onboarding_submit') }}" id="step3-form">
+                                <input type="hidden" name="step" value="3">
+
+                                <h4 class="mb-4">
+                                    <i class="fas fa-masks-theater me-2"></i>Choose Your Flying Style
+                                </h4>
+                                
+                                <p class="text-muted mb-4">
+                                    Select a persona that matches your flying preferences. You can also add custom instructions below to personalize further.
+                                </p>
+
+                                <!-- Enhanced Persona Grid (3x4) -->
+                                <div class="row mb-4">
+                                    <!-- Row 1 -->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="persona-card {{ 'selected' if profile.persona == 'work_life_balance' }}" 
+                                             onclick="selectPersona('work_life_balance')">
+                                            <div class="text-center">
+                                                <i class="fas fa-balance-scale fa-2x text-primary mb-2"></i>
+                                                <h6>Work-Life Balance</h6>
+                                                <small class="text-muted">Weekends off, predictable schedules, family time priority</small>
+                                                <input type="radio" name="persona" value="work_life_balance" class="d-none"
+                                                       {{ 'checked' if profile.persona == 'work_life_balance' }}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <div class="persona-card {{ 'selected' if profile.persona == 'credit_hunter' }}" 
+                                             onclick="selectPersona('credit_hunter')">

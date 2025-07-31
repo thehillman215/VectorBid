@@ -63,7 +63,7 @@ def onboarding(step=1):
     """Onboarding wizard for new users and profile updates."""
     user_id = get_current_user_id()
     if not user_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('replit_auth.login'))
     
     # Get current profile
     profile = get_profile(user_id)
@@ -79,7 +79,7 @@ def onboarding_submit():
     """Handle onboarding form submissions."""
     user_id = get_current_user_id()
     if not user_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('replit_auth.login'))
     
     step = int(request.form.get('step', 1))
     profile = get_profile(user_id)
@@ -361,7 +361,7 @@ def welcome():
     """Profile setup page for new users."""
     user_id = request.headers.get("X-Replit-User-Id")
     if not user_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('replit_auth.login'))
     
     if request.method == "GET":
         # Load existing profile data

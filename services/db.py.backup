@@ -195,48 +195,6 @@ def get_all_profiles() -> Dict[str, Dict[str, Any]]:
     return profiles
 
 
-def validate_profile(profile: Dict[str, Any]) -> Dict[str, Any]:
-    """Validate profile data and return validation results.
-
-    Args:
-        profile: Profile dictionary to validate
-
-    Returns:
-        Dictionary with validation results
-    """
-    errors = []
-    warnings = []
-
-    # Required fields for complete profile
-    required_fields = ['airline', 'base', 'seat', 'seniority']
-    for field in required_fields:
-        if not profile.get(field):
-            errors.append(f"Missing required field: {field}")
-
-    # Validate seniority range
-    seniority = profile.get('seniority')
-    if seniority and (seniority < 1 or seniority > 20000):
-        warnings.append("Seniority number seems unusual (should be 1-20000)")
-
-    # Validate seat position
-    seat = profile.get('seat')
-    if seat and seat not in ['CA', 'FO']:
-        errors.append("Seat must be 'CA' (Captain) or 'FO' (First Officer)")
-
-    # Validate fleet
-    fleet = profile.get('fleet', [])
-    if fleet and not isinstance(fleet, list):
-        warnings.append("Fleet should be a list of aircraft types")
-
-    return {
-        'valid': len(errors) == 0,
-        'complete': len(errors) == 0
-        and profile.get('onboard_complete', False),
-        'errors': errors,
-        'warnings': warnings
-    }
-
-
 def migrate_existing_profiles():
     """Migrate existing profiles to new enhanced schema.
 
@@ -289,6 +247,48 @@ def migrate_existing_profiles():
 
     print(f"🎉 Migration complete! Updated {migrated} profiles.")
     return migrated
+
+
+def validate_profile(profile: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate profile data and return validation results.
+
+    Args:
+        profile: Profile dictionary to validate
+
+    Returns:
+        Dictionary with validation results
+    """
+    errors = []
+    warnings = []
+
+    # Required fields for complete profile
+    required_fields = ['airline', 'base', 'seat', 'seniority']
+    for field in required_fields:
+        if not profile.get(field):
+            errors.append(f"Missing required field: {field}")
+
+    # Validate seniority range
+    seniority = profile.get('seniority')
+    if seniority and (seniority < 1 or seniority > 20000):
+        warnings.append("Seniority number seems unusual (should be 1-20000)")
+
+    # Validate seat position
+    seat = profile.get('seat')
+    if seat and seat not in ['CA', 'FO']:
+        errors.append("Seat must be 'CA' (Captain) or 'FO' (First Officer)")
+
+    # Validate fleet
+    fleet = profile.get('fleet', [])
+    if fleet and not isinstance(fleet, list):
+        warnings.append("Fleet should be a list of aircraft types")
+
+    return {
+        'valid': len(errors) == 0,
+        'complete': len(errors) == 0
+        and profile.get('onboard_complete', False),
+        'errors': errors,
+        'warnings': warnings
+    }
 
 
 def export_profiles(filename: str = 'profile_backup.json') -> int:
