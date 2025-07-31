@@ -56,88 +56,80 @@
         {% if user %}
             <!-- Authenticated user content -->
             <div class="row justify-content-center">
-                <div class="col-lg-8">
+                <div class="col-lg-10">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h2 class="card-title mb-0">
-                                <i class="fas fa-upload me-2"></i>
-                                Upload Your Schedule
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Available Bid Packages
                             </h2>
                             <button class="btn btn-outline-info btn-sm" onclick="restartTour()" title="Start guided tour">
                                 <i class="fas fa-question-circle me-1"></i>Tour
                             </button>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted mb-4">
-                                Upload your pilot schedule and let AI help you rank trips based on your preferences.
-                                Supported formats: PDF, CSV, and text files.
-                            </p>
+                            <div class="alert alert-info" role="alert" data-intro="Monthly bid packages are uploaded by administrators. Select one to analyze with your preferences." data-step="1">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Monthly bid packages are uploaded by site administrators. Select a package below to get AI-powered trip rankings based on your profile and preferences.
+                            </div>
 
-                            <form method="POST" action="{{ url_for('main.process_schedule') }}" enctype="multipart/form-data">
-                                <div class="mb-4" data-intro="Step 1: Upload your monthly pilot schedule file. Supported formats include PDF, CSV, and text files from any airline system." data-step="1">
-                                    <label for="schedule_file" class="form-label">
-                                        <i class="fas fa-file me-2"></i>
-                                        Schedule File
-                                    </label>
-                                    <input type="file" class="form-control" id="schedule_file" name="schedule_file" 
-                                           accept=".pdf,.csv,.txt" required>
-                                    <div class="form-text">
-                                        Upload your schedule in PDF, CSV, or text format. The file should contain trip information including IDs, dates, routing, and duration.
+                            <!-- Bid packages will be loaded here -->
+                            <div class="row" id="bid-packages" data-intro="Available bid packages from your airline will appear here. Click on one to analyze with your preferences." data-step="2">
+                                <div class="col-12">
+                                    <div class="text-center py-5 text-muted">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <h5>No Bid Packages Available</h5>
+                                        <p>Site administrators haven't uploaded any bid packages for your airline yet. Check back later!</p>
                                     </div>
                                 </div>
-
-                                <div class="mb-4" data-intro="Step 2: Tell us your preferences in plain English. Describe what you want in your schedule - weekends off, trip length, destinations, work-life balance, etc." data-step="2">
-                                    <label for="preferences" class="form-label">
-                                        <i class="fas fa-heart me-2"></i>
-                                        Your Preferences
-                                    </label>
-                                    <textarea class="form-control" id="preferences" name="preferences" rows="4" 
-                                              placeholder="Describe your trip preferences in natural language. For example: 'I want weekends off and no more than 3-day trips' or 'I prefer international routes with good layovers and don't mind longer trips'" 
-                                              required></textarea>
-                                    <div class="form-text">
-                                        Describe what you're looking for in your schedule. Be specific about days off, trip length, destinations, work-life balance, etc.
+                            </div>
+                            
+                            <!-- User Profile Summary -->
+                            <div class="mt-4" data-intro="Your profile and preferences are shown here. These guide the AI analysis." data-step="3">
+                                <h5><i class="fas fa-user-cog me-2"></i>Your Profile</h5>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="row" id="user-profile">
+                                            <!-- User profile will be loaded here -->
+                                            <div class="col-12 text-muted">
+                                                <p class="mb-0">Loading your profile information...</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div class="d-grid" data-intro="Step 3: Click here to let our AI analyze your schedule and rank all trips according to your preferences. The AI will consider factors like trip length, routing, layovers, and weekend work." data-step="3">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-magic me-2"></i>
-                                        Analyze Schedule with AI
-                                    </button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Instructions card -->
-                    <div class="card mt-4" data-intro="Step 4: After analysis, you'll get ranked results showing the best trips for you. You can download these rankings as a CSV file for easy reference during bidding." data-step="4">
+                    <div class="card mt-4" data-intro="This shows how VectorBid works. After selecting a bid package, you'll get AI-powered rankings." data-step="4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
                                 <i class="fas fa-info-circle me-2"></i>
-                                How It Works
+                                How VectorBid Works
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="text-center mb-3">
-                                        <i class="fas fa-upload fa-2x text-primary mb-2"></i>
-                                        <h6>1. Upload Schedule</h6>
-                                        <p class="text-muted small">Upload your monthly bid schedule in PDF, CSV, or text format.</p>
+                                        <i class="fas fa-user-circle fa-2x text-primary mb-2"></i>
+                                        <h6>1. Set Your Profile</h6>
+                                        <p class="text-muted small">Complete your pilot profile with airline, aircraft, and bid style preferences.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-center mb-3">
-                                        <i class="fas fa-comments fa-2x text-primary mb-2"></i>
-                                        <h6>2. Share Preferences</h6>
-                                        <p class="text-muted small">Tell us what you want in natural language - weekends off, trip length, destinations, etc.</p>
+                                        <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+                                        <h6>2. Select Bid Package</h6>
+                                        <p class="text-muted small">Choose from monthly bid packages uploaded by administrators for your airline.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-center mb-3">
-                                        <i class="fas fa-list-ol fa-2x text-primary mb-2"></i>
-                                        <h6>3. Get Rankings</h6>
-                                        <p class="text-muted small">AI analyzes your preferences and ranks all trips from best to worst fit.</p>
+                                        <i class="fas fa-magic fa-2x text-primary mb-2"></i>
+                                        <h6>3. Get AI Rankings</h6>
+                                        <p class="text-muted small">AI analyzes trips based on your profile and returns personalized rankings.</p>
                                     </div>
                                 </div>
                             </div>
@@ -204,9 +196,36 @@
         // Clear all localStorage to reset user state for testing
         localStorage.clear();
         
-        // Force page refresh to trigger server-side redirect
-        if (window.location.pathname === '/' && !window.location.href.includes('refreshed')) {
-            window.location.href = '/?refreshed=1';
+        // Load user profile information
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+        });
+        
+        function loadUserProfile() {
+            // Mock profile data for demonstration
+            const profileData = {
+                airline: 'United Airlines',
+                position: 'Captain',
+                aircraft: ['737', 'A320'],
+                base: 'ORD',
+                persona: 'Work-Life Balance'
+            };
+            
+            const profileContainer = document.getElementById('user-profile');
+            if (profileContainer) {
+                profileContainer.innerHTML = `
+                    <div class="col-md-6">
+                        <strong>Airline:</strong> ${profileData.airline}<br>
+                        <strong>Position:</strong> ${profileData.position}<br>
+                        <strong>Base:</strong> ${profileData.base}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Aircraft:</strong> ${profileData.aircraft.join(', ')}<br>
+                        <strong>Bid Style:</strong> ${profileData.persona}<br>
+                        <a href="/welcome/" class="btn btn-sm btn-outline-primary mt-2">Edit Profile</a>
+                    </div>
+                `;
+            }
         }
         
         // Start guided tour for first-time users
