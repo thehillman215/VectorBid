@@ -27,20 +27,25 @@ bp = Blueprint("main", __name__)
 
 
 @bp.get("/")
-@requires_onboarding
 def index():
     # Get authenticated user
     user_id = get_current_user_id()
-    # Get profile data and matching bid package for authenticated users
-    profile = None
-    bid_package = None
-    if user_id:
-        profile = get_profile(user_id)
-        bid_package = get_matching_bid_packet(profile)
+    
+    # If user is not authenticated (no header), show public page
+    if not user_id:
+        return render_template("index.html", user=None, profile=None, bid_package=None)
+    
+    # Check if user has completed onboarding
+    profile = get_profile(user_id)
+    if not profile.get('onboard_complete', False):
+        return redirect(url_for('main.onboarding'))
+    
+    # Get matching bid package for authenticated users
+    bid_package = get_matching_bid_packet(profile)
     
     return render_template(
         "index.html", 
-        user=user_id if user_id else None,  # Pass user_id as user variable, but handle None case
+        user=user_id,
         profile=profile,
         bid_package=bid_package
     )
