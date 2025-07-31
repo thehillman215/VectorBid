@@ -2,7 +2,9 @@ import os
 import sys
 import logging
 
-from flask import Flask
+from flask import Flask, render_template, request, redirect, url_for  # and any others you need
+
+app = Flask(__name__)  # ← this must exist **before** routes & app.run()
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
