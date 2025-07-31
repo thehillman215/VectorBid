@@ -204,6 +204,11 @@
         // Clear all localStorage to reset user state for testing
         localStorage.clear();
         
+        // Force page refresh to trigger server-side redirect
+        if (window.location.pathname === '/' && !window.location.href.includes('refreshed')) {
+            window.location.href = '/?refreshed=1';
+        }
+        
         // Start guided tour for first-time users
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Checking for tour completion...');
