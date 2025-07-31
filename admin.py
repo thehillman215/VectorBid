@@ -21,8 +21,14 @@ def upload_bid():
     if not month_tag or not file:
         abort(400)
     
-    # Validate month_tag format (6 digits YYYYMM)
+    # Validate month_tag format (6 digits YYYYMM with valid month)
     if not (month_tag.isdigit() and len(month_tag) == 6):
+        abort(400)
+    
+    # Validate year and month ranges
+    year = int(month_tag[:4])
+    month = int(month_tag[4:])
+    if year < 2000 or year > 2099 or month < 1 or month > 12:
         abort(400)
     
     # Save the bid packet
