@@ -116,6 +116,12 @@
                                    data-test-id="update-profile-btn">
                                     <i class="fas fa-edit me-2"></i>Update Profile
                                 </a>
+                                {% if request.args.get('test') == 'true' %}
+                                <a href="{{ url_for('main.results') }}?test=true" class="btn btn-outline-success ms-2" 
+                                   data-test-id="test-drag-drop-btn">
+                                    <i class="fas fa-arrows-alt me-2"></i>Test Drag & Drop
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

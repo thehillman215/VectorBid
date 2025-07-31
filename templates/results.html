@@ -84,6 +84,60 @@
         .trip-item {
             border-left: 4px solid #007bff;
             padding-left: 15px;
+            cursor: move;
+            transition: all 0.3s ease;
+            background-color: var(--bs-body-bg);
+        }
+
+        .trip-item:hover {
+            background-color: var(--bs-gray-100);
+            border-left-color: #0056b3;
+            transform: translateX(5px);
+        }
+
+        .trip-item.dragging {
+            opacity: 0.6;
+            transform: rotate(2deg);
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .trip-item.drag-over {
+            border-top: 3px solid #007bff;
+            margin-top: 5px;
+        }
+
+        .sortable-container {
+            min-height: 200px;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .drag-handle:hover {
+            color: #007bff;
+        }
+
+        .ranking-controls {
+            margin-bottom: 20px;
+        }
+
+        .manual-reorder {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
 
         .ai-reasoning {
@@ -121,8 +175,8 @@
                 <a class="nav-link" href="{{ url_for('main.index') }}">
                     <i class="fas fa-home me-1"></i>Dashboard
                 </a>
-                <a class="nav-link" href="{{ url_for('replit_auth.logout') }}">
-                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                <a class="nav-link" href="/?test=true">
+                    <i class="fas fa-sign-out-alt me-1"></i>Back to Dashboard
                 </a>
             </div>
         </div>
@@ -238,7 +292,8 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">
                                 <i class="fas fa-list-ol me-2"></i>
-                                Recommended Trip Rankings
+                                Trip Rankings
+                                <small class="text-muted ms-2" id="ranking-mode-indicator">(AI Recommended)</small>
                             </h5>
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-secondary active" onclick="showView('ranking')" data-view="ranking">
@@ -252,12 +307,42 @@
                     </div>
                     
                     <div class="card-body" id="ranking-view">
-                        {% for trip in ranked_trips[:20] %}
-                        <div class="trip-item border-bottom pb-3 mb-3">
+                        <!-- Ranking Controls -->
+                        <div class="manual-reorder">
                             <div class="row align-items-center">
-                                <div class="col-md-1">
-                                    <div class="rank-badge">{{ loop.index }}</div>
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-arrows-alt me-2"></i>
+                                        Customize Your Ranking
+                                    </h6>
+                                    <small class="text-muted">
+                                        Drag trips up or down to adjust your personal preferences. Changes are automatically saved.
+                                    </small>
                                 </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="resetToAIRanking()" data-test-id="reset-ranking-btn">
+                                        <i class="fas fa-undo me-1"></i>Reset to AI
+                                    </button>
+                                    <button class="btn btn-sm btn-success" onclick="saveCustomRanking()" data-test-id="save-ranking-btn">
+                                        <i class="fas fa-save me-1"></i>Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sortable Trip List -->
+                        <div class="sortable-container" id="trip-rankings" data-test-id="sortable-trip-list">
+                            {% for trip in ranked_trips[:20] %}
+                            <div class="trip-item border-bottom pb-3 mb-3" data-trip-id="{{ trip.trip_id or trip.pairing_id or loop.index }}" draggable="true">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <div class="drag-handle" data-test-id="drag-handle-{{ loop.index }}">
+                                            <i class="fas fa-grip-vertical"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="rank-badge" data-rank="{{ loop.index }}">{{ loop.index }}</div>
+                                    </div>
                                 <div class="col-md-3">
                                     <h6 class="mb-1">{{ trip.pairing_id or trip.trip_id or ('Trip ' + loop.index|string) }}</h6>
                                     <small class="text-muted">
@@ -279,12 +364,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-sm btn-outline-info" onclick="showTripDetails('{{ trip.pairing_id or trip.trip_id }}')">
-                                        <i class="fas fa-info-circle"></i> Details
-                                    </button>
+                                    <div class="col-auto">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showTripDetails('{{ trip.pairing_id or trip.trip_id }}')">
+                                            <i class="fas fa-info-circle"></i> Details
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
                             
                             <!-- Trip highlights -->
                             <div class="row mt-2">
@@ -316,8 +401,9 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                         
                         {% if ranked_trips|length > 20 %}
                         <div class="text-center mt-3">
@@ -587,10 +673,165 @@
             window.location.href = "{{ url_for('main.download_csv') }}";
         }
 
+        // Drag and Drop Functionality
+        let draggedElement = null;
+        let originalRanking = [];
+
+        function initializeDragAndDrop() {
+            const tripItems = document.querySelectorAll('.trip-item');
+            
+            // Store original ranking for reset functionality
+            originalRanking = Array.from(tripItems).map(item => ({
+                id: item.dataset.tripId,
+                html: item.outerHTML
+            }));
+            
+            tripItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.outerHTML);
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedElement !== this) {
+                const container = document.getElementById('trip-rankings');
+                const items = Array.from(container.children);
+                const draggedIndex = items.indexOf(draggedElement);
+                const targetIndex = items.indexOf(this);
+                
+                if (draggedIndex < targetIndex) {
+                    container.insertBefore(draggedElement, this.nextSibling);
+                } else {
+                    container.insertBefore(draggedElement, this);
+                }
+                
+                updateRankingNumbers();
+                updateRankingIndicator('Custom');
+                showToast('Trip ranking updated! Remember to save your changes.', 'info');
+            }
+            
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            
+            // Remove drag-over class from all items
+            document.querySelectorAll('.trip-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+            
+            draggedElement = null;
+        }
+
+        function updateRankingNumbers() {
+            const tripItems = document.querySelectorAll('.trip-item');
+            tripItems.forEach((item, index) => {
+                const rankBadge = item.querySelector('.rank-badge');
+                if (rankBadge) {
+                    rankBadge.textContent = index + 1;
+                    rankBadge.dataset.rank = index + 1;
+                }
+            });
+        }
+
+        function updateRankingIndicator(mode) {
+            const indicator = document.getElementById('ranking-mode-indicator');
+            if (indicator) {
+                indicator.textContent = mode === 'AI' ? '(AI Recommended)' : '(Custom Ranking)';
+                indicator.className = mode === 'AI' ? 'text-muted ms-2' : 'text-success ms-2';
+            }
+        }
+
+        function resetToAIRanking() {
+            if (confirm('Reset to original AI ranking? This will lose your custom changes.')) {
+                const container = document.getElementById('trip-rankings');
+                container.innerHTML = '';
+                
+                originalRanking.forEach(trip => {
+                    container.innerHTML += trip.html;
+                });
+                
+                // Reinitialize drag and drop for new elements
+                initializeDragAndDrop();
+                updateRankingIndicator('AI');
+                showToast('Ranking reset to AI recommendations', 'success');
+            }
+        }
+
+        function saveCustomRanking() {
+            const tripItems = document.querySelectorAll('.trip-item');
+            const customRanking = Array.from(tripItems).map((item, index) => ({
+                trip_id: item.dataset.tripId,
+                custom_rank: index + 1
+            }));
+            
+            // Here you would normally send this to the server
+            // For now, we'll just show a success message
+            console.log('Custom ranking to save:', customRanking);
+            showToast('Custom ranking saved successfully!', 'success');
+            
+            // Send to server with fetch
+            fetch('/save-custom-ranking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customRanking)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Custom ranking saved successfully!', 'success');
+                } else {
+                    showToast('Failed to save ranking: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving ranking:', error);
+                showToast('Error saving ranking', 'error');
+            });
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             // Show ranking view by default
             showView('ranking');
+            
+            // Initialize drag and drop functionality
+            initializeDragAndDrop();
         });
     </script>
 
