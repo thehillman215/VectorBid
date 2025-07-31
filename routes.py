@@ -31,7 +31,7 @@ def index():
     user_id = request.headers.get("X-Replit-User-Id")
     if user_id:
         profile = get_profile(user_id)
-        if not profile.get('profile_completed', False):
+        if not profile or not profile.get('profile_completed', False):
             # First redirect to how-to page for new users
             return redirect(url_for('main.how_to'))
     
