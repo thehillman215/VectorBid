@@ -34,8 +34,15 @@ def index():
             # First redirect to how-to page for new users
             return redirect(url_for('main.how_to'))
     
+    # Get profile data for authenticated users
+    profile = None
+    if user_id:
+        profile = get_profile(user_id)
+    
     return render_template(
-        "index.html", user=current_user if current_user.is_authenticated else None
+        "index.html", 
+        user=current_user if current_user.is_authenticated else None,
+        profile=profile
     )
 
 

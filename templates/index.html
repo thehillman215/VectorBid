@@ -55,88 +55,87 @@
         {% if user %}
             <!-- Authenticated user content -->
             <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h2 class="card-title mb-0">
-                                <i class="fas fa-upload me-2"></i>
-                                Upload Your Schedule
-                            </h2>
-
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted mb-4">
-                                Upload your pilot schedule and let AI help you rank trips based on your preferences.
-                                Supported formats: PDF, CSV, and text files.
+                <div class="col-lg-10">
+                    <!-- Welcome Header -->
+                    <div class="card mb-4">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-vector-square fa-3x text-primary mb-3"></i>
+                            <h1 class="card-title">Welcome to VectorBid</h1>
+                            <p class="card-text text-muted">
+                                Your AI-powered pilot schedule bidding assistant
                             </p>
-
-                            <form method="POST" action="{{ url_for('main.process_schedule') }}" enctype="multipart/form-data">
-                                <div class="mb-4">
-                                    <label for="schedule_file" class="form-label">
-                                        <i class="fas fa-file me-2"></i>
-                                        Schedule File
-                                    </label>
-                                    <input type="file" class="form-control" id="schedule_file" name="schedule_file" 
-                                           accept=".pdf,.csv,.txt" required>
-                                    <div class="form-text">
-                                        Upload your schedule in PDF, CSV, or text format. The file should contain trip information including IDs, dates, routing, and duration.
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label for="preferences" class="form-label">
-                                        <i class="fas fa-heart me-2"></i>
-                                        Your Preferences
-                                    </label>
-                                    <textarea class="form-control" id="preferences" name="preferences" rows="4" 
-                                              placeholder="Describe your trip preferences in natural language. For example: 'I want weekends off and no more than 3-day trips' or 'I prefer international routes with good layovers and don't mind longer trips'" 
-                                              required></textarea>
-                                    <div class="form-text">
-                                        Describe what you're looking for in your schedule. Be specific about days off, trip length, destinations, work-life balance, etc.
-                                    </div>
-                                </div>
-
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-magic me-2"></i>
-                                        Analyze Schedule with AI
-                                    </button>
-                                </div>
-                            </form>
                         </div>
                     </div>
 
-                    <!-- Instructions card -->
+                    <!-- Available Bid Packages -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title mb-0">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Available Bid Packages
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Select a monthly bid package to analyze and get AI-powered trip rankings based on your preferences.
+                            </p>
+
+                            <!-- Bid packages will be listed here -->
+                            <div class="row" id="bid-packages">
+                                <div class="col-12 text-center py-5">
+                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No bid packages available yet</h5>
+                                    <p class="text-muted">
+                                        Monthly bid packages will appear here once uploaded by administrators.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Summary -->
                     <div class="card mt-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                How It Works
+                                <i class="fas fa-user-circle me-2"></i>
+                                Your Profile
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="text-center mb-3">
-                                        <i class="fas fa-upload fa-2x text-primary mb-2"></i>
-                                        <h6>1. Upload Schedule</h6>
-                                        <p class="text-muted small">Upload your monthly bid schedule in PDF, CSV, or text format.</p>
+                                        <i class="fas fa-building fa-2x text-primary mb-2"></i>
+                                        <h6>Airline</h6>
+                                        <p class="text-muted small">{{ profile.airline or 'Not set' }}</p>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="text-center mb-3">
-                                        <i class="fas fa-comments fa-2x text-primary mb-2"></i>
-                                        <h6>2. Share Preferences</h6>
-                                        <p class="text-muted small">Tell us what you want in natural language - weekends off, trip length, destinations, etc.</p>
+                                        <i class="fas fa-plane fa-2x text-primary mb-2"></i>
+                                        <h6>Aircraft</h6>
+                                        <p class="text-muted small">{{ profile.fleet|join(', ') if profile.fleet else 'Not set' }}</p>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="text-center mb-3">
-                                        <i class="fas fa-list-ol fa-2x text-primary mb-2"></i>
-                                        <h6>3. Get Rankings</h6>
-                                        <p class="text-muted small">AI analyzes your preferences and ranks all trips from best to worst fit.</p>
+                                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                                        <h6>Base</h6>
+                                        <p class="text-muted small">{{ profile.base or 'Not set' }}</p>
                                     </div>
                                 </div>
+                                <div class="col-md-3">
+                                    <div class="text-center mb-3">
+                                        <i class="fas fa-masks-theater fa-2x text-primary mb-2"></i>
+                                        <h6>Bid Style</h6>
+                                        <p class="text-muted small">{{ profile.persona.replace('_', ' ').title() if profile.persona else 'Not set' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="{{ url_for('welcome.wizard_start') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit me-2"></i>Update Profile
+                                </a>
                             </div>
                         </div>
                     </div>
