@@ -70,6 +70,8 @@ class UserProfile(db.Model):
     seat = db.Column(db.String(2), nullable=True)  # "CA" or "FO"
     base = db.Column(db.String, nullable=True)  # Home base airport code
     seniority = db.Column(db.Integer, nullable=True)  # Seniority number
+    persona = db.Column(db.String, nullable=True)  # Flying style persona
+    custom_preferences = db.Column(db.Text, nullable=True)  # Custom preference text
     profile_completed = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)

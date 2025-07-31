@@ -31,11 +31,18 @@ def index():
     if user_id:
         profile = get_profile(user_id)
         if not profile.get('profile_completed', False):
-            return redirect(url_for('welcome.wizard_start'))
+            # First redirect to how-to page for new users
+            return redirect(url_for('main.how_to'))
     
     return render_template(
         "index.html", user=current_user if current_user.is_authenticated else None
     )
+
+
+@bp.get("/how-to")
+def how_to():
+    """Full-page how-to guide for new users."""
+    return render_template("how_to.html")
 
 
 @bp.post("/process")

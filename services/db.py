@@ -42,6 +42,8 @@ def get_profile(uid: str) -> Dict[str, Any]:
         "seat": profile.seat,
         "base": profile.base,
         "seniority": profile.seniority,
+        "persona": profile.persona,
+        "custom_preferences": profile.custom_preferences,
         "profile_completed": profile.profile_completed
     }
 
@@ -69,6 +71,8 @@ def save_profile(uid: str, data: Dict[str, Any]) -> bool:
         profile.seat = data.get("seat")
         profile.base = data.get("base")
         profile.seniority = data.get("seniority")
+        profile.persona = data.get("persona")
+        profile.custom_preferences = data.get("custom_preferences")
         profile.profile_completed = data.get("profile_completed", False)
         
         # Handle fleet data as JSON

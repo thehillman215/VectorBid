@@ -84,7 +84,7 @@ def wizard_step(step):
                              wizard_data=session['wizard_data'])
     
     elif step == 3:
-        # Process final step and save profile
+        # Process base and seniority, then go to persona selection
         base = request.form.get('base', '').strip().upper()
         seniority_str = request.form.get('seniority', '').strip()
         
@@ -97,9 +97,32 @@ def wizard_step(step):
         if seniority_str and seniority_str.isdigit():
             seniority = int(seniority_str)
         
-        # Update wizard data with final inputs
         session['wizard_data']['base'] = base
         session['wizard_data']['seniority'] = seniority
+        session.modified = True
+        
+        return render_template("welcome/step4.html",
+                             wizard_data=session['wizard_data'])
+    
+    elif step == 4:
+        # Process persona selection and save complete profile
+        persona = request.form.get('persona', '').strip()
+        custom_preferences = request.form.get('custom_preferences', '').strip()
+        
+        if not persona:
+            return render_template("welcome/step4.html",
+                                 wizard_data=session['wizard_data'],
+                                 error="Please select a flying style or create a custom profile")
+        
+        if persona == 'custom' and not custom_preferences:
+            return render_template("welcome/step4.html",
+                                 wizard_data=session['wizard_data'],
+                                 error="Please describe your custom preferences")
+        
+        # Update wizard data with persona
+        session['wizard_data']['persona'] = persona
+        if persona == 'custom':
+            session['wizard_data']['custom_preferences'] = custom_preferences
         session['wizard_data']['profile_completed'] = True
         
         # Save complete profile to database
@@ -113,7 +136,7 @@ def wizard_step(step):
             response.headers['HX-Redirect'] = url_for('main.index')
             return response
         else:
-            return render_template("welcome/step3.html",
+            return render_template("welcome/step4.html",
                                  wizard_data=session['wizard_data'],
                                  error="Error saving profile. Please try again.")
     
