@@ -1,0 +1,344 @@
+openapi: 3.1.0
+info:
+  title: VectorBid API
+  version: 1.0.0
+  description: |
+    VectorBid is an AI-powered pilot schedule bidding assistant that helps airline pilots analyze and rank their trip bids based on personal preferences.
+    
+    The application provides both web interface and administrative API endpoints for managing bid packets and processing schedule files.
+  contact:
+    name: VectorBid Support
+  license:
+    name: MIT
+servers:
+  - url: https://{replit-domain}
+    description: Production server
+    variables:
+      replit-domain:
+        default: your-repl.replit.app
+        description: Your Replit deployment domain
+  - url: http://localhost:5000
+    description: Development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Admin Bearer token for administrative endpoints
+
+  schemas:
+    Trip:
+      type: object
+      properties:
+        trip_id:
+          type: string
+          description: Unique identifier for the trip
+          example: "UA123"
+        days:
+          type: integer
+          description: Duration of the trip in days
+          example: 3
+        credit_hours:
+          type: number
+          format: float
+          description: Credit hours earned for the trip
+          example: 12.5
+        routing:
+          type: string
+          description: Flight routing information
+          example: "SFO-DEN-ORD"
+        dates:
+          type: string
+          description: Trip dates
+          example: "12NOV-15NOV"
+        includes_weekend:
+          type: boolean
+          description: Whether the trip includes weekend days
+          example: true
+        raw:
+          type: string
+          description: Raw trip data from schedule file
+          example: "UA123 3D 12.5 SFO-DEN-ORD 12NOV-15NOV"
+
+    RankedTrip:
+      allOf:
+        - $ref: '#/components/schemas/Trip'
+        - type: object
+          properties:
+            rank:
+              type: integer
+              description: AI-assigned rank (1 is best)
+              example: 1
+            comment:
+              type: string
+              description: AI-generated explanation for the ranking
+              example: "Perfect for work-life balance with no weekend flying"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid file format"
+        details:
+          type: string
+          description: Additional error details
+          example: "File must be PDF, CSV, or TXT format"
+
+    AdminUploadResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok]
+          description: Upload status
+          example: "ok"
+        stored:
+          type: string
+          pattern: '^[0-9]{6}$'
+          description: Month tag that was stored (YYYYMM format)
+          example: "202508"
+
+    BidPacket:
+      type: object
+      properties:
+        month_tag:
+          type: string
+          pattern: '^[0-9]{6}$'
+          description: Month identifier in YYYYMM format
+          example: "202508"
+        filename:
+          type: string
+          description: Original filename of the uploaded PDF
+          example: "august_2025_bid.pdf"
+        file_size:
+          type: integer
+          description: File size in bytes
+          example: 1048576
+        content_type:
+          type: string
+          description: MIME type of the file
+          example: "application/pdf"
+        uploaded_at:
+          type: string
+          format: date-time
+          description: Timestamp when the file was uploaded
+          example: "2025-07-31T12:00:00Z"
+
+  responses:
+    Unauthorized:
+      description: Authentication required or invalid token
+      content:
+        text/html:
+          schema:
+            type: string
+            example: "<!doctype html><html><title>401 Unauthorized</title>..."
+    
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        text/html:
+          schema:
+            type: string
+            example: "<!doctype html><html><title>400 Bad Request</title>..."
+    
+    MethodNotAllowed:
+      description: HTTP method not allowed for this endpoint
+      content:
+        text/html:
+          schema:
+            type: string
+            example: "<!doctype html><html><title>405 Method Not Allowed</title>..."
+
+paths:
+  /:
+    get:
+      summary: Home page
+      description: Main landing page for VectorBid application
+      operationId: getHomePage
+      responses:
+        '200':
+          description: Home page rendered successfully
+          content:
+            text/html:
+              schema:
+                type: string
+                description: HTML content of the home page
+      tags:
+        - Web Interface
+
+  /process:
+    post:
+      summary: Process schedule file
+      description: |
+        Upload a schedule file (PDF, CSV, or TXT) and provide preferences to get AI-ranked trip recommendations.
+        
+        The system will:
+        1. Parse the uploaded schedule file to extract trip data
+        2. Use AI to rank trips based on your preferences
+        3. Return a results page with ranked trips
+      operationId: processSchedule
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - schedule_file
+                - preferences
+              properties:
+                schedule_file:
+                  type: string
+                  format: binary
+                  description: Schedule file in PDF, CSV, or TXT format
+                preferences:
+                  type: string
+                  description: Natural language description of your trip preferences
+                  example: "I prefer shorter trips with no weekend flying and routes that include Denver"
+      responses:
+        '200':
+          description: Schedule processed successfully, returns results page
+          content:
+            text/html:
+              schema:
+                type: string
+                description: HTML results page with ranked trips
+        '302':
+          description: Redirect to home page with error message
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "/"
+      tags:
+        - Web Interface
+
+  /download_csv:
+    get:
+      summary: Download ranked trips as CSV
+      description: |
+        Download the previously processed ranked trips as a CSV file.
+        Requires an active session with ranked trip data.
+      operationId: downloadCSV
+      responses:
+        '200':
+          description: CSV file with ranked trips
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: "CSV data with columns: rank, trip_id, days, credit_hours, routing, includes_weekend, comment"
+              example: |
+                rank,trip_id,days,credit_hours,routing,includes_weekend,comment
+                1,UA123,3,12.5,SFO-DEN-ORD,true,Perfect for work-life balance
+                2,UA456,2,8.0,LAX-SEA,false,Short trip with good routing
+        '302':
+          description: Redirect to home page if no ranked trips available
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "/"
+      tags:
+        - Web Interface
+
+  /replit_auth/logout:
+    get:
+      summary: User logout
+      description: Log out the current user and redirect to Replit's logout endpoint
+      operationId: logout
+      responses:
+        '302':
+          description: Redirect to Replit logout URL
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "https://replit.com/oidc/session/end?client_id=...&post_logout_redirect_uri=..."
+      tags:
+        - Authentication
+
+  /replit_auth/error:
+    get:
+      summary: Authentication error page
+      description: Display authentication error page when OAuth fails
+      operationId: authError
+      responses:
+        '403':
+          description: Authentication error page
+          content:
+            text/html:
+              schema:
+                type: string
+                description: HTML error page
+      tags:
+        - Authentication
+
+  /admin/upload-bid:
+    post:
+      summary: Upload monthly bid packet
+      description: |
+        Administrative endpoint for uploading monthly bid packet PDFs.
+        
+        **Security**: Requires Bearer token authentication via Authorization header.
+        
+        **Month Tag Format**: Must be exactly 6 digits in YYYYMM format where:
+        - YYYY is between 2000-2099
+        - MM is between 01-12
+        
+        **File Requirements**: Must be a PDF file
+        
+        **Storage**: PDF is stored in PostgreSQL database with metadata
+      operationId: uploadBidPacket
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - month_tag
+                - file
+              properties:
+                month_tag:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+                  description: Month identifier in YYYYMM format (e.g., 202508 for August 2025)
+                  example: "202508"
+                file:
+                  type: string
+                  format: binary
+                  description: PDF file containing the monthly bid packet
+      responses:
+        '200':
+          description: Bid packet uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUploadResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+      tags:
+        - Administration
+
+tags:
+  - name: Web Interface
+    description: Main web application endpoints for pilot users
+  - name: Authentication
+    description: User authentication and session management
+  - name: Administration
+    description: Administrative endpoints for managing bid packets (requires authentication)
+
+externalDocs:
+  description: VectorBid Documentation
+  url: https://github.com/your-repo/vectorbid/blob/main/README.md

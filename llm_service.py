@@ -11,7 +11,11 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
     logging.warning('OPENAI_API_KEY not set – LLM ranking disabled.')
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+def get_openai_client():
+    """Get OpenAI client instance, created only when needed."""
+    if not OPENAI_API_KEY:
+        return None
+    return OpenAI(api_key=OPENAI_API_KEY)
 
 SYSTEM_PROMPT = """You are VectorBid, an AI assistant that helps airline pilots choose bid trips.
 Rank trips based on how well they satisfy the pilot's stated preferences.
@@ -34,6 +38,10 @@ def _summarize_trip(trip: Dict) -> str:
 def rank_trips_with_ai(trips: List[Dict], preferences: str) -> List[Dict]:
     if not OPENAI_API_KEY:
         raise RuntimeError('OPENAI_API_KEY missing – cannot call OpenAI.')
+
+    client = get_openai_client()
+    if not client:
+        raise RuntimeError('Failed to initialize OpenAI client.')
 
     # Summarize trips (max 50 to keep tokens under control)
     summaries = [_summarize_trip(t) for t in trips[:50]]
