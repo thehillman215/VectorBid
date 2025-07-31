@@ -45,3 +45,17 @@ class ScheduleData(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     user = db.relationship(User, backref='schedules')
+
+
+class BidPacket(db.Model):
+    __tablename__ = 'bid_packets'
+    id = db.Column(db.Integer, primary_key=True)
+    month_tag = db.Column(db.String(6), unique=True, nullable=False)  # YYYYMM format
+    filename = db.Column(db.String, nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)  # size in bytes
+    content_type = db.Column(db.String, nullable=False, default='application/pdf')
+    pdf_data = db.Column(db.LargeBinary, nullable=False)  # bytea column for PDF content
+    uploaded_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    
+    def __repr__(self):
+        return f'<BidPacket {self.month_tag} ({self.file_size} bytes)>'

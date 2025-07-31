@@ -32,6 +32,6 @@ def upload_bid():
         abort(400)
     
     # Save the bid packet
-    services.bids.save_bid_packet(month_tag, file.stream)
+    bid_packet = services.bids.save_bid_packet(month_tag, file.stream, file.filename)
     
     return jsonify({"status": "ok", "stored": month_tag})

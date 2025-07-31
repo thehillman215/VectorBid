@@ -26,39 +26,42 @@ def dummy_pdf():
         return f.read()
 
 
-def test_upload_bid_happy_path(client, dummy_pdf, tmp_path):
+def test_upload_bid_happy_path(client, dummy_pdf):
     """Test successful bid upload with correct token."""
-    # Create temporary bids directory for this test
-    bids_dir = tmp_path / "bids"
-    bids_dir.mkdir()
+    from io import BytesIO
+    from models import BidPacket
+    from extensions import db
     
-    # Mock the bids directory by changing working directory
-    original_cwd = os.getcwd()
-    os.chdir(tmp_path)
+    # Clean up any existing test data
+    existing = BidPacket.query.filter_by(month_tag='202508').first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
     
-    try:
-        from io import BytesIO
-        response = client.post(
-            '/admin/upload-bid?token=letmein',
-            data={
-                'month_tag': '202508',
-                'file': (BytesIO(dummy_pdf), 'test_bid.pdf')
-            }
-        )
-        
-        assert response.status_code == 200
-        
-        data = json.loads(response.data)
-        assert data['status'] == 'ok'
-        assert data['stored'] == '202508'
-        
-        # Verify file was saved
-        saved_file = bids_dir / "bid_202508.pdf"
-        assert saved_file.exists()
-        assert len(saved_file.read_bytes()) > 0
-        
-    finally:
-        os.chdir(original_cwd)
+    response = client.post(
+        '/admin/upload-bid?token=letmein',
+        data={
+            'month_tag': '202508',
+            'file': (BytesIO(dummy_pdf), 'test_bid.pdf')
+        }
+    )
+    
+    assert response.status_code == 200
+    
+    data = json.loads(response.data)
+    assert data['status'] == 'ok'
+    assert data['stored'] == '202508'
+    
+    # Verify file was saved to database
+    bid_packet = BidPacket.query.filter_by(month_tag='202508').first()
+    assert bid_packet is not None
+    assert bid_packet.filename == 'test_bid.pdf'
+    assert bid_packet.file_size == len(dummy_pdf)
+    assert bid_packet.pdf_data == dummy_pdf
+    
+    # Clean up
+    db.session.delete(bid_packet)
+    db.session.commit()
 
 
 def test_upload_bid_bad_token(client, dummy_pdf):

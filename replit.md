@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **User**: Core user model for authentication (required for Replit Auth)
 - **OAuth**: OAuth token storage for authentication sessions
 - **ScheduleData**: Stores user's schedule analysis history including preferences, trip data, and AI rankings
+- **BidPacket**: Stores monthly bid packet PDFs in PostgreSQL bytea columns with metadata (month_tag, filename, file_size, content_type, upload timestamp)
 
 ## Authentication System
 - **Replit Auth**: Integrated OAuth authentication
@@ -172,4 +173,5 @@ Preferred communication style: Simple, everyday language.
 - **Structure**: Fixed Flask app creation to use factory pattern consistently
 - **Testing**: Verified file upload, token protection, and method validation work correctly
 - **Comprehensive Testing**: Created pytest suite with 7 test cases covering happy path, authentication, validation, and error conditions
-- **Status**: Production ready - admin can upload monthly bid packets via API with full test coverage
+- **Database Storage Refactor**: Migrated from file-based storage to PostgreSQL bytea columns with metadata tables
+- **Status**: Production ready - admin can upload monthly bid packets via API with full test coverage and database persistence
