@@ -38,12 +38,16 @@ def test_upload_bid_happy_path(client, dummy_pdf):
         db.session.delete(existing)
         db.session.commit()
     
+    # Get admin token from environment
+    admin_token = os.environ.get('ADMIN_BEARER_TOKEN', 'test-token')
+    
     response = client.post(
-        '/admin/upload-bid?token=letmein',
+        '/admin/upload-bid',
         data={
             'month_tag': '202508',
             'file': (BytesIO(dummy_pdf), 'test_bid.pdf')
-        }
+        },
+        headers={'Authorization': f'Bearer {admin_token}'}
     )
     
     assert response.status_code == 200
@@ -65,21 +69,22 @@ def test_upload_bid_happy_path(client, dummy_pdf):
 
 
 def test_upload_bid_bad_token(client, dummy_pdf):
-    """Test upload with incorrect token returns 403."""
+    """Test upload with incorrect Bearer token returns 401."""
     from io import BytesIO
     response = client.post(
-        '/admin/upload-bid?token=wrongtoken',
+        '/admin/upload-bid',
         data={
             'month_tag': '202508',
             'file': (BytesIO(dummy_pdf), 'test_bid.pdf')
-        }
+        },
+        headers={'Authorization': 'Bearer wrongtoken'}
     )
     
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_upload_bid_no_token(client, dummy_pdf):
-    """Test upload without token returns 403."""
+    """Test upload without Authorization header returns 401."""
     from io import BytesIO
     response = client.post(
         '/admin/upload-bid',
@@ -89,17 +94,20 @@ def test_upload_bid_no_token(client, dummy_pdf):
         }
     )
     
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_upload_bid_missing_month_tag(client, dummy_pdf):
     """Test upload without month_tag returns 400."""
     from io import BytesIO
+    admin_token = os.environ.get('ADMIN_BEARER_TOKEN', 'test-token')
+    
     response = client.post(
-        '/admin/upload-bid?token=letmein',
+        '/admin/upload-bid',
         data={
             'file': (BytesIO(dummy_pdf), 'test_bid.pdf')
-        }
+        },
+        headers={'Authorization': f'Bearer {admin_token}'}
     )
     
     assert response.status_code == 400
@@ -107,11 +115,14 @@ def test_upload_bid_missing_month_tag(client, dummy_pdf):
 
 def test_upload_bid_missing_file(client):
     """Test upload without file returns 400."""
+    admin_token = os.environ.get('ADMIN_BEARER_TOKEN', 'test-token')
+    
     response = client.post(
-        '/admin/upload-bid?token=letmein',
+        '/admin/upload-bid',
         data={
             'month_tag': '202508'
-        }
+        },
+        headers={'Authorization': f'Bearer {admin_token}'}
     )
     
     assert response.status_code == 400
@@ -120,22 +131,54 @@ def test_upload_bid_missing_file(client):
 def test_upload_bid_invalid_month_tag(client, dummy_pdf):
     """Test upload with invalid month_tag format returns 400."""
     from io import BytesIO
+    admin_token = os.environ.get('ADMIN_BEARER_TOKEN', 'test-token')
     invalid_tags = ['2025', '20251', '2025123', 'abc123', '202513']
     
     for invalid_tag in invalid_tags:
         response = client.post(
-            '/admin/upload-bid?token=letmein',
+            '/admin/upload-bid',
             data={
                 'month_tag': invalid_tag,
                 'file': (BytesIO(dummy_pdf), 'test_bid.pdf')
-            }
+            },
+            headers={'Authorization': f'Bearer {admin_token}'}
         )
         
         assert response.status_code == 400, f"Failed for month_tag: {invalid_tag}"
 
 
+def test_upload_bid_invalid_auth_format(client, dummy_pdf):
+    """Test upload with invalid Authorization header format returns 401."""
+    from io import BytesIO
+    
+    # Test various invalid formats
+    invalid_headers = [
+        'Basic dGVzdDp0ZXN0',  # Basic auth instead of Bearer
+        'bearer test-token',  # lowercase 'bearer'
+        'Bearer',  # Missing token
+        'test-token',  # Missing 'Bearer' prefix
+    ]
+    
+    for header in invalid_headers:
+        response = client.post(
+            '/admin/upload-bid',
+            data={
+                'month_tag': '202508',
+                'file': (BytesIO(dummy_pdf), 'test_bid.pdf')
+            },
+            headers={'Authorization': header}
+        )
+        
+        assert response.status_code == 401, f"Failed for header: {header}"
+
+
 def test_upload_bid_get_method_not_allowed(client):
     """Test GET request to upload endpoint returns 405."""
-    response = client.get('/admin/upload-bid?token=letmein')
+    admin_token = os.environ.get('ADMIN_BEARER_TOKEN', 'test-token')
+    
+    response = client.get(
+        '/admin/upload-bid',
+        headers={'Authorization': f'Bearer {admin_token}'}
+    )
     
     assert response.status_code == 405

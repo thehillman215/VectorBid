@@ -165,13 +165,14 @@ Preferred communication style: Simple, everyday language.
 - **Feature**: Added administrative endpoint for uploading monthly bid packet PDFs
 - **Implementation**:
   - Created new admin blueprint with `/admin/upload-bid` POST endpoint
-  - Token-based protection using query parameter `?token=letmein`
+  - Bearer token authentication using Authorization header with `secrets.compare_digest` validation
   - Form-data fields: `month_tag` (YYYYMM format) and `file` (PDF upload)
-  - File storage service in `services/bids.py` saves PDFs to local `bids/` directory
+  - Database storage service in `services/bids.py` saves PDFs to PostgreSQL bytea columns
   - Returns JSON response: `{"status":"ok","stored":"202508"}`
-- **Security**: Protected by simple token authentication to prevent unauthorized uploads
+- **Security**: Protected by Bearer token authentication middleware preventing timing attacks
 - **Structure**: Fixed Flask app creation to use factory pattern consistently
 - **Testing**: Verified file upload, token protection, and method validation work correctly
-- **Comprehensive Testing**: Created pytest suite with 7 test cases covering happy path, authentication, validation, and error conditions
-- **Database Storage Refactor**: Migrated from file-based storage to PostgreSQL bytea columns with metadata tables
-- **Status**: Production ready - admin can upload monthly bid packets via API with full test coverage and database persistence
+- **Comprehensive Testing**: Created pytest suite with 8 test cases covering authentication, validation, and error conditions
+- **Database Storage**: Migrated from file-based storage to PostgreSQL bytea columns with metadata tables
+- **Authentication Enhancement**: Upgraded from query parameter to secure Bearer token with ADMIN_BEARER_TOKEN environment variable
+- **Status**: Production ready - admin can upload monthly bid packets via secure API with full test coverage and database persistence
