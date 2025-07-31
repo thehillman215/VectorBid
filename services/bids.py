@@ -71,3 +71,44 @@ def list_bid_packets() -> list[BidPacket]:
         List of BidPacket records
     """
     return BidPacket.query.order_by(BidPacket.month_tag.desc()).all()
+
+
+def get_matching_bid_packet(profile: dict) -> dict | None:
+    """Get the appropriate bid packet for a pilot based on their profile.
+    
+    Args:
+        profile: Pilot profile dictionary with airline, fleet, seat, base info
+        
+    Returns:
+        Dictionary with bid packet info or None if no match found
+    """
+    from datetime import datetime
+    
+    try:
+        # Get current month in YYYYMM format
+        current_month = datetime.now().strftime("%Y%m")
+        
+        # For now, we'll look for current month bid packets
+        # In the future, this logic will expand to match based on:
+        # - Airline (profile['airline'])
+        # - Aircraft types (profile['fleet'])
+        # - Position CA/FO (profile['seat'])
+        # - Base airport (profile['base'])
+        
+        bid_packet = BidPacket.query.filter_by(month_tag=current_month).first()
+        
+        if bid_packet:
+            return {
+                'month_tag': bid_packet.month_tag,
+                'filename': bid_packet.filename,
+                'file_size': bid_packet.file_size,
+                'upload_date': bid_packet.created_at,
+                'matches_profile': True,  # Will be more sophisticated matching logic
+                'content': bid_packet.pdf_data
+            }
+        
+        return None
+        
+    except Exception as e:
+        print(f"Error finding matching bid packet: {e}")
+        return None

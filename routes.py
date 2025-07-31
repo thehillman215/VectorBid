@@ -20,6 +20,7 @@ from flask_login import current_user
 from schedule_parser import parse_schedule
 from llm_service import rank_trips_with_ai
 from services.db import get_profile, save_profile
+from services.bids import get_matching_bid_packet
 
 bp = Blueprint("main", __name__)
 
@@ -34,15 +35,19 @@ def index():
             # First redirect to how-to page for new users
             return redirect(url_for('main.how_to'))
     
-    # Get profile data for authenticated users
+    # Get profile data and matching bid package for authenticated users
     profile = None
+    bid_package = None
     if user_id:
         profile = get_profile(user_id)
+        if profile and profile.get('profile_completed', False):
+            bid_package = get_matching_bid_packet(profile)
     
     return render_template(
         "index.html", 
         user=current_user if current_user.is_authenticated else None,
-        profile=profile
+        profile=profile,
+        bid_package=bid_package
     )
 
 
@@ -173,6 +178,119 @@ def download_csv():
         as_attachment=True,
         download_name="vectorbid_ranked_trips.csv",
     )
+
+
+@bp.route("/analyze_bid_package", methods=["POST"])
+def analyze_bid_package():
+    """Analyze bid package with AI based on user preferences."""
+    user_id = get_current_user_id()
+    if not user_id:
+        return redirect(url_for("replit_auth.login"))
+    
+    # Get profile and preferences
+    profile = get_profile(user_id)
+    if not profile or not profile.get('profile_completed', False):
+        flash("Please complete your profile first.", "error")
+        return redirect(url_for('welcome.wizard_start'))
+    
+    month_tag = request.form.get('month_tag')
+    if not month_tag:
+        flash("No bid package selected.", "error")
+        return redirect(url_for('main.index'))
+    
+    try:
+        # Get the bid package content
+        from services.bids import get_bid_packet
+        bid_packet = get_bid_packet(month_tag)
+        
+        if not bid_packet:
+            flash("Bid package not found.", "error")
+            return redirect(url_for('main.index'))
+        
+        # Parse the PDF content
+        trip_data = parse_schedule(bid_packet.pdf_data, bid_packet.filename)
+        
+        if not trip_data:
+            flash("Could not parse trip data from bid package.", "error")
+            return redirect(url_for('main.index'))
+        
+        # Get user preferences based on profile
+        preferences = build_preferences_from_profile(profile)
+        
+        # Rank trips using AI
+        ranked_trips = rank_trips_with_ai(trip_data, preferences)
+        
+        if not ranked_trips:
+            flash("Could not analyze trips. Please try again.", "error")
+            return redirect(url_for('main.index'))
+        
+        # Store results in session for results page
+        session['ranked_trips'] = ranked_trips
+        session['trip_analysis'] = {
+            'total_trips': len(trip_data),
+            'preferences': preferences,
+            'bid_package': {
+                'filename': bid_packet.filename,
+                'month_tag': month_tag
+            }
+        }
+        
+        return redirect(url_for('main.results'))
+        
+    except Exception as e:
+        flash(f"Error analyzing bid package: {str(e)}", "error")
+        return redirect(url_for('main.index'))
+
+
+def build_preferences_from_profile(profile):
+    """Build preference string from user profile."""
+    preferences = []
+    
+    # Add persona-based preferences
+    if profile.get('persona'):
+        persona_preferences = {
+            'work_life_balance': "I prioritize work-life balance with predictable schedules, weekends off when possible, and reasonable trip lengths that allow for good rest between duties.",
+            'credit_hunter': "I want to maximize flight time and credit hours. I prefer longer trips, back-to-back flying, and sequences that build the most hours efficiently.",
+            'adventure_seeker': "I love variety and new destinations. I prefer international routes, interesting layovers, and diverse trip patterns that take me to different places.",
+            'commuter_friendly': "As a commuter, I need trips that work with my travel to/from base. I prefer trips that start/end at convenient times and allow for reliable commute connections."
+        }
+        
+        if profile['persona'] in persona_preferences:
+            preferences.append(persona_preferences[profile['persona']])
+    
+    # Add custom preferences if provided
+    if profile.get('custom_preferences'):
+        preferences.append(profile['custom_preferences'])
+    
+    # Add base-specific preferences
+    if profile.get('base'):
+        preferences.append(f"I'm based at {profile['base']} so trips starting/ending there are preferred.")
+    
+    # Add aircraft preferences
+    if profile.get('fleet'):
+        fleet_str = ', '.join(profile['fleet'])
+        preferences.append(f"I'm qualified on {fleet_str} aircraft.")
+    
+    return ' '.join(preferences) if preferences else "Please rank trips based on general pilot preferences for good work-life balance."
+
+
+@bp.route("/results")
+def results():
+    """Display trip ranking results."""
+    # Apply profile requirement check
+    user_id = get_current_user_id()
+    if user_id:
+        profile = get_profile(user_id)
+        if not profile or not profile.get('profile_completed', False):
+            return redirect(url_for('welcome.wizard_start'))
+    
+    if 'ranked_trips' not in session:
+        flash("No analysis results found. Please analyze a bid package first.", "error")
+        return redirect(url_for('main.index'))
+    
+    return render_template("results.html", 
+                         ranked_trips=session['ranked_trips'],
+                         analysis=session.get('trip_analysis', {}))
 
 
 @bp.route("/welcome", methods=["GET", "POST"])
