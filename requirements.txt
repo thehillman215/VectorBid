@@ -20,3 +20,6 @@ pytest-cov
 requests
 ruff
 replit
+axe-playwright-python
+playwright
+pytest-playwright

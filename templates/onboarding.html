@@ -102,7 +102,7 @@
 
                         <div class="mb-4">
                             <label class="form-label">Airline</label>
-                            <select class="form-select" name="airline" required>
+                            <select class="form-select" name="airline" data-test-id="airline-select" required>
                                 <option value="">Select your airline</option>
                                 <option value="United" {{ 'selected' if profile.airline == 'United' }}>United Airlines</option>
                                 <option value="Delta" {{ 'selected' if profile.airline == 'Delta' }}>Delta Air Lines</option>
@@ -114,8 +114,8 @@
 
                         <div class="mb-4">
                             <label class="form-label">Base</label>
-                            <input type="text" class="form-control" name="base" placeholder="e.g. IAH, DEN, LAX" 
-                                   value="{{ profile.base or '' }}" required>
+                            <input type="text" class="form-control" name="base" data-test-id="base-input" 
+                                   placeholder="e.g. IAH, DEN, LAX" value="{{ profile.base or '' }}" required>
                             <small class="form-text text-muted">Enter your home base airport code</small>
                         </div>
 
@@ -123,25 +123,28 @@
                             <label class="form-label">Position</label>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <div class="seat-option {{ 'selected' if profile.seat == 'CA' }}" onclick="selectSeat('CA')">
+                                    <div class="seat-option {{ 'selected' if profile.seat == 'CA' }}" 
+                                         data-test-id="captain-option" onclick="selectSeat('CA')">
                                         <i class="fas fa-user-tie fa-2x mb-2"></i>
                                         <h5>Captain</h5>
                                         <p class="text-muted mb-0">Left seat</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <div class="seat-option {{ 'selected' if profile.seat == 'FO' }}" onclick="selectSeat('FO')">
+                                    <div class="seat-option {{ 'selected' if profile.seat == 'FO' }}" 
+                                         data-test-id="first-officer-option" onclick="selectSeat('FO')">
                                         <i class="fas fa-user fa-2x mb-2"></i>
                                         <h5>First Officer</h5>
                                         <p class="text-muted mb-0">Right seat</p>
                                     </div>
                                 </div>
                             </div>
-                            <input type="hidden" name="seat" id="seat-input" value="{{ profile.seat or '' }}" required>
+                            <input type="hidden" name="seat" id="seat-input" data-test-id="seat-input" 
+                                   value="{{ profile.seat or '' }}" required>
                         </div>
 
                         <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg" data-test-id="step1-submit-btn">
                                 Next <i class="fas fa-arrow-right ms-2"></i>
                             </button>
                         </div>
@@ -157,29 +160,32 @@
                         <div class="mb-4">
                             <label class="form-label">Aircraft Fleet</label>
                             <p class="text-muted">Select all aircraft types you're qualified on</p>
-                            <div id="fleet-selection">
+                            <div id="fleet-selection" data-test-id="fleet-selection">
                                 {% for aircraft in ['737', '320', '757/767', '787', 'A350', 'A330', 'Other'] %}
                                     <span class="fleet-chip {{ 'selected' if aircraft in profile.fleet }}" 
+                                          data-test-id="fleet-chip-{{ aircraft|replace('/', '-') }}"
                                           onclick="toggleFleet('{{ aircraft }}')">
                                         {{ aircraft }}
                                     </span>
                                 {% endfor %}
                             </div>
-                            <input type="hidden" name="fleet" id="fleet-input" value="{{ profile.fleet|join(',') if profile.fleet }}">
+                            <input type="hidden" name="fleet" id="fleet-input" data-test-id="fleet-input" 
+                                   value="{{ profile.fleet|join(',') if profile.fleet }}">
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label">Seniority Number</label>
-                            <input type="number" class="form-control" name="seniority" 
+                            <input type="number" class="form-control" name="seniority" data-test-id="seniority-input"
                                    placeholder="e.g. 1250" value="{{ profile.seniority or '' }}" required>
                             <small class="form-text text-muted">Your current seniority number at your airline</small>
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('main.onboarding', step=1) }}" class="btn btn-outline-secondary">
+                            <a href="{{ url_for('main.onboarding', step=1) }}" class="btn btn-outline-secondary" 
+                               data-test-id="step2-back-btn">
                                 <i class="fas fa-arrow-left me-2"></i>Back
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg" data-test-id="step2-submit-btn">
                                 Next <i class="fas fa-arrow-right ms-2"></i>
                             </button>
                         </div>
@@ -220,10 +226,11 @@
                         <form method="POST" action="{{ url_for('main.onboarding_submit') }}">
                             <input type="hidden" name="step" value="3">
                             <div class="d-flex justify-content-between">
-                                <a href="{{ url_for('main.onboarding', step=2) }}" class="btn btn-outline-secondary">
+                                <a href="{{ url_for('main.onboarding', step=2) }}" class="btn btn-outline-secondary"
+                                   data-test-id="step3-back-btn">
                                     <i class="fas fa-arrow-left me-2"></i>Back
                                 </a>
-                                <button type="submit" class="btn btn-success btn-lg">
+                                <button type="submit" class="btn btn-success btn-lg" data-test-id="step3-complete-btn">
                                     <i class="fas fa-rocket me-2"></i>Get Started!
                                 </button>
                             </div>

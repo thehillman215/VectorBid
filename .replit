@@ -2,7 +2,7 @@ modules = ["python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["freetype", "git", "gumbo", "harfbuzz", "jbig2dec", "libjpeg_turbo", "libyaml", "mupdf", "openjpeg", "openssl", "postgresql", "swig", "unzipNLS", "xcbuild"]
+packages = ["freetype", "git", "gitFull", "gumbo", "harfbuzz", "jbig2dec", "libjpeg_turbo", "libyaml", "mupdf", "openjpeg", "openssl", "playwright-driver", "postgresql", "swig", "unzipNLS", "xcbuild"]
 
 [deployment]
 deploymentTarget = "autoscale"

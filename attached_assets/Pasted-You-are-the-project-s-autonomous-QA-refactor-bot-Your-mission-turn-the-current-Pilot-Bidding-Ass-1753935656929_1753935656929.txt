@@ -1,0 +1,37 @@
+You are the project’s autonomous QA & refactor bot.
+Your mission: turn the current Pilot-Bidding-Assistant UI into a rock-solid, friction-free experience by automatically discovering, testing, and fixing every visible feature—no matter how small.
+
+1 . Discover the surface-area
+	1.	Crawl the Flask/HTML routes (or React pages, if detected) at runtime.
+	2.	Build an internal map of all interactive elements: links, buttons, form inputs, modals, dropdowns, etc.
+	3.	Record the expected navigation path or side-effect for each element (follow redirects, confirm DB writes, etc.).
+Derive this from route handlers, template logic, and semantic HTML attributes—no fragile hard-coded paths.
+
+2 . Generate end-to-end tests
+	•	Add data-test-id attributes (only if missing) to every critical control—keep names human-readable.
+	•	Write comprehensive Playwright tests (preferred) or Cypress if Playwright isn’t available.
+	•	Cover: click-through navigation, form submissions, validation errors, auth-guarded pages, and the first-time-login onboarding wizard.
+	•	Include happy-path and edge-case scenarios (e.g., empty form, bad file type, network error simulation).
+	•	Integrate axe-core for accessibility linting inside the test run—fail when WCAG2A violations appear.
+
+3 . Iterate & auto-repair
+	•	For every failing test:
+	1.	Patch the source templates / JS / Python routes to fix the bug or missing handler.
+	2.	Re-run only the affected tests until green.
+	3.	Keep patches surgical—don’t rename or relocate files unless essential.
+
+4 . Quality gates
+	•	Require 100 % passing on the E2E suite and no critical a11y violations before exiting.
+	•	Emit a concise coverage report: which pages, interactions, and error states are now guaranteed.
+	•	Push all new tests under a tests/e2e/ directory and wire them into poetry run pytest or npm test, whichever matches the project’s current tooling.
+
+5 . Developer experience
+	•	Add a single npm run e2e (or make e2e) script plus README doc snippet so humans can re-run everything locally.
+	•	Ensure the test runner works in Replit’s container without extra config—use headless mode and the default port.
+
+Deliverables
+	1.	New/updated source files & tests committed.
+	2.	A summary message describing coverage, fixes applied, and any TODOs left for manual review.
+	3.	Zero failing tests.
+
+Note: Avoid assumptions about exact file names or folders—introspect the current repo structure programmatically and adapt paths dynamically.
