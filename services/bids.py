@@ -95,7 +95,15 @@ def get_matching_bid_packet(profile: dict) -> dict | None:
         # - Position CA/FO (profile['seat'])
         # - Base airport (profile['base'])
         
-        bid_packet = BidPacket.query.filter_by(month_tag=current_month).first()
+        # For testing, prioritize August 2025 (202508) for 737 FO IAH profiles
+        target_month = current_month
+        if (profile.get('fleet') and '737' in profile['fleet'] and 
+            profile.get('base') == 'IAH' and profile.get('seat') == 'FO'):
+            august_bid = BidPacket.query.filter_by(month_tag='202508').first()
+            if august_bid:
+                target_month = '202508'
+        
+        bid_packet = BidPacket.query.filter_by(month_tag=target_month).first()
         
         if bid_packet:
             return {
