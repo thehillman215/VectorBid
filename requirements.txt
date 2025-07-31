@@ -19,3 +19,4 @@ bandit
 pytest-cov
 requests
 ruff
+replit

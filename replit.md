@@ -212,6 +212,16 @@ Preferred communication style: Simple, everyday language.
 - **UI Cleanup**: Removed redundant Intro.js tutorial popup in favor of comprehensive how-to guide
 - **Status**: Production ready - complete user onboarding system with persona-based preferences
 
+### Database Migration to Replit DB (Updated: July 31, 2025)
+- **Change**: Migrated user profile storage from PostgreSQL to Replit's built-in key-value database
+- **Implementation**:
+  - Refactored `services/db.py` to use `from replit import db` instead of SQLAlchemy models
+  - Updated profile structure to include new fields: name, email, subscription_tier, referral_code, onboard_complete
+  - Maintained backward compatibility with existing persona and preferences fields
+  - Simplified save/get operations using key-value pairs with pattern `user:{uid}:profile`
+- **Benefits**: Simplified database operations, reduced PostgreSQL dependency, better integration with Replit platform
+- **Status**: Implemented - user profiles now stored in Replit DB with enhanced data structure
+
 ### Automatic Bid Package Matching System (Updated: July 31, 2025)
 - **Major Workflow Change**: Eliminated manual bid package selection - system automatically matches pilots to appropriate packages
 - **Implementation**:
