@@ -79,9 +79,12 @@ def create_app() -> Flask:
 
     # ---------- Database tables --------------------------------------------
     with app.app_context():
-        import models  # noqa: F401 – side-effect: define tables
-
-        db.create_all()
+        try:
+            import models  # noqa: F401 – side-effect: define tables
+            db.create_all()
+        except Exception as e:
+            logging.error(f"Database initialization error: {e}")
+            # Continue without database for development
 
     # ---------- Helper Functions --------------------------------------------
     
