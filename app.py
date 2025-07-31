@@ -2,7 +2,13 @@ import os
 import sys
 import logging
 
-from flask import Flask, render_template, request, redirect, url_for  # and any others you need
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+)  # and any others you need
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -14,6 +20,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 class Base(DeclarativeBase):
     """Base class for SQL-Alchemy models (needed for v3.x)."""
+
     pass
 
 
@@ -23,6 +30,7 @@ db = SQLAlchemy(model_class=Base)
 
 try:
     from flask_login import LoginManager
+
     login_manager = LoginManager()
 except ModuleNotFoundError:
     # If login support is optional, fall back gracefully
@@ -44,7 +52,8 @@ def create_app() -> Flask:
     # ---------- Config ------------------------------------------------------
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "DATABASE_URL", "sqlite:///site.db")
+        "DATABASE_URL", "sqlite:///site.db"
+    )
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "pool_recycle": 300,
         "pool_pre_ping": True,
@@ -58,28 +67,32 @@ def create_app() -> Flask:
     db.init_app(app)
     if login_manager:
         login_manager.init_app(app)
-        login_manager.login_view = 'replit_auth.login'  # type: ignore
+        login_manager.login_view = "replit_auth.login"  # type: ignore
 
         # User loader function
         @login_manager.user_loader
         def load_user(user_id):
             from models import User
+
             return User.query.get(user_id)
 
     # ---------- Database tables --------------------------------------------
     with app.app_context():
         import models  # noqa: F401 – side-effect: define tables
+
         db.create_all()
 
     # ---------- Blueprints --------------------------------------------------
     try:
         from routes import bp as main_bp
+
         app.register_blueprint(main_bp)
     except ModuleNotFoundError:
         logging.warning("routes blueprint not found; skipping")
 
     try:
         from replit_auth import make_replit_blueprint
+
         app.register_blueprint(make_replit_blueprint())
     except ModuleNotFoundError:
         logging.info("replit_auth not configured; skipping auth blueprint")
@@ -87,6 +100,7 @@ def create_app() -> Flask:
     # Register admin blueprint
     try:
         from admin import bp as admin_bp
+
         app.register_blueprint(admin_bp)
     except ModuleNotFoundError:
         logging.warning("admin blueprint not found; skipping")

@@ -1,8 +1,7 @@
 import re, io
 
 
-_LINE = re.compile(
-    r"^(?P<id>\d{3,4})\s+(?P<days>\d)-Day.*?(?P<credit>\d+\.\d{2})")
+_LINE = re.compile(r"^(?P<id>\d{3,4})\s+(?P<days>\d)-Day.*?(?P<credit>\d+\.\d{2})")
 
 
 def parse_txt(blob: bytes) -> list[dict]:

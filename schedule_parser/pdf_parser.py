@@ -3,11 +3,14 @@ import re, io
 _TRIP_RE = re.compile(
     r"(?P<id>\d{3,4})\s+"
     r"(?P<days>\d)-Day.*?"
-    r"(?P<credit>\d{1,2}\.\d{2})\s+Cred", re.S)
+    r"(?P<credit>\d{1,2}\.\d{2})\s+Cred",
+    re.S,
+)
 
 
 def parse_pdf(blob: bytes) -> list[dict]:
     import fitz  # PyMuPDF imported only when needed
+
     trips: list[dict] = []
     with fitz.open(stream=blob, filetype="pdf") as pdf:
         text = "\n".join(page.get_text() for page in pdf)  # type: ignore

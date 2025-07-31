@@ -12,6 +12,7 @@ from typing import Protocol, BinaryIO
 
 class StorageBackend(Protocol):
     """Interface every storage backend must implement."""
+
     def save(self, key: str, fp: BinaryIO) -> None: ...
     def open(self, key: str, mode: str = "rb") -> BinaryIO: ...
     def exists(self, key: str) -> bool: ...
@@ -19,6 +20,7 @@ class StorageBackend(Protocol):
 
 class LocalDisk(StorageBackend):
     """Super-simple ‘put it in ./data’ backend."""
+
     def __init__(self, root: str | Path = "data"):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
