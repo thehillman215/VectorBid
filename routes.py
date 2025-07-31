@@ -31,6 +31,10 @@ def index():
     # Get authenticated user
     user_id = get_current_user_id()
     
+    # Debug: Log authentication attempt
+    current_app.logger.info(f"Authentication check - User ID: {user_id}")
+    current_app.logger.info(f"Headers: {dict(request.headers)}")
+    
     # If user is not authenticated (no header), show public page
     if not user_id:
         return render_template("index.html", user=None, profile=None, bid_package=None)
@@ -55,6 +59,44 @@ def index():
 def how_to():
     """Full-page how-to guide for new users."""
     return render_template("how_to.html")
+
+
+@bp.get("/debug")
+def debug():
+    """Debug page to check authentication and headers."""
+    user_id = get_current_user_id()
+    headers = dict(request.headers)
+    profile = None
+    
+    if user_id:
+        profile = get_profile(user_id)
+    
+    return f"""
+    <html>
+    <head><title>Debug Info</title></head>
+    <body style="background: #1a1a1a; color: white; font-family: monospace; padding: 20px;">
+        <h2>VectorBid Debug Information</h2>
+        
+        <h3>Authentication Status:</h3>
+        <p>User ID: <strong>{user_id or 'Not authenticated'}</strong></p>
+        
+        <h3>Received Headers:</h3>
+        <ul>
+        {''.join([f'<li>{k}: {v}</li>' for k, v in headers.items()])}
+        </ul>
+        
+        <h3>Profile Data:</h3>
+        <pre>{profile if profile else 'No profile data'}</pre>
+        
+        <h3>Test Links:</h3>
+        <p><a href="/" style="color: lightblue;">← Back to Home</a></p>
+        <p><a href="/onboarding" style="color: lightblue;">Test Onboarding →</a></p>
+        
+        <h3>Manual Test:</h3>
+        <p>To test with authentication, add header: X-Replit-User-Id: 44040350</p>
+    </body>
+    </html>
+    """
 
 
 @bp.route("/onboarding")
