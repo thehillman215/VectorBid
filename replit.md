@@ -1,6 +1,6 @@
 # Overview
 
-VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system now includes a comprehensive drag-and-drop trip preference ranking feature that allows pilots to visually reorder their trip preferences by dragging items up and down in their preferred priority order. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
+VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system now includes a comprehensive drag-and-drop trip preference ranking feature that allows pilots to visually reorder their trip preferences by dragging items up and down in their preferred priority order. The project includes a complete admin workflow with secure Bearer token authentication for uploading monthly bid packages and one-click validation preview capabilities. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
 
 # User Preferences
 
@@ -14,7 +14,7 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: Replit Auth integration with OAuth support
 - **AI Integration**: OpenAI GPT-4o for intelligent trip ranking
 - **File Processing**: Multi-format schedule parsing (PDF via PyMuPDF, CSV, TXT)
-- **Admin Features**: Secure administrative endpoint for uploading monthly bid packet PDFs with Bearer token authentication and PostgreSQL bytea storage.
+- **Admin Features**: Complete administrative system with Bearer token authentication for uploading monthly bid packet PDFs, one-click validation preview with trip parsing, file storage management, and real-time upload status feedback.
 
 ## Frontend Architecture
 - **Template Engine**: Jinja2 templates
@@ -35,6 +35,7 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced File Processing**: Implements a multi-layered parsing system with block detection and pattern matching for complex airline bid packages (e.g., United Airlines format), including deferred PyMuPDF import for robustness.
 - **User Onboarding & Profile Management**: Features a streamlined 3-step HTMX-powered onboarding wizard to collect pilot preferences, including predefined and custom flying style personas, stored in Replit DB. This system automatically redirects new users to complete their profile before accessing main features.
 - **Automated Bid Package Matching**: Eliminates manual bid package selection; the system automatically matches pilots to appropriate bid packages based on their profile attributes (month, airline, aircraft, base, position), converting profile preferences into AI-ready strings for analysis.
+- **One-Click Validation Preview**: Production-ready admin feature allowing instant bid package validation with trip parsing results, file details, sample data tables, and error handling through modal interface.
 
 # External Dependencies
 
