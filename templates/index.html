@@ -155,7 +155,7 @@
                                             Size: {{ "%.1f"|format(bid_package.file_size / 1024) }} KB
                                             &nbsp;&nbsp;
                                             <i class="fas fa-clock me-1"></i>
-                                            Uploaded: {{ bid_package.upload_date.strftime('%B %d, %Y') }}
+                                            Uploaded: {{ bid_package.get('created_at', 'Unknown') }}
                                         </p>
                                         <p class="text-success">
                                             <i class="fas fa-check-circle me-1"></i>
