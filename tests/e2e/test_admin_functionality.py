@@ -58,7 +58,7 @@ class TestAdminFunctionality:
                 page.goto(f"{base_url}{path}")
                 # Should not load successfully or should show unauthorized
                 expect(page).to_have_url(lambda url: "/admin" not in url or "401" in page.content() or "Unauthorized" in page.content())
-            except:
+            except Exception:
                 # Navigation might fail, which is expected for protected routes
                 pass
 

@@ -90,7 +90,7 @@ def show_profile_stats():
                     profile = db[key]
                     airline = profile.get('airline', 'Unknown')
                     airlines[airline] = airlines.get(airline, 0) + 1
-                except:
+                except Exception:
                     pass
 
         print(f"   Total Profiles: {profile_count}")

@@ -18,7 +18,7 @@ class TestMainApplication:
         page.goto("http://localhost:5000/onboarding/3")
         try:
             page.locator('button[type="submit"]').click(timeout=2000)
-        except:
+        except Exception:
             # If onboarding completion fails, manually set completed state
             pass
 
@@ -38,11 +38,13 @@ class TestMainApplication:
         page.goto(f"{base_url}/how-to")
         
         # Should load successfully
-        expect(page).to_have_title(lambda title: "How to" in title or "VectorBid" in title)
+        # Check page title contains expected text
+        title = page.title()
+        assert "How to" in title or "VectorBid" in title
         
         # Should have readable content
-        expect(page.locator("h1, h2, h3")).to_have_count_greater_than(0)
-        expect(page.locator("p, li")).to_have_count_greater_than(0)
+        expect(page.locator("h1, h2, h3")).to_have_count(1)  # At least one header
+        expect(page.locator("p, li")).to_be_visible()  # At least some content
 
     def test_bid_package_display(self, page: Page, base_url: str):
         """Test bid package display on dashboard."""

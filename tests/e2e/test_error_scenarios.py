@@ -16,7 +16,7 @@ class TestErrorScenarios:
         
         try:
             page.goto(base_url, timeout=5000)
-        except:
+        except Exception:
             # Network error expected when offline
             pass
         finally:
@@ -45,7 +45,7 @@ class TestErrorScenarios:
             try:
                 page.goto(url)
                 page.wait_for_load_state("networkidle", timeout=5000)
-            except:
+            except Exception:
                 # Some pages might redirect or have issues, continue testing
                 continue
         
@@ -97,7 +97,7 @@ class TestErrorScenarios:
         for url in urls:
             try:
                 page.goto(url, timeout=3000)
-            except:
+            except Exception:
                 # Rapid navigation might cause timeouts, which is acceptable
                 continue
         

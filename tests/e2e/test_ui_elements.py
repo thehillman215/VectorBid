@@ -40,11 +40,11 @@ class TestUIElements:
         
         # Test for navigation elements
         nav_elements = page.locator("nav, .navbar, [role='navigation']")
-        expect(nav_elements).to_have_count_greater_than(0)
+        expect(nav_elements.first).to_be_visible()
         
         # Test for main content areas
         main_content = page.locator("main, .main-content, .container")
-        expect(main_content).to_have_count_greater_than(0)
+        expect(main_content.first).to_be_visible()
 
     def _complete_onboarding_quickly(self, page: Page):
         """Helper to quickly complete onboarding for testing."""
@@ -62,7 +62,7 @@ class TestUIElements:
             
             # Step 3
             page.locator('button[type="submit"]').click()
-        except:
+        except Exception:
             # If onboarding fails, continue with tests
             pass
 
