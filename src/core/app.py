@@ -144,7 +144,7 @@ def configure_extensions(app):
     def load_user(user_id):
         """Load user for Flask-Login."""
         try:
-            from models import User
+            from src.core.models import User
             return User.query.get(user_id)
         except Exception as e:
             logger.error(f"Error loading user {user_id}: {e}")
