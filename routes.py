@@ -510,7 +510,79 @@ def save_custom_ranking():
 @bp.get("/test-results")
 def test_results():
     """Quick test route for results page - bypasses authentication and shows sample data."""
-    return render_template("results_minimal.html")
+    # Create sample trip data for testing
+    sample_trips = [
+        {
+            'trip_id': 'UA101',
+            'pairing_id': 'UA101',
+            'days': 3,
+            'credit_hours': 15.2,
+            'routing': 'DEN-ORD-LAX-DEN',
+            'dates': 'Jan 15-17',
+            'includes_weekend': True,
+            'aircraft': '737',
+            'score': 9,
+            'comment': 'Perfect for work-life balance with weekend return'
+        },
+        {
+            'trip_id': 'UA205',
+            'pairing_id': 'UA205', 
+            'days': 4,
+            'credit_hours': 22.8,
+            'routing': 'DEN-SFO-NRT-SFO-DEN',
+            'dates': 'Jan 18-21',
+            'includes_weekend': False,
+            'aircraft': '787',
+            'score': 8,
+            'comment': 'International route with good layover in Tokyo'
+        },
+        {
+            'trip_id': 'UA312',
+            'pairing_id': 'UA312',
+            'days': 2,
+            'credit_hours': 12.5,
+            'routing': 'DEN-PHX-DEN',
+            'dates': 'Jan 22-23',
+            'includes_weekend': False,
+            'aircraft': '737',
+            'score': 7,
+            'comment': 'Quick turnaround, good for commuters'
+        },
+        {
+            'trip_id': 'UA428',
+            'pairing_id': 'UA428',
+            'days': 3,
+            'credit_hours': 18.7,
+            'routing': 'DEN-IAH-MIA-IAH-DEN',
+            'dates': 'Jan 24-26',
+            'includes_weekend': True,
+            'aircraft': '737',
+            'score': 6,
+            'comment': 'Miami layover but weekend work required'
+        },
+        {
+            'trip_id': 'UA535',
+            'pairing_id': 'UA535',
+            'days': 4,
+            'credit_hours': 25.3,
+            'routing': 'DEN-LHR-FRA-LHR-DEN',
+            'dates': 'Jan 27-30',
+            'includes_weekend': False,
+            'aircraft': '787',
+            'score': 8,
+            'comment': 'European route with excellent credit hours'
+        }
+    ]
+    
+    sample_analysis = {
+        'total_trips': 5,
+        'optimization_score': 87,
+        'bid_package': {'filename': 'Sample_Bid_Package.pdf'}
+    }
+    
+    return render_template("results_minimal.html", 
+                         ranked_trips=sample_trips,
+                         analysis=sample_analysis)
 
 
 @bp.route("/welcome", methods=["GET", "POST"])

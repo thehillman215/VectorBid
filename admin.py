@@ -68,6 +68,150 @@ def upload_bid():
     return jsonify({"status": "ok", "stored": month_tag})
 
 
+@bp.route("/validate-bid/<month_tag>", methods=["GET"])
+@require_bearer_token
+def validate_bid_package(month_tag):
+    """One-click bid package validation preview."""
+    try:
+        # Get bid package info
+        bid_info = services.bids.get_bid_packet_info(month_tag)
+        if not bid_info:
+            return jsonify({"error": "Bid package not found"}), 404
+        
+        # Get file path and attempt to parse
+        file_path = services.bids.get_bid_packet_path(month_tag)
+        if not file_path:
+            return jsonify({"error": "Bid package file not found"}), 404
+        
+        # Import parsing service
+        from schedule_parser import parse_schedule
+        
+        # Attempt to parse the bid package
+        with open(file_path, 'rb') as f:
+            try:
+                parsed_trips = parse_schedule(f.read(), file_path.name)
+                
+                validation_result = {
+                    "status": "success",
+                    "month_tag": month_tag,
+                    "filename": bid_info.get('filename', 'Unknown'),
+                    "file_size": bid_info.get('file_size', 0),
+                    "total_trips": len(parsed_trips) if parsed_trips else 0,
+                    "sample_trips": parsed_trips[:5] if parsed_trips else [],
+                    "parsing_successful": True,
+                    "errors": [],
+                    "warnings": []
+                }
+                
+                # Add validation warnings/info
+                if not parsed_trips:
+                    validation_result["warnings"].append("No trips found in bid package")
+                elif len(parsed_trips) < 10:
+                    validation_result["warnings"].append(f"Only {len(parsed_trips)} trips found - this seems low for a monthly bid package")
+                
+                return jsonify(validation_result)
+                
+            except Exception as parse_error:
+                return jsonify({
+                    "status": "error", 
+                    "month_tag": month_tag,
+                    "filename": bid_info.get('filename', 'Unknown'),
+                    "file_size": bid_info.get('file_size', 0),
+                    "total_trips": 0,
+                    "parsing_successful": False,
+                    "errors": [f"Failed to parse bid package: {str(parse_error)}"],
+                    "warnings": []
+                })
+                
+    except Exception as e:
+        return jsonify({"error": f"Validation failed: {str(e)}"}), 500
+
+
+@bp.route("/preview-bid/<month_tag>", methods=["GET"])
+@require_bearer_token  
+def preview_bid_package(month_tag):
+    """Generate HTML preview of bid package validation."""
+    try:
+        # Get validation data
+        bid_info = services.bids.get_bid_packet_info(month_tag)
+        if not bid_info:
+            return "<h3>Bid package not found</h3>", 404
+            
+        file_path = services.bids.get_bid_packet_path(month_tag)
+        if not file_path:
+            return "<h3>Bid package file not found</h3>", 404
+        
+        from schedule_parser import parse_schedule
+        
+        # Parse trips for preview
+        with open(file_path, 'rb') as f:
+            try:
+                parsed_trips = parse_schedule(f.read(), file_path.name)
+                
+                preview_html = f"""
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-file-pdf me-2"></i>{bid_info.get('filename', 'Unknown')}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Month:</strong> {month_tag[:4]}-{month_tag[4:]}
+                            </div>
+                            <div class="col-md-4">
+                                <strong>File Size:</strong> {bid_info.get('file_size', 0) / 1024:.1f} KB
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Total Trips:</strong> {len(parsed_trips) if parsed_trips else 0}
+                            </div>
+                        </div>
+                        
+                        {'<div class="alert alert-success"><i class="fas fa-check me-2"></i>Parsing successful!</div>' if parsed_trips else '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>No trips found</div>'}
+                        
+                        {f'''
+                        <h6>Sample Trips (First 5):</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-dark">
+                                <thead>
+                                    <tr>
+                                        <th>Trip ID</th>
+                                        <th>Days</th>
+                                        <th>Credit Hours</th>
+                                        <th>Routing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {''.join([f"<tr><td>{trip.get('trip_id', 'N/A')}</td><td>{trip.get('days', 'N/A')}</td><td>{trip.get('credit_hours', 'N/A')}</td><td>{trip.get('routing', 'N/A')}</td></tr>" for trip in parsed_trips[:5]])}
+                                </tbody>
+                            </table>
+                        </div>
+                        ''' if parsed_trips else ''}
+                    </div>
+                </div>
+                """
+                
+                return preview_html
+                
+            except Exception as parse_error:
+                return f"""
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>{bid_info.get('filename', 'Unknown')}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger">
+                            <strong>Parsing Error:</strong> {str(parse_error)}
+                        </div>
+                        <p><strong>File Size:</strong> {bid_info.get('file_size', 0) / 1024:.1f} KB</p>
+                        <p><strong>Month:</strong> {month_tag[:4]}-{month_tag[4:]}</p>
+                    </div>
+                </div>
+                """
+                
+    except Exception as e:
+        return f"<div class='alert alert-danger'>Preview failed: {str(e)}</div>", 500
+
+
 @bp.route("/", methods=["GET"])
 @require_bearer_token  
 def admin_dashboard():
@@ -185,7 +329,7 @@ def admin_dashboard():
 
 
 def format_bid_packet_list(bid_packets):
-    """Format bid packet list for display."""
+    """Format bid packet list for display with validation buttons."""
     if not bid_packets:
         return '<p class="text-muted">No bid packages uploaded yet.</p>'
     
@@ -202,12 +346,86 @@ def format_bid_packet_list(bid_packets):
             
         html += f'''
         <div class="list-group-item bg-dark border-secondary">
-            <div class="d-flex w-100 justify-content-between">
-                <h6 class="mb-1">{display_date}</h6>
-                <small class="text-success">Active</small>
+            <div class="d-flex w-100 justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <h6 class="mb-1">{display_date}</h6>
+                    <p class="mb-1 small text-muted">{packet.get('filename', 'Unknown file')}</p>
+                    <p class="mb-0 small text-info">{packet.get('file_size', 0) / 1024:.1f} KB</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-success d-block">Active</small>
+                    <button class="btn btn-outline-primary btn-sm mt-1" 
+                            onclick="validateBidPackage('{month_tag}')"
+                            data-month="{month_tag}">
+                        <i class="fas fa-search me-1"></i>Preview
+                    </button>
+                </div>
             </div>
-            <p class="mb-1 small text-muted">{packet.get('filename', 'Unknown file')}</p>
         </div>
         '''
     html += '</div>'
+    
+    # Add preview modal and JavaScript
+    html += '''
+    <div class="modal fade" id="validationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bid Package Validation</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="validationContent">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Loading validation preview...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function validateBidPackage(monthTag) {
+            const modal = new bootstrap.Modal(document.getElementById('validationModal'));
+            const content = document.getElementById('validationContent');
+            
+            // Show loading
+            content.innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Validating bid package...</p>
+                </div>
+            `;
+            modal.show();
+            
+            try {
+                const response = await fetch(`/admin/preview-bid/${monthTag}`, {
+                    headers: {
+                        'Authorization': 'Bearer ''' + os.environ.get("ADMIN_BEARER_TOKEN", "") + '''\''
+                    }
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Failed to validate bid package: ${response.status}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+    '''
+    
     return html
