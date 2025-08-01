@@ -198,6 +198,14 @@ def register_blueprints(app):
 
     logger.info("All blueprints registered successfully")
 
+    # Register enhanced admin blueprint
+    try:
+        from admin_enhanced import admin_enhanced_bp
+        app.register_blueprint(admin_enhanced_bp, url_prefix='/admin')
+        logger.info("Enhanced admin routes registered successfully")
+    except ImportError:
+        logger.warning("Enhanced admin blueprint not found; skipping")
+
 
 def register_fallback_routes(app):
     """Register minimal fallback routes if blueprint imports fail."""

@@ -624,3 +624,148 @@ def welcome():
     except Exception as e:
         flash(f"Error saving profile: {str(e)}", "error")
         return render_template("welcome.html", profile=get_profile(user_id))
+
+
+# PBS Filter System Functions
+def natural_language_to_pbs_filters(preferences_text, trip_data=None):
+    """Convert natural language preferences to PBS filter commands."""
+    if not preferences_text:
+        return []
+
+    filters = []
+    text_lower = preferences_text.lower()
+
+    # Weekend preferences
+    if any(phrase in text_lower for phrase in ['weekends off', 'weekend off', 'no weekends']):
+        filters.append("AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN")
+
+    # Trip length preferences
+    if 'short trip' in text_lower or 'day trip' in text_lower:
+        filters.append("PREFER TRIPS WITH DUTY_DAYS <= 2")
+    elif 'long trip' in text_lower:
+        filters.append("PREFER TRIPS WITH DUTY_DAYS >= 4")
+
+    # Commute preferences
+    if any(phrase in text_lower for phrase in ['easy commute', 'avoid commute', 'commutable']):
+        filters.append("PREFER TRIPS STARTING AFTER 1000 ON MON,TUE,WED,THU,FRI")
+
+    # International preferences
+    if 'international' in text_lower:
+        if 'avoid' in text_lower or 'no' in text_lower:
+            filters.append("AVOID TRIPS WITH DESTINATION INTL")
+        else:
+            filters.append("PREFER TRIPS WITH DESTINATION INTL")
+
+    # Early morning preferences
+    if any(phrase in text_lower for phrase in ['no early', 'avoid early', 'late start']):
+        filters.append("AVOID TRIPS STARTING BEFORE 0800")
+
+    # Red-eye preferences  
+    if any(phrase in text_lower for phrase in ['no redeye', 'avoid redeye', 'no red-eye']):
+        filters.append("AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559")
+
+    # Home every night
+    if any(phrase in text_lower for phrase in ['home every night', 'home daily', 'no overnights']):
+        filters.append("PREFER TRIPS WITH DUTY_DAYS = 1")
+
+    # Maximum days off
+    if 'days off' in text_lower:
+        filters.append("PREFER MAX_DAYS_OFF")
+
+    # Add a catch-all preference if no specific filters matched
+    if not filters:
+        filters.append("PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE")
+
+    return filters
+
+@bp.route('/preview_pbs_filters', methods=['POST'])
+def preview_pbs_filters():
+    """Preview PBS filters from preferences without full analysis."""
+    try:
+        data = request.get_json()
+        preferences = data.get('preferences', '')
+
+        if not preferences:
+            return jsonify({'error': 'No preferences provided'}), 400
+
+        # Generate PBS filters
+        filters = natural_language_to_pbs_filters(preferences)
+
+        return jsonify({
+            'filters': filters,
+            'preview': True,
+            'count': len(filters)
+        })
+
+    except Exception as e:
+        logger.error(f"PBS filter preview error: {e}")
+        return jsonify({'error': 'Failed to generate preview'}), 500
+
+@bp.route('/download_pbs_filters')
+def download_pbs_filters():
+    """Download PBS filters as text file instead of CSV."""
+    try:
+        # Get the most recent analysis for this user
+        user_id = get_current_user_id()
+        if not user_id:
+            flash('Please log in to download filters', 'error')
+            return redirect(url_for('replit_auth.login'))
+
+        # Try to get the last analysis from session or database
+        analysis_data = session.get('last_analysis')
+        if not analysis_data:
+            # Fallback: try to get from database
+            from models import BidAnalysis
+            recent_analysis = BidAnalysis.query.filter_by(user_id=user_id).order_by(BidAnalysis.created_at.desc()).first()
+            if recent_analysis:
+                analysis_data = recent_analysis.results
+
+        if not analysis_data:
+            flash('No analysis data found. Please run an analysis first.', 'error')
+            return redirect(url_for('main.index'))
+
+        # Get preferences from analysis data
+        preferences = analysis_data.get('preferences', '')
+
+        # Generate PBS filters
+        filters = natural_language_to_pbs_filters(preferences)
+
+        # Create PBS filter file content
+        filter_content = f"""VectorBid PBS Filters
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Preferences: {preferences}
+
+PBS Filter Commands:
+{'=' * 50}
+
+"""
+
+        for i, filter_cmd in enumerate(filters, 1):
+            filter_content += f"{i:2d}. {filter_cmd}\n"
+
+        filter_content += f"""
+
+{'=' * 50}
+Usage Instructions:
+1. Copy the filter commands above
+2. Log into your airline's PBS system
+3. Paste these commands into your bid preferences
+4. Adjust priority order as needed
+5. Submit your bid
+
+Note: These filters are generated based on your preferences.
+Please review and modify as needed for your specific situation.
+"""
+
+        # Create response with text file
+        from flask import make_response
+        response = make_response(filter_content)
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Content-Disposition'] = f'attachment; filename=vectorbid_pbs_filters_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
+
+        return response
+
+    except Exception as e:
+        logger.error(f"PBS filter download error: {e}")
+        flash('Error generating PBS filters', 'error')
+        return redirect(url_for('main.index'))

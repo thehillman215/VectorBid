@@ -1,0 +1,17 @@
+# VectorBid Enhanced Features Environment Variables
+# Add these to your Replit Secrets or .env file:
+
+# Admin Portal Authentication
+ADMIN_TOKEN=your_secure_admin_token_here
+
+# Enhanced Features Configuration  
+ENABLE_ADMIN_ENDPOINTS=true
+ENABLE_PBS_FILTERS=true
+ENABLE_ANALYTICS=true
+
+# File Upload Configuration
+MAX_UPLOAD_SIZE=16777216  # 16MB in bytes
+UPLOAD_FOLDER=uploads/bid_packets
+
+# Database Configuration (if not already set)
+# DATABASE_URL=your_postgresql_connection_string
