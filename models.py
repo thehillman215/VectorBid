@@ -269,3 +269,21 @@ if __name__ == '__main__':
     print(f"User: {User.__doc__}")
     print(f"BidAnalysis: {BidAnalysis.__doc__}")
     print(f"BidPacket: {BidPacket.__doc__}")
+
+# User-customizable airport preferences for advanced scoring
+class UserAirportPreferences(db.Model):
+    """User-customizable airport scoring weights."""
+    __tablename__ = 'user_airport_preferences'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
+    airport_code = db.Column(db.String(3), nullable=False)
+    weight = db.Column(db.Integer, default=25)  # 0-50 range
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Ensure one weight per airport per user
+    __table_args__ = (db.UniqueConstraint('user_id', 'airport_code'),)
+    
+    def __repr__(self):
+        return f"<UserAirportPreferences {self.user_id}:{self.airport_code}={self.weight}>"

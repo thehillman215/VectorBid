@@ -1,3 +1,4 @@
+from airport_presets import enhanced_international_scoring_with_persona
 """
 Enhanced AI-powered trip ranking service for VectorBid.
 Provides robust ranking with fallback strategies and improved prompt engineering.
