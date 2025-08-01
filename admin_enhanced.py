@@ -237,3 +237,12 @@ def too_large(e):
 @admin_enhanced_bp.errorhandler(500)
 def internal_error(e):
     return jsonify({'error': 'Internal server error'}), 500
+
+@admin_enhanced_bp.route('/debug')
+def debug_admin():
+    import os
+    return {
+        'admin_token_exists': bool(os.getenv('ADMIN_TOKEN')),
+        'admin_token_value': os.getenv('ADMIN_TOKEN'),
+        'all_env_vars': dict(os.environ)
+    }
