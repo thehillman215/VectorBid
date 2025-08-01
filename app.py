@@ -136,7 +136,7 @@ def configure_extensions(app):
 
     # Authentication
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
+    # Don't set login_view since we're using a different auth system
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
 
@@ -179,7 +179,8 @@ def register_blueprints(app):
 
         # Authentication routes - try to import, but don't fail if missing
         try:
-            from replit_auth import bp as auth_bp
+            from replit_auth import make_replit_blueprint
+            auth_bp = make_replit_blueprint()
             app.register_blueprint(auth_bp, url_prefix='/auth')
         except ImportError:
             logger.warning("Replit auth not available - using fallback")

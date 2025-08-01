@@ -325,15 +325,20 @@ def analyze_bid_package():
     
     try:
         # Get the bid package content
-        from services.bids import get_bid_packet
-        bid_packet = get_bid_packet(month_tag)
+        from services.bids import get_bid_packet_info, get_bid_packet_path
+        bid_packet_info = get_bid_packet_info(month_tag)
+        bid_packet_path = get_bid_packet_path(month_tag)
         
-        if not bid_packet:
+        if not bid_packet_info or not bid_packet_path:
             flash("Bid package not found.", "error")
             return redirect(url_for('main.index'))
         
+        # Read the PDF content
+        with open(bid_packet_path, 'rb') as f:
+            pdf_data = f.read()
+        
         # Parse the PDF content
-        trip_data = parse_schedule(bid_packet.pdf_data, bid_packet.filename)
+        trip_data = parse_schedule(pdf_data, bid_packet_info['filename'])
         
         if not trip_data:
             flash("Could not parse trip data from bid package.", "error")
@@ -355,7 +360,7 @@ def analyze_bid_package():
             'total_trips': len(trip_data),
             'preferences': preferences,
             'bid_package': {
-                'filename': bid_packet.filename,
+                'filename': bid_packet_info['filename'],
                 'month_tag': month_tag
             }
         }

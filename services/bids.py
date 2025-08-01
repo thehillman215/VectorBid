@@ -238,7 +238,7 @@ def get_admin_stats() -> Dict:
         # Calculate stats
         total_packages = len(packages)
         active_packages = len(
-            [p for p in packages if p.get('month_tag') >= current_month])
+            [p for p in packages if p.get('month_tag', '') >= current_month])
         total_trips = sum(p.get('trip_count', 0) for p in packages)
 
         # File size stats

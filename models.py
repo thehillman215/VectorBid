@@ -230,6 +230,7 @@ class OAuth(db.Model):
     provider = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     browser_session_key = db.Column(db.String(255), nullable=False)
+    token = db.Column(db.Text, nullable=True)  # Store OAuth token as JSON
     created_at = db.Column(db.DateTime,
                            default=datetime.utcnow,
                            nullable=False)
