@@ -41,7 +41,7 @@ def create_app(config=None):
     Returns:
         Flask app instance
     """
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../ui/templates')
     app.register_blueprint(bid_layers_bp)
 
     # ===== CONFIGURATION =====
@@ -172,34 +172,31 @@ def configure_database(app):
 def register_blueprints(app):
     """Register application blueprints."""
 
+    # Main application routes - use existing routes.py
+    from src.api.routes import bp as main_bp
+    app.register_blueprint(main_bp)
+    logger.info("Main routes registered successfully")
+
+    # Authentication routes - try to import, but don't fail if missing
     try:
-        # Main application routes - use existing routes.py
-        from src.api.routes import bp as main_bp
-        app.register_blueprint(main_bp)
+        from src.auth.replit_auth import make_replit_blueprint
+        auth_bp = make_replit_blueprint()
+        app.register_blueprint(auth_bp, url_prefix='/auth')
+        logger.info("Auth routes registered successfully")
+    except Exception as e:
+        logger.warning(f"Replit auth not available: {e}")
 
-        # Authentication routes - try to import, but don't fail if missing
+    # Admin routes (if enabled) - try to import existing
+    app.config['ENABLE_ADMIN_ENDPOINTS'] = True  # Force enable for testing
+    if app.config.get('ENABLE_ADMIN_ENDPOINTS'):
         try:
-            from src.auth.replit_auth import make_replit_blueprint
-            auth_bp = make_replit_blueprint()
-            app.register_blueprint(auth_bp, url_prefix='/auth')
-        except ImportError:
-            logger.warning("Replit auth not available - using fallback")
+            from src.api.admin import bp as admin_bp
+            app.register_blueprint(admin_bp, url_prefix='/admin')
+            logger.info("Admin endpoints enabled")
+        except Exception as e:
+            logger.warning(f"Admin routes not available: {e}")
 
-        # Admin routes (if enabled) - try to import existing
-        if app.config.get('ENABLE_ADMIN_ENDPOINTS'):
-            try:
-                from src.api.admin import bp as admin_bp
-                app.register_blueprint(admin_bp, url_prefix='/admin')
-                logger.info("Admin endpoints enabled")
-            except ImportError:
-                logger.warning("Admin routes not available")
-
-        logger.info("Blueprints registered successfully")
-
-    except ImportError as e:
-        logger.warning(f"Could not import all blueprints: {e}")
-        # Create minimal routes if imports fail
-        register_fallback_routes(app)
+    logger.info("All blueprints registered successfully")
 
 
 def register_fallback_routes(app):

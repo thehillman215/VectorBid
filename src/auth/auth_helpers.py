@@ -2,7 +2,7 @@
 # Adding missing function definition and updating decorator docstring.
 from functools import wraps
 from flask import request, redirect, url_for
-from services.db import get_profile
+from src.lib.services.db import get_profile
 
 
 def get_current_user_id():
