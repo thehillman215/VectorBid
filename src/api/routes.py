@@ -4,6 +4,7 @@ import csv
 import io
 import json
 import logging
+from datetime import datetime
 from flask import (
     Blueprint,
     render_template,
@@ -14,6 +15,7 @@ from flask import (
     session,
     send_file,
     current_app,
+    jsonify,
 )
 from flask_login import current_user
 
@@ -22,6 +24,9 @@ from src.lib.llm_service import rank_trips_with_ai
 from src.lib.services.db import get_profile, save_profile
 from src.lib.services.bids import get_matching_bid_packet
 from src.auth.auth_helpers import get_current_user_id, requires_onboarding
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 bp = Blueprint("main", __name__)
 
@@ -715,7 +720,7 @@ def download_pbs_filters():
         analysis_data = session.get('last_analysis')
         if not analysis_data:
             # Fallback: try to get from database
-            from models import BidAnalysis
+            from src.core.models import BidAnalysis
             recent_analysis = BidAnalysis.query.filter_by(user_id=user_id).order_by(BidAnalysis.created_at.desc()).first()
             if recent_analysis:
                 analysis_data = recent_analysis.results
