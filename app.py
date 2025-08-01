@@ -11,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
 from sqlalchemy.orm import DeclarativeBase
+from bid_layers_routes import bid_layers_bp
 
 # Configure logging early
 logging.basicConfig(
@@ -41,6 +42,7 @@ def create_app(config=None):
         Flask app instance
     """
     app = Flask(__name__)
+    app.register_blueprint(bid_layers_bp)
 
     # ===== CONFIGURATION =====
     configure_app(app, config)
