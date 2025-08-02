@@ -100,6 +100,10 @@ def configure_app(app, config=None):
         'UPLOAD_EXTENSIONS': ['.pdf', '.csv', '.txt'],
         'ADMIN_BEARER_TOKEN':
         os.environ.get('ADMIN_BEARER_TOKEN'),
+        'ADMIN_TOKEN':
+        os.environ.get(
+            'ADMIN_TOKEN',
+            'admin-default-token'),  # Added for complete admin portal
         'OPENAI_API_KEY':
         os.environ.get('OPENAI_API_KEY'),
 
@@ -186,34 +190,20 @@ def register_blueprints(app):
     except Exception as e:
         logger.warning(f"Replit auth not available: {e}")
 
-    # Admin routes (if enabled) - try to import existing
-    app.config['ENABLE_ADMIN_ENDPOINTS'] = True  # Force enable for testing
-    if app.config.get('ENABLE_ADMIN_ENDPOINTS'):
-        try:
-            from src.api.admin import bp as admin_bp
-            app.register_blueprint(admin_bp, url_prefix='/admin')
-            logger.info("Admin endpoints enabled")
-        except Exception as e:
-            logger.warning(f"Admin routes not available: {e}")
+    # COMPLETE ADMIN PORTAL (REPLACES ALL OTHER ADMIN SYSTEMS)
+    try:
+        from admin_complete import admin_bp
+        app.register_blueprint(admin_bp)
+        logger.info("✅ Complete admin portal registered successfully")
+    except ImportError as e:
+        logger.error(f"❌ Complete admin portal not found: {e}")
+        logger.warning(
+            "Skipping admin portal - will fix admin_complete.py file")
+    except Exception as e:
+        logger.error(f"❌ Admin portal error: {e}")
+        logger.warning("Skipping admin portal due to error")
 
     logger.info("All blueprints registered successfully")
-
-    # Register enhanced admin blueprint (FIXED VERSION)
-    try:
-        from admin_enhanced_fixed import admin_enhanced_bp
-        app.register_blueprint(admin_enhanced_bp, url_prefix='/admin')
-        logger.info(
-            "Enhanced admin routes registered successfully (FIXED VERSION)")
-    except ImportError:
-        logger.warning(
-            "Enhanced admin blueprint (fixed) not found; trying original")
-        try:
-            from admin_enhanced import admin_enhanced_bp
-            app.register_blueprint(admin_enhanced_bp, url_prefix='/admin')
-            logger.info(
-                "Enhanced admin routes registered successfully (original)")
-        except ImportError:
-            logger.warning("Enhanced admin blueprint not found; skipping")
 
 
 def register_fallback_routes(app):
