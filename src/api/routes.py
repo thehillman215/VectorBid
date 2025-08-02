@@ -435,19 +435,112 @@ def build_preferences_from_profile(profile):
 
 @bp.route("/results")
 def results():
-    """Display PBS filter results - ALWAYS show PBS commands, never trip lists."""
-    # Always use test user for open testing
-    user_id = '44040350'
+    """Enhanced results route showing PBS commands by default"""
+    try:
+        user_id = session.get('user_id', get_current_user_id() or '44040350')
 
-    # Check if we have real analysis data from analyze_bid_package
-    if 'trip_analysis' in session and 'ranked_trips' in session:
-        # We have real data from analyze_bid_package - show PBS filters
-        trip_analysis = session['trip_analysis']
-        preferences = trip_analysis.get('preferences', '')
+        # Check if we have enhanced PBS data from recent analysis
+        if 'enhanced_pbs_data' in session:
+            pbs_data = session['enhanced_pbs_data']
 
-        # Generate PBS filters from the preferences
+            return render_template(
+                "enhanced_pbs_results.html",
+                pbs_output=pbs_data['pbs_output_clean'],
+                pbs_output_detailed=pbs_data['pbs_output_detailed'],
+                layers=pbs_data['layers'],
+                statistics=pbs_data['statistics'],
+                validation_issues=pbs_data['validation_issues'],
+                preferences=pbs_data['preferences'],
+                generated_at=pbs_data['generated_at'])
+
+        # Check for trip analysis data and generate PBS
+        elif 'trip_analysis' in session and 'ranked_trips' in session:
+            trip_analysis = session['trip_analysis']
+            preferences = trip_analysis.get('preferences', '')
+
+            # Generate PBS using enhanced system
+            try:
+                from src.lib.vectorbid_pbs_integration import VectorBidPBSService
+
+                service = VectorBidPBSService()
+                pilot_profile = service.get_pilot_profile_from_session()
+
+                result = service.process_pilot_preferences(
+                    preferences=preferences,
+                    user_id=user_id,
+                    pilot_profile=pilot_profile)
+
+                if result['success']:
+                    # Store for download functionality
+                    session['enhanced_pbs_data'] = result['session_data']
+
+                    return render_template(
+                        "enhanced_pbs_results.html",
+                        pbs_output=result['pbs_output'],
+                        pbs_output_detailed=result['pbs_output_detailed'],
+                        layers=result['detailed_layers'],
+                        statistics=result['statistics'],
+                        validation_issues=result['validation_issues'],
+                        preferences=preferences,
+                        generated_at=datetime.now().isoformat())
+                else:
+                    flash(
+                        f"Error generating PBS commands: {result.get('error', 'Unknown error')}",
+                        'error')
+
+            except ImportError:
+                logger.warning(
+                    "Enhanced PBS system not available, using fallback")
+
+        # Fallback: use original PBS template with current logic
+        # Always generate PBS filters from preferences (real or sample)
+        trip_analysis = session.get('trip_analysis', {})
+        ranked_trips = session.get('ranked_trips', [])
+
+        # Create sample data if none exists
+        if not ranked_trips:
+            ranked_trips = [{
+                'trip_id':
+                'UA101',
+                'pairing_id':
+                'UA101',
+                'days':
+                3,
+                'credit_hours':
+                15.2,
+                'routing':
+                'DEN-ORD-LAX-DEN',
+                'dates':
+                'Jan 15-17',
+                'includes_weekend':
+                True,
+                'aircraft':
+                '737',
+                'score':
+                9,
+                'comment':
+                'Perfect for work-life balance with weekend return'
+            }]
+            session['ranked_trips'] = ranked_trips
+            session['trip_analysis'] = {
+                'total_trips': 1,
+                'preferences':
+                'I prefer good work-life balance with weekends off and reasonable trip lengths',
+                'bid_package': {
+                    'filename': 'Sample_Bid_Package.pdf',
+                    'month_tag': 'demo_package'
+                }
+            }
+
+        # Get preferences from analysis or create default
+        preferences = trip_analysis.get(
+            'preferences',
+            'I prefer good work-life balance with weekends off and reasonable trip lengths'
+        )
+
+        # Generate PBS filters from preferences
         pbs_filters = natural_language_to_pbs_filters(preferences,
-                                                      session['ranked_trips'])
+                                                      ranked_trips)
 
         # Store PBS analysis in session for download
         session['last_analysis'] = {
@@ -456,174 +549,39 @@ def results():
             'pbs_filters':
             pbs_filters,
             'trips_analyzed':
-            trip_analysis.get('total_trips', 0),
+            len(ranked_trips),
             'month_tag':
             trip_analysis.get('bid_package', {}).get('month_tag',
-                                                     'analyzed_package')
+                                                     'demo_package')
         }
 
-        # Show PBS results
-        return render_template(
-            "pbs_results.html",
-            filters=pbs_filters,
-            preferences=preferences,
-            analysis={'trips_analyzed': trip_analysis.get('total_trips', 0)},
-            month_tag=trip_analysis.get('bid_package',
-                                        {}).get('month_tag',
-                                                'analyzed_package'))
+        # Show PBS results template - try enhanced first, fallback to original
+        try:
+            return render_template("enhanced_pbs_results.html",
+                                   pbs_output='\n'.join(pbs_filters),
+                                   layers=[],
+                                   statistics={
+                                       'total_layers': len(pbs_filters),
+                                       'total_commands': len(pbs_filters)
+                                   },
+                                   validation_issues=[],
+                                   preferences=preferences,
+                                   generated_at=datetime.now().isoformat())
+        except:
+            # Fallback to original template if enhanced not available
+            return render_template(
+                "pbs_results.html",
+                filters=pbs_filters,
+                preferences=preferences,
+                analysis={'trips_analyzed': len(ranked_trips)},
+                month_tag=trip_analysis.get('bid_package',
+                                            {}).get('month_tag',
+                                                    'demo_package'))
 
-    # Fallback: show sample data if no real analysis exists
-    if 'ranked_trips' not in session:
-        # Create sample trip data for open testing
-        session['ranked_trips'] = [{
-            'trip_id':
-            'UA101',
-            'pairing_id':
-            'UA101',
-            'days':
-            3,
-            'credit_hours':
-            15.2,
-            'routing':
-            'DEN-ORD-LAX-DEN',
-            'dates':
-            'Jan 15-17',
-            'includes_weekend':
-            True,
-            'aircraft':
-            '737',
-            'score':
-            9,
-            'comment':
-            'Perfect for work-life balance with weekend return'
-        }, {
-            'trip_id':
-            'UA205',
-            'pairing_id':
-            'UA205',
-            'days':
-            4,
-            'credit_hours':
-            22.8,
-            'routing':
-            'DEN-SFO-NRT-SFO-DEN',
-            'dates':
-            'Jan 18-21',
-            'includes_weekend':
-            False,
-            'aircraft':
-            '787',
-            'score':
-            8,
-            'comment':
-            'International route with good layover in Tokyo'
-        }, {
-            'trip_id':
-            'UA312',
-            'pairing_id':
-            'UA312',
-            'days':
-            2,
-            'credit_hours':
-            12.5,
-            'routing':
-            'DEN-PHX-DEN',
-            'dates':
-            'Jan 22-23',
-            'includes_weekend':
-            False,
-            'aircraft':
-            '737',
-            'score':
-            7,
-            'comment':
-            'Quick turnaround, good for commuters'
-        }, {
-            'trip_id':
-            'UA428',
-            'pairing_id':
-            'UA428',
-            'days':
-            3,
-            'credit_hours':
-            18.7,
-            'routing':
-            'DEN-IAH-MIA-IAH-DEN',
-            'dates':
-            'Jan 24-26',
-            'includes_weekend':
-            True,
-            'aircraft':
-            '737',
-            'score':
-            6,
-            'comment':
-            'Miami layover but weekend work required'
-        }, {
-            'trip_id':
-            'UA535',
-            'pairing_id':
-            'UA535',
-            'days':
-            4,
-            'credit_hours':
-            25.3,
-            'routing':
-            'DEN-LHR-FRA-LHR-DEN',
-            'dates':
-            'Jan 27-30',
-            'includes_weekend':
-            False,
-            'aircraft':
-            '787',
-            'score':
-            8,
-            'comment':
-            'European route with excellent credit hours'
-        }]
-        session['trip_analysis'] = {
-            'total_trips': 5,
-            'preferences':
-            'I prefer good work-life balance with weekends off and reasonable trip lengths',
-            'optimization_score': 87,
-            'bid_package': {
-                'filename': 'Sample_Bid_Package.pdf',
-                'month_tag': 'demo_package'
-            }
-        }
-
-    # Always generate PBS filters from preferences (real or sample)
-    trip_analysis = session.get('trip_analysis', {})
-    ranked_trips = session.get('ranked_trips', [])
-
-    # Get preferences from analysis or create default
-    preferences = trip_analysis.get(
-        'preferences',
-        'I prefer good work-life balance with weekends off and reasonable trip lengths'
-    )
-
-    # Generate PBS filters from preferences
-    pbs_filters = natural_language_to_pbs_filters(preferences, ranked_trips)
-
-    # Store PBS analysis in session for download
-    session['last_analysis'] = {
-        'preferences':
-        preferences,
-        'pbs_filters':
-        pbs_filters,
-        'trips_analyzed':
-        len(ranked_trips),
-        'month_tag':
-        trip_analysis.get('bid_package', {}).get('month_tag', 'demo_package')
-    }
-
-    # ALWAYS show PBS results template - never trip lists
-    return render_template("pbs_results.html",
-                           filters=pbs_filters,
-                           preferences=preferences,
-                           analysis={'trips_analyzed': len(ranked_trips)},
-                           month_tag=trip_analysis.get('bid_package', {}).get(
-                               'month_tag', 'demo_package'))
+    except Exception as e:
+        logger.error(f"Error in results route: {str(e)}")
+        flash('Error displaying results. Please try again.', 'error')
+        return redirect(url_for('main.index'))
 
 
 @bp.route("/save-custom-ranking", methods=["POST"])
@@ -777,9 +735,51 @@ def welcome():
 
 # PBS Filter System Functions
 def natural_language_to_pbs_filters(preferences_text, trip_data=None):
-    """Convert natural language preferences to PBS filter commands."""
+    """Enhanced PBS filter generation - maintains backward compatibility"""
+    try:
+        from src.lib.vectorbid_pbs_integration import VectorBidPBSService
+
+        service = VectorBidPBSService()
+
+        # Get pilot profile from session if available
+        pilot_profile = {}
+        user_id = session.get('user_id', get_current_user_id())
+        if user_id:
+            from src.lib.services.db import get_profile
+            profile = get_profile(user_id)
+            if profile:
+                pilot_profile = profile
+
+        # Process preferences with enhanced system
+        result = service.process_pilot_preferences(
+            preferences=preferences_text,
+            user_id=user_id,
+            pilot_profile=pilot_profile)
+
+        if result['success']:
+            # Store enhanced data in session for results page
+            session['enhanced_pbs_data'] = result['session_data']
+            return result[
+                'commands']  # Return simple commands for backward compatibility
+        else:
+            logger.error(
+                f"Enhanced PBS generation failed: {result.get('error', 'Unknown error')}"
+            )
+            # Fallback to original simple logic
+            return _fallback_pbs_generation(preferences_text)
+
+    except ImportError:
+        logger.warning("Enhanced PBS system not available, using fallback")
+        return _fallback_pbs_generation(preferences_text)
+    except Exception as e:
+        logger.error(f"Enhanced PBS system error: {str(e)}")
+        return _fallback_pbs_generation(preferences_text)
+
+
+def _fallback_pbs_generation(preferences_text):
+    """Fallback PBS generation using original logic"""
     if not preferences_text:
-        return []
+        return ["PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE"]
 
     filters = []
     text_lower = preferences_text.lower()
@@ -789,45 +789,27 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
            for phrase in ['weekends off', 'weekend off', 'no weekends']):
         filters.append("AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN")
 
+    # Early morning preferences
+    if any(phrase in text_lower
+           for phrase in ['no early', 'avoid early', 'late start']):
+        filters.append("AVOID TRIPS STARTING BEFORE 0800")
+
     # Trip length preferences
     if 'short trip' in text_lower or 'day trip' in text_lower:
         filters.append("PREFER TRIPS WITH DUTY_DAYS <= 2")
     elif 'long trip' in text_lower:
         filters.append("PREFER TRIPS WITH DUTY_DAYS >= 4")
 
-    # Commute preferences
-    if any(phrase in text_lower
-           for phrase in ['easy commute', 'avoid commute', 'commutable']):
-        filters.append(
-            "PREFER TRIPS STARTING AFTER 1000 ON MON,TUE,WED,THU,FRI")
-
-    # International preferences
-    if 'international' in text_lower:
-        if 'avoid' in text_lower or 'no' in text_lower:
-            filters.append("AVOID TRIPS WITH DESTINATION INTL")
-        else:
-            filters.append("PREFER TRIPS WITH DESTINATION INTL")
-
-    # Early morning preferences
-    if any(phrase in text_lower
-           for phrase in ['no early', 'avoid early', 'late start']):
-        filters.append("AVOID TRIPS STARTING BEFORE 0800")
-
     # Red-eye preferences
     if any(phrase in text_lower
            for phrase in ['no redeye', 'avoid redeye', 'no red-eye']):
         filters.append("AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559")
 
-    # Home every night
-    if any(phrase in text_lower
-           for phrase in ['home every night', 'home daily', 'no overnights']):
-        filters.append("PREFER TRIPS WITH DUTY_DAYS = 1")
+    # Commute preferences
+    if any(phrase in text_lower for phrase in ['commut', 'late start']):
+        filters.append("PREFER TRIPS STARTING AFTER 1000")
 
-    # Maximum days off
-    if 'days off' in text_lower:
-        filters.append("PREFER MAX_DAYS_OFF")
-
-    # Add a catch-all preference if no specific filters matched
+    # Add default if no specific matches
     if not filters:
         filters.append("PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE")
 
@@ -836,7 +818,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
 
 @bp.route('/preview_pbs_filters', methods=['POST'])
 def preview_pbs_filters():
-    """Preview PBS filters from preferences without full analysis."""
+    """Enhanced PBS filter preview"""
     try:
         data = request.get_json()
         preferences = data.get('preferences', '')
@@ -844,7 +826,36 @@ def preview_pbs_filters():
         if not preferences:
             return jsonify({'error': 'No preferences provided'}), 400
 
-        # Generate PBS filters
+        # Try enhanced system first
+        try:
+            from src.lib.vectorbid_pbs_integration import VectorBidPBSService
+
+            service = VectorBidPBSService()
+            pilot_profile = service.get_pilot_profile_from_session()
+
+            result = service.process_pilot_preferences(
+                preferences=preferences,
+                user_id=session.get('user_id'),
+                pilot_profile=pilot_profile)
+
+            if result['success']:
+                return jsonify({
+                    'success': True,
+                    'filters': result['commands'],
+                    'layers': result['layers'],
+                    'pbs_output': result['pbs_output'],
+                    'statistics': result['statistics'],
+                    'validation_issues': result['validation_issues'],
+                    'preview': True
+                })
+            else:
+                # Fall through to simple generation
+                pass
+
+        except ImportError:
+            logger.warning("Enhanced PBS system not available for preview")
+
+        # Fallback to simple generation
         filters = natural_language_to_pbs_filters(preferences)
 
         return jsonify({
@@ -860,24 +871,54 @@ def preview_pbs_filters():
 
 @bp.route('/download_pbs_filters')
 def download_pbs_filters():
-    """Download PBS filters as text file instead of CSV."""
+    """Enhanced PBS filter download"""
     try:
-        # Get the most recent analysis for this user
-        user_id = get_current_user_id()
-        if not user_id:
-            flash('Please log in to download filters', 'error')
-            return redirect(url_for('replit_auth.login'))
+        user_id = get_current_user_id() or session.get('user_id') or '44040350'
 
-        # Try to get the last analysis from session or database
+        # Try enhanced PBS data first
+        if 'enhanced_pbs_data' in session:
+            pbs_data = session['enhanced_pbs_data']
+
+            # Create enhanced downloadable file
+            file_content = f"""VectorBid Generated PBS Commands
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+File: vectorbid_50layer_strategy_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt
+
+{'=' * 60}
+
+{pbs_data['pbs_output_clean']}
+
+{'=' * 60}
+VectorBid - AI-Powered Pilot Schedule Optimization
+For questions or support, contact: support@vectorbid.com
+
+DISCLAIMER: Always review generated commands against actual
+bid packet data before submitting to your airline's PBS system.
+VectorBid is not responsible for bid results.
+"""
+
+            # Create download response
+            response = make_response(file_content)
+            response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+            response.headers['Content-Disposition'] = (
+                f'attachment; filename=vectorbid_50layer_pbs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
+            )
+
+            return response
+
+        # Fallback to original logic
         analysis_data = session.get('last_analysis')
         if not analysis_data:
-            # Fallback: try to get from database
-            from src.core.models import BidAnalysis
-            recent_analysis = BidAnalysis.query.filter_by(
-                user_id=user_id).order_by(
-                    BidAnalysis.created_at.desc()).first()
-            if recent_analysis:
-                analysis_data = recent_analysis.results
+            # Try to get from database
+            try:
+                from src.core.models import BidAnalysis
+                recent_analysis = BidAnalysis.query.filter_by(
+                    user_id=user_id).order_by(
+                        BidAnalysis.created_at.desc()).first()
+                if recent_analysis:
+                    analysis_data = recent_analysis.results
+            except:
+                pass
 
         if not analysis_data:
             flash('No analysis data found. Please run an analysis first.',
@@ -929,3 +970,66 @@ Please review and modify as needed for your specific situation.
         logger.error(f"PBS filter download error: {e}")
         flash('Error generating PBS filters', 'error')
         return redirect(url_for('main.index'))
+
+
+# Enhanced PBS Layer Management Routes
+@bp.route('/api/pbs/layers', methods=['GET'])
+def get_pbs_layers():
+    """Get current layers for the user"""
+    user_id = session.get('user_id', get_current_user_id() or '44040350')
+
+    if 'enhanced_pbs_data' in session:
+        return jsonify({
+            'success': True,
+            'layers': session['enhanced_pbs_data']['layers']
+        })
+    else:
+        return jsonify({'success': True, 'layers': []})
+
+
+@bp.route('/api/pbs/statistics', methods=['GET'])
+def get_pbs_statistics():
+    """Get PBS strategy statistics"""
+    if 'enhanced_pbs_data' in session:
+        return jsonify({
+            'success': True,
+            'statistics': session['enhanced_pbs_data']['statistics']
+        })
+    else:
+        return jsonify({'success': False, 'error': 'No PBS data found'})
+
+
+@bp.route('/bid-layers')
+def bid_layers_ui():
+    """Enhanced bid layers management UI"""
+    user_id = session.get('user_id', get_current_user_id() or '44040350')
+
+    # Get current PBS data
+    layers = []
+    pbs_output = "Visit this page after running an analysis to see your layers"
+    statistics = {'total_layers': 0, 'total_commands': 0}
+
+    if 'enhanced_pbs_data' in session:
+        pbs_data = session['enhanced_pbs_data']
+        layers = pbs_data.get('layers', [])
+        pbs_output = pbs_data.get('pbs_output_clean', pbs_output)
+        statistics = pbs_data.get('statistics', statistics)
+
+    try:
+        return render_template('enhanced_pbs_results.html',
+                               layers=layers,
+                               user_id=user_id,
+                               pbs_output=pbs_output,
+                               statistics=statistics,
+                               validation_issues=[],
+                               preferences="No analysis run yet"
+                               if not layers else "Based on your profile",
+                               generated_at=datetime.now().isoformat())
+    except:
+        # Fallback if enhanced template not available
+        return render_template(
+            'pbs_results.html',
+            filters=pbs_output.split('\n') if pbs_output else [],
+            preferences="No analysis run yet",
+            analysis={'trips_analyzed': 0},
+            month_tag='bid_layers')

@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Your PBS Bidding Strategy - VectorBid</title>
+
+        <!-- Bootstrap CSS -->
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <!-- Font Awesome -->
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            rel="stylesheet"
+        />
+
+        <style>
+            :root {
+                --primary-color: #2563eb;
+                --secondary-color: #64748b;
+                --success-color: #10b981;
+                --warning-color: #f59e0b;
+                --danger-color: #ef4444;
+                --dark-bg: #1e293b;
+                --border-color: #e2e8f0;
+            }
+
+            body {
+                background-color: #f8fafc;
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    sans-serif;
+            }
+
+            .main-header {
+                background: linear-gradient(
+                    135deg,
+                    var(--primary-color) 0%,
+                    #1d4ed8 100%
+                );
+                color: white;
+                padding: 2rem 0;
+                margin-bottom: 2rem;
+            }
+
+            .pbs-command-container {
+                background: #f8fafc;
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                padding: 1.5rem;
+                font-family: "Monaco", "Consolas", "Courier New", monospace;
+                font-size: 0.9rem;
+                line-height: 1.6;
+                max-height: 600px;
+                overflow-y: auto;
+                position: relative;
+            }
+
+            .pbs-command {
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .pbs-command:last-child {
+                border-bottom: none;
+            }
+
+            .layer-header {
+                font-weight: 700;
+                color: var(--primary-color);
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .layer-header:first-child {
+                margin-top: 0;
+            }
+
+            .command-text {
+                color: #1e293b;
+                font-weight: 600;
+                margin-left: 1rem;
+            }
+
+            .command-explanation {
+                color: var(--secondary-color);
+                font-style: italic;
+                margin-left: 2rem;
+                font-size: 0.85rem;
+            }
+
+            .priority-badge {
+                display: inline-block;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .priority-critical {
+                background-color: #fee2e2;
+                color: #991b1b;
+            }
+
+            .priority-high {
+                background-color: #fef3c7;
+                color: #92400e;
+            }
+
+            .priority-medium {
+                background-color: #dbeafe;
+                color: #1e40af;
+            }
+
+            .priority-low {
+                background-color: #d1fae5;
+                color: #065f46;
+            }
+
+            .stats-card {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                border: 1px solid var(--border-color);
+            }
+
+            .stat-item {
+                text-align: center;
+                padding: 1rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--primary-color);
+                display: block;
+            }
+
+            .stat-label {
+                font-size: 0.875rem;
+                color: var(--secondary-color);
+                margin-top: 0.25rem;
+            }
+
+            .action-buttons {
+                position: sticky;
+                top: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 1rem;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .copy-success {
+                background-color: var(--success-color) !important;
+                border-color: var(--success-color) !important;
+            }
+
+            .validation-issue {
+                background-color: #fef2f2;
+                border-left: 4px solid var(--danger-color);
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 0 8px 8px 0;
+            }
+
+            .layer-summary {
+                background: white;
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .layer-summary h6 {
+                color: var(--primary-color);
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+            }
+
+            .command-type-avoid {
+                color: var(--danger-color);
+            }
+
+            .command-type-prefer {
+                color: var(--success-color);
+            }
+
+            .command-type-award {
+                color: var(--warning-color);
+            }
+
+            .preferences-summary {
+                background: #f8fafc;
+                border-radius: 8px;
+                padding: 1rem;
+                border-left: 4px solid var(--primary-color);
+                margin-bottom: 2rem;
+            }
+
+            .toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+            }
+
+            .section-tabs {
+                background: white;
+                border-radius: 12px;
+                padding: 0.5rem;
+                margin-bottom: 2rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .section-tabs .nav-link {
+                border: none;
+                border-radius: 8px;
+                padding: 0.75rem 1.5rem;
+                color: var(--secondary-color);
+                font-weight: 500;
+                transition: all 0.2s ease;
+            }
+
+            .section-tabs .nav-link.active {
+                background: var(--primary-color);
+                color: white;
+            }
+
+            @media (max-width: 768px) {
+                .main-header {
+                    padding: 1rem 0;
+                }
+
+                .pbs-command-container {
+                    font-size: 0.8rem;
+                    padding: 1rem;
+                }
+
+                .action-buttons {
+                    padding: 0.75rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Toast Container -->
+        <div class="toast-container"></div>
+
+        <!-- Main Header -->
+        <div class="main-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="h2 mb-2">
+                            <i class="fas fa-layer-group me-3"></i>
+                            Your PBS Bidding Strategy
+                        </h1>
+                        <p class="mb-0 opacity-90">
+                            AI-generated 50-layer bidding strategy ready for
+                            copy-paste into your PBS system
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a
+                            href="{{ url_for('main.index') }}"
+                            class="btn btn-light me-2"
+                        >
+                            <i class="fas fa-arrow-left me-2"></i>Back to
+                            Dashboard
+                        </a>
+                        <button
+                            class="btn btn-success"
+                            onclick="downloadStrategy()"
+                        >
+                            <i class="fas fa-download me-2"></i>Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Preferences Summary -->
+            <div class="preferences-summary">
+                <h6><i class="fas fa-user-cog me-2"></i>Your Preferences</h6>
+                <p class="mb-0">
+                    {{ preferences or "Default pilot preferences applied" }}
+                </p>
+                <small class="text-muted"
+                    >Generated: {{ generated_at[:19] if generated_at else "Just
+                    now" }}</small
+                >
+            </div>
+
+            <!-- Validation Issues -->
+            {% if validation_issues %}
+            <div class="alert alert-warning">
+                <h6>
+                    <i class="fas fa-exclamation-triangle me-2"></i>Strategy
+                    Validation
+                </h6>
+                {% for issue in validation_issues %}
+                <div class="validation-issue">
+                    <small>{{ issue }}</small>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Section Tabs -->
+            <div class="section-tabs">
+                <ul class="nav nav-pills" id="strategyTabs">
+                    <li class="nav-item">
+                        <button
+                            class="nav-link active"
+                            id="pbs-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#pbs-commands"
+                            type="button"
+                        >
+                            <i class="fas fa-terminal me-2"></i>PBS Commands
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button
+                            class="nav-link"
+                            id="layers-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#layer-breakdown"
+                            type="button"
+                        >
+                            <i class="fas fa-layer-group me-2"></i>Layer
+                            Breakdown
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button
+                            class="nav-link"
+                            id="stats-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#statistics"
+                            type="button"
+                        >
+                            <i class="fas fa-chart-pie me-2"></i>Statistics
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content" id="strategyTabsContent">
+                <!-- PBS Commands Tab -->
+                <div class="tab-pane fade show active" id="pbs-commands">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <div
+                                    class="d-flex justify-content-between align-items-center"
+                                >
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-terminal me-2"></i>
+                                        Copy-Paste Ready Commands
+                                    </h5>
+                                    <div>
+                                        <button
+                                            class="btn btn-primary btn-sm me-2"
+                                            onclick="copyPBSCommands()"
+                                        >
+                                            <i class="fas fa-copy me-1"></i>Copy
+                                            All
+                                        </button>
+                                        <button
+                                            class="btn btn-outline-primary btn-sm"
+                                            onclick="toggleExplanations()"
+                                        >
+                                            <i class="fas fa-eye me-1"></i
+                                            >Toggle Help
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PBS Commands Container -->
+                            <div
+                                class="pbs-command-container"
+                                id="pbs-commands-container"
+                            >
+                                {% if layers %} {% for layer in layers %}
+                                <div class="layer-header">
+                                    LAYER {{ layer.layer_number|string|rjust(2,
+                                    '0') }}: {{ layer.name|upper }}
+                                    <span
+                                        class="priority-badge priority-{{ layer.priority.lower() }}"
+                                        >{{ layer.priority }}</span
+                                    >
+                                </div>
+                                {% for command in layer.commands %}
+                                <div class="pbs-command">
+                                    <div
+                                        class="command-text command-type-{{ command.command_type.lower() }}"
+                                    >
+                                        {{ command.pbs_string }}
+                                    </div>
+                                    <div
+                                        class="command-explanation"
+                                        style="display: none"
+                                    >
+                                        # {{ command.explanation }}
+                                    </div>
+                                </div>
+                                {% endfor %} {% endfor %} {% else %}
+                                <!-- Fallback to raw PBS output -->
+                                <pre>
+{{ pbs_output or "No PBS commands generated" }}</pre
+                                >
+                                {% endif %}
+                            </div>
+
+                            <!-- Usage Instructions -->
+                            <div class="alert alert-info mt-3">
+                                <h6>
+                                    <i class="fas fa-info-circle me-2"></i>How
+                                    to Use These Commands
+                                </h6>
+                                <ol class="mb-0">
+                                    <li>
+                                        Click "Copy All" above to copy all
+                                        commands to clipboard
+                                    </li>
+                                    <li>
+                                        Log into your airline's PBS bidding
+                                        system
+                                    </li>
+                                    <li>
+                                        Paste commands
+                                        <strong>in layer order</strong> (Layer
+                                        1, then 2, then 3...)
+                                    </li>
+                                    <li>
+                                        Review against current bid packet before
+                                        submitting
+                                    </li>
+                                    <li>Submit your bid before the deadline</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <!-- Quick Statistics -->
+                            <div class="stats-card mb-3">
+                                <h6>
+                                    <i class="fas fa-chart-bar me-2"></i
+                                    >Strategy Summary
+                                </h6>
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-number"
+                                                >{{ (layers|length) if layers
+                                                else (statistics.total_layers if
+                                                statistics else 0) }}</span
+                                            >
+                                            <div class="stat-label">Layers</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-number"
+                                                >{{
+                                                (layers|sum(attribute='commands')|length)
+                                                if layers else
+                                                (statistics.total_commands if
+                                                statistics else 0) }}</span
+                                            >
+                                            <div class="stat-label">
+                                                Commands
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Priority Breakdown -->
+                            {% if statistics and
+                            statistics.priority_distribution %}
+                            <div class="stats-card mb-3">
+                                <h6>
+                                    <i class="fas fa-sort-amount-up me-2"></i
+                                    >Priority Breakdown
+                                </h6>
+                                {% for priority, count in
+                                statistics.priority_distribution.items() %}
+                                <div
+                                    class="d-flex justify-content-between align-items-center mb-2"
+                                >
+                                    <span
+                                        class="priority-badge priority-{{ priority.lower() }}"
+                                        >{{ priority }}</span
+                                    >
+                                    <strong>{{ count }}</strong>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Quick Actions -->
+                            <div class="stats-card">
+                                <h6>
+                                    <i class="fas fa-tools me-2"></i>Quick
+                                    Actions
+                                </h6>
+                                <div class="d-grid gap-2">
+                                    <button
+                                        class="btn btn-outline-primary btn-sm"
+                                        onclick="previewCleanVersion()"
+                                    >
+                                        <i class="fas fa-eye me-2"></i>Preview
+                                        Clean Version
+                                    </button>
+                                    <button
+                                        class="btn btn-outline-success btn-sm"
+                                        onclick="downloadStrategy()"
+                                    >
+                                        <i class="fas fa-download me-2"></i
+                                        >Download Strategy
+                                    </button>
+                                    <button
+                                        class="btn btn-outline-secondary btn-sm"
+                                        onclick="shareStrategy()"
+                                    >
+                                        <i class="fas fa-share me-2"></i>Share
+                                        Strategy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layer Breakdown Tab -->
+                <div class="tab-pane fade" id="layer-breakdown">
+                    <div class="row">
+                        <div class="col-12">
+                            <h5>
+                                <i class="fas fa-layer-group me-2"></i>Detailed
+                                Layer Analysis
+                            </h5>
+
+                            {% if layers %} {% for layer in layers %}
+                            <div class="layer-summary">
+                                <div
+                                    class="d-flex justify-content-between align-items-center mb-2"
+                                >
+                                    <h6>
+                                        Layer {{ layer.layer_number }}: {{
+                                        layer.name }}
+                                    </h6>
+                                    <span
+                                        class="priority-badge priority-{{ layer.priority.lower() }}"
+                                        >{{ layer.priority }}</span
+                                    >
+                                </div>
+                                <p class="text-muted mb-2">
+                                    {{ layer.description }}
+                                </p>
+
+                                <div class="mt-2">
+                                    {% for command in layer.commands %}
+                                    <div
+                                        class="d-flex justify-content-between align-items-center mb-1"
+                                    >
+                                        <code
+                                            class="command-type-{{ command.command_type.lower() }}"
+                                            >{{ command.pbs_string }}</code
+                                        >
+                                        <small class="text-muted"
+                                            >{{ command.command_type }}</small
+                                        >
+                                    </div>
+                                    <small class="text-muted d-block mb-2"
+                                        >{{ command.explanation }}</small
+                                    >
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %} {% else %}
+                            <div class="alert alert-info">
+                                <p class="mb-0">
+                                    No detailed layer information available.
+                                    Using simplified PBS output.
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Tab -->
+                <div class="tab-pane fade" id="statistics">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stats-card">
+                                <h6>
+                                    <i class="fas fa-chart-pie me-2"></i>Command
+                                    Distribution
+                                </h6>
+                                {% if statistics and statistics.command_types %}
+                                {% for cmd_type, count in
+                                statistics.command_types.items() %}
+                                <div
+                                    class="d-flex justify-content-between align-items-center mb-2"
+                                >
+                                    <span
+                                        class="command-type-{{ cmd_type.lower() }}"
+                                        >{{ cmd_type }}</span
+                                    >
+                                    <strong>{{ count }}</strong>
+                                </div>
+                                {% endfor %} {% else %}
+                                <p class="text-muted mb-0">
+                                    No command statistics available
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="stats-card">
+                                <h6>
+                                    <i class="fas fa-layer-group me-2"></i>Layer
+                                    Distribution
+                                </h6>
+                                {% if statistics and
+                                statistics.layers_by_priority %} {% for
+                                priority, count in
+                                statistics.layers_by_priority.items() %} {% if
+                                count > 0 %}
+                                <div
+                                    class="d-flex justify-content-between align-items-center mb-2"
+                                >
+                                    <span
+                                        class="priority-badge priority-{{ priority.lower() }}"
+                                        >{{ priority }}</span
+                                    >
+                                    <strong>{{ count }}</strong>
+                                </div>
+                                {% endif %} {% endfor %} {% else %}
+                                <p class="text-muted mb-0">
+                                    No layer statistics available
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Strategy Quality Assessment -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="stats-card">
+                                <h6>
+                                    <i class="fas fa-check-circle me-2"></i
+                                    >Strategy Assessment
+                                </h6>
+
+                                {% if validation_issues %}
+                                <div class="alert alert-warning">
+                                    <strong>Issues to Address:</strong>
+                                    <ul class="mb-0">
+                                        {% for issue in validation_issues %}
+                                        <li>{{ issue }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Strategy looks good!</strong> No
+                                    validation issues detected.
+                                </div>
+                                {% endif %}
+
+                                <div class="row text-center mt-3">
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <span
+                                                class="stat-number text-success"
+                                                >{{ "✓" if not validation_issues
+                                                else "!" }}</span
+                                            >
+                                            <div class="stat-label">
+                                                Validation
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <span class="stat-number"
+                                                >{{ ((layers|length) / 50 *
+                                                100)|round|int if layers else 0
+                                                }}%</span
+                                            >
+                                            <div class="stat-label">
+                                                Layer Usage
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <span
+                                                class="stat-number text-primary"
+                                                >{{ "A" if (layers|length or 0)
+                                                > 5 else "B" }}</span
+                                            >
+                                            <div class="stat-label">
+                                                Strategy Grade
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden data for JavaScript -->
+        <div id="hidden-data" style="display: none">
+            <div id="pbs-output-clean">{{ pbs_output or "" }}</div>
+            <div id="pbs-output-detailed">{{ pbs_output_detailed or "" }}</div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            let explanationsVisible = false;
+
+            function copyPBSCommands() {
+                const container = document.getElementById(
+                    "pbs-commands-container",
+                );
+                let textToCopy = "";
+
+                // Extract text from the container, excluding explanations if hidden
+                const layerHeaders =
+                    container.querySelectorAll(".layer-header");
+                const commands = container.querySelectorAll(".command-text");
+
+                let commandIndex = 0;
+                layerHeaders.forEach((header) => {
+                    textToCopy += header.textContent.trim() + "\n";
+
+                    // Find commands for this layer
+                    const layerNumber =
+                        header.textContent.match(/LAYER (\d+)/)[1];
+                    const layerCommands = Array.from(commands).filter((cmd) => {
+                        const layerElement =
+                            cmd.closest(".pbs-command").previousElementSibling;
+                        return (
+                            layerElement &&
+                            layerElement.classList.contains("layer-header") &&
+                            layerElement.textContent.includes(
+                                `LAYER ${layerNumber}`,
+                            )
+                        );
+                    });
+
+                    // Get next few commands that belong to this layer
+                    const nextHeader = Array.from(layerHeaders).find((h) =>
+                        h.textContent.includes(
+                            `LAYER ${parseInt(layerNumber) + 1}`,
+                        ),
+                    );
+                    let currentElement = header.nextElementSibling;
+
+                    while (currentElement && currentElement !== nextHeader) {
+                        if (currentElement.classList.contains("pbs-command")) {
+                            const commandText =
+                                currentElement.querySelector(".command-text");
+                            if (commandText) {
+                                textToCopy +=
+                                    "  " +
+                                    commandText.textContent.trim() +
+                                    "\n";
+                            }
+                        }
+                        currentElement = currentElement.nextElementSibling;
+                    }
+                    textToCopy += "\n";
+                });
+
+                // Fallback: use clean PBS output if available
+                if (!textToCopy.trim()) {
+                    textToCopy =
+                        document.getElementById("pbs-output-clean")
+                            ?.textContent ||
+                        container.textContent ||
+                        "No PBS commands to copy";
+                }
+
+                navigator.clipboard
+                    .writeText(textToCopy)
+                    .then(() => {
+                        showToast(
+                            "PBS commands copied to clipboard!",
+                            "success",
+                        );
+
+                        // Visual feedback on button
+                        const button = event.target.closest("button");
+                        const originalContent = button.innerHTML;
+                        button.innerHTML =
+                            '<i class="fas fa-check me-1"></i>Copied!';
+                        button.classList.add("copy-success");
+
+                        setTimeout(() => {
+                            button.innerHTML = originalContent;
+                            button.classList.remove("copy-success");
+                        }, 2000);
+                    })
+                    .catch((err) => {
+                        console.error("Failed to copy:", err);
+                        showToast("Failed to copy to clipboard", "error");
+                    });
+            }
+
+            function toggleExplanations() {
+                explanationsVisible = !explanationsVisible;
+                const explanations = document.querySelectorAll(
+                    ".command-explanation",
+                );
+
+                explanations.forEach((explanation) => {
+                    explanation.style.display = explanationsVisible
+                        ? "block"
+                        : "none";
+                });
+
+                const button = event.target.closest("button");
+                const icon = button.querySelector("i");
+                if (explanationsVisible) {
+                    icon.className = "fas fa-eye-slash me-1";
+                    button.innerHTML = icon.outerHTML + "Hide Help";
+                } else {
+                    icon.className = "fas fa-eye me-1";
+                    button.innerHTML = icon.outerHTML + "Show Help";
+                }
+            }
+
+            function downloadStrategy() {
+                // Trigger download via existing route
+                window.location.href =
+                    '{{ url_for("main.download_pbs_filters") if url_for else "/download_pbs_filters" }}';
+                showToast("Starting download...", "info");
+            }
+
+            function previewCleanVersion() {
+                const cleanOutput =
+                    document.getElementById("pbs-output-clean")?.textContent;
+                if (cleanOutput) {
+                    const newWindow = window.open("", "_blank");
+                    newWindow.document.write(`
+                    <html>
+                        <head><title>Clean PBS Commands - VectorBid</title></head>
+                        <body style="font-family: monospace; padding: 2rem; line-height: 1.6;">
+                            <h3>Clean PBS Commands (No Explanations)</h3>
+                            <pre>${cleanOutput}</pre>
+                        </body>
+                    </html>
+                `);
+                    newWindow.document.close();
+                } else {
+                    showToast("Clean version not available", "warning");
+                }
+            }
+
+            function shareStrategy() {
+                if (navigator.share) {
+                    const cleanOutput =
+                        document.getElementById("pbs-output-clean")
+                            ?.textContent || "VectorBid PBS Strategy";
+                    navigator
+                        .share({
+                            title: "My VectorBid PBS Strategy",
+                            text: cleanOutput,
+                        })
+                        .catch((err) => console.log("Error sharing:", err));
+                } else {
+                    copyPBSCommands();
+                    showToast(
+                        "Strategy copied to clipboard for sharing",
+                        "info",
+                    );
+                }
+            }
+
+            function showToast(message, type = "info") {
+                const toastContainer =
+                    document.querySelector(".toast-container");
+                const toastId = "toast-" + Date.now();
+
+                const bgClass =
+                    {
+                        success: "bg-success",
+                        error: "bg-danger",
+                        warning: "bg-warning",
+                        info: "bg-info",
+                    }[type] || "bg-info";
+
+                const toastHtml = `
+                <div id="${toastId}" class="toast ${bgClass} text-white" role="alert">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === "success" ? "check" : type === "error" ? "times" : "info"}-circle me-2"></i>
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+                toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement, {
+                    autohide: true,
+                    delay: 3000,
+                });
+
+                toast.show();
+
+                // Remove toast element after it's hidden
+                toastElement.addEventListener("hidden.bs.toast", () => {
+                    toastElement.remove();
+                });
+            }
+
+            // Initialize tooltips if any
+            document.addEventListener("DOMContentLoaded", function () {
+                const tooltipTriggerList = [].slice.call(
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+                );
+                const tooltipList = tooltipTriggerList.map(
+                    function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    },
+                );
+            });
+
+            // Auto-scroll to top when switching tabs
+            document
+                .querySelectorAll("#strategyTabs button")
+                .forEach((button) => {
+                    button.addEventListener("shown.bs.tab", () => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    });
+                });
+        </script>
+    </body>
+</html>
