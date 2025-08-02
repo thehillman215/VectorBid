@@ -435,7 +435,7 @@ def build_preferences_from_profile(profile):
 
 @bp.route("/results")
 def results():
-    """Display trip ranking results."""
+    """Display PBS filter results - ALWAYS show PBS commands, never trip lists."""
     # Always use test user for open testing
     user_id = '44040350'
 
@@ -583,15 +583,47 @@ def results():
         }]
         session['trip_analysis'] = {
             'total_trips': 5,
+            'preferences':
+            'I prefer good work-life balance with weekends off and reasonable trip lengths',
             'optimization_score': 87,
             'bid_package': {
-                'filename': 'Sample_Bid_Package.pdf'
+                'filename': 'Sample_Bid_Package.pdf',
+                'month_tag': 'demo_package'
             }
         }
 
-    return render_template("results_minimal.html",
-                           ranked_trips=session['ranked_trips'],
-                           analysis=session.get('trip_analysis', {}))
+    # Always generate PBS filters from preferences (real or sample)
+    trip_analysis = session.get('trip_analysis', {})
+    ranked_trips = session.get('ranked_trips', [])
+
+    # Get preferences from analysis or create default
+    preferences = trip_analysis.get(
+        'preferences',
+        'I prefer good work-life balance with weekends off and reasonable trip lengths'
+    )
+
+    # Generate PBS filters from preferences
+    pbs_filters = natural_language_to_pbs_filters(preferences, ranked_trips)
+
+    # Store PBS analysis in session for download
+    session['last_analysis'] = {
+        'preferences':
+        preferences,
+        'pbs_filters':
+        pbs_filters,
+        'trips_analyzed':
+        len(ranked_trips),
+        'month_tag':
+        trip_analysis.get('bid_package', {}).get('month_tag', 'demo_package')
+    }
+
+    # ALWAYS show PBS results template - never trip lists
+    return render_template("pbs_results.html",
+                           filters=pbs_filters,
+                           preferences=preferences,
+                           analysis={'trips_analyzed': len(ranked_trips)},
+                           month_tag=trip_analysis.get('bid_package', {}).get(
+                               'month_tag', 'demo_package'))
 
 
 @bp.route("/save-custom-ranking", methods=["POST"])
