@@ -198,13 +198,22 @@ def register_blueprints(app):
 
     logger.info("All blueprints registered successfully")
 
-    # Register enhanced admin blueprint
+    # Register enhanced admin blueprint (FIXED VERSION)
     try:
-        from admin_enhanced import admin_enhanced_bp
+        from admin_enhanced_fixed import admin_enhanced_bp
         app.register_blueprint(admin_enhanced_bp, url_prefix='/admin')
-        logger.info("Enhanced admin routes registered successfully")
+        logger.info(
+            "Enhanced admin routes registered successfully (FIXED VERSION)")
     except ImportError:
-        logger.warning("Enhanced admin blueprint not found; skipping")
+        logger.warning(
+            "Enhanced admin blueprint (fixed) not found; trying original")
+        try:
+            from admin_enhanced import admin_enhanced_bp
+            app.register_blueprint(admin_enhanced_bp, url_prefix='/admin')
+            logger.info(
+                "Enhanced admin routes registered successfully (original)")
+        except ImportError:
+            logger.warning("Enhanced admin blueprint not found; skipping")
 
 
 def register_fallback_routes(app):
