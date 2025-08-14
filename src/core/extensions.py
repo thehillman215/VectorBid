@@ -1,6 +1,9 @@
-# extensions.py
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager  # optional but convenient
+"""
+Flask extensions
+"""
 
-db = SQLAlchemy()  # the ONE shared SQLAlchemy object
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+
+db = SQLAlchemy()
 login_manager = LoginManager()

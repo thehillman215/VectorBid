@@ -1,0 +1,13 @@
+{
+  "test_user_001": {
+    "user_id": "test_user_001",
+    "tier": "free_trial",
+    "status": "active",
+    "started_at": "2025-08-14T13:42:04.095548",
+    "trial_ends_at": "2025-10-13T13:42:04.095554",
+    "current_period_end": "2025-10-13T13:42:04.095560",
+    "usage": {
+      "monthly_generations": 0
+    }
+  }
+}

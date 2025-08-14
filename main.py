@@ -1,14 +1,12 @@
-"""VectorBid Application Entry Point
-
-This module serves as the entry point for the VectorBid Flask application.
-It imports and creates the Flask app instance using the application factory pattern.
+"""
+Main entry point for VectorBid
 """
 
 from src.core.app import create_app
+import os
 
-# Create the Flask application instance
 app = create_app()
 
-if __name__ == '__main__':
-    # Run the application in development mode
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

@@ -1,197 +1,266 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, make_response
+"""
+Enhanced routes with conflict resolution
+"""
+
+from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify, session
+import sys
+sys.path.append('src/lib')
+
+from pbs_command_generator import generate_pbs_commands
+from subscription_manager import SubscriptionManager
+try:
+    from pbs_enhanced import generate_advanced_pbs_strategy
+except ImportError:
+    generate_advanced_pbs_strategy = None
+
 from datetime import datetime
-import logging
-from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers
 
-# Import existing functions (preserve your existing imports)
-try:
-    from src.lib.llm_service import rank_trips_with_ai
-except ImportError:
-    def rank_trips_with_ai(trips, preferences):
-        return []
+bp = Blueprint("main", __name__)
 
-try:
-    from src.lib.schedule_parser.pdf_parser import parse_pdf_schedule
-    from src.lib.schedule_parser.csv_parser import parse_csv_schedule
-    from src.lib.schedule_parser.txt_parser import parse_txt_schedule
-except ImportError:
-    def parse_pdf_schedule(file_path):
-        return []
-    def parse_csv_schedule(file_path):
-        return []
-    def parse_txt_schedule(file_path):
-        return []
-
-try:
-    from src.lib.services.db import get_profile, save_profile
-except ImportError:
-    def get_profile(user_id):
-        return {}
-    def save_profile(user_id, profile_data):
-        pass
-
-try:
-    from src.auth.auth_helpers import get_current_user_id
-except ImportError:
-    def get_current_user_id():
-        return '44040350'  # fallback for testing
-
-# Create blueprint
-bp = Blueprint('main', __name__)
-logger = logging.getLogger(__name__)
-
-@bp.route('/')
+@bp.route("/")
 def index():
-    """Main dashboard page."""
-    return render_template('index.html')
+    """Main dashboard"""
+    user_id = session.get('user_id', 'test_user_001')
 
-@bp.route('/onboarding')
-def onboarding():
-    """User onboarding flow."""
-    user_id = get_current_user_id()
-    if not user_id:
-        return redirect(url_for('main.index'))
-    
-    try:
-        profile = get_profile(user_id)
-        return render_template('onboarding.html', profile=profile)
-    except:
-        return render_template('onboarding.html', profile={})
+    # Get subscription info
+    manager = SubscriptionManager()
+    subscription = manager.get_user_subscription(user_id)
 
-@bp.route('/process', methods=['POST'])
-def process():
-    """Process uploaded schedule file with preferences."""
-    preferences = request.form.get('preferences', '').strip()
-    
-    if not preferences:
-        flash('Please enter your preferences', 'error')
-        return redirect(url_for('main.index'))
+    index_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VectorBid - AI Pilot Bidding Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">✈️ VectorBid</span>
+            <div>
+                <span class="badge bg-success">{{ subscription.tier }}</span>
+                <a href="/admin/" class="btn btn-outline-light btn-sm ms-2">Admin</a>
+            </div>
+        </div>
+    </nav>
 
-    # Handle file upload
-    schedule_file = request.files.get('schedule_file')
-    trips = []
-    
-    if schedule_file and schedule_file.filename:
-        try:
-            filename = schedule_file.filename.lower()
-            file_content = schedule_file.read()
-            
-            # Save temporarily and parse
-            temp_path = f'/tmp/{schedule_file.filename}'
-            with open(temp_path, 'wb') as f:
-                f.write(file_content)
-            
-            if filename.endswith('.pdf'):
-                trips = parse_pdf_schedule(temp_path)
-            elif filename.endswith('.csv'):
-                trips = parse_csv_schedule(temp_path)
-            elif filename.endswith('.txt'):
-                trips = parse_txt_schedule(temp_path)
-                
-        except Exception as e:
-            logger.error(f"File processing error: {e}")
-            flash('Error processing file. Using sample data.', 'warning')
-    
-    # If no trips from file, create sample data
-    if not trips:
-        trips = [
-            {"trip_id": "001", "days": 3, "credit_hours": 12.5, "routing": "DEN-LAX-SFO-DEN"},
-            {"trip_id": "002", "days": 2, "credit_hours": 8.0, "routing": "DEN-ORD-DEN"},
-            {"trip_id": "003", "days": 4, "credit_hours": 18.0, "routing": "DEN-JFK-MIA-DEN"}
-        ]
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1>Welcome to VectorBid</h1>
+                <p class="lead">Your AI-powered pilot schedule bidding assistant</p>
 
-    # Store analysis data in session
-    session['trip_analysis'] = {
-        'preferences': preferences,
-        'total_trips': len(trips),
-        'bid_package': {'month_tag': 'current'},
-        'trips': trips
-    }
+                <div class="alert alert-info">
+                    <strong>Your Plan:</strong> {{ subscription.tier | upper | replace('_', ' ') }}
+                    {% if subscription.tier == 'free_trial' %}
+                    - Trial ends: {{ subscription.trial_ends_at[:10] }}
+                    {% endif %}
+                </div>
 
-    return redirect(url_for('main.results'))
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5>Generate PBS Commands</h5>
+                        <form action="/pbs-results" method="get">
+                            <div class="mb-3">
+                                <label class="form-label">Enter your preferences:</label>
+                                <textarea name="preferences" class="form-control" rows="4" 
+                                    placeholder="I want weekends off and prefer short trips..."></textarea>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="check_conflicts" id="conflicts" checked>
+                                <label class="form-check-label" for="conflicts">
+                                    Check for conflicts and provide resolution options
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Generate PBS Commands</button>
+                        </form>
+                    </div>
+                </div>
 
-@bp.route("/results")
-def results():
-    """Display PBS 2.0 compliant layer results - VectorBid's core value."""
-    user_id = get_current_user_id() or '44040350'
-    
-    analysis_data = session.get('last_analysis') or session.get('trip_analysis')
-    
-    if analysis_data:
-        preferences = analysis_data.get('preferences', '')
-        
-        try:
-            pilot_profile = get_profile(user_id) if user_id else {}
-        except:
-            pilot_profile = {}
-        
-        # Generate PBS 2.0 compliant 20-layer strategy
-        bid_layers = generate_pbs_compliant_bid_layers(preferences, pilot_profile)
-        
-        session['last_analysis'] = {
-            'preferences': preferences,
-            'bid_layers': bid_layers,
-            'trips_analyzed': analysis_data.get('total_trips', 0),
-            'month_tag': analysis_data.get('bid_package', {}).get('month_tag', 'current')
+                <div class="mt-4">
+                    <h5>Quick Links</h5>
+                    <a href="/pricing" class="btn btn-outline-primary">View Plans</a>
+                    <a href="/admin/" class="btn btn-outline-secondary">Admin Portal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+    """
+    return render_template_string(index_html, subscription=subscription)
+
+@bp.route("/pbs-results")
+def pbs_results():
+    """Display PBS results with conflict resolution"""
+    preferences = request.args.get('preferences', 'Default preferences')
+    check_conflicts = request.args.get('check_conflicts') == 'on'
+
+    # Use advanced strategy if available and conflicts requested
+    if check_conflicts and generate_advanced_pbs_strategy:
+        result = generate_advanced_pbs_strategy(preferences)
+
+        results_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PBS Results - VectorBid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">✈️ VectorBid</span>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2>Your PBS Strategy</h2>
+        <p>Based on: {{ preferences }}</p>
+
+        {% if conflicts %}
+        <div class="alert alert-warning">
+            <h5>⚠️ Conflicts Detected</h5>
+            <p>We found {{ conflicts|length }} conflict(s) in your preferences:</p>
+        </div>
+
+        {% for conflict in conflicts %}
+        <div class="card mb-3 border-warning">
+            <div class="card-header bg-warning text-dark">
+                Conflict: {{ conflict.description }}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Option A:</h6>
+                        <code>{{ conflict.option_a.command }}</code>
+                        <p class="mt-2">{{ conflict.option_a.explanation }}</p>
+                        <button class="btn btn-primary btn-sm">Choose Option A</button>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Option B:</h6>
+                        <code>{{ conflict.option_b.command }}</code>
+                        <p class="mt-2">{{ conflict.option_b.explanation }}</p>
+                        <button class="btn btn-primary btn-sm">Choose Option B</button>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <strong>Recommendation:</strong> {{ conflict.recommendation }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="card mt-4">
+            <div class="card-header">Generated Commands</div>
+            <div class="card-body">
+                <pre>{% for cmd in commands %}{{ cmd.command }}  # {{ cmd.explanation }}
+{% endfor %}</pre>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="/" class="btn btn-secondary">Generate New</a>
+            <button class="btn btn-success" onclick="copyCommands()">Copy Commands</button>
+        </div>
+    </div>
+
+    <script>
+        function copyCommands() {
+            const commands = document.querySelector('pre').textContent;
+            navigator.clipboard.writeText(commands);
+            alert('Commands copied to clipboard!');
         }
-        
-        return render_template(
-            "pbs_20_layer_template.html",
-            bid_layers=bid_layers,
-            preferences=preferences,
-            analysis={'trips_analyzed': analysis_data.get('total_trips', 0)},
-            month_tag=analysis_data.get('bid_package', {}).get('month_tag', 'current'),
-            pilot_profile=pilot_profile
-        )
+    </script>
+</body>
+</html>
+        """
+        return render_template_string(results_html, 
+                                    preferences=preferences,
+                                    commands=result.get('commands', []),
+                                    conflicts=result.get('conflicts', []))
     else:
-        flash('Please run an analysis first to generate your PBS strategy.', 'info')
-        return redirect(url_for('main.index'))
+        # Use basic generator
+        result = generate_pbs_commands(preferences)
+        return render_template_string(open('src/ui/templates/pbs_results.html').read(),
+                                    commands=result.get('commands', []),
+                                    formatted=result.get('formatted', ''),
+                                    preferences=preferences)
 
-@bp.route('/download_pbs_20_strategy')
-def download_pbs_20_strategy():
-    """Download complete PBS 2.0 strategy."""
-    analysis_data = session.get('last_analysis')
-    if not analysis_data:
-        flash('No analysis data found.', 'error')
-        return redirect(url_for('main.index'))
+@bp.route("/pricing")
+def pricing():
+    """Pricing page"""
+    manager = SubscriptionManager()
+    pricing_data = manager.get_pricing_page_data()
 
-    preferences = analysis_data.get('preferences', '')
-    bid_layers = analysis_data.get('bid_layers', [])
-    
-    # Create download content
-    content = f"""VectorBid PBS 2.0 Strategy
-Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-Preferences: "{preferences}"
+    pricing_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pricing - VectorBid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">✈️ VectorBid</span>
+        </div>
+    </nav>
 
-PBS 2.0 COMPLIANT 20-LAYER STRATEGY:
-{'='*50}
+    <div class="container mt-5">
+        <h2 class="text-center">Choose Your Plan</h2>
 
-"""
-    
-    for layer in bid_layers:
-        content += f"""
-LAYER {layer['layer']}: {layer['description']}
-Strategy: {layer['strategy']}
-Probability: {layer['probability']}
+        <div class="row mt-5">
+            {% for tier in tiers %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header text-center">
+                        <h4>{{ tier.name }}</h4>
+                        <h2>{{ tier.price_display }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                        {% for feature in tier.features %}
+                            <li>{{ feature }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button class="btn btn-primary">{{ tier.cta_text or 'Select' }}</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
-PBS Commands:
-"""
-        for i, filter_cmd in enumerate(layer['filters'], 1):
-            content += f"  {i}. {filter_cmd}\n"
-        content += "\n"
-    
-    response = make_response(content)
-    response.headers['Content-Type'] = 'text/plain'
-    response.headers['Content-Disposition'] = f'attachment; filename=pbs20_strategy_{datetime.now().strftime("%Y%m%d")}.txt'
-    return response
+        <div class="mt-5 text-center">
+            <a href="/" class="btn btn-secondary">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
+    """
+    return render_template_string(pricing_html, tiers=pricing_data['tiers'])
 
-# Legacy compatibility
-def natural_language_to_pbs_filters(preferences_text, pilot_profile=None, trip_data=None):
-    """Legacy function for backward compatibility."""
-    bid_layers = generate_pbs_compliant_bid_layers(preferences_text, pilot_profile, trip_data)
-    return bid_layers[0]['filters'] if bid_layers else ["PREFER MAX_DAYS_OFF"]
+@bp.route("/health")
+def health():
+    """Health check"""
+    return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
 
-@bp.route('/how-to')
-def how_to():
-    """How-to guide."""
-    return render_template('how_to.html')
+@bp.route("/api/generate-pbs", methods=["POST"])
+def api_generate_pbs():
+    """Generate PBS commands API"""
+    try:
+        data = request.get_json()
+        preferences = data.get('preferences', '')
+        check_conflicts = data.get('check_conflicts', False)
+
+        if check_conflicts and generate_advanced_pbs_strategy:
+            result = generate_advanced_pbs_strategy(preferences)
+        else:
+            result = generate_pbs_commands(preferences)
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

@@ -1,302 +1,41 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VectorBid - AI-Powered Pilot Schedule Assistant</title>
-    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+    <title>VectorBid - AI Pilot Bidding Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="fas fa-vector-square me-2"></i>
-                VectorBid
-            </a>
-            
-            <div class="navbar-nav ms-auto">
-                <!-- Dark Mode Toggle -->
-                <div class="nav-item me-3">
-                    <button class="btn btn-outline-secondary" id="darkModeToggle" type="button">
-                        <i class="fas fa-moon" id="darkModeIcon"></i>
-                    </button>
-                </div>
-                
-                {% if user %}
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-2"></i>
-                            Pilot
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="alert('Logout functionality managed by Replit')">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a></li>
-                        </ul>
-                    </div>
-                {% else %}
-                    <a class="nav-link" href="#" onclick="alert('Please access this application through Replit to authenticate.')">
-                        <i class="fas fa-sign-in-alt me-2"></i>Login
-                    </a>
-                {% endif %}
-            </div>
+            <span class="navbar-brand">✈️ VectorBid</span>
         </div>
     </nav>
 
-    <main class="container my-5">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1>Welcome to VectorBid</h1>
+                <p class="lead">Your AI-powered pilot schedule bidding assistant</p>
 
-        {% if user %}
-            <!-- Authenticated user content -->
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <!-- Welcome Header -->
-                    <div class="card mb-4">
-                        <div class="card-body text-center py-5">
-                            <i class="fas fa-vector-square fa-3x text-primary mb-3"></i>
-                            <h1 class="card-title" data-test-id="main-title">Welcome to VectorBid</h1>
-                            <p class="card-text text-muted" data-test-id="main-subtitle">
-                                Your AI-powered pilot schedule bidding assistant
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Profile Summary -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-user-circle me-2"></i>
-                                Your Profile
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="text-center mb-3">
-                                        <i class="fas fa-building fa-2x text-primary mb-2"></i>
-                                        <h6>Airline</h6>
-                                        <p class="text-muted small">{{ profile.airline or 'Not set' }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-center mb-3">
-                                        <i class="fas fa-plane fa-2x text-primary mb-2"></i>
-                                        <h6>Aircraft</h6>
-                                        <p class="text-muted small">{{ profile.fleet|join(', ') if profile.fleet else 'Not set' }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-center mb-3">
-                                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
-                                        <h6>Base</h6>
-                                        <p class="text-muted small">{{ profile.base or 'Not set' }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-center mb-3">
-                                        <i class="fas fa-masks-theater fa-2x text-primary mb-2"></i>
-                                        <h6>Bid Style</h6>
-                                        <p class="text-muted small">{{ profile.persona.replace('_', ' ').title() if profile.persona else 'Not set' }}</p>
-                                    </div>
-                                </div>
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5>Quick PBS Generation</h5>
+                        <form action="/pbs-results" method="get">
+                            <div class="mb-3">
+                                <label class="form-label">Enter your preferences:</label>
+                                <textarea name="preferences" class="form-control" rows="4" 
+                                    placeholder="I want weekends off and prefer short trips..."></textarea>
                             </div>
-                            <div class="text-center mt-3">
-                                <a href="{{ url_for('main.onboarding', step=1) }}{% if request.args.get('test') == 'true' %}?test=true{% endif %}" class="btn btn-outline-primary" 
-                                   data-test-id="update-profile-btn">
-                                    <i class="fas fa-edit me-2"></i>Update Profile
-                                </a>
-                                {% if request.args.get('test') == 'true' %}
-                                <a href="{{ url_for('main.results') }}?test=true" class="btn btn-outline-success ms-2" 
-                                   data-test-id="test-drag-drop-btn">
-                                    <i class="fas fa-arrows-alt me-2"></i>Test Drag & Drop
-                                </a>
-                                {% else %}
-                                <a href="{{ url_for('main.test_results') }}" class="btn btn-outline-success ms-2" 
-                                   data-test-id="quick-test-results-btn">
-                                    <i class="fas fa-vial me-2"></i>Quick Test Results
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Current Bid Package -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h2 class="card-title mb-0" data-test-id="bid-package-title">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Current Month Bid Package
-                            </h2>
-                        </div>
-                        <div class="card-body">
-                            {% if bid_package %}
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h5 class="text-primary">
-                                            <i class="fas fa-file-pdf me-2"></i>
-                                            {{ bid_package.filename }}
-                                        </h5>
-                                        <p class="text-muted mb-2">
-                                            <i class="fas fa-calendar me-1"></i>
-                                            Month: {{ bid_package.month_tag[:4] }}-{{ bid_package.month_tag[4:] }}
-                                            &nbsp;&nbsp;
-                                            <i class="fas fa-weight me-1"></i>
-                                            Size: {{ "%.1f"|format(bid_package.file_size / 1024) }} KB
-                                            &nbsp;&nbsp;
-                                            <i class="fas fa-clock me-1"></i>
-                                            Uploaded: {{ bid_package.get('created_at', 'Unknown') }}
-                                        </p>
-                                        <p class="text-success">
-                                            <i class="fas fa-check-circle me-1"></i>
-                                            Matches your profile: {{ profile.airline or 'Any Airline' }} - {{ profile.seat or 'Any Position' }} - {{ profile.base or 'Any Base' }}
-                                        </p>
-                                    </div>
-                                    <div class="col-md-4 text-center">
-                                        <form method="POST" action="{{ url_for('main.analyze_bid_package') }}">
-                                            <input type="hidden" name="month_tag" value="{{ bid_package.month_tag }}">
-                                            <button type="submit" class="btn btn-primary btn-lg">
-                                                <i class="fas fa-magic me-2"></i>
-                                                Analyze with AI
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <div class="text-center py-5">
-                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                    <h5 class="text-muted">No bid package available</h5>
-                                    <p class="text-muted">
-                                        {% if not profile or not profile.profile_completed %}
-                                            Complete your pilot profile first to see available bid packages.
-                                        {% else %}
-                                            The current month's bid package hasn't been uploaded yet.<br>
-                                            Please check back later or contact your administrator.
-                                        {% endif %}
-                                    </p>
-                                </div>
-                            {% endif %}
-                        </div>
+                            <button type="submit" class="btn btn-primary">Generate PBS Commands</button>
+                        </form>
                     </div>
                 </div>
-            </div>
-        {% else %}
-            <!-- Landing page for non-authenticated users -->
-            <div class="row justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <div class="card">
-                        <div class="card-body py-5">
-                            <i class="fas fa-vector-square fa-4x text-primary mb-4"></i>
-                            <h1 class="card-title mb-4">VectorBid</h1>
-                            <p class="lead mb-4">
-                                AI-powered pilot schedule bidding assistant. Upload your monthly bid package, 
-                                share your preferences, and get intelligent trip rankings.
-                            </p>
-                            
-                            <div class="row text-start my-5">
-                                <div class="col-md-6">
-                                    <h5><i class="fas fa-brain text-primary me-2"></i>AI-Powered Rankings</h5>
-                                    <p class="text-muted">Advanced AI understands your natural language preferences and ranks trips accordingly.</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5><i class="fas fa-file-alt text-primary me-2"></i>Multiple Formats</h5>
-                                    <p class="text-muted">Supports PDF, CSV, and text schedule files from any airline system.</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5><i class="fas fa-download text-primary me-2"></i>Export Results</h5>
-                                    <p class="text-muted">Download your personalized rankings as CSV for easy reference.</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5><i class="fas fa-shield-alt text-primary me-2"></i>Secure & Private</h5>
-                                    <p class="text-muted">Your schedule data is processed securely and stored privately.</p>
-                                </div>
-                            </div>
 
-                            <a href="/?test=true" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>
-                                Get Started (Test Mode)
-                            </a>
-                            <p class="mt-2 text-muted small">
-                                <i class="fas fa-info-circle me-1"></i>
-                                For full authentication, access through Replit while logged in
-                            </p>
-                        </div>
-                    </div>
+                <div class="mt-4">
+                    <a href="/admin/" class="btn btn-secondary">Admin Portal</a>
                 </div>
             </div>
-        {% endif %}
-    </main>
-
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">
-                <i class="fas fa-vector-square me-2"></i>
-                VectorBid - AI-powered pilot schedule bidding assistant
-            </p>
         </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Tour completion check
-        function checkTourCompletion() {
-            const tourCompleted = localStorage.getItem('vectorbid_tour_completed');
-            console.log('Checking for tour completion...');
-            if (tourCompleted) {
-                console.log('Tour already completed');
-                return;
-            }
-            
-            // Only start tour if not completed and user is authenticated
-            if ({{ 'true' if user else 'false' }}) {
-                console.log('Starting guided tour...');
-                localStorage.setItem('vectorbid_tour_completed', 'true');
-            }
-        }
-        
-        // Run tour check once
-        checkTourCompletion();
-        
-        // Dark Mode Toggle Functionality
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const darkModeIcon = document.getElementById('darkModeIcon');
-        const htmlElement = document.documentElement;
-
-        // Check for saved theme preference or default to dark mode
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        
-        function setTheme(theme) {
-            if (theme === 'dark') {
-                htmlElement.setAttribute('data-bs-theme', 'dark');
-                darkModeIcon.className = 'fas fa-sun';
-                darkModeToggle.title = 'Switch to light mode';
-            } else {
-                htmlElement.setAttribute('data-bs-theme', 'light');
-                darkModeIcon.className = 'fas fa-moon';
-                darkModeToggle.title = 'Switch to dark mode';
-            }
-            localStorage.setItem('theme', theme);
-        }
-
-        // Initialize theme
-        setTheme(savedTheme);
-
-        // Toggle theme on button click
-        darkModeToggle.addEventListener('click', () => {
-            const currentTheme = htmlElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            setTheme(newTheme);
-        });
-    </script>
+    </div>
 </body>
 </html>
