@@ -73,6 +73,220 @@
     --vb-radius-xl: 16px;
     --vb-radius-2xl: 20px;
     --vb-radius-full: 9999px;
+}
+
+/* ============================================
+   2. LAYOUT & CONTAINERS
+   ============================================ */
+.vb-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ============================================
+   3. NAVIGATION
+   ============================================ */
+.vb-nav {
+    background: var(--vb-bg-elevated);
+    border-bottom: 1px solid var(--vb-border);
+    padding: 1rem 0;
+}
+
+.vb-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vb-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--vb-primary);
+    text-decoration: none;
+}
+
+.vb-logo-icon {
+    background: var(--vb-primary);
+    color: white;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--vb-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vb-nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.vb-nav-link {
+    color: var(--vb-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.vb-nav-link:hover,
+.vb-nav-link.active {
+    color: var(--vb-primary);
+}
+
+.vb-nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--vb-text-primary);
+}
+
+/* ============================================
+   4. HERO SECTION
+   ============================================ */
+.vb-hero {
+    text-align: center;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.vb-hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--vb-text-primary);
+    margin-bottom: 1rem;
+}
+
+.vb-hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--vb-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   5. CARDS & COMPONENTS
+   ============================================ */
+.vb-card {
+    background: var(--vb-bg-elevated);
+    border: 1px solid var(--vb-border);
+    border-radius: var(--vb-radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.vb-card-header {
+    margin-bottom: 1.5rem;
+}
+
+.vb-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--vb-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.vb-card-subtitle {
+    color: var(--vb-text-secondary);
+    font-size: 1rem;
+}
+
+/* ============================================
+   6. METRICS
+   ============================================ */
+.vb-metric {
+    background: var(--vb-bg-elevated);
+    border: 1px solid var(--vb-border);
+    border-radius: var(--vb-radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.vb-metric-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--vb-primary);
+    margin-bottom: 0.5rem;
+}
+
+.vb-metric-label {
+    color: var(--vb-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* ============================================
+   7. FORMS
+   ============================================ */
+.vb-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.vb-label {
+    display: block;
+    font-weight: 600;
+    color: var(--vb-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.vb-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 1px solid var(--vb-border);
+    border-radius: var(--vb-radius-md);
+    font-size: 1rem;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.vb-textarea:focus {
+    outline: none;
+    border-color: var(--vb-primary);
+    box-shadow: 0 0 0 3px var(--vb-primary-subtle);
+}
+
+/* ============================================
+   8. BUTTONS
+   ============================================ */
+.vb-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    font-weight: 600;
+    border-radius: var(--vb-radius-md);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+
+.vb-btn-primary {
+    background: var(--vb-primary);
+    color: white;
+}
+
+.vb-btn-primary:hover {
+    background: var(--vb-primary-dark);
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   9. UTILITY CLASSES
+   ============================================ */
+.vb-text-center { text-align: center; }
+.vb-text-muted { color: var(--vb-text-muted); }
+.vb-mt-5 { margin-top: 3rem; }
 
     /* Shadows */
     --vb-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);

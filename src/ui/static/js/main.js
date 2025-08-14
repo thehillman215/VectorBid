@@ -6,10 +6,8 @@ class VectorBid {
 
     init() {
         this.initDragDrop();
-        this.initNotifications();
         this.initFormValidation();
-        this.initTooltips();
-        this.initModals();
+        this.initNavigation();
     }
 
     // Drag and Drop functionality
@@ -71,6 +69,32 @@ class VectorBid {
             info: 'Info'
         };
         return titles[type] || 'Notification';
+    }
+
+    // Form validation
+    initFormValidation() {
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', (e) => {
+                const textarea = form.querySelector('textarea[name="preferences"]');
+                if (textarea && textarea.value.trim() === '') {
+                    e.preventDefault();
+                    this.showNotification('warning', 'Please enter your preferences before generating PBS commands.');
+                }
+            });
+        });
+    }
+
+    // Navigation functionality
+    initNavigation() {
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('show');
+            });
+        }
     }
 }
 
