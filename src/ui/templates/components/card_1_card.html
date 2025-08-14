@@ -1,0 +1,17 @@
+<!-- Card 1 Card Component -->
+<div class="vb-card vb-card-card_1">
+    <div class="vb-card-header">
+        <h3 class="vb-card-title">{{ title }}</h3>
+        {% if subtitle %}
+        <p class="vb-card-subtitle">{{ subtitle }}</p>
+        {% endif %}
+    </div>
+    <div class="vb-card-body">
+        {{ content | safe }}
+    </div>
+    {% if footer %}
+    <div class="vb-card-footer">
+        {{ footer | safe }}
+    </div>
+    {% endif %}
+</div>

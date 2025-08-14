@@ -1,0 +1,77 @@
+<div class="step-content">
+    <h3 class="text-center mb-4">
+        <i class="fas fa-plane text-primary me-2"></i>
+        Step 2: Fleet & Position
+    </h3>
+    
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+        </div>
+    {% endif %}
+
+    <form hx-post="{{ url_for('welcome.wizard_step', step=2) }}" 
+          hx-target="#wizard-content" 
+          hx-swap="innerHTML">
+        
+        <!-- Fleet Selection -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">
+                <i class="fas fa-plane-departure me-2"></i>
+                Which aircraft types do you fly?
+            </label>
+            <div class="fleet-selection mt-3">
+                {% set fleet_types = ['737', '320', '757/767', '787', 'Bus'] %}
+                {% for fleet in fleet_types %}
+                    <label class="fleet-chip {{ 'selected' if wizard_data and fleet in wizard_data.fleet }}">
+                        <input type="checkbox" name="fleet" value="{{ fleet }}" 
+                               {{ 'checked' if wizard_data and fleet in wizard_data.fleet }}>
+                        <i class="fas fa-plane me-2"></i>{{ fleet }}
+                    </label>
+                {% endfor %}
+            </div>
+            <div class="form-text mt-2">
+                <i class="fas fa-info-circle text-primary me-1"></i>
+                Select all aircraft types you're qualified to fly
+            </div>
+        </div>
+
+        <!-- Position Selection -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">
+                <i class="fas fa-user-tie me-2"></i>
+                What's your current position?
+            </label>
+            <div class="row mt-3">
+                <div class="col-6">
+                    <label class="seat-option {{ 'selected' if wizard_data and wizard_data.seat == 'CA' }}">
+                        <input type="radio" name="seat" value="CA" 
+                               {{ 'checked' if wizard_data and wizard_data.seat == 'CA' }}>
+                        <div>
+                            <i class="fas fa-crown display-6 mb-2"></i>
+                            <h5 class="mb-0">Captain</h5>
+                            <small>CA</small>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-6">
+                    <label class="seat-option {{ 'selected' if wizard_data and wizard_data.seat == 'FO' }}">
+                        <input type="radio" name="seat" value="FO"
+                               {{ 'checked' if wizard_data and wizard_data.seat == 'FO' }}>
+                        <div>
+                            <i class="fas fa-user-graduate display-6 mb-2"></i>
+                            <h5 class="mb-0">First Officer</h5>
+                            <small>FO</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-right me-2"></i>Continue to Base & Seniority
+            </button>
+        </div>
+    </form>
+</div>

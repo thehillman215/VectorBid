@@ -1,0 +1,20 @@
+<div class="vb-trip" draggable="true" data-trip-id="{{ trip.id }}">
+    <div class="vb-trip-header">
+        <div>
+            <div class="vb-trip-id">Trip {{ trip.number }}</div>
+            <div class="vb-trip-route">
+                <i class="fas fa-plane text-muted"></i>
+                {{ trip.route }}
+            </div>
+        </div>
+        <span class="vb-trip-score vb-score-{{ trip.score_class }}">
+            <i class="fas fa-{{ trip.score_icon }}"></i>
+            {{ trip.match_percentage }}% match
+        </span>
+    </div>
+    <div class="vb-trip-tags">
+        {% for tag in trip.tags %}
+        <span class="vb-tag">{{ tag }}</span>
+        {% endfor %}
+    </div>
+</div>

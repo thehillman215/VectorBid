@@ -1,14 +1,3 @@
-
-def get_dashboard_stats():
-    """Get statistics for dashboard display"""
-    return {
-        'trips_count': 142,  # TODO: Get from database
-        'match_score': 85,
-        'days_off': 12,
-        'block_hours': 72.5,
-        'trips_trend': {'direction': 'up', 'value': 12}
-    }
-
 """
 Enhanced routes with conflict resolution
 """

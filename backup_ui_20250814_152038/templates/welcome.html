@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to VectorBid - Profile Setup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .welcome-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        .welcome-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="welcome-container p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-plane welcome-header display-4 mb-3"></i>
+                        <h1 class="welcome-header mb-2">Welcome to VectorBid</h1>
+                        <p class="text-muted">Set up your pilot profile to get personalized trip rankings</p>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('main.welcome') }}">
+                        <div class="mb-4">
+                            <label for="airline" class="form-label">
+                                <i class="fas fa-building text-primary me-2"></i>Airline
+                            </label>
+                            <select class="form-select" id="airline" name="airline" required>
+                                <option value="">Select your airline</option>
+                                <option value="American Airlines" {{ 'selected' if profile.airline == 'American Airlines' }}>American Airlines</option>
+                                <option value="Delta Air Lines" {{ 'selected' if profile.airline == 'Delta Air Lines' }}>Delta Air Lines</option>
+                                <option value="United Airlines" {{ 'selected' if profile.airline == 'United Airlines' }}>United Airlines</option>
+                                <option value="Southwest Airlines" {{ 'selected' if profile.airline == 'Southwest Airlines' }}>Southwest Airlines</option>
+                                <option value="Alaska Airlines" {{ 'selected' if profile.airline == 'Alaska Airlines' }}>Alaska Airlines</option>
+                                <option value="JetBlue Airways" {{ 'selected' if profile.airline == 'JetBlue Airways' }}>JetBlue Airways</option>
+                                <option value="Hawaiian Airlines" {{ 'selected' if profile.airline == 'Hawaiian Airlines' }}>Hawaiian Airlines</option>
+                                <option value="Spirit Airlines" {{ 'selected' if profile.airline == 'Spirit Airlines' }}>Spirit Airlines</option>
+                                <option value="Frontier Airlines" {{ 'selected' if profile.airline == 'Frontier Airlines' }}>Frontier Airlines</option>
+                                <option value="Other" {{ 'selected' if profile.airline and profile.airline not in ['American Airlines', 'Delta Air Lines', 'United Airlines', 'Southwest Airlines', 'Alaska Airlines', 'JetBlue Airways', 'Hawaiian Airlines', 'Spirit Airlines', 'Frontier Airlines'] }}>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-plane text-primary me-2"></i>Fleet Types
+                            </label>
+                            <div class="row">
+                                {% set fleet_types = [
+                                    'A319', 'A320', 'A321', 'A330', 'A350', 'A380',
+                                    'B737', 'B747', 'B757', 'B767', 'B777', 'B787',
+                                    'CRJ', 'E170', 'E175', 'E190', 'Other'
+                                ] %}
+                                {% for fleet_type in fleet_types %}
+                                    <div class="col-md-4 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="fleet_{{ fleet_type }}" name="fleet" value="{{ fleet_type }}"
+                                                   {{ 'checked' if fleet_type in profile.fleet }}>
+                                            <label class="form-check-label" for="fleet_{{ fleet_type }}">
+                                                {{ fleet_type }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="seat" class="form-label">
+                                <i class="fas fa-user-tie text-primary me-2"></i>Position
+                            </label>
+                            <select class="form-select" id="seat" name="seat" required>
+                                <option value="">Select your position</option>
+                                <option value="CA" {{ 'selected' if profile.seat == 'CA' }}>Captain (CA)</option>
+                                <option value="FO" {{ 'selected' if profile.seat == 'FO' }}>First Officer (FO)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="base" class="form-label">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>Home Base
+                            </label>
+                            <input type="text" class="form-control" id="base" name="base" 
+                                   placeholder="e.g., LAX, JFK, ORD" 
+                                   value="{{ profile.base or '' }}" required>
+                            <div class="form-text">Enter your home base airport code</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="seniority" class="form-label">
+                                <i class="fas fa-sort-numeric-up text-primary me-2"></i>Seniority Number
+                            </label>
+                            <input type="number" class="form-control" id="seniority" name="seniority" 
+                                   placeholder="e.g., 1500" min="1"
+                                   value="{{ profile.seniority or '' }}">
+                            <div class="form-text">Optional: Your system seniority number</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Complete Profile Setup
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            Your profile information helps VectorBid provide personalized trip rankings based on your preferences and constraints.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
