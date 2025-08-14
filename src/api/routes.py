@@ -51,7 +51,7 @@ def index():
                 <div class="container">
                     <span class="navbar-brand">✈️ VectorBid</span>
                     <div>
-                        <span class="badge bg-success">{subscription.tier}</span>
+                        <span class="badge bg-success">{subscription.get('tier', 'Free')}</span>
                         <a href="/admin/" class="btn btn-outline-light btn-sm ms-2">Admin</a>
                     </div>
                 </div>
@@ -181,11 +181,22 @@ def pbs_results():
                                     conflicts=result.get('conflicts', []))
     else:
         # Use basic generator
-        result = generate_pbs_commands(preferences)
-        return render_template_string(open('src/ui/templates/pbs_results.html').read(),
-                                    commands=result.get('commands', []),
-                                    formatted=result.get('formatted', ''),
-                                    preferences=preferences)
+        try:
+            result = generate_pbs_commands(preferences)
+            return render_template("pbs_results.html",
+                                commands=result.get('commands', []),
+                                formatted=result.get('formatted', ''),
+                                preferences=preferences)
+        except Exception as e:
+            # Fallback if PBS generator fails - show actual error for debugging
+            return f"""
+            <h1>PBS Results</h1>
+            <p>Preferences: {preferences}</p>
+            <div class="alert alert-warning">
+                PBS command generation error: {str(e)}
+            </div>
+            <a href="/" class="btn btn-primary">Back to Dashboard</a>
+            """
 
 @bp.route("/pricing")
 def pricing():
