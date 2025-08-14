@@ -1,0 +1,7 @@
+
+# Add this to the TOP of your routes.py file, right after the other imports:
+
+# Import the fixed PBS generation functions
+from src.lib.pbs_fixed import natural_language_to_pbs_filters, _fallback_pbs_generation
+
+# That's it! The functions are now available to use in your routes.

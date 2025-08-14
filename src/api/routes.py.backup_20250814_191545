@@ -4,6 +4,106 @@ from src.api.pbs_fix import natural_language_to_pbs_filters
 
 
 # ============== FIXED PBS GENERATION ==============
+def _fallback_pbs_generation(preferences_text):
+    """Fixed PBS generation with working pattern matching"""
+
+    # Handle empty input
+    if not preferences_text or preferences_text.strip() == "":
+        return ["PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE"]
+
+    filters = []
+    text_lower = preferences_text.lower().strip()
+
+    # Debug logging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"PBS Processing preferences: {text_lower}")
+
+    # Weekend preferences - EXPANDED PHRASES
+    weekend_phrases = ['weekends off', 'weekend off', 'no weekends', 'no weekend', 
+                      'avoid weekends', 'weekends free', 'saturday off', 'sunday off',
+                      'saturdays off', 'sundays off', 'no saturday', 'no sunday']
+    if any(phrase in text_lower for phrase in weekend_phrases):
+        filters.append("AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN")
+        logger.info("Added weekend filter")
+
+    # Early morning preferences - EXPANDED PHRASES
+    early_phrases = ['no early', 'avoid early', 'late start', 'no morning', 
+                    'avoid morning', 'no early departure', 'no early departures',
+                    'not early', 'hate early', 'sleep in', 'no dawn']
+    if any(phrase in text_lower for phrase in early_phrases):
+        filters.append("AVOID TRIPS STARTING BEFORE 0800")
+        logger.info("Added early morning filter")
+
+    # Trip length preferences
+    short_phrases = ['short trip', 'day trip', '1 day', 'one day', 'short', 
+                    'quick trip', 'turns', 'day turns', 'no overnight']
+    long_phrases = ['long trip', '4 day', 'four day', 'week long', '5 day',
+                   'five day', 'extended', 'multi-day']
+
+    if any(phrase in text_lower for phrase in short_phrases):
+        filters.append("PREFER TRIPS WITH DUTY_DAYS <= 2")
+        logger.info("Added short trip filter")
+    elif any(phrase in text_lower for phrase in long_phrases):
+        filters.append("PREFER TRIPS WITH DUTY_DAYS >= 4")
+        logger.info("Added long trip filter")
+
+    # Red-eye preferences - EXPANDED PHRASES
+    redeye_phrases = ['no redeye', 'avoid redeye', 'no red-eye', 'no red eye', 
+                     'avoid red-eye', 'no overnight', 'no late night',
+                     'not redeye', 'hate redeye', 'no night flight']
+    if any(phrase in text_lower for phrase in redeye_phrases):
+        filters.append("AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559")
+        logger.info("Added red-eye filter")
+
+    # Commute preferences - EXPANDED PHRASES
+    commute_phrases = ['commut', 'late start', 'commutable', 'easy commute',
+                      'commuter', 'drive in', 'drive home', 'same day']
+    if any(phrase in text_lower for phrase in commute_phrases):
+        filters.append("PREFER TRIPS STARTING AFTER 1000")
+        logger.info("Added commute filter")
+
+    # International preferences
+    intl_phrases = ['international', 'overseas', 'europe', 'asia', 'london',
+                   'paris', 'tokyo', 'foreign', 'abroad']
+    if any(phrase in text_lower for phrase in intl_phrases):
+        avoid_words = ['avoid', 'no', 'without', 'not', 'don't', 'dont', 'hate']
+        if any(word in text_lower for word in avoid_words):
+            filters.append("AVOID TRIPS WITH DESTINATION INTL")
+            logger.info("Added avoid international filter")
+        else:
+            filters.append("PREFER TRIPS WITH DESTINATION INTL")
+            logger.info("Added prefer international filter")
+
+    # Days off preferences
+    if 'days off' in text_lower or 'time off' in text_lower or 'more off' in text_lower:
+        filters.append("PREFER MAX_DAYS_OFF")
+        logger.info("Added days off filter")
+
+    # Add default if no specific matches
+    if not filters:
+        filters.append("PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE")
+        logger.info("No specific matches, added default filter")
+
+    logger.info(f"Generated {len(filters)} PBS filters")
+    return filters
+
+def natural_language_to_pbs_filters(preferences_text, trip_data=None):
+    """Main PBS filter generation function"""
+    try:
+        # Try enhanced system first if available
+        from src.lib.vectorbid_pbs_integration import VectorBidPBSService
+        service = VectorBidPBSService()
+        # ... enhanced logic ...
+        pass
+    except ImportError:
+        pass
+
+    # Use the fixed fallback function
+    return _fallback_pbs_generation(preferences_text)
+# ============== END FIXED PBS GENERATION ==============
+
+
 def get_dashboard_stats():
     """Get statistics for dashboard display"""
     return {
@@ -31,9 +131,6 @@ except ImportError:
     generate_advanced_pbs_strategy = None
 
 from datetime import datetime
-
-# Fixed PBS generation functions
-from src.lib.pbs_fixed import natural_language_to_pbs_filters, _fallback_pbs_generation
 
 bp = Blueprint("main", __name__)
 

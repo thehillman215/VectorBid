@@ -1,9 +1,6 @@
 from src.api.pbs_fix import natural_language_to_pbs_filters
 
 
-
-
-# ============== FIXED PBS GENERATION ==============
 def get_dashboard_stats():
     """Get statistics for dashboard display"""
     return {
@@ -31,9 +28,6 @@ except ImportError:
     generate_advanced_pbs_strategy = None
 
 from datetime import datetime
-
-# Fixed PBS generation functions
-from src.lib.pbs_fixed import natural_language_to_pbs_filters, _fallback_pbs_generation
 
 bp = Blueprint("main", __name__)
 
