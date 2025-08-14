@@ -25,6 +25,7 @@ Enhanced routes with conflict resolution
 from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify, session, render_template
 from src.lib.pbs_command_generator import generate_pbs_commands
 from src.lib.subscription_manager import SubscriptionManager
+from src.lib.personas import PILOT_PERSONAS
 try:
     from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
 except ImportError:
@@ -280,6 +281,174 @@ def health():
         'status': 'healthy',
         'timestamp': datetime.now().isoformat()
     })
+
+@bp.route('/admin')
+def admin_redirect():
+    """Redirect to admin dashboard"""
+    return redirect('/admin/dashboard')
+
+@bp.route('/personas')
+def personas():
+    """Display available pilot personas"""
+    personas_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pilot Personas - VectorBid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/vectorbid-modern.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="vb-nav">
+        <div class="vb-nav-container">
+            <a href="/" class="vb-logo">
+                <div class="vb-logo-icon"><i class="fas fa-plane"></i></div>
+                VectorBid
+            </a>
+            <div class="vb-nav-links">
+                <a href="/" class="vb-nav-link">Home</a>
+                <a href="/personas" class="vb-nav-link active">Personas</a>
+                <a href="/admin" class="vb-nav-link">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="vb-container">
+        <div class="vb-hero">
+            <h1 class="vb-hero-title">Pilot Personas</h1>
+            <p class="vb-hero-subtitle">Pre-built flying styles to match your preferences</p>
+        </div>
+
+        <div class="row">
+            {% for persona_id, persona in personas.items() %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="vb-card">
+                    <div class="vb-card-header">
+                        <h3 class="vb-card-title">
+                            <i class="{{ persona.icon }}"></i>
+                            {{ persona.name }}
+                        </h3>
+                        <p class="vb-card-subtitle">{{ persona.description }}</p>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Preferences:</strong></p>
+                        <p class="text-muted">{{ persona.preferences[:100] }}...</p>
+                        <form action="/bid-layers/generate" method="POST" class="mt-3">
+                            <input type="hidden" name="persona" value="{{ persona_id }}">
+                            <button type="submit" class="vb-btn vb-btn-primary">
+                                <i class="fas fa-magic"></i>
+                                Use This Persona
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+    """
+    return render_template_string(personas_html, personas=PILOT_PERSONAS)
+
+@bp.route('/bid-layers/generate', methods=['POST'])
+def generate_bid_layers():
+    """Generate PBS commands using bid layers with persona support"""
+    preferences = request.form.get('preferences', '')
+    persona_id = request.form.get('persona', '')
+    
+    # Use persona if selected
+    persona = None
+    if persona_id and persona_id in PILOT_PERSONAS:
+        persona = PILOT_PERSONAS[persona_id]
+        preferences = persona['preferences']
+    
+    # Generate enhanced PBS commands
+    pbs_commands = generate_pbs_commands(preferences)
+    
+    results_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Persona PBS Results - VectorBid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/vectorbid-modern.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="vb-nav">
+        <div class="vb-nav-container">
+            <a href="/" class="vb-logo">
+                <div class="vb-logo-icon"><i class="fas fa-plane"></i></div>
+                VectorBid
+            </a>
+            <div class="vb-nav-links">
+                <a href="/" class="vb-nav-link">Home</a>
+                <a href="/personas" class="vb-nav-link">Personas</a>
+                <a href="/admin" class="vb-nav-link">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="vb-container">
+        {% if persona %}
+        <div class="vb-hero">
+            <h1 class="vb-hero-title">
+                <i class="{{ persona.icon }}"></i>
+                {{ persona.name }} Results
+            </h1>
+            <p class="vb-hero-subtitle">{{ persona.description }}</p>
+        </div>
+        {% endif %}
+
+        <div class="vb-card">
+            <div class="vb-card-header">
+                <h2 class="vb-card-title">Your PBS Commands</h2>
+                <p class="vb-card-subtitle">Based on: {{ preferences }}</p>
+            </div>
+
+            <div class="card-body">
+                <h5 class="mt-4">Commands Breakdown:</h5>
+                <ul>
+                {% for command in commands %}
+                    <li>
+                        <strong>{{ command.command }}</strong><br>
+                        <small class="text-muted">{{ command.explanation }}</small>
+                    </li>
+                {% endfor %}
+                </ul>
+
+                <h5 class="mt-4">Complete PBS Command Block:</h5>
+                <pre class="bg-light p-3 rounded">{{ formatted }}</pre>
+            </div>
+
+            <div class="mt-3">
+                <a href="/personas" class="vb-btn vb-btn-secondary">Try Another Persona</a>
+                <button class="vb-btn vb-btn-primary" onclick="copyCommands()">
+                    <i class="fas fa-copy"></i>
+                    Copy Commands
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyCommands() {
+            const commands = document.querySelector('pre').textContent;
+            navigator.clipboard.writeText(commands);
+            alert('Commands copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
+    """
+    
+    return render_template_string(results_html,
+                                 preferences=preferences,
+                                 commands=pbs_commands.get('commands', []),
+                                 formatted=pbs_commands.get('formatted', ''),
+                                 persona=persona)
 
 
 @bp.route("/api/generate-pbs", methods=["POST"])
