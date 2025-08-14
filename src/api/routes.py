@@ -97,13 +97,14 @@ def index():
         """
 
 
-@bp.route("/process", methods=["POST"])
+@bp.route("/process", methods=["POST", "GET"])
 def process():
     """Process schedule file and preferences - main form handler"""
-    # This is where the main form from index.html should submit
-    # For now, redirect to PBS results since that's the current flow
-    preferences = request.form.get('preferences', '')
-    return redirect(url_for('main.pbs_results', preferences=preferences))
+    if request.method == "POST":
+        preferences = request.form.get('preferences', '')
+        return redirect(url_for('main.pbs_results', preferences=preferences))
+    else:
+        return redirect(url_for('main.index'))
 
 
 @bp.route("/pbs-results")
