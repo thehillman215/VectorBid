@@ -13,14 +13,11 @@ def get_dashboard_stats():
 Enhanced routes with conflict resolution
 """
 
-from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify, session
-import sys
-sys.path.append('src/lib')
-
-from pbs_command_generator import generate_pbs_commands
-from subscription_manager import SubscriptionManager
+from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify, session, render_template
+from src.lib.pbs_command_generator import generate_pbs_commands
+from src.lib.subscription_manager import SubscriptionManager
 try:
-    from pbs_enhanced import generate_advanced_pbs_strategy
+    from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
 except ImportError:
     generate_advanced_pbs_strategy = None
 
@@ -30,76 +27,67 @@ bp = Blueprint("main", __name__)
 
 @bp.route("/")
 def index():
-    """Main dashboard"""
+    """Main dashboard - use proper template"""
     user_id = session.get('user_id', 'test_user_001')
 
     # Get subscription info
     manager = SubscriptionManager()
     subscription = manager.get_user_subscription(user_id)
 
-    index_html = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VectorBid - AI Pilot Bidding Assistant</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
-            <span class="navbar-brand">✈️ VectorBid</span>
-            <div>
-                <span class="badge bg-success">{{ subscription.tier }}</span>
-                <a href="/admin/" class="btn btn-outline-light btn-sm ms-2">Admin</a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <h1>Welcome to VectorBid</h1>
-                <p class="lead">Your AI-powered pilot schedule bidding assistant</p>
-
-                <div class="alert alert-info">
-                    <strong>Your Plan:</strong> {{ subscription.tier | upper | replace('_', ' ') }}
-                    {% if subscription.tier == 'free_trial' %}
-                    - Trial ends: {{ subscription.trial_ends_at[:10] }}
-                    {% endif %}
-                </div>
-
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h5>Generate PBS Commands</h5>
-                        <form action="/pbs-results" method="get">
-                            <div class="mb-3">
-                                <label class="form-label">Enter your preferences:</label>
-                                <textarea name="preferences" class="form-control" rows="4" 
-                                    placeholder="I want weekends off and prefer short trips..."></textarea>
-                            </div>
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" name="check_conflicts" id="conflicts" checked>
-                                <label class="form-check-label" for="conflicts">
-                                    Check for conflicts and provide resolution options
-                                </label>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Generate PBS Commands</button>
-                        </form>
+    # Use the proper template file instead of inline HTML
+    try:
+        return render_template("index.html", subscription=subscription, user_id=user_id)
+    except:
+        # Fallback to simple HTML if template not found
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>VectorBid - AI Pilot Bidding Assistant</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body>
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container">
+                    <span class="navbar-brand">✈️ VectorBid</span>
+                    <div>
+                        <span class="badge bg-success">{subscription.tier}</span>
+                        <a href="/admin/" class="btn btn-outline-light btn-sm ms-2">Admin</a>
                     </div>
                 </div>
-
-                <div class="mt-4">
-                    <h5>Quick Links</h5>
-                    <a href="/pricing" class="btn btn-outline-primary">View Plans</a>
-                    <a href="/admin/" class="btn btn-outline-secondary">Admin Portal</a>
+            </nav>
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <h1>Welcome to VectorBid</h1>
+                        <p class="lead">Your AI-powered pilot schedule bidding assistant</p>
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h5>Generate PBS Commands</h5>
+                                <form action="/process" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label">Enter your preferences:</label>
+                                        <textarea name="preferences" class="form-control" rows="4" 
+                                            placeholder="I want weekends off and prefer short trips..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Generate PBS Commands</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</body>
-</html>
-    """
-    return render_template_string(index_html, subscription=subscription)
+        </body>
+        </html>
+        """
+
+@bp.route("/process", methods=["POST"])
+def process():
+    """Process schedule file and preferences - main form handler"""
+    # This is where the main form from index.html should submit
+    # For now, redirect to PBS results since that's the current flow
+    preferences = request.form.get('preferences', '')
+    return redirect(url_for('main.pbs_results', preferences=preferences))
 
 @bp.route("/pbs-results")
 def pbs_results():
@@ -275,3 +263,18 @@ def api_generate_pbs():
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# Add missing routes for navigation
+@bp.route("/preferences") 
+def preferences():
+    return "Preferences page under development. <a href=\"/\">Back to Dashboard</a>"
+
+@bp.route("/schedule")
+def schedule():
+    return "Schedule page under development. <a href=\"/\">Back to Dashboard</a>"
+
+@bp.route("/history")
+def history():
+    return "History page under development. <a href=\"/\">Back to Dashboard</a>"
+

@@ -1,6 +1,6 @@
 # Overview
 
-**📅 Last Updated**: August 1, 2025 - Major refactor completed with improved project structure
+**📅 Last Updated**: August 14, 2025 - Fixed navigation issues and broken links throughout the application
 
 VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system now includes a comprehensive drag-and-drop trip preference ranking feature that allows pilots to visually reorder their trip preferences by dragging items up and down in their preferred priority order. The project includes a complete admin workflow with secure Bearer token authentication for uploading monthly bid packages and one-click validation preview capabilities. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
 
