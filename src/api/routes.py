@@ -416,7 +416,6 @@ def generate_bid_layers():
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/static/css/vectorbid-modern.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <nav class="vb-nav">
@@ -500,12 +499,26 @@ def generate_bid_layers():
         </div>
     </div>
 
+    <!-- Bootstrap JavaScript (must be loaded after DOM elements) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         function copyCommands() {
             const commands = document.querySelector('pre').textContent;
             navigator.clipboard.writeText(commands);
             alert('Commands copied to clipboard!');
         }
+        
+        // Initialize Bootstrap components after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing Bootstrap accordion...');
+            // Ensure Bootstrap is available
+            if (typeof bootstrap !== 'undefined') {
+                console.log('Bootstrap is loaded');
+            } else {
+                console.error('Bootstrap is not loaded!');
+            }
+        });
     </script>
 </body>
 </html>
