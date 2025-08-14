@@ -26,6 +26,8 @@ from flask import Blueprint, render_template_string, request, redirect, url_for,
 from src.lib.pbs_command_generator import generate_pbs_commands
 from src.lib.subscription_manager import SubscriptionManager
 from src.lib.personas import PILOT_PERSONAS
+from src.lib.services.db import get_profile, save_profile
+from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers
 try:
     from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
 except ImportError:
@@ -287,9 +289,44 @@ def admin_redirect():
     """Redirect to admin dashboard"""
     return redirect('/admin/dashboard')
 
+@bp.route('/onboarding')
+def onboarding():
+    """Pilot profile onboarding wizard"""
+    return render_template('onboarding.html', step=1)
+
+@bp.route('/onboarding/submit', methods=['POST'])
+def onboarding_submit():
+    """Handle onboarding form submission"""
+    try:
+        # Collect pilot profile data
+        profile_data = {
+            'airline': request.form.get('airline', ''),
+            'base': request.form.get('base', ''),
+            'seat': request.form.get('seat', ''),
+            'fleet': request.form.get('fleet', '').split(',') if request.form.get('fleet') else [],
+            'seniority': int(request.form.get('seniority', 5000)),
+            'onboarded': True
+        }
+        
+        # Save profile (using demo user ID for now)
+        user_id = "demo_pilot"
+        save_profile(user_id, profile_data)
+        
+        # Redirect to personas page
+        return redirect(url_for('main.personas'))
+        
+    except Exception as e:
+        return f"Error saving profile: {str(e)}", 400
+
 @bp.route('/personas')
 def personas():
-    """Display available pilot personas"""
+    """Display available pilot personas after onboarding"""
+    # Check if pilot has completed profile (simplified for demo)
+    user_id = "demo_pilot"
+    profile = get_profile(user_id)
+    
+    if not profile.get('onboarded'):
+        return redirect(url_for('main.onboarding'))
     personas_html = """
 <!DOCTYPE html>
 <html>
@@ -316,8 +353,8 @@ def personas():
 
     <div class="vb-container">
         <div class="vb-hero">
-            <h1 class="vb-hero-title">Pilot Personas</h1>
-            <p class="vb-hero-subtitle">Pre-built flying styles to match your preferences</p>
+            <h1 class="vb-hero-title">Choose Your Flying Style</h1>
+            <p class="vb-hero-subtitle">Pre-built personas for {{ profile.get('airline', 'Pilot') }} {{ profile.get('seat', 'pilot') }}</p>
         </div>
 
         <div class="row">
@@ -350,13 +387,17 @@ def personas():
 </body>
 </html>
     """
-    return render_template_string(personas_html, personas=PILOT_PERSONAS)
+    return render_template_string(personas_html, personas=PILOT_PERSONAS, profile=profile)
 
 @bp.route('/bid-layers/generate', methods=['POST'])
 def generate_bid_layers():
-    """Generate PBS commands using bid layers with persona support"""
+    """Generate 20-layer PBS bid strategy with pilot profile and persona"""
     preferences = request.form.get('preferences', '')
     persona_id = request.form.get('persona', '')
+    
+    # Get pilot profile
+    user_id = "demo_pilot"
+    profile = get_profile(user_id)
     
     # Use persona if selected
     persona = None
@@ -364,8 +405,8 @@ def generate_bid_layers():
         persona = PILOT_PERSONAS[persona_id]
         preferences = persona['preferences']
     
-    # Generate enhanced PBS commands
-    pbs_commands = generate_pbs_commands(preferences)
+    # Generate full 20-layer PBS bid strategy
+    bid_layers = generate_pbs_compliant_bid_layers(preferences, profile)
     
     results_html = """
 <!DOCTYPE html>
@@ -409,18 +450,43 @@ def generate_bid_layers():
             </div>
 
             <div class="card-body">
-                <h5 class="mt-4">Commands Breakdown:</h5>
-                <ul>
-                {% for command in commands %}
-                    <li>
-                        <strong>{{ command.command }}</strong><br>
-                        <small class="text-muted">{{ command.explanation }}</small>
-                    </li>
+                <div class="alert alert-info mb-4">
+                    <h6><i class="fas fa-user-pilot"></i> Pilot Profile</h6>
+                    <p><strong>{{ profile.airline }}</strong> {{ profile.seat }} | Base: {{ profile.base }} | Fleet: {{ profile.fleet|join(', ') }} | Seniority: {{ profile.seniority }}</p>
+                </div>
+
+                <h5 class="mt-4">20-Layer PBS Bid Strategy:</h5>
+                <div class="accordion" id="layersAccordion">
+                {% for layer in bid_layers %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ layer.layer }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ layer.layer }}">
+                                <strong>Layer {{ layer.layer }}: {{ layer.description }}</strong>
+                                <span class="badge bg-{{ 'success' if layer.category == 'IDEAL' else 'primary' if layer.category == 'GOOD' else 'warning' if layer.category == 'ACCEPTABLE' else 'secondary' }} ms-2">{{ layer.probability }}</span>
+                            </button>
+                        </h2>
+                        <div id="collapse{{ layer.layer }}" class="accordion-collapse collapse" data-bs-parent="#layersAccordion">
+                            <div class="accordion-body">
+                                <p><strong>Strategy:</strong> {{ layer.strategy }}</p>
+                                <p><strong>PBS Filters:</strong></p>
+                                <ul>
+                                {% for filter in layer.filters %}
+                                    <li><code>{{ filter }}</code></li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 {% endfor %}
-                </ul>
+                </div>
 
                 <h5 class="mt-4">Complete PBS Command Block:</h5>
-                <pre class="bg-light p-3 rounded">{{ formatted }}</pre>
+                <pre class="bg-light p-3 rounded">{% for layer in bid_layers %}
+# LAYER {{ layer.layer }}: {{ layer.description }} ({{ layer.probability }})
+{% for filter in layer.filters %}{{ filter }}
+{% endfor %}
+
+{% endfor %}</pre>
             </div>
 
             <div class="mt-3">
@@ -446,8 +512,8 @@ def generate_bid_layers():
     
     return render_template_string(results_html,
                                  preferences=preferences,
-                                 commands=pbs_commands.get('commands', []),
-                                 formatted=pbs_commands.get('formatted', ''),
+                                 bid_layers=bid_layers,
+                                 profile=profile,
                                  persona=persona)
 
 

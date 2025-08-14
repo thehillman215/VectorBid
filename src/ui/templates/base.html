@@ -36,6 +36,9 @@
                 <a href="{{ url_for('main.index') }}" class="vb-nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
                     Dashboard
                 </a>
+                <a href="{{ url_for('main.onboarding') }}" class="vb-nav-link {% if request.endpoint == 'main.onboarding' %}active{% endif %}">
+                    Setup Profile
+                </a>
                 <a href="{{ url_for('main.personas') }}" class="vb-nav-link {% if request.endpoint == 'main.personas' %}active{% endif %}">
                     Personas
                 </a>
