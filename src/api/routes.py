@@ -51,7 +51,7 @@ def index():
                 <div class="container">
                     <span class="navbar-brand">✈️ VectorBid</span>
                     <div>
-                        <span class="badge bg-success">{subscription.get('tier', 'Free')}</span>
+                        <span class="badge bg-success">{subscription.get('tier', 'Free') if subscription else 'Free'}</span>
                         <a href="/admin/" class="btn btn-outline-light btn-sm ms-2">Admin</a>
                     </div>
                 </div>
