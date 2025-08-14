@@ -1,6 +1,6 @@
 # Overview
 
-**📅 Last Updated**: August 14, 2025 - Restored admin login functionality and bid layer personas system
+**📅 Last Updated**: August 14, 2025 - Complete pilot workflow restored with onboarding, personas, and 20-layer PBS generation
 
 VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system features a comprehensive admin portal with session-based authentication and a bid layer personas system offering 6 pre-built pilot flying styles (Family First, Money Maker, Commuter Friendly, Quality of Life, Reserve Avoider, Adventure Seeker). The project includes secure admin functionality for bid package management and one-click PBS command generation from persona preferences. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
 
@@ -45,7 +45,8 @@ Preferred communication style: Simple, everyday language.
 - **Authentication Strategy**: Leverages Replit Auth for secure user authentication and session management.
 - **AI Integration Approach**: Utilizes OpenAI GPT-4o for natural language processing and intelligent trip analysis, enabling flexible preference input and human-like reasoning.
 - **Enhanced File Processing**: Implements a multi-layered parsing system with block detection and pattern matching for complex airline bid packages (e.g., United Airlines format), including deferred PyMuPDF import for robustness.
-- **User Onboarding & Profile Management**: Features a streamlined 3-step HTMX-powered onboarding wizard to collect pilot preferences, including predefined and custom flying style personas, stored in Replit DB. This system automatically redirects new users to complete their profile before accessing main features.
+- **Complete Pilot Workflow**: Features a comprehensive 3-step workflow: (1) Profile onboarding collecting airline, base, position, fleet, and seniority data, (2) Persona selection from 6 pre-built flying styles, and (3) Full 20-layer PBS bid strategy generation with expandable accordion interface showing strategy, probability, and PBS filters for each layer.
+- **20-Layer PBS System**: Implements production-ready PBS 2.0 compliant bidding strategy with layers 1-5 (ideal conditions), 6-10 (good conditions), 11-15 (acceptable conditions), and 16-20 (fallback conditions), each with specific probability ratings and PBS command filters.
 - **Automated Bid Package Matching**: Eliminates manual bid package selection; the system automatically matches pilots to appropriate bid packages based on their profile attributes (month, airline, aircraft, base, position), converting profile preferences into AI-ready strings for analysis.
 - **One-Click Validation Preview**: Production-ready admin feature allowing instant bid package validation with trip parsing results, file details, sample data tables, and error handling through modal interface.
 
