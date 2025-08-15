@@ -1,1 +1,0 @@
-# UI templates and assets
