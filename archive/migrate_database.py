@@ -6,6 +6,7 @@ Run this first to add new database columns safely.
 
 import os
 import sys
+import subprocess
 from datetime import datetime
 from sqlalchemy import text
 
@@ -21,8 +22,22 @@ def backup_database():
         return None
 
     print(f"📦 Creating database backup: {backup_file}")
-    backup_cmd = f"pg_dump '{database_url}' > {backup_file}"
-    result = os.system(backup_cmd)
+    try:
+        with open(backup_file, 'w') as f:
+            result = subprocess.run(
+                ['pg_dump', database_url],
+                stdout=f,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True
+            )
+        result = 0  # Success
+    except subprocess.CalledProcessError as e:
+        print(f"❌ pg_dump failed: {e.stderr}")
+        result = e.returncode
+    except FileNotFoundError:
+        print("❌ pg_dump command not found")
+        result = 1
 
     if result == 0:
         print(f"✅ Database backed up to: {backup_file}")
@@ -169,7 +184,7 @@ def main():
         print("❌ Migration failed")
         if backup_file:
             print(
-                f"   Restore from backup: psql '{os.environ.get('DATABASE_URL')}' < {backup_file}"
+                f"   Restore from backup: psql [DATABASE_URL] < {backup_file}"
             )
         sys.exit(1)
 
