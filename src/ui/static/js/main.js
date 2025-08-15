@@ -34,15 +34,30 @@ class VectorBid {
 
         const icon = this.getIcon(type);
 
-        notification.innerHTML = `
-            <div class="vb-alert vb-alert-${type}">
-                <i class="fas fa-${icon}"></i>
-                <div>
-                    <strong>${this.getTitle(type)}</strong>
-                    <p>${message}</p>
-                </div>
-            </div>
-        `;
+        // Create alert container
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `vb-alert vb-alert-${type}`;
+
+        // Create and append icon
+        const iconElement = document.createElement('i');
+        iconElement.className = `fas fa-${icon}`;
+        alertDiv.appendChild(iconElement);
+
+        // Create content div
+        const contentDiv = document.createElement('div');
+
+        // Create and append title
+        const titleElement = document.createElement('strong');
+        titleElement.textContent = this.getTitle(type);
+        contentDiv.appendChild(titleElement);
+
+        // Create and append message
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        contentDiv.appendChild(messageElement);
+
+        alertDiv.appendChild(contentDiv);
+        notification.appendChild(alertDiv);
 
         document.body.appendChild(notification);
 
