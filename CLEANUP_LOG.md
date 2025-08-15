@@ -31,6 +31,17 @@ Files removed during cleanup:
 - test_pbs.py, test_pbs_fix.py, test_pbs_v2.py
 - run_dev.py, run_on_port_8080.py
 
+## Additional Cleanup (Second Pass):
+- src/api/routes_backup_20250813_2101.py
+- src/api/routes_backup_pbs20_20250813_212356.py
+- src/api/routes.py.backup_* (multiple backup files)
+- src/api/routes_integration.py (unused)
+- src/api/preferences_routes.py (unused)
+- src/ui/templates/results.html.backup
+- src/ui/templates/onboarding.html.backup
+- src/lib/schedule_parser/pdf_parser_backup.py
+- src/lib/services/db.py.backup
+
 ## Miscellaneous Files Removed:
 - routes_patch_instructions.txt
 - cookies.txt
