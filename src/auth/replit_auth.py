@@ -1,6 +1,7 @@
 import jwt
 import os
 import uuid
+import requests
 from functools import wraps
 from urllib.parse import urlencode
 
@@ -121,6 +122,72 @@ def make_replit_blueprint():
     return replit_bp
 
 
+def get_jwt_public_keys(issuer_url):
+    """Fetch public keys for JWT verification from OIDC issuer."""
+    try:
+        # Get well-known configuration
+        well_known_url = f"{issuer_url}/.well-known/openid-configuration"
+        config_response = requests.get(well_known_url, timeout=10)
+        config_response.raise_for_status()
+        config = config_response.json()
+        
+        # Get public keys
+        jwks_url = config["jwks_uri"]
+        keys_response = requests.get(jwks_url, timeout=10)
+        keys_response.raise_for_status()
+        return keys_response.json()
+    except (requests.RequestException, KeyError, ValueError) as e:
+        raise ValueError(f"Failed to fetch JWT public keys: {str(e)}")
+
+
+def verify_jwt_token(token, issuer_url, client_id):
+    """Verify JWT token signature and claims."""
+    try:
+        # Get public keys
+        jwks_data = get_jwt_public_keys(issuer_url)
+        
+        # Get the header to find the key ID
+        unverified_header = jwt.get_unverified_header(token)
+        kid = unverified_header.get('kid')
+        
+        if not kid:
+            raise ValueError("JWT token missing 'kid' in header")
+        
+        # Find the matching key
+        key_data = None
+        for key in jwks_data.get('keys', []):
+            if key.get('kid') == kid:
+                key_data = key
+                break
+        
+        if not key_data:
+            raise ValueError(f"Public key not found for kid: {kid}")
+        
+        # Convert JWKS key to PyJWT format
+        from jwt.algorithms import RSAAlgorithm
+        public_key = RSAAlgorithm.from_jwk(key_data)
+        
+        # Decode token with verification
+        user_claims = jwt.decode(
+            token,
+            public_key,
+            algorithms=["RS256"],  # Replit uses RS256
+            audience=client_id,
+            issuer=issuer_url,
+            options={
+                "verify_signature": True,
+                "verify_aud": True,
+                "verify_iss": True,
+                "verify_exp": True
+            }
+        )
+        return user_claims
+    except jwt.InvalidTokenError as e:
+        raise ValueError(f"Invalid JWT token: {str(e)}")
+    except Exception as e:
+        raise ValueError(f"JWT verification error: {str(e)}")
+
+
 def save_user(user_claims):
     user = User()
     user.id = user_claims["sub"]
@@ -135,15 +202,22 @@ def save_user(user_claims):
 
 @oauth_authorized.connect
 def logged_in(blueprint, token):
-    user_claims = jwt.decode(token["id_token"], options={"verify_signature": False})
-    user = save_user(user_claims)
-    login_user(user)
-    blueprint.token = token
-    next_url = session.pop("next_url", None)
-    if next_url is not None:
-        return redirect(next_url)
-    # Default redirect to home page
-    return redirect(url_for("main.index"))
+    try:
+        issuer_url = os.environ.get("ISSUER_URL", "https://replit.com/oidc")
+        client_id = os.environ.get("REPL_ID")
+        user_claims = verify_jwt_token(token["id_token"], issuer_url, client_id)
+        user = save_user(user_claims)
+        login_user(user)
+        blueprint.token = token
+        next_url = session.pop("next_url", None)
+        if next_url is not None:
+            return redirect(next_url)
+        # Default redirect to home page
+        return redirect(url_for("main.index"))
+    except ValueError as e:
+        # Log the error and redirect to error page
+        print(f"JWT verification failed: {e}")
+        return redirect(url_for("replit_auth.error"))
 
 
 @oauth_error.connect
