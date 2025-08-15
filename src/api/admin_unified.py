@@ -18,15 +18,17 @@ from flask import Blueprint, jsonify, redirect, render_template_string, request,
 from werkzeug.utils import secure_filename
 
 # Import the BidPacketManager
-import sys
-
-sys.path.append('src/lib')
-
 try:
-    from bid_packet_manager import BidPacketManager
+    from src.lib.bid_packet_manager import BidPacketManager
 except ImportError:
-    # If not found, we'll handle it gracefully
-    BidPacketManager = None
+    try:
+        # Fallback import path
+        import sys
+        sys.path.append('src/lib')
+        from bid_packet_manager import BidPacketManager
+    except ImportError:
+        # If not found, we'll handle it gracefully
+        BidPacketManager = None
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -199,11 +201,18 @@ def dashboard():
     """Admin dashboard"""
 
     if not BidPacketManager:
-        return "BidPacketManager not available. Please check installation.", 500
-
-    manager = BidPacketManager()
-    packets = manager.get_available_bid_packets()
-    contracts = []  # manager.get_contracts() - TODO: implement
+        # Fallback data when BidPacketManager is not available
+        packets = []
+        contracts = []
+    else:
+        try:
+            manager = BidPacketManager()
+            packets = manager.get_available_bid_packets()
+            contracts = []  # manager.get_contracts() - TODO: implement
+        except Exception as e:
+            logger.error(f"Error loading bid packets: {e}")
+            packets = []
+            contracts = []
 
     dashboard_html = """
 <!DOCTYPE html>
@@ -508,7 +517,9 @@ def dashboard():
     
     return render_template_string(dashboard_html,
                                   packets=packets,
-                                  contracts=contracts)
+                                  contracts=contracts,
+                                  storage_mb=storage_mb,
+                                  unique_airlines=unique_airlines)
 
 
 # ============================================
