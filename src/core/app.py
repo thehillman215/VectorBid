@@ -55,8 +55,8 @@ def create_app():
             'status': 'ok',
             'template_folder': app.template_folder,
             'static_folder': app.static_folder,
-            'template_exists': os.path.exists(app.template_folder),
-            'static_exists': os.path.exists(app.static_folder)
+            'template_exists': os.path.exists(app.template_folder) if app.template_folder else False,
+            'static_exists': os.path.exists(app.static_folder) if app.static_folder else False
         }
 
     # Add a test route to verify the app is working
