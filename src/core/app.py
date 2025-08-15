@@ -1,15 +1,24 @@
+
 """
-Flask application factory for VectorBid with Fixed Admin Portal
+Flask application factory for VectorBid - FIXED VERSION
 """
 
 from flask import Flask
 import os
 
 def create_app():
-    """Create and configure Flask app"""
+    """Create and configure Flask app with correct paths"""
+    
+    # Get the project root directory
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    # Set correct template and static folders
+    template_folder = os.path.join(project_root, 'src', 'ui', 'templates')
+    static_folder = os.path.join(project_root, 'src', 'ui', 'static')
+    
     app = Flask(__name__, 
-                template_folder='../../src/ui/templates',
-                static_folder='../../src/ui/static')
+                template_folder=template_folder,
+                static_folder=static_folder)
 
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -17,26 +26,42 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-    # Register blueprints
-    from src.api.routes import bp as main_bp
-    app.register_blueprint(main_bp)
+    # Debug: Print paths to verify they're correct
+    print(f"Template folder: {template_folder}")
+    print(f"Static folder: {static_folder}")
+    print(f"Template folder exists: {os.path.exists(template_folder)}")
+    print(f"Static folder exists: {os.path.exists(static_folder)}")
 
-    # Register admin portal - try fixed version first
+    # Register main routes blueprint
+    try:
+        from src.api.routes import bp as main_bp
+        app.register_blueprint(main_bp)
+        print("✅ Main routes registered!")
+    except ImportError as e:
+        print(f"❌ Failed to register main routes: {e}")
+
+    # Register admin portal - try only the fixed version
     try:
         from admin_portal_fixed import admin_portal
         app.register_blueprint(admin_portal)
         print("✅ Fixed admin portal registered!")
     except ImportError:
-        try:
-            from admin_portal_enhanced import admin_portal
-            app.register_blueprint(admin_portal)
-            print("✅ Enhanced admin portal registered!")
-        except ImportError:
-            try:
-                from admin_portal import admin_portal
-                app.register_blueprint(admin_portal)
-                print("✅ Basic admin portal registered")
-            except ImportError:
-                print("⚠️ No admin portal available")
+        print("⚠️ Admin portal not available")
+
+    # Add a simple health check route for debugging
+    @app.route('/health')
+    def health_check():
+        return {
+            'status': 'ok',
+            'template_folder': app.template_folder,
+            'static_folder': app.static_folder,
+            'template_exists': os.path.exists(app.template_folder),
+            'static_exists': os.path.exists(app.static_folder)
+        }
+
+    # Add a test route to verify the app is working
+    @app.route('/test')
+    def test_route():
+        return '<h1>VectorBid Test Route Working!</h1><p>If you see this, the Flask app is running correctly.</p>'
 
     return app
