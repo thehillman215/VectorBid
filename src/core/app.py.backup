@@ -42,9 +42,9 @@ def create_app():
 
     # Register admin portal - try only the fixed version
     try:
-        from src.api.admin_unified import unified_admin
-        app.register_blueprint(unified_admin)
-        print("✅ Unified admin system registered!")
+        from admin_portal_fixed import admin_portal
+        app.register_blueprint(admin_portal)
+        print("✅ Fixed admin portal registered!")
     except ImportError:
         print("⚠️ Admin portal not available")
 
