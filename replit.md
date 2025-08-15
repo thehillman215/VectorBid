@@ -1,8 +1,8 @@
 # Overview
 
-**📅 Last Updated**: August 15, 2025 - Project cleanup completed, removed duplicate/obsolete files
+**📅 Last Updated**: August 15, 2025 - Major UX improvements: Enhanced dashboard, advanced preferences, intelligent user profiles
 
-VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system features a comprehensive admin portal with session-based authentication and a bid layer personas system offering 6 pre-built pilot flying styles (Family First, Money Maker, Commuter Friendly, Quality of Life, Reserve Avoider, Adventure Seeker). The project includes secure admin functionality for bid package management and one-click PBS command generation from persona preferences. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
+VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system now features a comprehensive, intelligent user experience with enhanced profile management, advanced preferences system with learning capabilities, smart dashboard with personalization, and a bid layer personas system offering 6 pre-built pilot flying styles (Family First, Money Maker, Commuter Friendly, Quality of Life, Reserve Avoider, Adventure Seeker). The project includes secure admin functionality for bid package management, one-click PBS command generation, and now provides professional-grade pilot operations interface with continuous preference optimization. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
 
 # User Preferences
 

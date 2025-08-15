@@ -43,8 +43,13 @@ bp = Blueprint("main", __name__)
 
 @bp.route("/")
 def index():
-    """Main dashboard - use proper template"""
-    user_id = session.get('user_id', 'test_user_001')
+    """Main dashboard - redirect to enhanced dashboard or show basic version"""
+    user_id = session.get('user_id', 'demo_pilot')
+    profile = get_profile(user_id)
+
+    # If user has completed profile, show enhanced dashboard
+    if profile.get('onboard_complete') or profile.get('airline'):
+        return redirect(url_for('main.enhanced_dashboard'))
 
     # Get subscription info
     manager = SubscriptionManager()
@@ -54,7 +59,8 @@ def index():
     try:
         return render_template("index.html",
                                subscription=subscription,
-                               user_id=user_id)
+                               user_id=user_id,
+                               profile=profile)
     except:
         # Fallback to simple HTML if template not found
         return f"""
@@ -563,3 +569,93 @@ def schedule():
 @bp.route("/history")
 def history():
     return "History page under development. <a href=\"/\">Back to Dashboard</a>"
+
+
+@bp.route("/profile")
+def user_profile():
+    """Enhanced user profile page"""
+    user_id = session.get('user_id', 'demo_pilot')
+    profile = get_profile(user_id)
+    
+    return render_template("user_profile.html", 
+                         profile=profile, 
+                         personas=PILOT_PERSONAS)
+
+
+@bp.route("/dashboard")
+def enhanced_dashboard():
+    """Enhanced dashboard with metrics and personalized content"""
+    user_id = session.get('user_id', 'demo_pilot')
+    profile = get_profile(user_id)
+    
+    # Get dashboard statistics
+    stats = get_dashboard_stats()
+    
+    # Get current month for bid period display
+    from datetime import datetime
+    current_month = datetime.now().strftime("%B %Y")
+    
+    # Add persona name to profile for display
+    if profile.get('persona'):
+        profile['persona_name'] = PILOT_PERSONAS.get(profile['persona'], {}).get('name', 'Custom')
+    
+    return render_template("enhanced_dashboard.html", 
+                         profile=profile, 
+                         stats=stats,
+                         personas=PILOT_PERSONAS,
+                         current_month=current_month)
+
+
+@bp.route("/api/dashboard-stats")
+def api_dashboard_stats():
+    """API endpoint for dashboard statistics"""
+    stats = get_dashboard_stats()
+    return jsonify(stats)
+
+
+@bp.route("/preferences/advanced")
+def advanced_preferences():
+    """Advanced preferences management page"""
+    user_id = session.get('user_id', 'demo_pilot')
+    
+    # Import preferences manager
+    from src.lib.preferences_manager import preferences_manager
+    
+    # Get user preferences and analysis
+    profile = get_profile(user_id)
+    report = preferences_manager.generate_preference_report(user_id)
+    suggestions = preferences_manager.get_smart_suggestions(user_id)
+    
+    # Get current persona if selected
+    current_persona = None
+    if profile.get('persona'):
+        current_persona = PILOT_PERSONAS.get(profile['persona'])
+    
+    return render_template("preferences_advanced.html",
+                         profile=profile,
+                         optimization_score=report['optimization_score'],
+                         suggestions=suggestions,
+                         learning_data=report.get('learning_data', {}),
+                         current_persona=current_persona)
+
+
+@bp.route("/api/preferences/advanced", methods=["POST"])
+def api_save_advanced_preferences():
+    """Save advanced preferences via API"""
+    try:
+        user_id = session.get('user_id', 'demo_pilot')
+        data = request.get_json()
+        
+        # Import preferences manager
+        from src.lib.preferences_manager import preferences_manager
+        
+        # Save preferences using preferences manager
+        success = preferences_manager.update_preferences(user_id, data)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'Preferences saved successfully'})
+        else:
+            return jsonify({'success': False, 'message': 'Error saving preferences'}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
