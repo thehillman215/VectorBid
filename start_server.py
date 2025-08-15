@@ -28,6 +28,10 @@ def start_gunicorn():
     """Start Gunicorn with automatic port detection"""
     port = find_free_port(5000)
     
+    # Validate port number (defensive programming)
+    if not isinstance(port, int) or port < 1 or port > 65535:
+        raise ValueError(f"Invalid port number: {port}")
+    
     # Set environment variable for other parts of the app
     os.environ['PORT'] = str(port)
     
