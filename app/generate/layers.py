@@ -15,7 +15,7 @@ def _next_month_tag(dt: datetime) -> str:
 def _canonical_sha256(obj) -> str:
     """Deterministic hash for export fingerprint."""
     data = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return hashlib.sha256(data.encode("utf-8")).hexdigest()
+    return hashlib.sha256(data.encode('utf-8')).hexdigest()
 
 def candidates_to_layers(topk: List[CandidateSchedule], bundle: FeatureBundle) -> BidLayerArtifact:
     # Build simple 1:1 layers from the ranked candidates

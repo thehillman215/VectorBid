@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException, Depends
 import os
 import json
 from pathlib import Path
+from app.models import FeatureBundle
+from app.services.optimizer import select_topk
 
 from app.models import (
     PreferenceSchema,
@@ -51,22 +53,10 @@ def validate(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 @router.post("/optimize", tags=["Optimize"])
 def optimize(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Body:
-      {"feature_bundle": {...}, "K": 5}
-    Returns:
-      {"candidates": [CandidateSchedule, ...]}
-    """
-    try:
-        bundle = FeatureBundle(**payload["feature_bundle"])
-        rules = load_rule_pack("rule_packs/UAL/2025.08.yml")
-        feas = validate_feasibility(bundle, rules)["feasible_pairings"]
-        topk = rank_candidates(bundle, feas, K=int(payload.get("K", 10)))
-        return {"candidates": [c.model_dump() for c in topk]}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
+    bundle = FeatureBundle(**payload["feature_bundle"])
+    K = int(payload.get("K", 50))
+    topk = select_topk(bundle, K)
+    return {"candidates": [c.model_dump() for c in topk]}
 @router.post("/strategy", tags=["Strategy"])
 def strategy(payload: Dict[str, Any]) -> Dict[str, Any]:
     """

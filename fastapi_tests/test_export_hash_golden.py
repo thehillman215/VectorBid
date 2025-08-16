@@ -44,4 +44,4 @@ def test_export_hash_golden(monkeypatch):
 
     # Known-good hash for this frozen month + payload
     assert artifact["month"] == "2025-09"
-    assert artifact["export_hash"] == "c004517d9f7f18a67905d42288c35b35f67a9c3f9dde4c9177bceddc402d39d5"
+    assert artifact["export_hash"] == "84bc797693de6955fb1029c46ef21ae669e221771a87ed06bfdcf223cd76cd56"

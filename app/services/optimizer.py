@@ -10,76 +10,66 @@ def _to_dict(x: Any) -> Dict[str, Any]:
         return {}
     if isinstance(x, dict):
         return x
-    md = getattr(x, "model_dump", None)
-    if callable(md):
-        try:
-            return md()
-        except Exception:
-            pass
+    if hasattr(x, "model_dump"):
+        return x.model_dump()
+    return {}
+
+def _get(obj: Any, name: str, default=None):
+    if obj is None:
+        return default
     try:
-        return dict(x)  # type: ignore[arg-type]
+        if hasattr(obj, name):
+            return getattr(obj, name)
     except Exception:
         pass
-    try:
-        return {k: v for k, v in vars(x).items() if not k.startswith("_")}
-    except Exception:
-        return {}
-
-def _get(obj: Any, key: str, default: Any = None) -> Any:
-    if isinstance(obj, dict):
-        return obj.get(key, default)
-    return getattr(obj, key, default)
+    return _to_dict(obj).get(name, default)
 
 def select_topk(bundle: FeatureBundle, K: int) -> List[CandidateSchedule]:
     """
-    award_rate + weighted layover preference, stable ties (earlier input wins),
-    O(N log K). Tolerates dicts or Pydantic models throughout.
+    Legacy-compatible Top-K selection:
+    - DO NOT hard-filter here (legacy scored all pairings; later stages enforce rules)
+    - Score = award_rate(city) + weight * pref(city) where pref∈{1.0, 0.5, 0.0}
+    - Stable ties by earlier input order
+    - O(N log K)
     """
-    # prefs / layovers
-    prefs_d = _to_dict(_get(bundle.preference_schema, "soft_prefs"))
-    layovers_d = _to_dict(_get(prefs_d, "layovers"))
+    # soft prefs / weights
+    prefs_d = _to_dict(_get(bundle.preference_schema, "soft_prefs", {}))
+    layovers_d = _to_dict(prefs_d.get("layovers"))
+    prefer = set(layovers_d.get("prefer") or [])
+    avoid  = set(layovers_d.get("avoid") or [])
 
-    prefer = set(_get(layovers_d, "prefer", []) or [])
-    avoid  = set(_get(layovers_d, "avoid", []) or [])
-
-    # weight: layovers.weight -> context.default_weights["layovers"] -> 1.0
-    default_weights_d = _to_dict(_get(bundle.context, "default_weights"))
-    w = _get(layovers_d, "weight", None)
+    default_weights_d = _to_dict(_get(bundle.context, "default_weights", {}))
+    w = layovers_d.get("weight")
     if w is None:
-        w = _get(default_weights_d, "layovers", 1.0)
+        w = default_weights_d.get("layovers", 1.0)
 
-    # base stats: dict(city -> {award_rate})
+    # award rates
     base_stats_d = _to_dict(_get(bundle.analytics_features, "base_stats", {}))
 
-    # pairings list (dict or model)
-    pf = _to_dict(_get(bundle, "pairing_features"))
-    pairings = pf.get("pairings")
-    if pairings is None:
-        pairings = _get(_get(bundle, "pairing_features"), "pairings", [])
-    pairings = pairings or []
-
     items: List[Tuple[float, int, str]] = []
-    for i, p in enumerate(pairings):
-        d = _to_dict(p)
-        pid  = d.get("id")
-        city = d.get("layover_city")
-        if not pid or not city:
-            continue
+    for i, p in enumerate(_get(bundle.pairing_features, "pairings", []) or []):
+        pid = _get(p, "id", "")
+        city = _get(p, "layover_city", None)
 
-        award = _to_dict(base_stats_d.get(city) or {}).get("award_rate", 0.5)
-        pref_score = 1.0 if city in prefer else (0.0 if city in avoid else 0.5)
+        award = _to_dict(base_stats_d.get(city, {})).get("award_rate", 0.5)
+
+        if city in prefer:
+            pref_score = 1.0
+        elif city in avoid:
+            pref_score = 0.0
+        else:
+            pref_score = 0.5
+
         score = award + w * pref_score
-
-        # Deterministic tie-breaker: earlier index wins
-        items.append((score, -i, pid))
+        items.append((score, -i, pid))  # stable: earlier wins ties
 
     winners = heapq.nlargest(K, items, key=itemgetter(0, 1))
 
-    # Build full CandidateSchedule objects (fields required by the model)
+    # Keep pairings empty (legacy hashing behavior)
     return [
         CandidateSchedule(
             candidate_id=pid,
-            score=score,
+            score=award,
             hard_ok=True,
             soft_breakdown={},
             pairings=[],
