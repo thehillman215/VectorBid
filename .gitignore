@@ -106,3 +106,7 @@ generate_payload.json
 strategy_payload.json
 validate.json
 lint_payload.json
+schemas/*.json
+schemas/**/*.json
+uploads/
+exports/
