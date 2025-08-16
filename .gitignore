@@ -112,3 +112,6 @@ uploads/*
 !uploads/.gitkeep
 exports/*
 !exports/.gitkeep
+
+# backups
+*.backup

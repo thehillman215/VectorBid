@@ -49,3 +49,21 @@ def get_all_schemas() -> dict[str, dict]:
 from app.api import router as api_router
 
 app.include_router(api_router)
+
+# UI Routes Integration
+try:
+    from app.routes.ui import router as ui_router
+    app.include_router(ui_router, prefix="", tags=["UI"])
+    print("✅ UI routes registered")
+except ImportError as e:
+    print(f"⚠️  UI routes not available: {e}")
+
+# Static files
+try:
+    from fastapi.staticfiles import StaticFiles
+    import os
+    if os.path.exists("app/static"):
+        app.mount("/static", StaticFiles(directory="app/static"), name="static")
+        print("✅ Static files mounted")
+except Exception as e:
+    print(f"⚠️  Static files not mounted: {e}")
