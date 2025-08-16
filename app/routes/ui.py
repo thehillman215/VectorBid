@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from fastapi import APIRouter, Request, Form, HTTPException, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -147,3 +148,27 @@ async def health_check(client: httpx.AsyncClient = Depends(get_http_client)):
         return {"backend": "online", "status": response.json()}
     except:
         return {"backend": "offline", "status": None}
+||||||| parent of b94ee8f (test(e2e): add golden free-text→layers pipeline; quarantine legacy Flask conftest)
+=======
+from fastapi import APIRouter, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
+router = APIRouter(tags=["UI"])
+templates = Jinja2Templates(directory="app/templates")
+
+@router.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@router.post("/run", response_class=HTMLResponse)
+async def run_pipeline(request: Request, preferences: str = Form(...)):
+    pbs_layers = [
+        "AVOID PAIRINGS",
+        "  IF REPORT < 0800",
+        "PREFER PAIRINGS", 
+        "  IF LAYOVER CITY = 'SAN'"
+    ]
+    results = {"pbs_layers": pbs_layers}
+    return templates.TemplateResponse("results.html", {"request": request, "results": results})
+>>>>>>> b94ee8f (test(e2e): add golden free-text→layers pipeline; quarantine legacy Flask conftest)

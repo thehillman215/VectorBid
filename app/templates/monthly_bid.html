@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VectorBid - Monthly Bid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input[type="range"] {
+            background: linear-gradient(to right, #3B82F6 0%, #3B82F6 50%, #E5E7EB 50%, #E5E7EB 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header with Profile -->
+    <nav class="bg-blue-900 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">✈️ VectorBid</h1>
+            <div class="text-sm">
+                {{ profile.name }} | {{ profile.airline }}-{{ profile.base }} | {{ profile.equipment }} {{ profile.seat }}
+                <a href="/profile" class="ml-4 underline">Settings</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-3xl font-bold mb-2">{{ current_month }} Bid Preferences</h2>
+            <p class="text-gray-600 mb-8">Let's optimize your schedule for next month</p>
+            
+            <form method="post" action="/generate-pbs" class="space-y-6">
+                <!-- Step 1: Choose Persona -->
+                <div class="border-b pb-6">
+                    <h3 class="text-xl font-semibold mb-4">1️⃣ What's your priority this month?</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        {% for key, persona in personas.items() %}
+                        <label class="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition">
+                            <input type="radio" name="persona" value="{{ key }}" {% if loop.first %}checked{% endif %}>
+                            <span class="ml-2 font-medium">{{ persona.name }}</span>
+                            <p class="text-sm text-gray-600 mt-1 ml-6">{{ persona.defaults }}</p>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Step 2: Custom Preferences -->
+                <div class="border-b pb-6">
+                    <h3 class="text-xl font-semibold mb-4">2️⃣ Any specific requests?</h3>
+                    <textarea name="preferences" rows="4" class="w-full p-3 border rounded-lg" 
+                        placeholder="E.g., I need Dec 24-26 off for family Christmas, prefer SAN layovers, avoid red-eyes this month due to commute..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">💡 Be specific - mention dates, cities, and reasons</p>
+                </div>
+                
+                <!-- Step 3: Fine-tune Priorities -->
+                <div class="pb-6">
+                    <h3 class="text-xl font-semibold mb-4">3️⃣ Fine-tune your priorities</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>⏰ Time at Home</span>
+                                <span id="home-val">5</span>
+                            </div>
+                            <input type="range" name="priority_time_home" min="1" max="10" value="5" 
+                                   oninput="updateSlider(this, 'home-val')" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>💰 Pay/Credit</span>
+                                <span id="pay-val">5</span>
+                            </div>
+                            <input type="range" name="priority_pay" min="1" max="10" value="5"
+                                   oninput="updateSlider(this, 'pay-val')" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>📅 Weekends Off</span>
+                                <span id="weekend-val">5</span>
+                            </div>
+                            <input type="range" name="priority_weekends" min="1" max="10" value="5"
+                                   oninput="updateSlider(this, 'weekend-val')" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>😴 Rest/Comfort</span>
+                                <span id="comfort-val">5</span>
+                            </div>
+                            <input type="range" name="priority_comfort" min="1" max="10" value="5"
+                                   oninput="updateSlider(this, 'comfort-val')" class="w-full">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+                    Generate PBS Commands →
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    function updateSlider(slider, valId) {
+        document.getElementById(valId).innerText = slider.value;
+        const percent = (slider.value - 1) * 11.11;
+        slider.style.background = `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${percent}%, #E5E7EB ${percent}%, #E5E7EB 100%)`;
+    }
+    </script>
+</body>
+</html>

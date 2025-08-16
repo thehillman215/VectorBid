@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}VectorBid{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-900 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-xl font-bold flex items-center space-x-2">
+                        <span>✈️</span>
+                        <span>VectorBid</span>
+                    </a>
+                    <div class="flex space-x-4 text-sm">
+                        <a href="/" class="hover:text-blue-300">Home</a>
+                        <a href="/test-panel" class="hover:text-blue-300 bg-yellow-600 px-2 py-1 rounded">🧪 Test Mode</a>
+                        <a href="/onboarding" class="hover:text-blue-300">Setup</a>
+                        <a href="/profile" class="hover:text-blue-300">Profile</a>
+                    </div>
+                </div>
+                <div class="text-sm">
+                    {% block user_info %}
+                    <span>Not logged in</span>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

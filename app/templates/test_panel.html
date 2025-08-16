@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VectorBid - Test Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
+            <p class="font-bold">🧪 Test Mode Active</p>
+            <p class="text-sm">This panel is only visible in development</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold mb-6">Test Control Panel</h2>
+            
+            <form method="post" action="/set-test-profile" class="space-y-6">
+                <!-- Quick Profile Selection -->
+                <div>
+                    <h3 class="font-semibold mb-3">Select Test Profile</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        {% for key, profile in profiles.items() %}
+                        <label class="border rounded p-4 cursor-pointer hover:bg-blue-50">
+                            <input type="radio" name="profile_key" value="{{ key }}" required>
+                            <div class="ml-2">
+                                <div class="font-medium">{{ profile.name }}</div>
+                                <div class="text-sm text-gray-600">
+                                    {{ profile.airline }}-{{ profile.base }} 
+                                    {{ profile.equipment }} {{ profile.seat }}
+                                </div>
+                                <div class="text-xs text-gray-500">Seniority: {{ profile.seniority }}</div>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Test Month -->
+                <div>
+                    <label class="block font-semibold mb-2">Test Month</label>
+                    <select name="month" class="w-full p-2 border rounded">
+                        <option>January 2025</option>
+                        <option>February 2025</option>
+                        <option>December 2024</option>
+                        <option>March 2025</option>
+                    </select>
+                </div>
+                
+                <!-- Last Month's Persona -->
+                <div>
+                    <label class="block font-semibold mb-2">Simulate Last Month's Persona</label>
+                    <select name="last_persona" class="w-full p-2 border rounded">
+                        <option value="none">None (New User)</option>
+                        <option value="commuter">Commuter</option>
+                        <option value="family">Family First</option>
+                        <option value="money">Money Maximizer</option>
+                        <option value="seniority">Seniority Builder</option>
+                        <option value="quality">Quality of Life</option>
+                    </select>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                        Set Profile & Go to App
+                    </button>
+                    <a href="/clear-test" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 inline-block">
+                        Clear All Test Data
+                    </a>
+                </div>
+            </form>
+            
+            <div class="mt-8 pt-8 border-t">
+                <h3 class="font-semibold mb-3">Quick Links</h3>
+                <div class="space-x-4">
+                    <a href="/" class="text-blue-600 hover:underline">Main App</a>
+                    <a href="/onboarding" class="text-blue-600 hover:underline">Onboarding Flow</a>
+                    <a href="/profile" class="text-blue-600 hover:underline">Profile Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
