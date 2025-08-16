@@ -108,5 +108,7 @@ validate.json
 lint_payload.json
 schemas/*.json
 schemas/**/*.json
-uploads/
-exports/
+uploads/*
+!uploads/.gitkeep
+exports/*
+!exports/.gitkeep
