@@ -1,0 +1,11 @@
+# Dev deps (extends runtime)
+-r requirements.txt
+
+# Local server for FastAPI with reload
+uvicorn>=0.30,<1
+
+# Tests
+pytest>=8,<9
+httpx>=0.28,<0.29
+
+watchfiles>=0.22,<1
