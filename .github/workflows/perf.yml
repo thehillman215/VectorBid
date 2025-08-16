@@ -1,0 +1,33 @@
+name: Perf Sanity
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+jobs:
+  perf-sanity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install runtime deps
+        run: |
+          python -m pip install -U pip
+          [ -f requirements.txt ] && pip install -r requirements.txt || true
+      - name: Run light bench
+        run: |
+          set -euo pipefail
+          python scripts/bench_10k.py --n 2000 --k 50 | tee bench_out.txt
+          python - <<'PY'
+import re, sys
+txt=open("bench_out.txt").read()
+m=re.search(r'(?m)^total\s+([\d.]+)\s+ms', txt)
+if not m:
+    print("Could not find total ms in output"); sys.exit(1)
+total=float(m.group(1))
+thr=250.0   # adjust if runners are slower
+print(f"Perf total: {total} ms (threshold {thr} ms)")
+sys.exit(0 if total <= thr else 2)
+PY
