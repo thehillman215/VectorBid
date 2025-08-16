@@ -3,8 +3,6 @@ PBS Command Generation Diagnostic & Fix Script
 Run this to test and fix PBS generation issues
 """
 
-import re
-from typing import List, Dict
 
 # ============================================
 # STEP 1: TEST CURRENT IMPLEMENTATION
@@ -38,7 +36,7 @@ def test_current_pbs_generation():
     print("=" * 60)
 
 
-def _fallback_pbs_generation_current(preferences_text: str) -> List[str]:
+def _fallback_pbs_generation_current(preferences_text: str) -> list[str]:
     """Current broken implementation (for reference)"""
     # This is what's likely in your code now
     return ["PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE"]
@@ -49,7 +47,7 @@ def _fallback_pbs_generation_current(preferences_text: str) -> List[str]:
 # ============================================
 
 
-def _fallback_pbs_generation_fixed(preferences_text: str) -> List[str]:
+def _fallback_pbs_generation_fixed(preferences_text: str) -> list[str]:
     """
     Fixed PBS command generation with working pattern matching
     Converts natural language to PBS 2.0 commands

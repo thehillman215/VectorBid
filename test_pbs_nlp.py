@@ -3,8 +3,9 @@ Test PBS Natural Language Processing
 Verify professional-grade command generation
 """
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, 'src/lib')
 
 from pbs_command_generator import generate_pbs_commands
@@ -42,7 +43,7 @@ print("=" * 80)
 use_llm = os.environ.get('USE_LLM', 'true').lower() == 'true'
 api_key = os.environ.get('OPENAI_API_KEY', '')
 
-print(f"\nConfiguration:")
+print("\nConfiguration:")
 print(f"  LLM Enabled: {use_llm}")
 print(f"  API Key Set: {'Yes' if api_key else 'No'}")
 print("=" * 80)
@@ -52,41 +53,41 @@ for i, test in enumerate(test_cases, 1):
     print(f"Pilot: {test['profile'].get('seniority', 50)}% seniority at {test['profile'].get('base', 'Unknown')}")
     print(f"Input: \"{test['input'][:100]}...\"")
     print("-" * 40)
-    
+
     # Generate commands
     result = generate_pbs_commands(test['input'], test['profile'])
-    
+
     # Check quality
     stats = result.get('stats', {})
     quality = stats.get('quality_score', 0)
     method = stats.get('generation_method', 'unknown')
-    
+
     # Display results
     print(f"Method: {method.upper()}")
     print(f"Quality Score: {quality}/100 {'⭐' * (quality // 20)}")
     print(f"Commands Generated: {len(result.get('commands', []))}")
-    
+
     # Show commands
     print("\nGenerated PBS Commands:")
     for cmd in result.get('commands', [])[:5]:  # Show first 5
         confidence = f"[{cmd.get('confidence', 0.5):.0%}]" if method == 'llm' else ""
         print(f"  • {cmd['command']}")
         print(f"    → {cmd['explanation']} {confidence}")
-    
+
     # Check if expected categories were covered
     command_text = ' '.join(c['command'] for c in result.get('commands', []))
     covered = []
     for expected in test['expected_commands']:
         if expected.lower() in command_text.lower():
             covered.append(expected)
-    
+
     coverage = len(covered) / len(test['expected_commands']) * 100
     print(f"\nExpected Coverage: {coverage:.0f}% - Covered: {', '.join(covered)}")
-    
+
     # Warnings/Issues
     if result.get('warnings'):
         print(f"⚠️  Warnings: {', '.join(result['warnings'])}")
-    
+
     # Professional Assessment
     if quality >= 85 and coverage >= 75:
         print("✅ PROFESSIONAL GRADE - Ready for production!")

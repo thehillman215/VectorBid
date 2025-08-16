@@ -1,10 +1,10 @@
 from __future__ import annotations
-from typing import List
-from app.models import FeatureBundle, CandidateSchedule, StrategyDirectives
+
+from app.models import CandidateSchedule, FeatureBundle, StrategyDirectives
 
 MAX_DELTA = 0.15
 
-def propose_strategy(bundle: FeatureBundle, topk: List[CandidateSchedule]) -> StrategyDirectives:
+def propose_strategy(bundle: FeatureBundle, topk: list[CandidateSchedule]) -> StrategyDirectives:
     """
     Heuristic, bounded strategy:
     - If top candidate benefits from layover prefs and there exists at least one candidate

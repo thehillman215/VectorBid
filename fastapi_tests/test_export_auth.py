@@ -1,7 +1,9 @@
-from fastapi.testclient import TestClient
-from app.main import app
-from app.generate import layers as gen_layers
 import pathlib
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+
 
 def _build_artifact(client: TestClient):
     # Freeze month for deterministic output (not strictly needed here, but tidy)
@@ -59,5 +61,5 @@ def test_export_requires_api_key_when_enabled(tmp_path, monkeypatch):
     assert pathlib.Path(out["export_path"]).exists()
 
     # Also allow via query param
-    r = client.post(f"/export?api_key=sekret", json={"artifact": artifact})
+    r = client.post("/export?api_key=sekret", json={"artifact": artifact})
     assert r.status_code == 200

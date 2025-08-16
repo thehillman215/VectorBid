@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import cProfile, pstats, io, random, json, argparse, time
+
+import argparse
+import cProfile
+import io
+import pstats
+import random
+import time
+
 from fastapi.testclient import TestClient
+
 from app.main import app
+
 
 def make_bundle(n: int):
     cities = ["SAN","SJU","DEN","IAH","ORD","LAX","EWR"]

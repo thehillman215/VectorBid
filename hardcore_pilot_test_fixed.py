@@ -5,7 +5,6 @@ Testing real-world pilot preferences and industry lingo
 """
 
 import sys
-import os
 
 sys.path.insert(0, 'src')
 

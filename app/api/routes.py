@@ -1,33 +1,33 @@
 # app/api/routes.py
 from __future__ import annotations
-from typing import Any, Dict, List
-from fastapi import APIRouter, HTTPException, Depends
-import os
-import json
-from pathlib import Path
-from app.models import FeatureBundle
-from app.services.optimizer import select_topk
 
-from app.models import (
-    PreferenceSchema,
-    ContextSnapshot,
-    FeatureBundle,
-    CandidateSchedule,
-    StrategyDirectives,
-    BidLayerArtifact,
-)
-from app.rules.engine import load_rule_pack, validate_feasibility
-from app.optimize.optimizer import rank_candidates
-from app.strategy.engine import propose_strategy
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException
+
 from app.generate.layers import candidates_to_layers
 from app.generate.lint import lint_layers
+from app.models import (
+    BidLayerArtifact,
+    CandidateSchedule,
+    ContextSnapshot,
+    FeatureBundle,
+    PreferenceSchema,
+    StrategyDirectives,
+)
+from app.rules.engine import load_rule_pack, validate_feasibility
 from app.security.api_key import require_api_key
+from app.services.optimizer import select_topk
+from app.strategy.engine import propose_strategy
 
 router = APIRouter()
 
 
 @router.post("/validate", tags=["Validate"])
-def validate(payload: Dict[str, Any]) -> Dict[str, Any]:
+def validate(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Body:
       {
@@ -52,13 +52,13 @@ def validate(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @router.post("/optimize", tags=["Optimize"])
-def optimize(payload: Dict[str, Any]) -> Dict[str, Any]:
+def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     bundle = FeatureBundle(**payload["feature_bundle"])
     K = int(payload.get("K", 50))
     topk = select_topk(bundle, K)
     return {"candidates": [c.model_dump() for c in topk]}
 @router.post("/strategy", tags=["Strategy"])
-def strategy(payload: Dict[str, Any]) -> Dict[str, Any]:
+def strategy(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Body:
       {"feature_bundle": {...}, "candidates": [...]}
@@ -75,7 +75,7 @@ def strategy(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @router.post("/generate_layers", tags=["Generate"])
-def generate_layers(payload: Dict[str, Any]) -> Dict[str, Any]:
+def generate_layers(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Body:
       {"feature_bundle": {...}, "candidates": [...]}
@@ -92,7 +92,7 @@ def generate_layers(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @router.post("/lint", tags=["Generate"])
-def lint(payload: Dict[str, Any]) -> Dict[str, Any]:
+def lint(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Body: {"artifact": {...}}
     Returns: {"errors": [...], "warnings": [...]}
@@ -106,7 +106,7 @@ def lint(payload: Dict[str, Any]) -> Dict[str, Any]:
 @router.post("/export",
              tags=["Export"],
              dependencies=[Depends(require_api_key)])
-def export(payload: Dict[str, Any]) -> Dict[str, str]:
+def export(payload: dict[str, Any]) -> dict[str, str]:
     """
     Protected when VECTORBID_API_KEY is set.
     Accepts: {"artifact": {...}}

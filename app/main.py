@@ -1,12 +1,18 @@
 from __future__ import annotations
-from fastapi import FastAPI
+
+import json
 from contextlib import asynccontextmanager
 from pathlib import Path
-import json
-from typing import Dict
+
+from fastapi import FastAPI
+
 from app.models import (
-    PreferenceSchema, ContextSnapshot, FeatureBundle,
-    CandidateSchedule, StrategyDirectives, BidLayerArtifact
+    BidLayerArtifact,
+    CandidateSchedule,
+    ContextSnapshot,
+    FeatureBundle,
+    PreferenceSchema,
+    StrategyDirectives,
 )
 
 MODELS = [
@@ -33,12 +39,13 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="VectorBid (v0.3 scaffold)", lifespan=lifespan)
 
 @app.get("/health", tags=["Meta"])
-def health() -> Dict[str, str]:
+def health() -> dict[str, str]:
     return {"status": "ok"}
 
 @app.get("/schemas", tags=["Meta"])
-def get_all_schemas() -> Dict[str, Dict]:
+def get_all_schemas() -> dict[str, dict]:
     return {cls.__name__: cls.model_json_schema() for cls in MODELS}
 
 from app.api import router as api_router
+
 app.include_router(api_router)

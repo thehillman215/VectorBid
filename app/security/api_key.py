@@ -1,11 +1,13 @@
 from __future__ import annotations
+
 import os
-from typing import Optional
-from fastapi import Header, Query, HTTPException, status
+
+from fastapi import Header, HTTPException, Query, status
+
 
 def require_api_key(
-    x_api_key: Optional[str] = Header(default=None),
-    api_key: Optional[str] = Query(default=None),
+    x_api_key: str | None = Header(default=None),
+    api_key: str | None = Query(default=None),
 ) -> None:
     """
     If VECTORBID_API_KEY is set:

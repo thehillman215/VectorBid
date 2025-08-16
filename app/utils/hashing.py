@@ -1,6 +1,9 @@
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
 from typing import Any
+
 
 def stable_hash(obj: Any) -> str:
     """Deterministic SHA256 of JSON-canonicalized object (no spaces, sorted keys)."""

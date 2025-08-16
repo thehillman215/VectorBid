@@ -1,18 +1,20 @@
 from __future__ import annotations
-from typing import Dict, List, Union
+
+from typing import Union
+
 from app.models import BidLayerArtifact
 
-ArtifactLike = Union[BidLayerArtifact, Dict]
+ArtifactLike = Union[BidLayerArtifact, dict]
 
-def _to_plain_dict(artifact: ArtifactLike) -> Dict:
+def _to_plain_dict(artifact: ArtifactLike) -> dict:
     if isinstance(artifact, BidLayerArtifact):
         return artifact.model_dump()
     return artifact  # assume dict-like
 
-def lint_artifact(artifact: ArtifactLike) -> Dict[str, List[str]]:
+def lint_artifact(artifact: ArtifactLike) -> dict[str, list[str]]:
     data = _to_plain_dict(artifact)
-    errors: List[str] = []
-    warnings: List[str] = []
+    errors: list[str] = []
+    warnings: list[str] = []
 
     layers = data.get("layers") or []
     if not layers:
@@ -41,5 +43,5 @@ def lint_artifact(artifact: ArtifactLike) -> Dict[str, List[str]]:
     return {"errors": errors, "warnings": warnings}
 
 # Back-compat alias expected by routes
-def lint_layers(artifact: ArtifactLike) -> Dict[str, List[str]]:
+def lint_layers(artifact: ArtifactLike) -> dict[str, list[str]]:
     return lint_artifact(artifact)

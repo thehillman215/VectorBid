@@ -1,18 +1,18 @@
-import jwt
 import os
 import uuid
-import requests
 from functools import wraps
 from urllib.parse import urlencode
 
-from flask import g, session, redirect, request, render_template, url_for
+import jwt
+import requests
+from flask import g, redirect, render_template, request, session, url_for
 from flask_dance.consumer import (
     OAuth2ConsumerBlueprint,
     oauth_authorized,
     oauth_error,
 )
 from flask_dance.consumer.storage import BaseStorage
-from flask_login import LoginManager, login_user, logout_user, current_user
+from flask_login import current_user, login_user, logout_user
 from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
 from sqlalchemy.exc import NoResultFound
 from werkzeug.local import LocalProxy
@@ -130,7 +130,7 @@ def get_jwt_public_keys(issuer_url):
         config_response = requests.get(well_known_url, timeout=10)
         config_response.raise_for_status()
         config = config_response.json()
-        
+
         # Get public keys
         jwks_url = config["jwks_uri"]
         keys_response = requests.get(jwks_url, timeout=10)
@@ -145,28 +145,28 @@ def verify_jwt_token(token, issuer_url, client_id):
     try:
         # Get public keys
         jwks_data = get_jwt_public_keys(issuer_url)
-        
+
         # Get the header to find the key ID
         unverified_header = jwt.get_unverified_header(token)
         kid = unverified_header.get('kid')
-        
+
         if not kid:
             raise ValueError("JWT token missing 'kid' in header")
-        
+
         # Find the matching key
         key_data = None
         for key in jwks_data.get('keys', []):
             if key.get('kid') == kid:
                 key_data = key
                 break
-        
+
         if not key_data:
             raise ValueError(f"Public key not found for kid: {kid}")
-        
+
         # Convert JWKS key to PyJWT format
         from jwt.algorithms import RSAAlgorithm
         public_key = RSAAlgorithm.from_jwk(key_data)
-        
+
         # Decode token with verification
         user_claims = jwt.decode(
             token,

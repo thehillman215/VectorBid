@@ -1,9 +1,9 @@
 """E2E test configuration and fixtures."""
 
-import pytest
-import os
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -14,7 +14,7 @@ def base_url():
     """Base URL for the application during testing."""
     return "http://localhost:5000"
 
-@pytest.fixture(scope="session") 
+@pytest.fixture(scope="session")
 def mock_user_headers():
     """Mock user headers for Replit authentication."""
     return {"X-Replit-User-Id": "test_user_e2e"}

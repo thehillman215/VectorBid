@@ -1,9 +1,11 @@
 """Tests for admin blueprint endpoints."""
 
-import pytest
 import json
 import os
 from pathlib import Path
+
+import pytest
+
 from main import app
 
 
@@ -29,8 +31,9 @@ def dummy_pdf():
 def test_upload_bid_happy_path(client, dummy_pdf):
     """Test successful bid upload with correct token."""
     from io import BytesIO
-    from models import BidPacket
+
     from extensions import db
+    from models import BidPacket
 
     # Clean up any existing test data
     existing = BidPacket.query.filter_by(month_tag="202508").first()

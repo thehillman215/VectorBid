@@ -1,6 +1,8 @@
-from typing import Dict, Any
+from typing import Any
+
 from app.models import ContextSnapshot
-import asyncio
-async def compile_inputs(ctx: ContextSnapshot, text: str, sliders: Dict[str, Any]):
+
+
+async def compile_inputs(ctx: ContextSnapshot, text: str, sliders: dict[str, Any]):
     # Will run NLP, precheck, analytics via asyncio.gather in PR2
     raise NotImplementedError("Implemented in PR2")

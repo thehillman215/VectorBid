@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import time, argparse, json, random
-from typing import List, Dict, Any
+
+import argparse
+import random
+import time
+from typing import Any
+
 from fastapi.testclient import TestClient
+
 from app.main import app
 
-def _build_pairings(n: int) -> Dict[str, Any]:
+
+def _build_pairings(n: int) -> dict[str, Any]:
     # Deterministic but varied; mostly valid (no redeyes, rest >= 10)
     cities = ["SAN", "SJU", "DEN", "IAH", "ORD", "LAX", "EWR"]
     random.seed(42)
@@ -20,7 +26,7 @@ def _build_pairings(n: int) -> Dict[str, Any]:
         })
     return {"pairings": pairings}
 
-def _pref() -> Dict[str, Any]:
+def _pref() -> dict[str, Any]:
     return {
         "pilot_id": "u1",
         "airline": "UAL",
@@ -33,7 +39,7 @@ def _pref() -> Dict[str, Any]:
         },
     }
 
-def _ctx() -> Dict[str, Any]:
+def _ctx() -> dict[str, Any]:
     return {
         "ctx_id": "ctx-u1",
         "pilot_id": "u1",
@@ -46,7 +52,7 @@ def _ctx() -> Dict[str, Any]:
         "default_weights": {"layovers": 1.0},
     }
 
-def _analytics() -> Dict[str, Any]:
+def _analytics() -> dict[str, Any]:
     # Keep tiny; optimizer just needs something plausible
     return {"base_stats": {"SAN": {"award_rate": 0.65}, "SJU": {"award_rate": 0.55}}}
 
@@ -97,7 +103,7 @@ def run_once(n: int, k: int) -> None:
 
     # Pretty summary
     total = sum(timings.values())
-    print(f"\n=== VectorBid bench ===")
+    print("\n=== VectorBid bench ===")
     print(f"pairings: {n:,}   K: {k}")
     for kstep in ["validate", "optimize", "strategy", "generate_layers", "lint"]:
         print(f"{kstep:16s} {timings[kstep]*1000:8.1f} ms")

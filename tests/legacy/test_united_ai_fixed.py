@@ -2,8 +2,8 @@
 Test Enhanced United Airlines LLM with Real OpenAI API - FIXED VERSION
 """
 
-import os
 import json
+import os
 
 # United Airlines specific system prompt
 UNITED_SYSTEM_PROMPT = """You are VectorBid, an expert AI assistant specializing in United Airlines pilot trip bidding.
@@ -32,11 +32,11 @@ Be specific about United Airlines operations."""
 
 def create_united_prompt(trips, preferences, top_n=5):
     """Create United-specific prompt."""
-    
+
     # Analyze preferences for context
     prefs_lower = preferences.lower()
     context = []
-    
+
     if 'den' in prefs_lower or 'denver' in prefs_lower:
         context.append("appears to be Denver-based")
     if 'family' in prefs_lower or 'weekend' in prefs_lower:
@@ -45,16 +45,16 @@ def create_united_prompt(trips, preferences, top_n=5):
         context.append("focuses on maximizing pay")
     if 'international' in prefs_lower:
         context.append("prefers international routes")
-    
+
     context_str = " and ".join(context) if context else "has standard preferences"
-    
+
     # Create trip summaries
     trip_summaries = []
     for trip in trips:
         efficiency = trip.get('credit_hours', 0) / max(trip.get('days', 1), 1)
         routing = trip.get('routing', '')
         weekend_status = 'includes weekend' if trip.get('includes_weekend') else 'weekdays only'
-        
+
         # Add United-specific insights
         route_notes = []
         if 'DEN' in routing:
@@ -65,12 +65,12 @@ def create_united_prompt(trips, preferences, top_n=5):
             route_notes.append('premium Asian route')
         if efficiency >= 6:
             route_notes.append('good efficiency')
-        
+
         notes = ' • '.join(route_notes) if route_notes else 'standard route'
-        
+
         summary = f"Trip {trip['trip_id']}: {trip['days']}-day • {trip['credit_hours']} hrs • ({efficiency:.1f} hrs/day) • {routing} • {weekend_status} • {notes}"
         trip_summaries.append(summary)
-    
+
     prompt = f"""PILOT PREFERENCES: {preferences}
 
 CONTEXT: This pilot {context_str}
@@ -86,16 +86,16 @@ Focus on practical pilot concerns like pay efficiency vs time off, commuting, in
 
 def test_with_openai_api():
     """Test with real OpenAI API call using your existing llm_service."""
-    
+
     # Check for API key
     api_key = os.environ.get('OPENAI_API_KEY')
     if not api_key:
         print("❌ OPENAI_API_KEY not set")
         print("Set it with: export OPENAI_API_KEY='your-key-here'")
         return False
-    
+
     print("🔑 OpenAI API key found")
-    
+
     # Sample United trips with more variety
     sample_trips = [
         {
@@ -106,7 +106,7 @@ def test_with_openai_api():
             'includes_weekend': False
         },
         {
-            'trip_id': 'UA456', 
+            'trip_id': 'UA456',
             'days': 4,
             'credit_hours': 25.12,
             'routing': 'DEN-LHR-FRA-DEN',
@@ -127,12 +127,12 @@ def test_with_openai_api():
             'includes_weekend': False
         }
     ]
-    
+
     preferences = "I'm a Denver-based pilot who wants to maximize credit hours while maintaining work-life balance. I prefer international routes but want weekends off when possible."
-    
+
     # Create prompt
     prompt = create_united_prompt(sample_trips, preferences, 4)
-    
+
     print("🧪 Testing Enhanced United Airlines AI")
     print("=" * 60)
     print("TRIP ANALYSIS:")
@@ -142,16 +142,16 @@ def test_with_openai_api():
         intl = "🌍 International" if any(code in trip['routing'] for code in ['LHR', 'FRA', 'NRT', 'ICN']) else "🇺🇸 Domestic"
         print(f"  {trip['trip_id']}: {efficiency:.1f}h/day • {weekend} • {intl} • {trip['routing']}")
     print("=" * 60)
-    
+
     try:
         # Use your existing llm_service if available
         try:
             from llm_service import rank_trips_with_ai
             print("🤖 Using existing llm_service...")
-            
+
             # Test with your existing system
             results = rank_trips_with_ai(sample_trips, preferences)
-            
+
             print("✅ AI ranking successful!")
             print()
             print("🎯 RANKING RESULTS:")
@@ -163,20 +163,20 @@ def test_with_openai_api():
                 print(f"  {i+1}. {trip_id} (Score: {score})")
                 print(f"     → {reasoning}")
             print("-" * 40)
-            
+
             return True
-            
+
         except ImportError:
             print("⚠️ llm_service not available, using direct API call...")
-            
+
             # Direct OpenAI API call as backup
             try:
                 from openai import OpenAI
-                
+
                 client = OpenAI()  # Simplified initialization
-                
+
                 print("🤖 Making direct API call...")
-                
+
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
@@ -186,7 +186,7 @@ def test_with_openai_api():
                     temperature=0.1,
                     max_tokens=800
                 )
-                
+
                 response_content = response.choices[0].message.content
                 print("✅ Direct API call successful!")
                 print()
@@ -194,12 +194,12 @@ def test_with_openai_api():
                 print("-" * 40)
                 print(response_content)
                 print("-" * 40)
-                
+
                 # Try to parse JSON
                 try:
                     data = json.loads(response_content)
                     rankings = data.get('rankings', [])
-                    
+
                     print()
                     print("📊 PARSED RANKINGS:")
                     for ranking in rankings:
@@ -210,32 +210,32 @@ def test_with_openai_api():
                         efficiency = ranking.get('efficiency', '?')
                         print(f"  {rank}. {trip_id} (Score: {score}/100, {efficiency} hrs/day)")
                         print(f"     → {reasoning}")
-                    
+
                 except json.JSONDecodeError as e:
                     print(f"⚠️ Could not parse JSON: {e}")
-                
+
                 return True
-                
+
             except Exception as api_error:
                 print(f"❌ Direct API call failed: {api_error}")
                 return False
-            
+
     except Exception as e:
         print(f"❌ Test failed: {e}")
         return False
 
 def show_enhanced_prompt_example():
     """Show what the enhanced prompts look like."""
-    
+
     sample_trips = [
         {'trip_id': 'UA123', 'days': 3, 'credit_hours': 18.3, 'routing': 'DEN-LAX-DEN', 'includes_weekend': False},
         {'trip_id': 'UA456', 'days': 4, 'credit_hours': 25.12, 'routing': 'DEN-LHR-FRA-DEN', 'includes_weekend': True},
         {'trip_id': 'UA101', 'days': 5, 'credit_hours': 32.15, 'routing': 'DEN-NRT-ICN-DEN', 'includes_weekend': False}
     ]
-    
+
     preferences = "Denver-based senior pilot seeking high-credit international routes with minimal weekend work"
     prompt = create_united_prompt(sample_trips, preferences, 3)
-    
+
     print("🧪 Enhanced United Airlines Prompt Example")
     print("=" * 60)
     print(prompt)
@@ -251,7 +251,7 @@ def show_enhanced_prompt_example():
 
 if __name__ == "__main__":
     import sys
-    
+
     if len(sys.argv) > 1 and sys.argv[1] == "example":
         show_enhanced_prompt_example()
     else:

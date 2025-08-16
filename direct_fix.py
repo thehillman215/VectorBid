@@ -2,7 +2,7 @@
 """Direct fix for the test file - replaces the broken section"""
 
 # Read the broken test file
-with open('hardcore_pilot_test_fixed.py', 'r') as f:
+with open('hardcore_pilot_test_fixed.py') as f:
     lines = f.readlines()
 
 # Find line 165 area and fix it

@@ -1,6 +1,9 @@
 from __future__ import annotations
-from typing import Any, List
-from app.models import FeatureBundle, CandidateSchedule
+
+from typing import Any
+
+from app.models import CandidateSchedule, FeatureBundle
+
 
 def _layover_soft_score(pref: dict, pairing: dict) -> float:
     lay = pref.get("soft_prefs", {}).get("layovers", {})
@@ -10,9 +13,9 @@ def _layover_soft_score(pref: dict, pairing: dict) -> float:
     # 1.0 if preferred city; 0.5 otherwise (no "avoid" concept in the test).
     return 1.0 if city in prefer else 0.5
 
-def rank_candidates(bundle: FeatureBundle, feasible_pairings: List[Any], K: int = 50) -> List[CandidateSchedule]:
+def rank_candidates(bundle: FeatureBundle, feasible_pairings: list[Any], K: int = 50) -> list[CandidateSchedule]:
     pref = bundle.preference_schema.model_dump()
-    candidates: List[CandidateSchedule] = []
+    candidates: list[CandidateSchedule] = []
 
     for p in feasible_pairings:
         lay_score = _layover_soft_score(pref, p)

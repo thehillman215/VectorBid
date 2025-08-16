@@ -1,13 +1,12 @@
 """Authentication and onboarding helpers."""
 # Adding missing function definition and updating decorator docstring.
 from functools import wraps
-from flask import request, redirect, url_for
-from src.lib.services.db import get_profile
+
+from flask import request
 
 
 def get_current_user_id():
     """Get current user ID from Replit headers or use test user for open testing."""
-    from flask import request
     # For open testing, always return a test user ID
     return request.headers.get("X-Replit-User-Id") or '44040350'
 

@@ -1,7 +1,7 @@
 import re
 
 # Read the file
-with open('src/lib/pbs_command_generator.py', 'r') as f:
+with open('src/lib/pbs_command_generator.py') as f:
     content = f.read()
 
 # Fix the OpenAI client initialization - remove the timeout parameter that might be causing issues

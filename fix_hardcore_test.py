@@ -2,7 +2,7 @@
 """Fix the hardcore test script bug"""
 
 # Read and fix the file
-with open('hardcore_pilot_test.py', 'r') as f:
+with open('hardcore_pilot_test.py') as f:
     content = f.read()
 
 # Fix the test cases that are missing the 4th parameter

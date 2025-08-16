@@ -6,10 +6,10 @@ This script tests the various API endpoints to verify they work correctly
 according to the OpenAPI specification.
 """
 
-import requests
 import os
 import sys
-from pathlib import Path
+
+import requests
 
 
 def test_home_page(base_url):
@@ -77,9 +77,9 @@ def test_admin_upload_with_valid_token(base_url):
         data = {"month_tag": "202512"}  # Use December 2025 as test month
 
         response = requests.post(
-            f"{base_url}/admin/upload-bid", 
-            headers=headers, 
-            files=files, 
+            f"{base_url}/admin/upload-bid",
+            headers=headers,
+            files=files,
             data=data,
             timeout=30
         )

@@ -1,11 +1,19 @@
 """
 Fixed Admin Portal with Working Contract Upload
 """
-from flask import Blueprint, render_template_string, request, jsonify, session, redirect, url_for
-from werkzeug.utils import secure_filename
-from functools import wraps
-import os
 import sys
+from functools import wraps
+
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    render_template_string,
+    request,
+    session,
+    url_for,
+)
+
 sys.path.append('src/lib')
 
 from bid_packet_manager import BidPacketManager

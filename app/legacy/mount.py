@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 from fastapi import APIRouter, FastAPI
-from typing import Optional
+
 
 def mount_legacy(app: FastAPI, import_path: str = "legacy_app:app") -> None:
     """

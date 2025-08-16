@@ -1,11 +1,13 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Tuple
-from operator import itemgetter
+
 import heapq
+from operator import itemgetter
+from typing import Any
 
-from app.models import FeatureBundle, CandidateSchedule
+from app.models import CandidateSchedule, FeatureBundle
 
-def _to_dict(x: Any) -> Dict[str, Any]:
+
+def _to_dict(x: Any) -> dict[str, Any]:
     if x is None:
         return {}
     if isinstance(x, dict):
@@ -24,7 +26,7 @@ def _get(obj: Any, name: str, default=None):
         pass
     return _to_dict(obj).get(name, default)
 
-def select_topk(bundle: FeatureBundle, K: int) -> List[CandidateSchedule]:
+def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
     """
     Legacy-compatible Top-K selection:
     - DO NOT hard-filter here (legacy scored all pairings; later stages enforce rules)
@@ -46,7 +48,7 @@ def select_topk(bundle: FeatureBundle, K: int) -> List[CandidateSchedule]:
     # award rates
     base_stats_d = _to_dict(_get(bundle.analytics_features, "base_stats", {}))
 
-    items: List[Tuple[float, int, str]] = []
+    items: list[tuple[float, int, str]] = []
     for i, p in enumerate(_get(bundle.pairing_features, "pairings", []) or []):
         pid = _get(p, "id", "")
         city = _get(p, "layover_city", None)

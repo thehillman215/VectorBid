@@ -7,18 +7,19 @@ about the API endpoints, schemas, and security requirements.
 """
 
 import json
-import yaml
 import sys
 from pathlib import Path
+
+import yaml
 
 
 def load_spec(format="yaml"):
     """Load OpenAPI specification from YAML or JSON file."""
     if format == "yaml":
-        with open("openapi.yaml", "r") as f:
+        with open("openapi.yaml") as f:
             return yaml.safe_load(f)
     else:
-        with open("openapi.json", "r") as f:
+        with open("openapi.json") as f:
             return json.load(f)
 
 
@@ -163,7 +164,7 @@ def main():
         print("  No security schemes defined")
 
     # Summary statistics
-    print(f"\n📈 Specification Summary:")
+    print("\n📈 Specification Summary:")
     print(f"  • API Title: {spec['info']['title']}")
     print(f"  • API Version: {spec['info']['version']}")
     print(f"  • OpenAPI Version: {spec['openapi']}")

@@ -117,7 +117,7 @@ if percentage >= 90:
 elif percentage >= 80:
     print("✅ EXCELLENT! Ready for pilot testing!")
 elif percentage >= 70:
-    
+
     print("👍 GOOD! Solid foundation!")
 elif percentage >= 60:
     print("⚠️  ACCEPTABLE for MVP")

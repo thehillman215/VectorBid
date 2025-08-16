@@ -1,7 +1,9 @@
-import json, pathlib
+import json
+import pathlib
+
 from fastapi.testclient import TestClient
+
 from app.main import app
-from app.models import PreferenceSchema, ContextSnapshot, FeatureBundle
 
 client = TestClient(app)
 DATA = json.loads((pathlib.Path(__file__).parent/"testdata"/"pairings_small.json").read_text())

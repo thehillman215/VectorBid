@@ -5,7 +5,6 @@ Copy this entire code into a file called: check_dependencies.py
 """
 
 import sys
-import traceback
 
 
 def check_import(module_name, description=""):
@@ -27,7 +26,7 @@ def check_import(module_name, description=""):
 def check_file_exists(filepath, description=""):
     """Check if a file exists"""
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             lines = len(f.readlines())
         print(f"✅ {filepath} - {description} ({lines} lines)")
         return True

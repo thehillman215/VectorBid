@@ -5,7 +5,6 @@ Testing the LLM's ability to understand pilot preferences and lingo
 
 import json
 from datetime import datetime
-from typing import Dict, List, Tuple
 
 # ================================================================================
 # COMPREHENSIVE TEST CASES - PILOT LANGUAGE & PREFERENCES
@@ -275,7 +274,7 @@ PILOT_TEST_CASES = [
 # ================================================================================
 
 
-def run_nlp_test(test_case: Dict, llm_function=None) -> Dict:
+def run_nlp_test(test_case: dict, llm_function=None) -> dict:
     """
     Execute a single NLP test case
     Returns result with score and analysis
@@ -334,7 +333,7 @@ def run_nlp_test(test_case: Dict, llm_function=None) -> Dict:
     return result
 
 
-def simulate_llm_response(input_text: str) -> List[str]:
+def simulate_llm_response(input_text: str) -> list[str]:
     """
     Simulate LLM response for testing framework
     In production, this would call your actual LLM
@@ -360,7 +359,7 @@ def simulate_llm_response(input_text: str) -> List[str]:
     return commands if commands else ["PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE"]
 
 
-def run_full_test_suite(llm_function=None) -> Dict:
+def run_full_test_suite(llm_function=None) -> dict:
     """
     Run the complete test suite and generate report
     """
@@ -428,7 +427,7 @@ def run_full_test_suite(llm_function=None) -> Dict:
     print("\n" + "=" * 80)
     print(" TEST SUITE SUMMARY")
     print("=" * 80)
-    print(f"\n📊 Overall Results:")
+    print("\n📊 Overall Results:")
     print(f"  • Total Tests: {results['total_tests']}")
     print(
         f"  • Passed: {results['passed']} ({results['passed']/results['total_tests']*100:.1f}%)"
@@ -436,7 +435,7 @@ def run_full_test_suite(llm_function=None) -> Dict:
     print(f"  • Failed: {results['failed']}")
     print(f"  • Average Score: {results['average_score']:.1f}/100")
 
-    print(f"\n📈 Results by Category:")
+    print("\n📈 Results by Category:")
     for category, stats in results["categories"].items():
         print(f"\n  {category}:")
         print(f"    • Tests: {stats['total']}")
@@ -446,7 +445,7 @@ def run_full_test_suite(llm_function=None) -> Dict:
         print(f"    • Avg Score: {stats['avg_score']:.1f}/100")
 
     # Identify problem areas
-    print(f"\n⚠️  Problem Areas (Failed Tests):")
+    print("\n⚠️  Problem Areas (Failed Tests):")
     failed_tests = [r for r in results["detailed_results"] if not r["passed"]]
     for test in failed_tests[:5]:  # Show top 5 failures
         print(f"  • {test['id']}: {test['input'][:40]}...")
@@ -498,7 +497,7 @@ def test_with_your_llm():
     with open("nlp_test_results.json", "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\n💾 Results saved to nlp_test_results.json")
+    print("\n💾 Results saved to nlp_test_results.json")
 
     return results
 

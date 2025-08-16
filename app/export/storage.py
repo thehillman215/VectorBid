@@ -1,18 +1,21 @@
 from __future__ import annotations
+
+import json
+import os
+import re
 from pathlib import Path
-from typing import Dict, Union
-import json, os, re
+from typing import Union
 
-from app.models import BidLayerArtifact
 from app.generate.layers import _canonical_sha256  # consistent with generator
+from app.models import BidLayerArtifact
 
-ArtifactLike = Union[BidLayerArtifact, Dict]
+ArtifactLike = Union[BidLayerArtifact, dict]
 
 _AIRLINE_RE = re.compile(r"^[A-Z0-9_-]{2,8}$")
 _MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
 
 
-def _to_dict(a: ArtifactLike) -> Dict:
+def _to_dict(a: ArtifactLike) -> dict:
     return a.model_dump() if isinstance(a, BidLayerArtifact) else dict(a)
 
 
@@ -26,7 +29,7 @@ def _sanitize_month(v: str | None) -> str:
     return v if _MONTH_RE.fullmatch(v) else "0000-00"
 
 
-def _compute_hash(data: Dict) -> str:
+def _compute_hash(data: dict) -> str:
     # recompute ignoring non-essential fields to keep hash stable
     core = {k: v for k, v in data.items() if k not in {"export_hash", "lint"}}
     return _canonical_sha256(core)
