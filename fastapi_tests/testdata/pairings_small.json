@@ -1,0 +1,7 @@
+{
+  "pairings": [
+    {"id": "P1", "layover_city": "SAN", "redeye": false, "rest_hours": 12},
+    {"id": "P2", "layover_city": "SJU", "redeye": false, "rest_hours": 11},
+    {"id": "P3", "layover_city": "XXX", "redeye": true,  "rest_hours": 9}
+  ]
+}
