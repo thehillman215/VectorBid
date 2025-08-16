@@ -22,14 +22,24 @@ def test_export_hash_golden(monkeypatch):
            "default_weights":{"layovers":1.0}}
 
     # Optimize → TopK
-    fb = {"feature_bundle":{"context":ctx,"preference_schema":pref,
-          "analytics_features":{"base_stats":{"SAN":{"award_rate":0.65},"SJU":{"award_rate":0.55}}}},
-          "compliance_flags":{},"pairing_features":DATA,"K":5}
+    fb = {
+        "feature_bundle": {
+            "context": ctx,
+            "preference_schema": pref,
+            "analytics_features": {
+                "base_stats": {"SAN": {"award_rate": 0.65}, "SJU": {"award_rate": 0.55}}
+            },
+            "compliance_flags": {},
+            "pairing_features": DATA,
+        },
+        "K": 5,
+    }
     topk = client.post("/optimize", json=fb).json()["candidates"]
 
     # Generate → artifact with deterministic export_hash
-    artifact = client.post("/generate_layers",
-        json={"feature_bundle": fb["feature_bundle"], "candidates": topk}
+    artifact = client.post(
+        "/generate_layers",
+        json={"feature_bundle": fb["feature_bundle"], "candidates": topk},
     ).json()["artifact"]
 
     # Known-good hash for this frozen month + payload
