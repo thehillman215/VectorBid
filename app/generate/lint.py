@@ -16,6 +16,7 @@ def lint_artifact(artifact: BidLayerArtifact) -> Dict[str, List[str]]:
         if n in seen:
             errors.append(f"duplicate layer n={n}")
         seen.add(n)
+
         filters = layer.get("filters") or []
         if not filters:
             errors.append(f"layer {n}: missing filters")
@@ -29,3 +30,7 @@ def lint_artifact(artifact: BidLayerArtifact) -> Dict[str, List[str]]:
             warnings.append(f"layer {n}: unexpected prefer '{layer.get('prefer')}'")
 
     return {"errors": errors, "warnings": warnings}
+
+# Back-compat alias expected by routes/__init__
+def lint_layers(artifact: BidLayerArtifact) -> Dict[str, List[str]]:
+    return lint_artifact(artifact)
