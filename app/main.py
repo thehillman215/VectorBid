@@ -39,3 +39,6 @@ def health() -> Dict[str, str]:
 @app.get("/schemas", tags=["Meta"])
 def get_all_schemas() -> Dict[str, Dict]:
     return {cls.__name__: cls.model_json_schema() for cls in MODELS}
+
+from app.api import router as api_router
+app.include_router(api_router)
