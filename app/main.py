@@ -1,5 +1,6 @@
 from __future__ import annotations
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from pathlib import Path
 import json
 from typing import Dict
@@ -8,15 +9,12 @@ from app.models import (
     CandidateSchedule, StrategyDirectives, BidLayerArtifact
 )
 
-app = FastAPI(title="VectorBid (v0.3 scaffold)")
-
 MODELS = [
     PreferenceSchema, ContextSnapshot, FeatureBundle,
     CandidateSchedule, StrategyDirectives, BidLayerArtifact
 ]
 
-@app.on_event("startup")
-def export_model_schemas() -> None:
+def _export_model_schemas() -> None:
     root_dir = Path(__file__).resolve().parent.parent
     schema_dir = root_dir / "schemas"
     schema_dir.mkdir(parents=True, exist_ok=True)
@@ -24,6 +22,15 @@ def export_model_schemas() -> None:
         (schema_dir / f"{cls.__name__}.json").write_text(
             json.dumps(cls.model_json_schema(), indent=2)
         )
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # on startup
+    _export_model_schemas()
+    yield
+    # on shutdown (noop)
+
+app = FastAPI(title="VectorBid (v0.3 scaffold)", lifespan=lifespan)
 
 @app.get("/health", tags=["Meta"])
 def health() -> Dict[str, str]:
