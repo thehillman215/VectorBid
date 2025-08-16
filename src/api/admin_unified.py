@@ -6,16 +6,21 @@ Author: VectorBid Engineering
 Version: 2.0.0
 """
 
-import json
 import logging
 import os
 import secrets
 from datetime import datetime
 from functools import wraps
-from typing import Any, Optional
 
-from flask import Blueprint, jsonify, redirect, render_template_string, request, session, url_for
-from werkzeug.utils import secure_filename
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    render_template_string,
+    request,
+    session,
+    url_for,
+)
 
 # Import the BidPacketManager
 try:
@@ -214,7 +219,7 @@ def dashboard():
             packets = []
             contracts = []
 
-    dashboard_html = """
+    dashboard_html = r"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -511,18 +516,18 @@ def dashboard():
     # Calculate statistics
     storage_mb = sum(p.get('size_mb', 0) for p in packets) if packets else 0
     storage_mb = round(storage_mb, 1)
-    
+
     airlines = set(p.get('airline', '') for p in packets if p.get('airline'))
     unique_airlines = len(airlines)
-    
+
 
     # Calculate statistics
     storage_mb = sum(p.get('size_mb', 0) for p in packets) if packets else 0
     storage_mb = round(storage_mb, 1)
-    
+
     airlines = set(p.get('airline', '') for p in packets if p.get('airline'))
     unique_airlines = len(airlines)
-    
+
     return render_template_string(dashboard_html,
                                   packets=packets,
                                   contracts=contracts,

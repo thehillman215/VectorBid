@@ -8,7 +8,7 @@ def fix_test_file():
     """Fix the hardcore test file"""
     print("Fixing hardcore_pilot_test.py...")
 
-    with open('hardcore_pilot_test.py', 'r') as f:
+    with open('hardcore_pilot_test.py') as f:
         content = f.read()
 
     # Fix all test cases that are missing the 4th parameter
@@ -40,7 +40,7 @@ def add_missing_patterns():
     """Add the missing patterns to pbs_fix.py"""
     print("\nAdding missing patterns to pbs_fix.py...")
 
-    with open('src/api/pbs_fix.py', 'r') as f:
+    with open('src/api/pbs_fix.py') as f:
         content = f.read()
 
     # Check if patterns already exist
@@ -121,6 +121,7 @@ def test_patterns():
 
     # Reload the module to get new changes
     import importlib
+
     import api.pbs_fix
     importlib.reload(api.pbs_fix)
 

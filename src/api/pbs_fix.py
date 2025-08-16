@@ -4,7 +4,6 @@ This version handles comprehensive pilot language patterns
 """
 
 import logging
-import re
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +109,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
     # Enhanced credit maximization (specific phrases)
     if 'maximize credit hour' in text_lower or 'max credit hour' in text_lower:
         filters.append("MAXIMIZE CREDIT_TIME")
-        filters.append("PREFER HIGH_CREDIT_TRIPS") 
+        filters.append("PREFER HIGH_CREDIT_TRIPS")
         filters.append("MAXIMIZE MONTHLY_CREDIT")
 
     # Slam-clicker lifestyle (pilot who goes straight to hotel)
@@ -129,7 +128,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
             filters.append("PREFER TRIPS WITH DUTY_DAYS = 1")
             filters.append("MAXIMIZE CREDIT_PER_DAY")
 
-    
+
     # ==========================================
     credit_phrases = [
         'max credit', 'maximum credit', 'high credit', 'max pay',

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import os
-import sys
 
 # Test cases for VectorBid NLP
 TEST_CASES = [

@@ -7,7 +7,7 @@ implement the same 3-method interface.
 """
 
 from pathlib import Path
-from typing import Protocol, BinaryIO
+from typing import BinaryIO, Protocol
 
 
 class StorageBackend(Protocol):

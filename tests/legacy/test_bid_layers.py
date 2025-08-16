@@ -91,7 +91,7 @@ try:
     summary = system.get_layer_summary()
     print(f"✅ Total layers: {summary['total_layers']}")
     print(f"✅ Active layers: {summary['active_layers']}")
-    print(f"✅ Layer details:")
+    print("✅ Layer details:")
     for layer_detail in summary['layers_detail']:
         print(
             f"  - {layer_detail['name']} (Priority: {layer_detail['priority']})"

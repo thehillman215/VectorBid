@@ -1,9 +1,11 @@
 """Admin blueprint for bid packet management."""
 
-from flask import Blueprint, request, abort, jsonify
-from functools import wraps
-import secrets
 import os
+import secrets
+from functools import wraps
+
+from flask import Blueprint, abort, jsonify, request
+
 import src.lib.services.bids as services_bids
 
 # Create admin blueprint
@@ -80,20 +82,20 @@ def validate_bid_package(month_tag):
         bid_info = services_bids.get_bid_packet_info(month_tag)
         if not bid_info:
             return jsonify({"error": "Bid package not found"}), 404
-        
+
         # Get file path and attempt to parse
         file_path = services_bids.get_bid_packet_path(month_tag)
         if not file_path:
             return jsonify({"error": "Bid package file not found"}), 404
-        
+
         # Import parsing service
         from src.lib.schedule_parser import parse_schedule
-        
+
         # Attempt to parse the bid package
         with open(file_path, 'rb') as f:
             try:
                 parsed_trips = parse_schedule(f.read(), file_path.name)
-                
+
                 validation_result = {
                     "status": "success",
                     "month_tag": month_tag,
@@ -105,18 +107,18 @@ def validate_bid_package(month_tag):
                     "errors": [],
                     "warnings": []
                 }
-                
+
                 # Add validation warnings/info
                 if not parsed_trips:
                     validation_result["warnings"].append("No trips found in bid package")
                 elif len(parsed_trips) < 10:
                     validation_result["warnings"].append(f"Only {len(parsed_trips)} trips found - this seems low for a monthly bid package")
-                
+
                 return jsonify(validation_result)
-                
+
             except Exception as parse_error:
                 return jsonify({
-                    "status": "error", 
+                    "status": "error",
                     "month_tag": month_tag,
                     "filename": bid_info.get('filename', 'Unknown'),
                     "file_size": bid_info.get('file_size', 0),
@@ -125,13 +127,13 @@ def validate_bid_package(month_tag):
                     "errors": [f"Failed to parse bid package: {str(parse_error)}"],
                     "warnings": []
                 })
-                
+
     except Exception as e:
         return jsonify({"error": f"Validation failed: {str(e)}"}), 500
 
 
 @bp.route("/preview-bid/<month_tag>", methods=["GET"])
-@require_bearer_token  
+@require_bearer_token
 def preview_bid_package(month_tag):
     """Generate HTML preview of bid package validation."""
     try:
@@ -139,18 +141,18 @@ def preview_bid_package(month_tag):
         bid_info = services_bids.get_bid_packet_info(month_tag)
         if not bid_info:
             return "<h3>Bid package not found</h3>", 404
-            
+
         file_path = services_bids.get_bid_packet_path(month_tag)
         if not file_path:
             return "<h3>Bid package file not found</h3>", 404
-        
+
         from src.lib.schedule_parser import parse_schedule
-        
+
         # Parse trips for preview
         with open(file_path, 'rb') as f:
             try:
                 parsed_trips = parse_schedule(f.read(), file_path.name)
-                
+
                 preview_html = f"""
                 <div class="card">
                     <div class="card-header">
@@ -192,9 +194,9 @@ def preview_bid_package(month_tag):
                     </div>
                 </div>
                 """
-                
+
                 return preview_html
-                
+
             except Exception as parse_error:
                 return f"""
                 <div class="card">
@@ -210,19 +212,19 @@ def preview_bid_package(month_tag):
                     </div>
                 </div>
                 """
-                
+
     except Exception as e:
         return f"<div class='alert alert-danger'>Preview failed: {str(e)}</div>", 500
 
 
 @bp.route("/", methods=["GET"])
-@require_bearer_token  
+@require_bearer_token
 def admin_dashboard():
     """Admin dashboard for managing bid packets."""
-    
+
     # Get list of existing bid packets
     bid_packets = services_bids.get_all_bid_packets()
-    
+
     dashboard_html = f"""
     <!DOCTYPE html>
     <html lang="en" data-bs-theme="dark">
@@ -327,7 +329,7 @@ def admin_dashboard():
     </body>
     </html>
     """
-    
+
     return dashboard_html
 
 
@@ -335,7 +337,7 @@ def format_bid_packet_list(bid_packets):
     """Format bid packet list for display with validation buttons."""
     if not bid_packets:
         return '<p class="text-muted">No bid packages uploaded yet.</p>'
-    
+
     html = '<div class="list-group list-group-flush">'
     for packet in bid_packets:
         # Format month tag for display
@@ -346,7 +348,7 @@ def format_bid_packet_list(bid_packets):
             display_date = f"{month}/{year}"
         else:
             display_date = month_tag
-            
+
         html += f'''
         <div class="list-group-item bg-dark border-secondary">
             <div class="d-flex w-100 justify-content-between align-items-start">
@@ -367,7 +369,7 @@ def format_bid_packet_list(bid_packets):
         </div>
         '''
     html += '</div>'
-    
+
     # Add preview modal and JavaScript
     html += '''
     <div class="modal fade" id="validationModal" tabindex="-1">
@@ -430,5 +432,5 @@ def format_bid_packet_list(bid_packets):
         }
     </script>
     '''
-    
+
     return html

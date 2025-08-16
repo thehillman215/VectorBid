@@ -8,7 +8,7 @@ def add_final_patterns():
     """Add the final 3 patterns that are missing"""
 
     # Read the current file
-    with open('src/api/pbs_fix.py', 'r') as f:
+    with open('src/api/pbs_fix.py') as f:
         content = f.read()
 
     # Check if patterns already exist
@@ -108,7 +108,6 @@ def test_final_patterns():
     sys.path.insert(0, 'src')
 
     # Force reload
-    import importlib
     if 'api.pbs_fix' in sys.modules:
         del sys.modules['api.pbs_fix']
 

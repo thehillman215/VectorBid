@@ -5,9 +5,10 @@ Run this first to add new database columns safely.
 """
 
 import os
-import sys
 import subprocess
+import sys
 from datetime import datetime
+
 from sqlalchemy import text
 
 
@@ -44,7 +45,7 @@ def backup_database():
         return backup_file
     else:
         print(
-            f"❌ Failed to create backup (pg_dump not available or permission denied)"
+            "❌ Failed to create backup (pg_dump not available or permission denied)"
         )
         print("   Continuing without backup - be careful!")
         return None
@@ -56,8 +57,9 @@ def migrate_database():
 
     try:
         # Import Flask app and models
-        from app import create_app
         from models import db
+
+        from app import create_app
 
         app = create_app()
         with app.app_context():
@@ -123,8 +125,9 @@ def verify_migration():
     print("🔍 Verifying migration...")
 
     try:
-        from app import create_app
         from models import db
+
+        from app import create_app
 
         app = create_app()
         with app.app_context():

@@ -10,9 +10,10 @@ sys.path.insert(0, str(project_root))
 
 import pytest
 
+from app import db
+
 # Import the main app instance and database
 from main import app
-from app import db
 
 
 @pytest.fixture
@@ -24,7 +25,7 @@ def test_app():
     )
     app.config["SECRET_KEY"] = "test-secret-key"
     app.config["ADMIN_BEARER_TOKEN"] = "test-admin-token"
-    
+
     with app.app_context():
         db.create_all()
         yield app

@@ -4,10 +4,8 @@ VectorBid Quick Test Harness - United Airlines Focus
 Run this locally or in Replit console for instant feedback without web server.
 """
 
-import sys
 import json
-import os
-from typing import Dict, List
+import sys
 from datetime import datetime
 
 # Sample United Airlines trip data for testing
@@ -22,7 +20,7 @@ SAMPLE_UNITED_TRIPS = [
         "raw": "UA123 3DAY 15JAN-17JAN DEN-LAX-DEN 18:30"
     },
     {
-        "trip_id": "UA456", 
+        "trip_id": "UA456",
         "days": 4,
         "credit_hours": 25.2,
         "routing": "DEN-LHR-FRA-DEN",
@@ -32,7 +30,7 @@ SAMPLE_UNITED_TRIPS = [
     },
     {
         "trip_id": "UA789",
-        "days": 2, 
+        "days": 2,
         "credit_hours": 12.0,
         "routing": "DEN-PHX-DEN",
         "dates": "25JAN-26JAN",
@@ -83,7 +81,7 @@ def test_united_parser():
 
     return parsed_trips
 
-def parse_united_line(line: str) -> Dict:
+def parse_united_line(line: str) -> dict:
     """Quick United Airlines parser for testing."""
     import re
 
@@ -180,7 +178,7 @@ def test_ai_fallback_ranking():
 
     return ranked_trips
 
-def calculate_united_score(trip: Dict, preferences: str) -> int:
+def calculate_united_score(trip: dict, preferences: str) -> int:
     """Score United trips based on preferences."""
     score = 5  # baseline
 
@@ -220,7 +218,7 @@ def calculate_united_score(trip: Dict, preferences: str) -> int:
 
     return min(10, max(1, score))
 
-def get_united_reasoning(trip: Dict, preferences: str) -> str:
+def get_united_reasoning(trip: dict, preferences: str) -> str:
     """Generate reasoning for United trip score."""
     reasons = []
 
@@ -248,7 +246,7 @@ def test_profile_matching():
 
     profile = {
         "airline": "United",
-        "base": "DEN", 
+        "base": "DEN",
         "fleet": "737",
         "seat": "FO",
         "seniority": 1500,
@@ -261,7 +259,7 @@ def test_profile_matching():
 
     return preferences
 
-def build_united_preferences(profile: Dict) -> str:
+def build_united_preferences(profile: dict) -> str:
     """Build United-specific preferences from profile."""
     base_prefs = SAMPLE_PREFERENCES.get(profile.get('persona', 'work_life_balance'))
 
@@ -347,6 +345,6 @@ if __name__ == "__main__":
         try:
             with open('/tmp/united_test_results.json', 'w') as f:
                 json.dump(results, f, indent=2, default=str)
-            print(f"\n💾 Results saved to /tmp/united_test_results.json")
+            print("\n💾 Results saved to /tmp/united_test_results.json")
         except:
-            print(f"\n💾 Could not save results file")
+            print("\n💾 Could not save results file")

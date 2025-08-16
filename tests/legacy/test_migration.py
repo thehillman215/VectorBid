@@ -4,7 +4,7 @@ Test script for enhanced profile functionality.
 Run this after migration to verify everything works.
 """
 
-from datetime import datetime, date
+from datetime import date
 
 
 def test_enhanced_profiles():
@@ -13,11 +13,15 @@ def test_enhanced_profiles():
     print("=" * 40)
 
     try:
-        from services.db import (get_profile, save_profile, validate_profile,
-                                 get_seniority_analysis,
-                                 needs_seniority_update,
-                                 update_seniority_analysis,
-                                 calculate_seniority_category)
+        from services.db import (
+            calculate_seniority_category,
+            get_profile,
+            get_seniority_analysis,
+            needs_seniority_update,
+            save_profile,
+            update_seniority_analysis,
+            validate_profile,
+        )
 
         # Test user
         test_uid = "test_enhanced_user"

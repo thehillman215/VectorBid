@@ -1,6 +1,3 @@
-from src.api.pbs_fix import natural_language_to_pbs_filters
-
-
 
 
 # ============== FIXED PBS GENERATION ==============
@@ -22,12 +19,23 @@ def get_dashboard_stats():
 Enhanced routes with conflict resolution
 """
 
-from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify, session, render_template
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    render_template,
+    render_template_string,
+    request,
+    session,
+    url_for,
+)
+
+from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers
 from src.lib.pbs_command_generator import generate_pbs_commands
-from src.lib.subscription_manager import SubscriptionManager
 from src.lib.personas import PILOT_PERSONAS
 from src.lib.services.db import get_profile, save_profile
-from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers
+from src.lib.subscription_manager import SubscriptionManager
+
 try:
     from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
 except ImportError:
@@ -36,7 +44,6 @@ except ImportError:
 from datetime import datetime
 
 # Fixed PBS generation functions
-from src.lib.pbs_fixed import natural_language_to_pbs_filters, _fallback_pbs_generation
 
 bp = Blueprint("main", __name__)
 
@@ -313,14 +320,14 @@ def onboarding_submit():
             'seniority': int(request.form.get('seniority', 5000)),
             'onboarded': True
         }
-        
+
         # Save profile (using demo user ID for now)
         user_id = "demo_pilot"
         save_profile(user_id, profile_data)
-        
+
         # Redirect to personas page
         return redirect(url_for('main.personas'))
-        
+
     except Exception as e:
         return f"Error saving profile: {str(e)}", 400
 
@@ -330,7 +337,7 @@ def personas():
     # Check if pilot has completed profile (simplified for demo)
     user_id = "demo_pilot"
     profile = get_profile(user_id)
-    
+
     if not profile.get('onboarded'):
         return redirect(url_for('main.onboarding'))
     personas_html = """
@@ -400,20 +407,20 @@ def generate_bid_layers():
     """Generate 20-layer PBS bid strategy with pilot profile and persona"""
     preferences = request.form.get('preferences', '')
     persona_id = request.form.get('persona', '')
-    
+
     # Get pilot profile
     user_id = "demo_pilot"
     profile = get_profile(user_id)
-    
+
     # Use persona if selected
     persona = None
     if persona_id and persona_id in PILOT_PERSONAS:
         persona = PILOT_PERSONAS[persona_id]
         preferences = persona['preferences']
-    
+
     # Generate full 20-layer PBS bid strategy
     bid_layers = generate_pbs_compliant_bid_layers(preferences, profile)
-    
+
     results_html = """
 <!DOCTYPE html>
 <html>
@@ -529,7 +536,7 @@ def generate_bid_layers():
 </body>
 </html>
     """
-    
+
     return render_template_string(results_html,
                                  preferences=preferences,
                                  bid_layers=bid_layers,
@@ -576,9 +583,9 @@ def user_profile():
     """Enhanced user profile page"""
     user_id = session.get('user_id', 'demo_pilot')
     profile = get_profile(user_id)
-    
-    return render_template("user_profile.html", 
-                         profile=profile, 
+
+    return render_template("user_profile.html",
+                         profile=profile,
                          personas=PILOT_PERSONAS)
 
 
@@ -587,20 +594,20 @@ def enhanced_dashboard():
     """Enhanced dashboard with metrics and personalized content"""
     user_id = session.get('user_id', 'demo_pilot')
     profile = get_profile(user_id)
-    
+
     # Get dashboard statistics
     stats = get_dashboard_stats()
-    
+
     # Get current month for bid period display
     from datetime import datetime
     current_month = datetime.now().strftime("%B %Y")
-    
+
     # Add persona name to profile for display
     if profile.get('persona'):
         profile['persona_name'] = PILOT_PERSONAS.get(profile['persona'], {}).get('name', 'Custom')
-    
-    return render_template("enhanced_dashboard.html", 
-                         profile=profile, 
+
+    return render_template("enhanced_dashboard.html",
+                         profile=profile,
                          stats=stats,
                          personas=PILOT_PERSONAS,
                          current_month=current_month)
@@ -617,20 +624,20 @@ def api_dashboard_stats():
 def advanced_preferences():
     """Advanced preferences management page"""
     user_id = session.get('user_id', 'demo_pilot')
-    
+
     # Import preferences manager
     from src.lib.preferences_manager import preferences_manager
-    
+
     # Get user preferences and analysis
     profile = get_profile(user_id)
     report = preferences_manager.generate_preference_report(user_id)
     suggestions = preferences_manager.get_smart_suggestions(user_id)
-    
+
     # Get current persona if selected
     current_persona = None
     if profile.get('persona'):
         current_persona = PILOT_PERSONAS.get(profile['persona'])
-    
+
     return render_template("preferences_advanced.html",
                          profile=profile,
                          optimization_score=report['optimization_score'],
@@ -645,17 +652,17 @@ def api_save_advanced_preferences():
     try:
         user_id = session.get('user_id', 'demo_pilot')
         data = request.get_json()
-        
+
         # Import preferences manager
         from src.lib.preferences_manager import preferences_manager
-        
+
         # Save preferences using preferences manager
         success = preferences_manager.update_preferences(user_id, data)
-        
+
         if success:
             return jsonify({'success': True, 'message': 'Preferences saved successfully'})
         else:
             return jsonify({'success': False, 'message': 'Error saving preferences'}), 500
-            
+
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500

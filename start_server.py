@@ -9,6 +9,7 @@ import socket
 import subprocess
 import sys
 
+
 def find_free_port(start_port=5000, max_attempts=10):
     """Find a free port starting from start_port"""
     for port in range(start_port, start_port + max_attempts):
@@ -20,21 +21,21 @@ def find_free_port(start_port=5000, max_attempts=10):
         except OSError:
             print(f"⚠️ Port {port} is in use, trying next...")
             continue
-    
-    print(f"❌ No free ports found in range, using fallback port 8080")
+
+    print("❌ No free ports found in range, using fallback port 8080")
     return 8080
 
 def start_gunicorn():
     """Start Gunicorn with automatic port detection"""
     port = find_free_port(5000)
-    
+
     # Validate port number (defensive programming)
     if not isinstance(port, int) or port < 1 or port > 65535:
         raise ValueError(f"Invalid port number: {port}")
-    
+
     # Set environment variable for other parts of the app
     os.environ['PORT'] = str(port)
-    
+
     # Build gunicorn command
     cmd = [
         'gunicorn',
@@ -43,10 +44,10 @@ def start_gunicorn():
         '--reload',
         'main:app'
     ]
-    
+
     print(f"🚀 Starting Gunicorn on port {port}")
     print(f"📱 Your app will be available at: https://{os.environ.get('REPL_SLUG', 'your-repl')}-{os.environ.get('REPL_OWNER', 'username')}.replit.app:{port}")
-    
+
     # Start Gunicorn
     try:
         subprocess.run(cmd, check=True)

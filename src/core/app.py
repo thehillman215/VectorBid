@@ -3,20 +3,22 @@
 Flask application factory for VectorBid - FIXED VERSION
 """
 
-from flask import Flask
 import os
+
+from flask import Flask
+
 
 def create_app():
     """Create and configure Flask app with correct paths"""
-    
+
     # Get the project root directory
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
+
     # Set correct template and static folders
     template_folder = os.path.join(project_root, 'src', 'ui', 'templates')
     static_folder = os.path.join(project_root, 'src', 'ui', 'static')
-    
-    app = Flask(__name__, 
+
+    app = Flask(__name__,
                 template_folder=template_folder,
                 static_folder=static_folder)
 

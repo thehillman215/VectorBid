@@ -9,7 +9,7 @@ def patch_fallback_ranking():
     """
     Instructions to modify your existing _fallback_ranking method in llm_service.py
     """
-    
+
     integration_code = '''
     # Find your existing _fallback_ranking method and modify the calculate_score function
     # Add this after your existing scoring logic:
@@ -39,7 +39,7 @@ def patch_fallback_ranking():
         # Your existing return statement...
         return score, key_factors
     '''
-    
+
     print("🔧 Integration Instructions:")
     print("=" * 50)
     print("1. Add import at top of llm_service.py:")

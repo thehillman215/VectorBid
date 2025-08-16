@@ -1,7 +1,6 @@
-import sys
 
 # Read the file
-with open('src/api/admin_unified.py', 'r') as f:
+with open('src/api/admin_unified.py') as f:
     content = f.read()
 
 # Replace the problematic template lines

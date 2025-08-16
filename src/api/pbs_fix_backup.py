@@ -18,14 +18,14 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
     logger.info(f"Processing preferences: {text_lower}")
 
     # Weekend preferences
-    weekend_phrases = ['weekends off', 'weekend off', 'no weekends', 'no weekend', 
+    weekend_phrases = ['weekends off', 'weekend off', 'no weekends', 'no weekend',
                       'avoid weekends', 'weekends free', 'saturday off', 'sunday off']
     if any(phrase in text_lower for phrase in weekend_phrases):
         filters.append("AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN")
         logger.info("Added weekend filter")
 
     # Early morning preferences
-    early_phrases = ['no early', 'avoid early', 'late start', 'no morning', 
+    early_phrases = ['no early', 'avoid early', 'late start', 'no morning',
                     'avoid morning', 'no early departure', 'no early departures']
     if any(phrase in text_lower for phrase in early_phrases):
         filters.append("AVOID TRIPS STARTING BEFORE 0800")
@@ -40,7 +40,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
         logger.info("Added long trip filter")
 
     # Red-eye preferences
-    redeye_phrases = ['no redeye', 'avoid redeye', 'no red-eye', 'no red eye', 
+    redeye_phrases = ['no redeye', 'avoid redeye', 'no red-eye', 'no red eye',
                      'avoid red-eye', 'no overnight', 'no late night']
     if any(phrase in text_lower for phrase in redeye_phrases):
         filters.append("AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559")
