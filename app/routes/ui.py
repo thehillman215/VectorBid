@@ -10,12 +10,41 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @router.post("/run", response_class=HTMLResponse)
-async def run_pipeline(request: Request, preferences: str = Form(...)):
-    pbs_layers = [
-        "AVOID PAIRINGS",
-        "  IF REPORT < 0800",
-        "PREFER PAIRINGS", 
-        "  IF LAYOVER CITY = 'SAN'"
-    ]
-    results = {"pbs_layers": pbs_layers}
+async def run_pipeline(request: Request, 
+                       preferences: str = Form(...),
+                       airline: str = Form("UAL"),
+                       base: str = Form("EWR")):
+    # Parse preferences to generate PBS
+    pbs_layers = []
+    
+    if "weekend" in preferences.lower():
+        pbs_layers.extend([
+            "AVOID PAIRINGS",
+            "  IF DOW CONTAINS SA,SU"
+        ])
+    
+    if "red-eye" in preferences.lower() or "redeye" in preferences.lower():
+        pbs_layers.extend([
+            "AVOID PAIRINGS",
+            "  IF REPORT < 0600"
+        ])
+    
+    if "SAN" in preferences.upper():
+        pbs_layers.extend([
+            "PREFER PAIRINGS",
+            "  IF LAYOVER CITY = 'SAN'"
+        ])
+    
+    if not pbs_layers:
+        pbs_layers = [
+            "AWARD PAIRINGS",
+            "  IN SENIORITY ORDER"
+        ]
+    
+    results = {
+        "pbs_layers": pbs_layers,
+        "airline": airline,
+        "base": base,
+        "preferences": preferences
+    }
     return templates.TemplateResponse("results.html", {"request": request, "results": results})
