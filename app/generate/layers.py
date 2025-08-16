@@ -40,12 +40,7 @@ def candidates_to_layers(topk: List[CandidateSchedule], bundle: FeatureBundle) -
         export_hash="",  # fill after hashing
     )
 
-    # Compute export hash deterministically from core fields (exclude export_hash itself)
-    core = {
-        "airline": artifact.airline,
-        "format": artifact.format,
-        "month": artifact.month,
-        "layers": artifact.layers,
-    }
+    # Compute export hash deterministically from a plain dict (exclude non-essential fields)
+    core = artifact.model_dump(exclude={"lint", "export_hash"})
     artifact.export_hash = _canonical_sha256(core)
     return artifact
