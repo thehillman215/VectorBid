@@ -1,4 +1,4 @@
-import json, os
+import json, os, glob
 from pathlib import Path
 from uuid import uuid4
 import pytest
@@ -18,10 +18,7 @@ def _pick(endpoint: str) -> str:
     raise AssertionError(f"Could not find path for {endpoint}. Have: {sorted(_OPENAPI_PATHS)[:10]}...")
 
 def _maybe_parse(client: TestClient, payload: dict) -> dict:
-    """
-    If /parse_preferences exists, use it. Otherwise, treat the payload as already 'parsed'.
-    This keeps the pipeline working even when parsing is folded into later steps.
-    """
+    """Use /parse_preferences if present, otherwise pass-through."""
     try:
         path = _pick("parse_preferences")
     except AssertionError:
@@ -33,6 +30,28 @@ def _maybe_parse(client: TestClient, payload: dict) -> dict:
     r = client.post(path, json=payload)
     assert r.status_code == 200, r.text
     return r.json()
+
+def _find_rule_pack() -> str:
+    """Find a UAL rule-pack (e.g., rule_packs/UAL/2025.08.yml)."""
+    root = Path(__file__).resolve().parents[2]
+    candidates = sorted(glob.glob(str(root / "rule_packs" / "UAL" / "*.yml")))
+    if not candidates:
+        # fallback to a common default; your engine patch resolves from repo root
+        return "rule_packs/UAL/2025.08.yml"
+    # pick the latest-looking file
+    return str(Path(candidates[-1]).relative_to(root))
+
+def _build_context(persona: dict) -> dict:
+    """Minimal context most handlers expect."""
+    return {
+        "airline": persona.get("airline"),
+        "base": persona.get("base"),
+        "seat": persona.get("seat"),
+        "fleet": persona.get("fleet"),
+        "rule_pack_path": _find_rule_pack(),
+        "bid_period": "2025-09",
+        "pbs_version": "2.x",
+    }
 
 GOLDENS_DIR = Path(__file__).parent / "goldens"
 GOLDENS_DIR.mkdir(parents=True, exist_ok=True)
@@ -68,6 +87,9 @@ def test_full_pipeline_golden(client, scenario):
     h = client.get(_pick("health"))
     assert h.status_code == 200, h.text
 
+    # build context
+    ctx = _build_context(scenario["persona"])
+
     # 1) parse (or fallback pass-through)
     parsed = _maybe_parse(client, {
         "persona": scenario["persona"],
@@ -75,23 +97,23 @@ def test_full_pipeline_golden(client, scenario):
         "weights": scenario["weights"],
     })
 
-    # 2) validate
-    r = client.post(_pick("validate"), json={"preferences": parsed})
+    # 2) validate (expects top-level 'context')
+    r = client.post(_pick("validate"), json={"preferences": parsed, "context": ctx})
     assert r.status_code == 200, r.text
     validation = r.json()
 
-    # 3) optimize
-    r = client.post(_pick("optimize"), json={"preferences": parsed, "validation": validation, "top_k": 20})
+    # 3) optimize (pass context along)
+    r = client.post(_pick("optimize"), json={"preferences": parsed, "validation": validation, "context": ctx, "top_k": 20})
     assert r.status_code == 200, r.text
     optimized = r.json()
 
     # 4) strategy
-    r = client.post(_pick("strategy"), json={"preferences": parsed, "optimized": optimized})
+    r = client.post(_pick("strategy"), json={"preferences": parsed, "optimized": optimized, "context": ctx})
     assert r.status_code == 200, r.text
     strategy = r.json()
 
     # 5) generate layers
-    r = client.post(_pick("generate_layers"), json={"strategy": strategy})
+    r = client.post(_pick("generate_layers"), json={"strategy": strategy, "context": ctx})
     assert r.status_code == 200, r.text
     layers = r.json()
 
