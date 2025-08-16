@@ -515,6 +515,14 @@ def dashboard():
     airlines = set(p.get('airline', '') for p in packets if p.get('airline'))
     unique_airlines = len(airlines)
     
+
+    # Calculate statistics
+    storage_mb = sum(p.get('size_mb', 0) for p in packets) if packets else 0
+    storage_mb = round(storage_mb, 1)
+    
+    airlines = set(p.get('airline', '') for p in packets if p.get('airline'))
+    unique_airlines = len(airlines)
+    
     return render_template_string(dashboard_html,
                                   packets=packets,
                                   contracts=contracts,
