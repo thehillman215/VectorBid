@@ -95,4 +95,14 @@ logs/
 *.sqlite3
 
 # Node modules (if any)
-node_modules/
+node_modules/schemas/*.json
+pref.json
+ctx.json
+pairings.json
+fb.json
+out_generate.json
+out_optimize.json
+generate_payload.json
+strategy_payload.json
+validate.json
+lint_payload.json
