@@ -71,10 +71,10 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
     return [
         CandidateSchedule(
             candidate_id=pid,
-            score=award,
+            score=winner_score,
             hard_ok=True,
             soft_breakdown={},
             pairings=[],
         )
-        for (score, _neg_i, pid) in winners
+        for (winner_score, _neg_i, pid) in winners
     ]
