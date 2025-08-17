@@ -60,3 +60,12 @@ def test_select_topk_pref_weighting():
     assert [c.candidate_id for c in topk] == ["B_id", "A_id"]
     assert topk[0].score == pytest.approx(1.7)
     assert topk[1].score == pytest.approx(1.3)
+
+    # rationale should reflect top scoring factors
+    assert len(topk[0].rationale) >= 2
+    assert "layovers" in topk[0].rationale[0]
+    assert "award_rate" in topk[0].rationale[1]
+
+    assert len(topk[1].rationale) >= 2
+    assert "award_rate" in topk[1].rationale[0]
+    assert "layovers" in topk[1].rationale[1]

@@ -7,6 +7,36 @@ from typing import Any
 from app.models import CandidateSchedule, FeatureBundle
 
 
+def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
+    """Create human readable rationale strings for the top scoring factors.
+
+    Parameters
+    ----------
+    pairing: Any
+        Pairing data that may contain attributes such as layover city. The
+        current implementation only relies on the breakdown values but the
+        argument is kept for future enrichment.
+    breakdown: dict[str, float]
+        Mapping of scoring category to its contribution toward the total
+        score.
+
+    Returns
+    -------
+    list[str]
+        Up to three messages describing the largest contributions in
+        descending order.
+    """
+
+    # Sort breakdown by contribution (descending) and take top three entries
+    top_items = sorted(breakdown.items(), key=lambda kv: kv[1], reverse=True)[:3]
+
+    messages: list[str] = []
+    for key, val in top_items:
+        messages.append(f"{key} contributed {val:.2f}")
+
+    return messages
+
+
 def _to_dict(x: Any) -> dict[str, Any]:
     if x is None:
         return {}
@@ -48,8 +78,9 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
     # award rates
     base_stats_d = _to_dict(_get(bundle.analytics_features, "base_stats", {}))
 
-    items: list[tuple[float, int, str]] = []
-    for i, p in enumerate(_get(bundle.pairing_features, "pairings", []) or []):
+    items: list[tuple[float, int, str, dict[str, float], Any]] = []
+    pairings = _get(bundle.pairing_features, "pairings", []) or []
+    for i, p in enumerate(pairings):
         pid = _get(p, "id", "")
         city = _get(p, "layover_city", None)
 
@@ -62,19 +93,26 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
         else:
             pref_score = 0.5
 
-        score = award + w * pref_score
-        items.append((score, -i, pid))  # stable: earlier wins ties
+        breakdown = {
+            "award_rate": award,
+            "layovers": w * pref_score,
+        }
+        score = sum(breakdown.values())
+        items.append((score, -i, pid, breakdown, p))  # stable: earlier wins ties
 
     winners = heapq.nlargest(K, items, key=itemgetter(0, 1))
 
     # Keep pairings empty (legacy hashing behavior)
-    return [
-        CandidateSchedule(
-            candidate_id=pid,
-            score=winner_score,
-            hard_ok=True,
-            soft_breakdown={},
-            pairings=[],
+    result: list[CandidateSchedule] = []
+    for winner_score, _neg_i, pid, breakdown, pairing in winners:
+        result.append(
+            CandidateSchedule(
+                candidate_id=pid,
+                score=winner_score,
+                hard_ok=True,
+                soft_breakdown=breakdown,
+                pairings=[],
+                rationale=_generate_rationale(pairing, breakdown),
+            )
         )
-        for (winner_score, _neg_i, pid) in winners
-    ]
+    return result
