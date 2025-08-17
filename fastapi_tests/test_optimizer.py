@@ -60,6 +60,8 @@ def test_select_topk_pref_weighting():
     assert [c.candidate_id for c in topk] == ["B_id", "A_id"]
     assert topk[0].score == pytest.approx(1.7)
     assert topk[1].score == pytest.approx(1.3)
+    assert topk[0].pairings == ["B_id"]
+    assert topk[1].pairings == ["A_id"]
 
     # rationale should reflect top scoring factors
     assert len(topk[0].rationale) >= 2

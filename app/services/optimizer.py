@@ -56,9 +56,9 @@ def _get(obj: Any, name: str, default=None):
         pass
     return _to_dict(obj).get(name, default)
 
-def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
+def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
     """
-    Legacy-compatible Top-K selection:
+    Legacy-compatible Top-K selection (default K=50):
     - DO NOT hard-filter here (legacy scored all pairings; later stages enforce rules)
     - Score = award_rate(city) + weight * pref(city) where pref∈{1.0, 0.5, 0.0}
     - Stable ties by earlier input order
@@ -102,7 +102,6 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
 
     winners = heapq.nlargest(K, items, key=itemgetter(0, 1))
 
-    # Keep pairings empty (legacy hashing behavior)
     result: list[CandidateSchedule] = []
     for winner_score, _neg_i, pid, breakdown, pairing in winners:
         result.append(
@@ -111,8 +110,10 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
                 score=winner_score,
                 hard_ok=True,
                 soft_breakdown=breakdown,
-                pairings=[],
+                pairings=[pid],
                 rationale=_generate_rationale(pairing, breakdown),
             )
         )
+
+    # heapq.nlargest already returns the top K in descending order
     return result
