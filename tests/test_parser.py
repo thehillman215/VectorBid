@@ -1,4 +1,4 @@
-from schedule_parser import parse_schedule
+from src.lib.schedule_parser import parse_schedule
 
 
 def test_csv_happy_path():

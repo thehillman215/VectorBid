@@ -3,7 +3,7 @@
 Test script for the enhanced airline schedule parsing logic
 """
 
-from schedule_parser import parse_schedule
+from src.lib.schedule_parser import parse_schedule
 
 # Sample text compatible with new parser format
 sample_united_text = """PILOT MONTHLY BID PACKAGE - NOVEMBER 2024
