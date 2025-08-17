@@ -26,6 +26,10 @@ from app.strategy.engine import propose_strategy
 router = APIRouter()
 
 
+RULE_PACK_PATH = "rule_packs/UAL/2025.08.yml"
+_RULES = load_rule_pack(RULE_PACK_PATH)
+
+
 @router.post("/validate", tags=["Validate"])
 def validate(payload: dict[str, Any]) -> dict[str, Any]:
     """
@@ -45,8 +49,11 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
             compliance_flags={},
             pairing_features=payload["pairings"],
         )
-        rules = load_rule_pack("rule_packs/UAL/2025.08.yml")
-        return validate_feasibility(bundle, rules)
+        force = payload.get("force_reload", False)
+        global _RULES
+        if force:
+            _RULES = load_rule_pack(RULE_PACK_PATH, force_reload=True)
+        return validate_feasibility(bundle, _RULES)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

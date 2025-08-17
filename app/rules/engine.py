@@ -1,15 +1,22 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 import yaml
+
+
+_RULE_CACHE: Dict[str, dict[str, Any]] = {}
 
 from app.models import FeatureBundle
 
 
-def load_rule_pack(path: str) -> dict[str, Any]:
-    """Load a YAML rule pack, resolving relative paths robustly."""
+def load_rule_pack(path: str, force_reload: bool = False) -> dict[str, Any]:
+    """Load a YAML rule pack, resolving relative paths robustly.
+
+    Results are cached in-memory keyed by the resolved file path. Pass
+    ``force_reload=True`` to bypass the cache and reload from disk.
+    """
     pth = Path(path)
     candidates = []
     if pth.is_absolute():
@@ -19,9 +26,14 @@ def load_rule_pack(path: str) -> dict[str, Any]:
         candidates.extend([repo_root / path, Path.cwd() / path])
     for c in candidates:
         c = c.resolve()
+        key = str(c)
+        if not force_reload and key in _RULE_CACHE:
+            return _RULE_CACHE[key]
         if c.exists():
             with open(c) as f:
-                return yaml.safe_load(f)
+                data = yaml.safe_load(f)
+            _RULE_CACHE[key] = data
+            return data
     raise FileNotFoundError(f"Rule pack not found in any candidate: {[str(c) for c in candidates]}")
 
 def _eval_hard(pref: dict[str, Any], pairing: dict[str, Any], rule: dict[str, Any]) -> bool:
