@@ -35,6 +35,13 @@ except ImportError:
         # If not found, we'll handle it gracefully
         BidPacketManager = None
 
+# Database models
+try:
+    from src.core.extensions import db
+    from src.core.models import BidPacket
+except Exception:  # pragma: no cover - fallback for legacy paths
+    db = None
+    BidPacket = None
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -576,6 +583,32 @@ def api_upload_bid_packet():
                 'error': 'Airline is required'
             }), 400
 
+        # Check if a bid packet already exists for this month and airline
+        existing = None
+        if BidPacket is not None and db is not None:
+            query = BidPacket.query.filter_by(month_tag=month_tag)
+            if hasattr(BidPacket, 'airline'):
+                query = query.filter_by(airline=airline)
+            existing = query.first()
+
+        if existing:
+            # Update existing record instead of failing due to unique constraint
+            file_data = file.read()
+            existing.filename = file.filename
+            if hasattr(existing, 'file_data'):
+                existing.file_data = file_data
+            if hasattr(existing, 'pdf_data'):
+                existing.pdf_data = file_data
+            if hasattr(existing, 'file_size'):
+                existing.file_size = len(file_data)
+            existing.upload_date = datetime.utcnow()
+            if hasattr(existing, 'airline'):
+                existing.airline = airline
+            db.session.commit()
+            logger.info(f"Bid packet updated: {airline} {month_tag}")
+            return jsonify({'success': True, 'updated': True}), 200
+
+        # No existing record; proceed with standard upload
         result = manager.upload_bid_packet(file, month_tag, airline)
 
         if result['success']:
