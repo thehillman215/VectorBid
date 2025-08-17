@@ -1,0 +1,13 @@
+<div class="rounded-lg p-4 mb-4 {% if type == 'error' %}bg-red-100 border border-red-400 text-red-700{% elif type == 'warning' %}bg-yellow-100 border border-yellow-400 text-yellow-700{% else %}bg-blue-100 border border-blue-400 text-blue-700{% endif %}">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            {% if type == 'error' %}❌{% elif type == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+        </div>
+        <div class="ml-3">
+            <p class="text-sm font-medium">
+                {% if type == 'error' %}Error{% elif type == 'warning' %}Warning{% else %}Info{% endif %}
+            </p>
+            <p class="text-sm mt-1">{{ error if error else message }}</p>
+        </div>
+    </div>
+</div>

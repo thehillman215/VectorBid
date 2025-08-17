@@ -39,7 +39,7 @@ def _build_artifact(client: TestClient):
 
 def test_export_requires_api_key_when_enabled(tmp_path, monkeypatch):
     # Enable auth & set export dir
-    monkeypatch.setenv("VECTORBID_API_KEY", "sekret")
+    monkeypatch.setenv("VECTORBID_API_KEY", "secret")
     monkeypatch.setenv("EXPORT_DIR", str(tmp_path))
 
     client = TestClient(app)
@@ -54,12 +54,12 @@ def test_export_requires_api_key_when_enabled(tmp_path, monkeypatch):
     assert r.status_code == 401
 
     # With correct header key -> 200 and path exists
-    r = client.post("/export", headers={"x-api-key": "sekret"}, json={"artifact": artifact})
+    r = client.post("/export", headers={"x-api-key": "secret"}, json={"artifact": artifact})
     assert r.status_code == 200
     out = r.json()
     assert "export_path" in out
     assert pathlib.Path(out["export_path"]).exists()
 
     # Also allow via query param
-    r = client.post("/export?api_key=sekret", json={"artifact": artifact})
+    r = client.post("/export?api_key=secret", json={"artifact": artifact})
     assert r.status_code == 200

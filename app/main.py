@@ -50,18 +50,24 @@ from app.api import router as api_router
 
 app.include_router(api_router)
 
+import os
 
-# Import and include UI routes
-from app.routes.ui import router as ui_router
-app.include_router(ui_router, prefix="", tags=["UI"])
-print("✅ UI routes registered at /")
-
-# UI Routes (opt-in only)
-import os as _os
-if _os.getenv("ENABLE_UI") == "1":
+# UI Routes Integration (opt-in)
+if os.getenv("ENABLE_UI") == "1":
     try:
         from app.routes.ui import router as ui_router  # heavy: uses Form()
-        app.include_router(ui_router)
-        print("✅ UI routes added")
+        app.include_router(ui_router, prefix="", tags=["UI"])
+        print("✅ UI routes registered")
     except Exception as e:
-        print(f"⚠️ UI disabled: {e}")
+        print(f"⚠️  UI routes not available: {e}")
+else:
+    print("⚠️  UI routes not enabled. Set ENABLE_UI=1 to enable.")
+
+# Static files
+try:
+    from fastapi.staticfiles import StaticFiles
+    if os.path.exists("app/static"):
+        app.mount("/static", StaticFiles(directory="app/static"), name="static")
+        print("✅ Static files mounted")
+except Exception as e:
+    print(f"⚠️  Static files not mounted: {e}")
