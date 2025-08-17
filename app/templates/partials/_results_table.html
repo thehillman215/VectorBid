@@ -1,0 +1,100 @@
+<div class="bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-800">Generated PBS Commands</h3>
+        <span class="text-sm text-green-600 font-medium">
+            ✓ {{ results.stats.success_probability }} Success Rate
+        </span>
+    </div>
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-2xl font-bold text-blue-600">{{ results.stats.total_pairings }}</div>
+            <div class="text-xs text-gray-600">Total Pairings</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-2xl font-bold text-green-600">{{ results.stats.filtered }}</div>
+            <div class="text-xs text-gray-600">Filtered</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-2xl font-bold text-purple-600">{{ results.stats.preferred }}</div>
+            <div class="text-xs text-gray-600">Preferred</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-2xl font-bold text-orange-600">{{ results.stats.success_probability }}</div>
+            <div class="text-xs text-gray-600">Success Rate</div>
+        </div>
+    </div>
+    
+    <!-- PBS Commands -->
+    <div class="bg-gray-900 text-green-400 p-6 rounded-lg font-mono text-sm mb-6 overflow-x-auto">
+        <pre id="pbs-output">{% for line in results.pbs_layers %}{{ line }}
+{% endfor %}</pre>
+    </div>
+    
+    <!-- Warnings -->
+    {% if results.warnings %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+        <div class="flex">
+            <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                    {% for warning in results.warnings %}
+                    • {{ warning }}<br>
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-3">
+        <button onclick="copyPBS()" 
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+            📋 Copy PBS Commands
+        </button>
+        <button onclick="downloadPBS()" 
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            💾 Download PBS File
+        </button>
+        <button onclick="downloadJSON()" 
+                class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+            📊 Download Analysis
+        </button>
+        <button hx-get="/" hx-target="body" 
+                class="bg-white text-gray-700 px-6 py-2 rounded-lg border hover:bg-gray-50 transition-colors">
+            🔄 New Bid
+        </button>
+    </div>
+</div>
+
+<script>
+function copyPBS() {
+    const text = document.getElementById('pbs-output').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('✅ PBS commands copied to clipboard!');
+    });
+}
+
+function downloadPBS() {
+    const text = document.getElementById('pbs-output').innerText;
+    const blob = new Blob([text], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vectorbid-pbs-commands.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function downloadJSON() {
+    const results = {{ results | tojson }};
+    const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vectorbid-analysis.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
