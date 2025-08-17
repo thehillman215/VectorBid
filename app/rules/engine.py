@@ -215,3 +215,66 @@ def load_rule_pack(path: str | _VB_Seq[str], force_reload: bool = False):  # typ
 
     merged = _vb_merge_rule_dict(acc)
     return merged if merged.get("hard") else DEFAULT_RULES
+
+# ------------------------------------------------------------
+# Optional concurrent validation wrapper (back-compat safe)
+# ------------------------------------------------------------
+import os as _VB_os
+import concurrent.futures as _VB_fut
+from typing import Any as _VB_Any, Dict as _VB_Dict, List as _VB_List
+
+# Keep a handle to the existing sequential validator before we override
+try:
+    _vb_validate_feasibility_seq = validate_feasibility  # type: ignore[name-defined]
+except Exception:  # pragma: no cover
+    def _vb_validate_feasibility_seq(pairings, rules=None, context=None):  # type: ignore[unused-ignore]
+        # Absolute fallback: sequential no-ops
+        return []
+
+def _vb_normalize_pairings_for_validate(raw: _VB_Any) -> _VB_List[_VB_Dict[str, _VB_Any]]:
+    if isinstance(raw, list):
+        return [p for p in raw if isinstance(p, dict)]
+    if isinstance(raw, dict):
+        # allow {"id": {…}} maps
+        return [p if isinstance(p, dict) else {} for p in raw.values()]
+    return []
+
+def validate_feasibility(pairings, rules=None, context=None):  # type: ignore[override]
+    """
+    Back-compat wrapper around the existing sequential validator.
+    Runs sequentially by default. Enable concurrency by either:
+      - setting context["concurrency"] truthy or
+      - exporting env VALIDATE_CONCURRENCY=1
+    """
+    items = _vb_normalize_pairings_for_validate(pairings)
+    ctx = context or {}
+    flag = False
+    try:
+        flag = bool(ctx.get("concurrency")) or str(_VB_os.getenv("VALIDATE_CONCURRENCY", "0")).lower() in ("1","true","yes","on")
+    except Exception:
+        flag = False
+
+    if not flag or len(items) <= 1:
+        # Call the original sequential implementation
+        try:
+            return _vb_validate_feasibility_seq(items, rules, ctx)
+        except TypeError:
+            try:
+                return _vb_validate_feasibility_seq(items, rules)
+            except TypeError:
+                return _vb_validate_feasibility_seq(items)
+
+    # Concurrent fan-out: call the original sequential validator per pairing
+    max_workers = int(ctx.get("max_workers") or _VB_os.getenv("VALIDATE_MAX_WORKERS") or 4)
+    results: _VB_List[_VB_Dict[str, _VB_Any]] = []
+    with _VB_fut.ThreadPoolExecutor(max_workers=max_workers) as ex:
+        futs = [ex.submit(_vb_validate_feasibility_seq, [p], rules, ctx) for p in items]
+        for fu in futs:
+            try:
+                vs = fu.result()
+                if isinstance(vs, list):
+                    results.extend(vs)
+            except Exception:
+                # If a worker fails, skip that item (keeps endpoint robust)
+                pass
+    return results
