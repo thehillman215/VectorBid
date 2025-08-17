@@ -58,8 +58,8 @@ def test_select_topk_pref_weighting():
     topk = select_topk(bundle, 2)
 
     assert [c.candidate_id for c in topk] == ["B_id", "A_id"]
-    assert topk[0].score == pytest.approx(1.7)
-    assert topk[1].score == pytest.approx(1.3)
+    assert topk[0].score == pytest.approx(0.85)
+    assert topk[1].score == pytest.approx(0.65)
 
     # rationale should reflect top scoring factors
     assert len(topk[0].rationale) >= 2
@@ -69,3 +69,14 @@ def test_select_topk_pref_weighting():
     assert len(topk[1].rationale) >= 2
     assert "award_rate" in topk[1].rationale[0]
     assert "layovers" in topk[1].rationale[1]
+
+
+def test_weight_and_seniority_adjustment():
+    bundle = _build_bundle()
+    bundle.context.default_weights = {"award_rate": 2.0, "layovers": 1.0}
+    bundle.context.seniority_percentile = 1.0
+
+    topk = select_topk(bundle, 1)
+
+    expected = (0.7 * (2 / 3) + 1.0 * (1 / 3)) * 1.1
+    assert topk[0].score == pytest.approx(expected)
