@@ -9,12 +9,12 @@ Version: 2.0.0
 import logging
 import os
 import secrets
-import hashlib
 from datetime import datetime
 from functools import wraps
 
 from flask import (
     Blueprint,
+    current_app,
     jsonify,
     redirect,
     render_template_string,
@@ -36,34 +36,8 @@ except ImportError:
         # If not found, we'll handle it gracefully
         BidPacketManager = None
 
-# Database models
-try:
-    from src.core.extensions import db
-    from src.core.models import BidPacket
-except Exception:  # pragma: no cover - fallback for legacy paths
-    db = None
-    BidPacket = None
 # Configure logging
 logger = logging.getLogger(__name__)
-
-
-def _redact_token(token: str) -> str:
-    """Return a redacted representation of a bearer token."""
-    if not token:
-        return ""
-    prefix = token[:6]
-    token_hash = hashlib.sha256(token.encode()).hexdigest()[:8]
-    return f"{prefix}...{token_hash}"
-
-
-def log_action(action: str, token: str | None = None, **details) -> None:
-    """Log admin actions while avoiding plain text token storage."""
-    if token:
-        details['token'] = _redact_token(token)
-    if details:
-        logger.info("%s | %s", action, details)
-    else:
-        logger.info(action)
 
 # ============================================
 # CONFIGURATION
@@ -134,6 +108,40 @@ def require_bearer_token(f):
 
 
 # ============================================
+# RATE LIMITING UTILITIES
+# ============================================
+
+upload_counters = {}
+
+
+def check_rate_limit():
+    """Simple in-memory rate limiter for upload endpoints."""
+    # During tests we don't want rate limits to interfere with results.
+    if current_app.config.get('TESTING'):
+        upload_counters.clear()
+        return True
+
+    client_ip = request.remote_addr or 'global'
+    now = datetime.utcnow()
+    hour_key = now.strftime('%Y%m%d%H')
+
+    client_counts = upload_counters.setdefault(client_ip, {})
+    count = client_counts.get(hour_key, 0)
+
+    if count >= AdminConfig.MAX_UPLOADS_PER_HOUR:
+        return False
+
+    client_counts[hour_key] = count + 1
+
+    # Remove counters for previous hours to prevent growth
+    for key in list(client_counts.keys()):
+        if key != hour_key:
+            del client_counts[key]
+
+    return True
+
+
+# ============================================
 # WEB UI ROUTES
 # ============================================
 
@@ -148,11 +156,11 @@ def login():
         if token and secrets.compare_digest(token, AdminConfig.BEARER_TOKEN):
             session['admin_token'] = token
             session['admin_login_time'] = datetime.utcnow().isoformat()
-            log_action("admin_login", token=token)
+            logger.info("Admin logged in successfully")
             return redirect(url_for('admin.dashboard'))
         else:
             error = "Invalid token"
-            log_action("admin_login_failed", token=token)
+            logger.warning("Failed admin login attempt")
     else:
         error = None
 
@@ -220,10 +228,9 @@ def login():
 @admin_bp.route('/logout')
 def logout():
     """Admin logout"""
-    token = session.get('admin_token')
     session.pop('admin_token', None)
     session.pop('admin_login_time', None)
-    log_action("admin_logout", token=token)
+    logger.info("Admin logged out")
     return redirect(url_for('admin.login'))
 
 
@@ -604,32 +611,12 @@ def api_upload_bid_packet():
                 'error': 'Airline is required'
             }), 400
 
-        # Check if a bid packet already exists for this month and airline
-        existing = None
-        if BidPacket is not None and db is not None:
-            query = BidPacket.query.filter_by(month_tag=month_tag)
-            if hasattr(BidPacket, 'airline'):
-                query = query.filter_by(airline=airline)
-            existing = query.first()
+        if not check_rate_limit():
+            return jsonify({
+                'success': False,
+                'error': 'Rate limit exceeded'
+            }), 429
 
-        if existing:
-            # Update existing record instead of failing due to unique constraint
-            file_data = file.read()
-            existing.filename = file.filename
-            if hasattr(existing, 'file_data'):
-                existing.file_data = file_data
-            if hasattr(existing, 'pdf_data'):
-                existing.pdf_data = file_data
-            if hasattr(existing, 'file_size'):
-                existing.file_size = len(file_data)
-            existing.upload_date = datetime.utcnow()
-            if hasattr(existing, 'airline'):
-                existing.airline = airline
-            db.session.commit()
-            logger.info(f"Bid packet updated: {airline} {month_tag}")
-            return jsonify({'success': True, 'updated': True}), 200
-
-        # No existing record; proceed with standard upload
         result = manager.upload_bid_packet(file, month_tag, airline)
 
         if result['success']:
@@ -672,6 +659,12 @@ def api_upload_contract():
                 'success': False,
                 'error': 'Airline is required'
             }), 400
+
+        if not check_rate_limit():
+            return jsonify({
+                'success': False,
+                'error': 'Rate limit exceeded'
+            }), 429
 
         result = manager.upload_contract(file, airline, version)
 
