@@ -34,9 +34,13 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]]:
+) -> Optional[
+    Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]
+]:
     if response.status_code == 200:
-        response_200 = OptimizeOptimizePostResponseOptimizeOptimizePost.from_dict(response.json())
+        response_200 = OptimizeOptimizePostResponseOptimizeOptimizePost.from_dict(
+            response.json()
+        )
 
         return response_200
     if response.status_code == 422:
@@ -51,7 +55,9 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]]:
+) -> Response[
+    Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]
+]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -64,7 +70,9 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: OptimizeOptimizePostPayload,
-) -> Response[Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]]:
+) -> Response[
+    Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]
+]:
     """Optimize
 
     Args:
@@ -93,7 +101,9 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: OptimizeOptimizePostPayload,
-) -> Optional[Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]]:
+) -> Optional[
+    Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]
+]:
     """Optimize
 
     Args:
@@ -117,7 +127,9 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: OptimizeOptimizePostPayload,
-) -> Response[Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]]:
+) -> Response[
+    Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]
+]:
     """Optimize
 
     Args:
@@ -144,7 +156,9 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: OptimizeOptimizePostPayload,
-) -> Optional[Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]]:
+) -> Optional[
+    Union[HTTPValidationError, OptimizeOptimizePostResponseOptimizeOptimizePost]
+]:
     """Optimize
 
     Args:

@@ -142,7 +142,11 @@ class TestOnboardingFlow:
 
         # Test each step for accessibility violations
         for step in range(1, 4):
-            page.goto(f"{base_url}/onboarding/{step}" if step > 1 else f"{base_url}/onboarding")
+            page.goto(
+                f"{base_url}/onboarding/{step}"
+                if step > 1
+                else f"{base_url}/onboarding"
+            )
 
             # Inject axe-core
             inject_axe(page)
@@ -152,9 +156,13 @@ class TestOnboardingFlow:
             violations = get_violations(results)
 
             # Check for critical violations
-            critical_violations = [v for v in violations if v['impact'] in ['critical', 'serious']]
+            critical_violations = [
+                v for v in violations if v["impact"] in ["critical", "serious"]
+            ]
 
-            assert len(critical_violations) == 0, f"Step {step} has {len(critical_violations)} critical accessibility violations: {critical_violations}"
+            assert (
+                len(critical_violations) == 0
+            ), f"Step {step} has {len(critical_violations)} critical accessibility violations: {critical_violations}"
 
     def test_onboarding_navigation_back_forward(self, page: Page, base_url: str):
         """Test navigation between onboarding steps."""
@@ -164,7 +172,7 @@ class TestOnboardingFlow:
         page.goto(f"{base_url}/onboarding")
         page.locator('select[name="airline"]').select_option("Southwest")
         page.locator('input[name="base"]').fill("BWI")
-        page.locator('.seat-option').first.click()
+        page.locator(".seat-option").first.click()
         page.locator('button[type="submit"]').click()
 
         # Should be on step 2

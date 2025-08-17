@@ -15,258 +15,210 @@ PILOT_TEST_CASES = [
     {
         "id": "basic_1",
         "input": "I want weekends off",
-        "expected_commands":
-        ["AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN"],
-        "category": "Basic"
+        "expected_commands": ["AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN"],
+        "category": "Basic",
     },
     {
         "id": "basic_2",
         "input": "No early morning departures",
         "expected_commands": ["AVOID TRIPS STARTING BEFORE 0800"],
-        "category": "Basic"
+        "category": "Basic",
     },
-
     # === PILOT LINGO - COMMON TERMS ===
     {
-        "id":
-        "lingo_1",
-        "input":
-        "I need commutable trips, no red-eyes, and max credit",
+        "id": "lingo_1",
+        "input": "I need commutable trips, no red-eyes, and max credit",
         "expected_commands": [
             "PREFER TRIPS STARTING AFTER 1000",
             "AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559",
-            "MAXIMIZE CREDIT_TIME"
+            "MAXIMIZE CREDIT_TIME",
         ],
-        "category":
-        "Pilot Lingo"
+        "category": "Pilot Lingo",
     },
     {
-        "id":
-        "lingo_2",
-        "input":
-        "Give me high-time turns with good per diem",
+        "id": "lingo_2",
+        "input": "Give me high-time turns with good per diem",
         "expected_commands": [
-            "PREFER TRIPS WITH DUTY_DAYS = 1", "MAXIMIZE CREDIT_TIME",
-            "MAXIMIZE PER_DIEM_VALUE"
+            "PREFER TRIPS WITH DUTY_DAYS = 1",
+            "MAXIMIZE CREDIT_TIME",
+            "MAXIMIZE PER_DIEM_VALUE",
         ],
-        "category":
-        "Pilot Lingo"
+        "category": "Pilot Lingo",
     },
     {
-        "id":
-        "lingo_3",
-        "input":
-        "I'm a slam-clicker who wants easy layovers and no hub turns",
+        "id": "lingo_3",
+        "input": "I'm a slam-clicker who wants easy layovers and no hub turns",
         "expected_commands": [
-            "PREFER LAYOVERS WITH DURATION >= 14 HOURS", "AVOID HUB_TURNS",
-            "PREFER TRIPS WITH GOOD_HOTELS"
+            "PREFER LAYOVERS WITH DURATION >= 14 HOURS",
+            "AVOID HUB_TURNS",
+            "PREFER TRIPS WITH GOOD_HOTELS",
         ],
-        "category":
-        "Pilot Lingo"
+        "category": "Pilot Lingo",
     },
-
     # === SENIORITY-BASED PREFERENCES ===
     {
-        "id":
-        "senior_1",
-        "input":
-        "Senior pilot - want prime time off, holiday avoidance, best equipment",
+        "id": "senior_1",
+        "input": "Senior pilot - want prime time off, holiday avoidance, best equipment",
         "expected_commands": [
-            "AVOID TRIPS DURING HOLIDAYS", "PREFER WEEKDAYS OFF",
-            "PREFER EQUIPMENT TYPE 777 OR 787"
+            "AVOID TRIPS DURING HOLIDAYS",
+            "PREFER WEEKDAYS OFF",
+            "PREFER EQUIPMENT TYPE 777 OR 787",
         ],
-        "category":
-        "Seniority"
+        "category": "Seniority",
     },
     {
-        "id":
-        "junior_1",
-        "input":
-        "Junior guy here - just need to build time and avoid reserve",
+        "id": "junior_1",
+        "input": "Junior guy here - just need to build time and avoid reserve",
         "expected_commands": [
-            "MAXIMIZE BLOCK_TIME", "AVOID RESERVE_ASSIGNMENTS",
-            "ACCEPT ANY_LEGAL_TRIP"
+            "MAXIMIZE BLOCK_TIME",
+            "AVOID RESERVE_ASSIGNMENTS",
+            "ACCEPT ANY_LEGAL_TRIP",
         ],
-        "category":
-        "Seniority"
+        "category": "Seniority",
     },
-
     # === LIFESTYLE PREFERENCES ===
     {
-        "id":
-        "lifestyle_1",
-        "input":
-        "Family first - home every night if possible, no overnights on school nights",
+        "id": "lifestyle_1",
+        "input": "Family first - home every night if possible, no overnights on school nights",
         "expected_commands": [
-            "PREFER DAY_TRIPS", "AVOID OVERNIGHTS MON THROUGH THU",
-            "MINIMIZE TIME_AWAY_FROM_BASE"
+            "PREFER DAY_TRIPS",
+            "AVOID OVERNIGHTS MON THROUGH THU",
+            "MINIMIZE TIME_AWAY_FROM_BASE",
         ],
-        "category":
-        "Lifestyle"
+        "category": "Lifestyle",
     },
     {
-        "id":
-        "lifestyle_2",
-        "input":
-        "Commuter from LAX to DEN base - need late shows and early releases",
+        "id": "lifestyle_2",
+        "input": "Commuter from LAX to DEN base - need late shows and early releases",
         "expected_commands": [
             "PREFER TRIPS STARTING AFTER 1200",
             "PREFER TRIPS ENDING BEFORE 1500",
-            "AVOID EARLY_MORNING_DEPARTURES", "AVOID LATE_NIGHT_ARRIVALS"
+            "AVOID EARLY_MORNING_DEPARTURES",
+            "AVOID LATE_NIGHT_ARRIVALS",
         ],
-        "category":
-        "Lifestyle"
+        "category": "Lifestyle",
     },
     {
-        "id":
-        "lifestyle_3",
-        "input":
-        "Part-timer looking for minimum days with maximum pay",
+        "id": "lifestyle_3",
+        "input": "Part-timer looking for minimum days with maximum pay",
         "expected_commands": [
-            "MINIMIZE DUTY_DAYS", "MAXIMIZE CREDIT_PER_DAY",
-            "PREFER TRIPS WITH DAYS <= 10 PER MONTH"
+            "MINIMIZE DUTY_DAYS",
+            "MAXIMIZE CREDIT_PER_DAY",
+            "PREFER TRIPS WITH DAYS <= 10 PER MONTH",
         ],
-        "category":
-        "Lifestyle"
+        "category": "Lifestyle",
     },
-
     # === COMPLEX MULTI-PREFERENCE ===
     {
-        "id":
-        "complex_1",
-        "input":
-        "I want weekends off, no red-eyes, prefer 3-day trips, and need Fridays at home for family commitments",
+        "id": "complex_1",
+        "input": "I want weekends off, no red-eyes, prefer 3-day trips, and need Fridays at home for family commitments",
         "expected_commands": [
             "AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN",
             "AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559",
             "PREFER TRIPS WITH DUTY_DAYS = 3",
-            "AVOID TRIPS IF DUTY_PERIOD INCLUDES FRI"
+            "AVOID TRIPS IF DUTY_PERIOD INCLUDES FRI",
         ],
-        "category":
-        "Complex"
+        "category": "Complex",
     },
     {
-        "id":
-        "complex_2",
-        "input":
-        "Senior captain wants Europe trips, avoid CDG, prefer LHR or FRA, no back-to-back atlantics",
+        "id": "complex_2",
+        "input": "Senior captain wants Europe trips, avoid CDG, prefer LHR or FRA, no back-to-back atlantics",
         "expected_commands": [
             "PREFER INTERNATIONAL_DESTINATIONS",
-            "PREFER DESTINATIONS INCLUDE LHR OR FRA", "AVOID DESTINATION CDG",
-            "AVOID CONSECUTIVE_ATLANTIC_CROSSINGS"
+            "PREFER DESTINATIONS INCLUDE LHR OR FRA",
+            "AVOID DESTINATION CDG",
+            "AVOID CONSECUTIVE_ATLANTIC_CROSSINGS",
         ],
-        "category":
-        "Complex"
+        "category": "Complex",
     },
-
     # === EQUIPMENT & ROUTE PREFERENCES ===
     {
-        "id":
-        "equipment_1",
-        "input":
-        "737 only, no MAX variants please",
-        "expected_commands":
-        ["PREFER EQUIPMENT TYPE 737", "AVOID EQUIPMENT TYPE 737MAX"],
-        "category":
-        "Equipment"
+        "id": "equipment_1",
+        "input": "737 only, no MAX variants please",
+        "expected_commands": [
+            "PREFER EQUIPMENT TYPE 737",
+            "AVOID EQUIPMENT TYPE 737MAX",
+        ],
+        "category": "Equipment",
     },
     {
-        "id":
-        "routes_1",
-        "input":
-        "West coast flying only, avoid transcons",
-        "expected_commands":
-        ["PREFER DESTINATIONS WEST_COAST", "AVOID TRANSCONTINENTAL_FLIGHTS"],
-        "category":
-        "Routes"
+        "id": "routes_1",
+        "input": "West coast flying only, avoid transcons",
+        "expected_commands": [
+            "PREFER DESTINATIONS WEST_COAST",
+            "AVOID TRANSCONTINENTAL_FLIGHTS",
+        ],
+        "category": "Routes",
     },
-
     # === SPECIFIC AIRLINE TERMINOLOGY ===
     {
-        "id":
-        "airline_1",
-        "input":
-        "No continuous duty overnights (CDOs) or stand-ups",
-        "expected_commands":
-        ["AVOID CONTINUOUS_DUTY_OVERNIGHTS", "AVOID STANDUP_OVERNIGHTS"],
-        "category":
-        "Airline Specific"
+        "id": "airline_1",
+        "input": "No continuous duty overnights (CDOs) or stand-ups",
+        "expected_commands": [
+            "AVOID CONTINUOUS_DUTY_OVERNIGHTS",
+            "AVOID STANDUP_OVERNIGHTS",
+        ],
+        "category": "Airline Specific",
     },
     {
-        "id":
-        "airline_2",
-        "input":
-        "Prefer productivity runs and avoid min-rest layovers",
+        "id": "airline_2",
+        "input": "Prefer productivity runs and avoid min-rest layovers",
         "expected_commands": [
             "PREFER HIGH_PRODUCTIVITY_TRIPS",
-            "AVOID LAYOVERS WITH REST < 10 HOURS"
+            "AVOID LAYOVERS WITH REST < 10 HOURS",
         ],
-        "category":
-        "Airline Specific"
+        "category": "Airline Specific",
     },
-
     # === EDGE CASES & UNUSUAL REQUESTS ===
     {
-        "id":
-        "edge_1",
-        "input":
-        "I have a fear of flying over water - no ocean crossings",
-        "expected_commands":
-        ["AVOID OCEANIC_ROUTES", "AVOID INTERNATIONAL_OVER_WATER"],
-        "category":
-        "Edge Cases"
+        "id": "edge_1",
+        "input": "I have a fear of flying over water - no ocean crossings",
+        "expected_commands": ["AVOID OCEANIC_ROUTES", "AVOID INTERNATIONAL_OVER_WATER"],
+        "category": "Edge Cases",
     },
     {
         "id": "edge_2",
         "input": "Birthday is March 15th - always want that day off",
-        "expected_commands":
-        ["AVOID TRIPS IF DUTY_PERIOD INCLUDES DATE 03/15"],
-        "category": "Edge Cases"
+        "expected_commands": ["AVOID TRIPS IF DUTY_PERIOD INCLUDES DATE 03/15"],
+        "category": "Edge Cases",
     },
-
     # === ABBREVIATIONS & SHORTHAND ===
     {
-        "id":
-        "abbrev_1",
-        "input":
-        "Max block, min TAFB, no DH",
+        "id": "abbrev_1",
+        "input": "Max block, min TAFB, no DH",
         "expected_commands": [
-            "MAXIMIZE BLOCK_TIME", "MINIMIZE TIME_AWAY_FROM_BASE",
-            "AVOID DEADHEAD_SEGMENTS"
+            "MAXIMIZE BLOCK_TIME",
+            "MINIMIZE TIME_AWAY_FROM_BASE",
+            "AVOID DEADHEAD_SEGMENTS",
         ],
-        "category":
-        "Abbreviations"
+        "category": "Abbreviations",
     },
     {
-        "id":
-        "abbrev_2",
-        "input":
-        "No JFK, EWR, or LGA - basically avoid NYC",
+        "id": "abbrev_2",
+        "input": "No JFK, EWR, or LGA - basically avoid NYC",
         "expected_commands": [
-            "AVOID DESTINATION JFK", "AVOID DESTINATION EWR",
-            "AVOID DESTINATION LGA"
+            "AVOID DESTINATION JFK",
+            "AVOID DESTINATION EWR",
+            "AVOID DESTINATION LGA",
         ],
-        "category":
-        "Abbreviations"
+        "category": "Abbreviations",
     },
-
     # === UNION & CONTRACT SPECIFIC ===
     {
-        "id":
-        "union_1",
-        "input":
-        "Want to maximize my 401k contributions - need high credit months",
-        "expected_commands":
-        ["MAXIMIZE MONTHLY_CREDIT", "PREFER CREDIT_TIME >= 85 HOURS"],
-        "category":
-        "Union/Contract"
+        "id": "union_1",
+        "input": "Want to maximize my 401k contributions - need high credit months",
+        "expected_commands": [
+            "MAXIMIZE MONTHLY_CREDIT",
+            "PREFER CREDIT_TIME >= 85 HOURS",
+        ],
+        "category": "Union/Contract",
     },
     {
         "id": "union_2",
         "input": "Trying to hit guarantee plus 20",
         "expected_commands": ["TARGET CREDIT_TIME BETWEEN 95 AND 105 HOURS"],
-        "category": "Union/Contract"
-    }
+        "category": "Union/Contract",
+    },
 ]
 
 # ================================================================================
@@ -289,7 +241,7 @@ def run_nlp_test(test_case: dict, llm_function=None) -> dict:
         "passed": False,
         "missing_commands": [],
         "extra_commands": [],
-        "analysis": ""
+        "analysis": "",
     }
 
     # If we have an LLM function, use it
@@ -324,11 +276,9 @@ def run_nlp_test(test_case: dict, llm_function=None) -> dict:
         result["passed"] = result["score"] >= 70  # 70% threshold
 
         if result["missing_commands"]:
-            result[
-                "analysis"] = f"Missing: {', '.join(result['missing_commands'][:3])}"
+            result["analysis"] = f"Missing: {', '.join(result['missing_commands'][:3])}"
         if result["extra_commands"]:
-            result[
-                "analysis"] += f" Extra: {', '.join(result['extra_commands'][:3])}"
+            result["analysis"] += f" Extra: {', '.join(result['extra_commands'][:3])}"
 
     return result
 
@@ -347,8 +297,7 @@ def simulate_llm_response(input_text: str) -> list[str]:
     if "early" in text_lower and ("no" in text_lower or "avoid" in text_lower):
         commands.append("AVOID TRIPS STARTING BEFORE 0800")
     if "red-eye" in text_lower or "redeye" in text_lower:
-        commands.append(
-            "AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559")
+        commands.append("AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559")
     if "commut" in text_lower:
         commands.append("PREFER TRIPS STARTING AFTER 1000")
     if "family" in text_lower:
@@ -375,14 +324,17 @@ def run_full_test_suite(llm_function=None) -> dict:
         "failed": 0,
         "total_score": 0,
         "categories": {},
-        "detailed_results": []
+        "detailed_results": [],
     }
 
     # Run each test
     for test_case in PILOT_TEST_CASES:
         print(f"\n[{test_case['category']}] Testing: {test_case['id']}")
-        print(f"  Input: \"{test_case['input'][:60]}...\"" if len(
-            test_case['input']) > 60 else f"  Input: \"{test_case['input']}\"")
+        print(
+            f"  Input: \"{test_case['input'][:60]}...\""
+            if len(test_case["input"]) > 60
+            else f"  Input: \"{test_case['input']}\""
+        )
 
         result = run_nlp_test(test_case, llm_function)
         results["detailed_results"].append(result)
@@ -405,7 +357,7 @@ def run_full_test_suite(llm_function=None) -> dict:
                 "total": 0,
                 "passed": 0,
                 "failed": 0,
-                "avg_score": 0
+                "avg_score": 0,
             }
         results["categories"][category]["total"] += 1
         if result["passed"]:
@@ -417,11 +369,9 @@ def run_full_test_suite(llm_function=None) -> dict:
     results["average_score"] = results["total_score"] / results["total_tests"]
     for category in results["categories"]:
         cat_scores = [
-            r["score"] for r in results["detailed_results"]
-            if r["category"] == category
+            r["score"] for r in results["detailed_results"] if r["category"] == category
         ]
-        results["categories"][category]["avg_score"] = sum(cat_scores) / len(
-            cat_scores)
+        results["categories"][category]["avg_score"] = sum(cat_scores) / len(cat_scores)
 
     # Generate summary report
     print("\n" + "=" * 80)
@@ -452,10 +402,19 @@ def run_full_test_suite(llm_function=None) -> dict:
         print(f"    Score: {test['score']}/100 - {test['analysis']}")
 
     # Final grade
-    grade = "A" if results["average_score"] >= 90 else \
-            "B" if results["average_score"] >= 80 else \
-            "C" if results["average_score"] >= 70 else \
-            "D" if results["average_score"] >= 60 else "F"
+    grade = (
+        "A"
+        if results["average_score"] >= 90
+        else (
+            "B"
+            if results["average_score"] >= 80
+            else (
+                "C"
+                if results["average_score"] >= 70
+                else "D" if results["average_score"] >= 60 else "F"
+            )
+        )
+    )
 
     print(f"\n🎯 Final Grade: {grade} ({results['average_score']:.1f}%)")
 
@@ -508,8 +467,7 @@ def test_with_your_llm():
 
 if __name__ == "__main__":
     print("\n🚀 Starting VectorBid NLP Test Suite...")
-    print(
-        "This will test the LLM's ability to understand pilot preferences.\n")
+    print("This will test the LLM's ability to understand pilot preferences.\n")
 
     # Run with simulation for demonstration
     results = run_full_test_suite()
@@ -518,7 +476,8 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print(" HOW TO USE WITH YOUR ACTUAL LLM")
     print("=" * 80)
-    print("""
+    print(
+        """
 1. Import your actual NLP function:
    from src.api.routes import natural_language_to_pbs_filters
 
@@ -530,6 +489,7 @@ if __name__ == "__main__":
    results = run_full_test_suite(llm_function=llm_wrapper)
 
 4. Review the results and iterate on any failed tests.
-    """)
+    """
+    )
 
     print("\n✨ Test suite complete!")

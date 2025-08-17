@@ -16,7 +16,7 @@ def backup_database():
     """Create a database backup before migration."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_file = f"backup_before_migration_{timestamp}.sql"
-    database_url = os.environ.get('DATABASE_URL')
+    database_url = os.environ.get("DATABASE_URL")
 
     if not database_url:
         print("❌ DATABASE_URL not set")
@@ -24,13 +24,13 @@ def backup_database():
 
     print(f"📦 Creating database backup: {backup_file}")
     try:
-        with open(backup_file, 'w') as f:
+        with open(backup_file, "w") as f:
             result = subprocess.run(
-                ['pg_dump', database_url],
+                ["pg_dump", database_url],
                 stdout=f,
                 stderr=subprocess.PIPE,
                 text=True,
-                check=True
+                check=True,
             )
         result = 0  # Success
     except subprocess.CalledProcessError as e:
@@ -44,9 +44,7 @@ def backup_database():
         print(f"✅ Database backed up to: {backup_file}")
         return backup_file
     else:
-        print(
-            "❌ Failed to create backup (pg_dump not available or permission denied)"
-        )
+        print("❌ Failed to create backup (pg_dump not available or permission denied)")
         print("   Continuing without backup - be careful!")
         return None
 
@@ -75,7 +73,6 @@ def migrate_database():
                 ADD COLUMN IF NOT EXISTS bid_month VARCHAR(20),
                 ADD COLUMN IF NOT EXISTS upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
                 """,
-
                 # User activity tracking
                 """
                 ALTER TABLE user_profile 
@@ -83,7 +80,6 @@ def migrate_database():
                 ADD COLUMN IF NOT EXISTS last_login TIMESTAMP,
                 ADD COLUMN IF NOT EXISTS profile_completion_date TIMESTAMP;
                 """,
-
                 # Create indexes for better performance
                 """
                 CREATE INDEX IF NOT EXISTS idx_bid_packet_airline 
@@ -96,7 +92,7 @@ def migrate_database():
                 """
                 CREATE INDEX IF NOT EXISTS idx_bid_packet_month 
                 ON bid_packet(bid_month);
-                """
+                """,
             ]
 
             # Execute migrations
@@ -135,7 +131,7 @@ def verify_migration():
             checks = [
                 "SELECT COUNT(*) FROM information_schema.columns WHERE table_name='bid_packet' AND column_name='airline'",
                 "SELECT COUNT(*) FROM information_schema.columns WHERE table_name='bid_packet' AND column_name='aircraft'",
-                "SELECT COUNT(*) FROM information_schema.columns WHERE table_name='user_profile' AND column_name='login_count'"
+                "SELECT COUNT(*) FROM information_schema.columns WHERE table_name='user_profile' AND column_name='login_count'",
             ]
 
             success_count = 0
@@ -173,7 +169,7 @@ def main():
     print()
 
     # Check environment
-    if not os.environ.get('DATABASE_URL'):
+    if not os.environ.get("DATABASE_URL"):
         print("❌ DATABASE_URL environment variable not set")
         print("   Set it first: export DATABASE_URL='your-database-url'")
         sys.exit(1)
@@ -186,9 +182,7 @@ def main():
     if not migrate_database():
         print("❌ Migration failed")
         if backup_file:
-            print(
-                f"   Restore from backup: psql [DATABASE_URL] < {backup_file}"
-            )
+            print(f"   Restore from backup: psql [DATABASE_URL] < {backup_file}")
         sys.exit(1)
 
     # Step 3: Verify migration

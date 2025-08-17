@@ -1,7 +1,7 @@
 import os
 
 # Create a base template with navigation
-base_template = '''<!DOCTYPE html>
+base_template = """<!DOCTYPE html>
 <html>
 <head>
     <title>{% block title %}VectorBid{% endblock %}</title>
@@ -41,7 +41,7 @@ base_template = '''<!DOCTYPE html>
     
     {% block scripts %}{% endblock %}
 </body>
-</html>'''
+</html>"""
 
 # Save the base template
 with open("app/templates/base_nav.html", "w") as f:
@@ -50,7 +50,7 @@ with open("app/templates/base_nav.html", "w") as f:
 print("✅ Created base template with navigation")
 
 # Update index.html to use the base
-index_with_nav = '''{% extends "base_nav.html" %}
+index_with_nav = """{% extends "base_nav.html" %}
 
 {% block title %}VectorBid - Home{% endblock %}
 
@@ -89,7 +89,7 @@ index_with_nav = '''{% extends "base_nav.html" %}
         </div>
     </div>
 </div>
-{% endblock %}'''
+{% endblock %}"""
 
 with open("app/templates/index_nav.html", "w") as f:
     f.write(index_with_nav)

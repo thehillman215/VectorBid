@@ -1,4 +1,3 @@
-
 """
 Main entry point for VectorBid
 """
@@ -15,7 +14,7 @@ def find_free_port(start_port=5000, max_attempts=10):
         try:
             # Test if port is available
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.bind(('0.0.0.0', port))
+                s.bind(("0.0.0.0", port))
                 print(f"✅ Found available port: {port}")
                 return port
         except OSError:
@@ -25,6 +24,7 @@ def find_free_port(start_port=5000, max_attempts=10):
     # Fallback to default if no port found
     print("❌ No free ports found in range, using fallback port 8080")
     return 8080
+
 
 # Create Flask app instance for gunicorn
 app = create_app()

@@ -6,7 +6,9 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.export_export_post_payload import ExportExportPostPayload
-from ...models.export_export_post_response_export_export_post import ExportExportPostResponseExportExportPost
+from ...models.export_export_post_response_export_export_post import (
+    ExportExportPostResponseExportExportPost,
+)
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response, Unset
 
@@ -50,7 +52,9 @@ def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Union[ExportExportPostResponseExportExportPost, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = ExportExportPostResponseExportExportPost.from_dict(response.json())
+        response_200 = ExportExportPostResponseExportExportPost.from_dict(
+            response.json()
+        )
 
         return response_200
     if response.status_code == 422:

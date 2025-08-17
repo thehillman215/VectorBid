@@ -50,10 +50,12 @@ class TestErrorScenarios:
 
         # Filter out expected/harmless errors
         critical_errors = [
-            error for error in js_errors
-            if not any(harmless in error.lower() for harmless in [
-                "favicon", "replit", "third-party", "extension"
-            ])
+            error
+            for error in js_errors
+            if not any(
+                harmless in error.lower()
+                for harmless in ["favicon", "replit", "third-party", "extension"]
+            )
         ]
 
         assert len(critical_errors) == 0, f"JavaScript errors found: {critical_errors}"
@@ -109,7 +111,8 @@ class TestErrorScenarios:
         page.goto(f"{base_url}/onboarding")
 
         # Try to submit with unusual data
-        page.evaluate("""
+        page.evaluate(
+            """
             const form = document.querySelector('form');
             if (form) {
                 // Add hidden input with unusual data
@@ -119,7 +122,8 @@ class TestErrorScenarios:
                 input.value = '<script>alert("xss")</script>';
                 form.appendChild(input);
             }
-        """)
+        """
+        )
 
         # Submit form
         submit_btn = page.locator('button[type="submit"]')
@@ -239,6 +243,14 @@ class TestErrorScenarios:
 
             # Should not show database error details
             error_text = page.content().lower()
-            sql_error_indicators = ["sql", "database", "table", "column", "syntax error"]
+            sql_error_indicators = [
+                "sql",
+                "database",
+                "table",
+                "column",
+                "syntax error",
+            ]
             for indicator in sql_error_indicators:
-                assert indicator not in error_text or "error" not in error_text, f"Possible SQL error exposed: {indicator}"
+                assert (
+                    indicator not in error_text or "error" not in error_text
+                ), f"Possible SQL error exposed: {indicator}"

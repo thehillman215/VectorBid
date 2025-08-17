@@ -28,7 +28,9 @@ class TestMainApplication:
 
         # Should see main dashboard elements
         expect(page.locator("h1, h2")).to_contain_text("VectorBid")
-        expect(page.locator("text=AI-powered pilot schedule bidding assistant")).to_be_visible()
+        expect(
+            page.locator("text=AI-powered pilot schedule bidding assistant")
+        ).to_be_visible()
 
         # Should see navigation elements
         expect(page.locator("nav, .navbar")).to_be_visible()
@@ -66,14 +68,19 @@ class TestMainApplication:
             # Test file input is present and has proper attributes
             file_input = file_inputs.first
             expect(file_input).to_be_visible()
-            expect(file_input).to_have_attribute("accept", lambda accept: ".pdf" in accept or ".csv" in accept or ".txt" in accept)
+            expect(file_input).to_have_attribute(
+                "accept",
+                lambda accept: ".pdf" in accept or ".csv" in accept or ".txt" in accept,
+            )
 
     def test_navigation_links(self, page: Page, base_url: str):
         """Test all navigation links work properly."""
         page.goto(base_url)
 
         # Test how-to link if present
-        how_to_links = page.locator('a[href="/how-to"], a:has-text("How to"), a:has-text("Guide")')
+        how_to_links = page.locator(
+            'a[href="/how-to"], a:has-text("How to"), a:has-text("Guide")'
+        )
         if how_to_links.count() > 0:
             how_to_links.first.click()
             expect(page).to_have_url(f"{base_url}/how-to")
@@ -85,14 +92,18 @@ class TestMainApplication:
 
         # Should handle 404s gracefully
         # Either show a 404 page or redirect appropriately
-        expect(page.locator("text=404, text=not found, text=error")).to_be_visible() if page.locator("text=404, text=not found, text=error").count() > 0 else expect(page).to_have_url(base_url + "/")
+        (
+            expect(page.locator("text=404, text=not found, text=error")).to_be_visible()
+            if page.locator("text=404, text=not found, text=error").count() > 0
+            else expect(page).to_have_url(base_url + "/")
+        )
 
     def test_responsive_design(self, page: Page, base_url: str):
         """Test responsive design across different viewports."""
         viewports = [
             {"width": 1920, "height": 1080},  # Desktop
-            {"width": 768, "height": 1024},   # Tablet
-            {"width": 375, "height": 667},    # Mobile
+            {"width": 768, "height": 1024},  # Tablet
+            {"width": 375, "height": 667},  # Mobile
         ]
 
         for viewport in viewports:
@@ -128,9 +139,13 @@ class TestMainApplication:
             violations = get_violations(results)
 
             # Check for critical violations
-            critical_violations = [v for v in violations if v['impact'] in ['critical', 'serious']]
+            critical_violations = [
+                v for v in violations if v["impact"] in ["critical", "serious"]
+            ]
 
-            assert len(critical_violations) == 0, f"Page {url} has {len(critical_violations)} critical accessibility violations: {critical_violations}"
+            assert (
+                len(critical_violations) == 0
+            ), f"Page {url} has {len(critical_violations)} critical accessibility violations: {critical_violations}"
 
     def test_csrf_protection(self, page: Page, base_url: str):
         """Test CSRF protection on forms."""

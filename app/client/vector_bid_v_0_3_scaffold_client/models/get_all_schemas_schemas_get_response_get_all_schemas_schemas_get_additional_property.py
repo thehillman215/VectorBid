@@ -4,7 +4,10 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty")
+T = TypeVar(
+    "T",
+    bound="GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty",
+)
 
 
 @_attrs_define
@@ -22,9 +25,13 @@ class GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property = cls()
+        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property = (
+            cls()
+        )
 
-        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property.additional_properties = d
+        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property.additional_properties = (
+            d
+        )
         return get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property
 
     @property

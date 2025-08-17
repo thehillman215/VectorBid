@@ -9,7 +9,13 @@ import yaml
 from app.models import FeatureBundle
 
 DEFAULT_RULES: Dict[str, Any] = {
-    "hard": [{"id": "rest_min_10", "desc": "Rest >= 10h", "check": "pairing.rest_hours >= 10"}],
+    "hard": [
+        {
+            "id": "rest_min_10",
+            "desc": "Rest >= 10h",
+            "check": "pairing.rest_hours >= 10",
+        }
+    ],
     "soft": [],
 }
 
@@ -61,7 +67,9 @@ def load_rule_pack(path: str, force_reload: bool = False) -> Dict[str, Any]:
         return DEFAULT_RULES
 
 
-def validate_feasibility(bundle: FeatureBundle, rules: Dict[str, Any]) -> Dict[str, Any]:
+def validate_feasibility(
+    bundle: FeatureBundle, rules: Dict[str, Any]
+) -> Dict[str, Any]:
     """Very small feasibility check used by tests.
 
     Flags pairings that are red-eyes when the preference disallows them or

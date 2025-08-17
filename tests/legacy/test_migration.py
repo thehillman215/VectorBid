@@ -30,17 +30,16 @@ def test_enhanced_profiles():
 
         # Test saving enhanced profile
         enhanced_data = {
-            'airline': 'United',
-            'base': 'IAH',
-            'seat': 'CA',
-            'fleet': ['737', '787', '320'],
-            'seniority': 1250,
-            'hire_date': date(2015, 3, 15),
-            'years_at_position': 8,
-            'persona': 'work_life_balance',
-            'custom_preferences':
-            'I prefer weekends off and trips under 4 days',
-            'onboard_complete': True
+            "airline": "United",
+            "base": "IAH",
+            "seat": "CA",
+            "fleet": ["737", "787", "320"],
+            "seniority": 1250,
+            "hire_date": date(2015, 3, 15),
+            "years_at_position": 8,
+            "persona": "work_life_balance",
+            "custom_preferences": "I prefer weekends off and trips under 4 days",
+            "onboard_complete": True,
         }
 
         save_profile(test_uid, enhanced_data)
@@ -52,9 +51,14 @@ def test_enhanced_profiles():
 
         # Test new fields exist
         new_fields = [
-            'hire_date', 'years_at_position', 'seniority_percentile',
-            'last_seniority_update', 'persona', 'custom_preferences',
-            'onboard_complete', 'profile_completion_date'
+            "hire_date",
+            "years_at_position",
+            "seniority_percentile",
+            "last_seniority_update",
+            "persona",
+            "custom_preferences",
+            "onboard_complete",
+            "profile_completion_date",
         ]
 
         missing_fields = []
@@ -70,13 +74,13 @@ def test_enhanced_profiles():
         print("\n2️⃣ Testing data type handling...")
 
         # Test date handling
-        if isinstance(profile.get('hire_date'), str):
+        if isinstance(profile.get("hire_date"), str):
             print("   ✅ Date properly serialized as ISO string")
         else:
             print("   ❌ Date serialization issue")
 
         # Test fleet list handling
-        if isinstance(profile.get('fleet'), list):
+        if isinstance(profile.get("fleet"), list):
             print(f"   ✅ Fleet stored as list: {profile['fleet']}")
         else:
             print(f"   ❌ Fleet not a list: {type(profile.get('fleet'))}")
@@ -84,18 +88,18 @@ def test_enhanced_profiles():
         print("\n3️⃣ Testing validation...")
 
         validation = validate_profile(profile)
-        if validation['valid']:
+        if validation["valid"]:
             print("   ✅ Profile validation passed")
         else:
             print(f"   ❌ Validation errors: {validation['errors']}")
 
-        if validation['warnings']:
+        if validation["warnings"]:
             print(f"   ⚠️  Warnings: {validation['warnings']}")
 
         print("\n4️⃣ Testing seniority analysis...")
 
         # Test seniority percentile calculation
-        update_seniority_analysis(test_uid, 85.5, 'Very Senior')
+        update_seniority_analysis(test_uid, 85.5, "Very Senior")
 
         seniority_data = get_seniority_analysis(test_uid)
         if seniority_data:
@@ -106,9 +110,13 @@ def test_enhanced_profiles():
             print("   ❌ Seniority analysis failed")
 
         # Test category calculation
-        categories_test = [(95, 'Very Senior'), (80, 'Senior'),
-                           (60, 'Mid-Seniority'), (35, 'Junior'),
-                           (15, 'Very Junior')]
+        categories_test = [
+            (95, "Very Senior"),
+            (80, "Senior"),
+            (60, "Mid-Seniority"),
+            (35, "Junior"),
+            (15, "Very Junior"),
+        ]
 
         for percentile, expected in categories_test:
             result = calculate_seniority_category(percentile)
@@ -118,16 +126,23 @@ def test_enhanced_profiles():
         print("\n5️⃣ Testing persona system...")
 
         personas = [
-            'work_life_balance', 'credit_hunter', 'adventure_seeker',
-            'commuter_friendly', 'reserve_avoider', 'family_first',
-            'international_specialist', 'night_owl', 'senior_lifestyle',
-            'building_hours', 'training_focused'
+            "work_life_balance",
+            "credit_hunter",
+            "adventure_seeker",
+            "commuter_friendly",
+            "reserve_avoider",
+            "family_first",
+            "international_specialist",
+            "night_owl",
+            "senior_lifestyle",
+            "building_hours",
+            "training_focused",
         ]
 
         for persona in personas:
-            save_profile(test_uid, {'persona': persona})
+            save_profile(test_uid, {"persona": persona})
             retrieved = get_profile(test_uid)
-            if retrieved['persona'] == persona:
+            if retrieved["persona"] == persona:
                 print(f"   ✅ {persona}")
             else:
                 print(f"   ❌ {persona} - got {retrieved['persona']}")
@@ -136,8 +151,12 @@ def test_enhanced_profiles():
 
         # Test legacy field access
         legacy_fields = [
-            'profile_completed', 'airline', 'fleet', 'seat', 'base',
-            'seniority'
+            "profile_completed",
+            "airline",
+            "fleet",
+            "seat",
+            "base",
+            "seniority",
         ]
         for field in legacy_fields:
             if field in profile:
@@ -149,6 +168,7 @@ def test_enhanced_profiles():
 
         # Clean up test data
         from replit import db
+
         del db[f"user:{test_uid}:profile"]
         print("   ✅ Test data cleaned up")
 
@@ -181,8 +201,7 @@ def test_existing_profiles():
 
         # Test first few profiles
         test_count = min(3, len(profiles))
-        for i, (uid,
-                profile) in enumerate(list(profiles.items())[:test_count]):
+        for i, (uid, profile) in enumerate(list(profiles.items())[:test_count]):
             print(f"\n   Testing profile {i+1}: {uid}")
 
             # Test validation
@@ -192,7 +211,7 @@ def test_existing_profiles():
 
             # Test new fields have defaults
             new_field_count = 0
-            for field in ['hire_date', 'persona', 'onboard_complete']:
+            for field in ["hire_date", "persona", "onboard_complete"]:
                 if field in profile:
                     new_field_count += 1
 

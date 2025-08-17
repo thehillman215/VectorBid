@@ -66,9 +66,12 @@ def upload_bid():
 
     # Save the bid packet
     from io import BytesIO
+
     file_data = file.stream.read()
     file_stream = BytesIO(file_data)
-    bid_packet = services_bids.save_bid_packet(month_tag, file_stream, file.filename or "upload.pdf")
+    bid_packet = services_bids.save_bid_packet(
+        month_tag, file_stream, file.filename or "upload.pdf"
+    )
 
     return jsonify({"status": "ok", "stored": month_tag})
 
@@ -92,41 +95,47 @@ def validate_bid_package(month_tag):
         from src.lib.schedule_parser import parse_schedule
 
         # Attempt to parse the bid package
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             try:
                 parsed_trips = parse_schedule(f.read(), file_path.name)
 
                 validation_result = {
                     "status": "success",
                     "month_tag": month_tag,
-                    "filename": bid_info.get('filename', 'Unknown'),
-                    "file_size": bid_info.get('file_size', 0),
+                    "filename": bid_info.get("filename", "Unknown"),
+                    "file_size": bid_info.get("file_size", 0),
                     "total_trips": len(parsed_trips) if parsed_trips else 0,
                     "sample_trips": parsed_trips[:5] if parsed_trips else [],
                     "parsing_successful": True,
                     "errors": [],
-                    "warnings": []
+                    "warnings": [],
                 }
 
                 # Add validation warnings/info
                 if not parsed_trips:
-                    validation_result["warnings"].append("No trips found in bid package")
+                    validation_result["warnings"].append(
+                        "No trips found in bid package"
+                    )
                 elif len(parsed_trips) < 10:
-                    validation_result["warnings"].append(f"Only {len(parsed_trips)} trips found - this seems low for a monthly bid package")
+                    validation_result["warnings"].append(
+                        f"Only {len(parsed_trips)} trips found - this seems low for a monthly bid package"
+                    )
 
                 return jsonify(validation_result)
 
             except Exception as parse_error:
-                return jsonify({
-                    "status": "error",
-                    "month_tag": month_tag,
-                    "filename": bid_info.get('filename', 'Unknown'),
-                    "file_size": bid_info.get('file_size', 0),
-                    "total_trips": 0,
-                    "parsing_successful": False,
-                    "errors": [f"Failed to parse bid package: {str(parse_error)}"],
-                    "warnings": []
-                })
+                return jsonify(
+                    {
+                        "status": "error",
+                        "month_tag": month_tag,
+                        "filename": bid_info.get("filename", "Unknown"),
+                        "file_size": bid_info.get("file_size", 0),
+                        "total_trips": 0,
+                        "parsing_successful": False,
+                        "errors": [f"Failed to parse bid package: {str(parse_error)}"],
+                        "warnings": [],
+                    }
+                )
 
     except Exception as e:
         return jsonify({"error": f"Validation failed: {str(e)}"}), 500
@@ -149,7 +158,7 @@ def preview_bid_package(month_tag):
         from src.lib.schedule_parser import parse_schedule
 
         # Parse trips for preview
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             try:
                 parsed_trips = parse_schedule(f.read(), file_path.name)
 
@@ -341,7 +350,7 @@ def format_bid_packet_list(bid_packets):
     html = '<div class="list-group list-group-flush">'
     for packet in bid_packets:
         # Format month tag for display
-        month_tag = packet.get('month_tag', '')
+        month_tag = packet.get("month_tag", "")
         if len(month_tag) == 6:
             year = month_tag[:4]
             month = month_tag[4:]
@@ -349,7 +358,7 @@ def format_bid_packet_list(bid_packets):
         else:
             display_date = month_tag
 
-        html += f'''
+        html += f"""
         <div class="list-group-item bg-dark border-secondary">
             <div class="d-flex w-100 justify-content-between align-items-start">
                 <div class="flex-grow-1">
@@ -367,11 +376,12 @@ def format_bid_packet_list(bid_packets):
                 </div>
             </div>
         </div>
-        '''
-    html += '</div>'
+        """
+    html += "</div>"
 
     # Add preview modal and JavaScript
-    html += '''
+    html += (
+        """
     <div class="modal fade" id="validationModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content bg-dark">
@@ -406,7 +416,9 @@ def format_bid_packet_list(bid_packets):
             try {
                 const response = await fetch(`/admin/preview-bid/${monthTag}`, {
                     headers: {
-                        'Authorization': 'Bearer ''' + os.environ.get("ADMIN_BEARER_TOKEN", "") + '''\''
+                        'Authorization': 'Bearer """
+        + os.environ.get("ADMIN_BEARER_TOKEN", "")
+        + """\''
                     }
                 });
                 
@@ -431,6 +443,7 @@ def format_bid_packet_list(bid_packets):
             }
         }
     </script>
-    '''
+    """
+    )
 
     return html

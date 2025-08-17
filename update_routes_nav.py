@@ -38,7 +38,8 @@ async def bid_page(request: Request, pilot_id: Optional[str] = Cookie(None)):
 
 # Find and replace the index function
 import re
-lines = content.split('\n')
+
+lines = content.split("\n")
 in_index = False
 start_line = -1
 
@@ -46,16 +47,20 @@ for i, line in enumerate(lines):
     if '@router.get("/", response_class=HTMLResponse)' in line:
         start_line = i
         in_index = True
-    elif in_index and 'def ' in lines[i+1] if i+1 < len(lines) else False:
+    elif in_index and "def " in lines[i + 1] if i + 1 < len(lines) else False:
         # Find the end of this function
-        for j in range(i+2, len(lines)):
-            if lines[j] and not lines[j].startswith(' ') and not lines[j].startswith('\t'):
+        for j in range(i + 2, len(lines)):
+            if (
+                lines[j]
+                and not lines[j].startswith(" ")
+                and not lines[j].startswith("\t")
+            ):
                 # Replace this section
-                lines = lines[:start_line] + nav_route.split('\n') + lines[j:]
+                lines = lines[:start_line] + nav_route.split("\n") + lines[j:]
                 break
         break
 
-content = '\n'.join(lines)
+content = "\n".join(lines)
 
 with open("app/routes/ui.py", "w") as f:
     f.write(content)

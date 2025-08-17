@@ -8,19 +8,33 @@ from app.main import app
 def _build_artifact(client: TestClient):
     # Freeze month for deterministic output (not strictly needed here, but tidy)
     # NOTE: We do not monkeypatch here to avoid conflicting with other tests
-    DATA = {"pairings":[
-      {"id":"P1","layover_city":"SAN","redeye":False,"rest_hours":12},
-      {"id":"P2","layover_city":"SJU","redeye":False,"rest_hours":11},
-      {"id":"P3","layover_city":"XXX","redeye":True,"rest_hours":9}
-    ]}
-    pref = {
-      "pilot_id":"u1","airline":"UAL","base":"EWR","seat":"FO","equip":["73G"],
-      "hard_constraints":{"no_red_eyes": True},
-      "soft_prefs":{"layovers":{"prefer":["SAN","SJU"],"weight":1.0}}
+    DATA = {
+        "pairings": [
+            {"id": "P1", "layover_city": "SAN", "redeye": False, "rest_hours": 12},
+            {"id": "P2", "layover_city": "SJU", "redeye": False, "rest_hours": 11},
+            {"id": "P3", "layover_city": "XXX", "redeye": True, "rest_hours": 9},
+        ]
     }
-    ctx = {"ctx_id":"ctx-u1","pilot_id":"u1","airline":"UAL","base":"EWR","seat":"FO",
-           "equip":["73G"],"seniority_percentile":0.5,"commuting_profile":{},
-           "default_weights":{"layovers":1.0}}
+    pref = {
+        "pilot_id": "u1",
+        "airline": "UAL",
+        "base": "EWR",
+        "seat": "FO",
+        "equip": ["73G"],
+        "hard_constraints": {"no_red_eyes": True},
+        "soft_prefs": {"layovers": {"prefer": ["SAN", "SJU"], "weight": 1.0}},
+    }
+    ctx = {
+        "ctx_id": "ctx-u1",
+        "pilot_id": "u1",
+        "airline": "UAL",
+        "base": "EWR",
+        "seat": "FO",
+        "equip": ["73G"],
+        "seniority_percentile": 0.5,
+        "commuting_profile": {},
+        "default_weights": {"layovers": 1.0},
+    }
     fb = {
         "feature_bundle": {
             "context": ctx,
@@ -34,8 +48,12 @@ def _build_artifact(client: TestClient):
         "K": 5,
     }
     topk = client.post("/optimize", json=fb).json()["candidates"]
-    artifact = client.post("/generate_layers", json={"feature_bundle": fb["feature_bundle"], "candidates": topk}).json()["artifact"]
+    artifact = client.post(
+        "/generate_layers",
+        json={"feature_bundle": fb["feature_bundle"], "candidates": topk},
+    ).json()["artifact"]
     return artifact
+
 
 def test_export_requires_api_key_when_enabled(tmp_path, monkeypatch):
     # Enable auth & set export dir
@@ -50,11 +68,15 @@ def test_export_requires_api_key_when_enabled(tmp_path, monkeypatch):
     assert r.status_code == 401
 
     # With wrong key -> 401
-    r = client.post("/export", headers={"x-api-key": "nope"}, json={"artifact": artifact})
+    r = client.post(
+        "/export", headers={"x-api-key": "nope"}, json={"artifact": artifact}
+    )
     assert r.status_code == 401
 
     # With correct header key -> 200 and path exists
-    r = client.post("/export", headers={"x-api-key": "secret"}, json={"artifact": artifact})
+    r = client.post(
+        "/export", headers={"x-api-key": "secret"}, json={"artifact": artifact}
+    )
     assert r.status_code == 200
     out = r.json()
     assert "export_path" in out

@@ -2,7 +2,7 @@
 import os
 
 # Add more realistic PBS commands
-ui_code = '''from fastapi import APIRouter, Request, Form
+ui_code = """from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -52,7 +52,7 @@ async def run_pipeline(request: Request,
         "preferences": preferences
     }
     return templates.TemplateResponse("results.html", {"request": request, "results": results})
-'''
+"""
 
 with open("app/routes/ui.py", "w") as f:
     f.write(ui_code)

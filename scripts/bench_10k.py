@@ -18,13 +18,16 @@ def _build_pairings(n: int) -> dict[str, Any]:
     pairings = []
     for i in range(1, n + 1):
         city = cities[i % len(cities)]
-        pairings.append({
-            "id": f"P{i}",
-            "layover_city": city,
-            "redeye": False if i % 11 else True,          # rare violations
-            "rest_hours": 12 if i % 13 else 9,            # rare violations
-        })
+        pairings.append(
+            {
+                "id": f"P{i}",
+                "layover_city": city,
+                "redeye": False if i % 11 else True,  # rare violations
+                "rest_hours": 12 if i % 13 else 9,  # rare violations
+            }
+        )
     return {"pairings": pairings}
+
 
 def _pref() -> dict[str, Any]:
     return {
@@ -34,10 +37,9 @@ def _pref() -> dict[str, Any]:
         "seat": "FO",
         "equip": ["73G"],
         "hard_constraints": {"no_red_eyes": True},
-        "soft_prefs": {
-            "layovers": {"prefer": ["SAN", "SJU"], "weight": 1.0}
-        },
+        "soft_prefs": {"layovers": {"prefer": ["SAN", "SJU"], "weight": 1.0}},
     }
+
 
 def _ctx() -> dict[str, Any]:
     return {
@@ -52,9 +54,11 @@ def _ctx() -> dict[str, Any]:
         "default_weights": {"layovers": 1.0},
     }
 
+
 def _analytics() -> dict[str, Any]:
     # Keep tiny; optimizer just needs something plausible
     return {"base_stats": {"SAN": {"award_rate": 0.65}, "SJU": {"award_rate": 0.55}}}
+
 
 def run_once(n: int, k: int) -> None:
     client = TestClient(app)
@@ -72,7 +76,10 @@ def run_once(n: int, k: int) -> None:
     timings = {}
 
     t0 = time.time()
-    r = client.post("/validate", json={"preference_schema": pref, "context": ctx, "pairings": pairings})
+    r = client.post(
+        "/validate",
+        json={"preference_schema": pref, "context": ctx, "pairings": pairings},
+    )
     r.raise_for_status()
     timings["validate"] = time.time() - t0
     violations = r.json().get("violations", [])
@@ -90,7 +97,9 @@ def run_once(n: int, k: int) -> None:
     directives = r.json()["directives"]
 
     t0 = time.time()
-    r = client.post("/generate_layers", json={"feature_bundle": bundle, "candidates": topk})
+    r = client.post(
+        "/generate_layers", json={"feature_bundle": bundle, "candidates": topk}
+    )
     r.raise_for_status()
     timings["generate_layers"] = time.time() - t0
     artifact = r.json()["artifact"]
@@ -111,19 +120,29 @@ def run_once(n: int, k: int) -> None:
 
     if violations:
         print(f"violations: {len(violations)} (sample: {violations[:2]})")
-    print(f"candidates: {len(topk)}; top 5 ids: {[c['candidate_id'] for c in topk[:5]]}")
-    print(f"artifact: month={artifact['month']} format={artifact['format']} hash={artifact['export_hash'][:12]}…")
+    print(
+        f"candidates: {len(topk)}; top 5 ids: {[c['candidate_id'] for c in topk[:5]]}"
+    )
+    print(
+        f"artifact: month={artifact['month']} format={artifact['format']} hash={artifact['export_hash'][:12]}…"
+    )
     if lint.get("errors"):
         print(f"lint.errors: {lint['errors']}")
     if lint.get("warnings"):
         print(f"lint.warnings (first 3): {lint['warnings'][:3]}")
 
+
 def main():
-    ap = argparse.ArgumentParser(description="Benchmark VectorBid pipeline on a large batch.")
-    ap.add_argument("--n", type=int, default=10_000, help="number of pairings to include")
+    ap = argparse.ArgumentParser(
+        description="Benchmark VectorBid pipeline on a large batch."
+    )
+    ap.add_argument(
+        "--n", type=int, default=10_000, help="number of pairings to include"
+    )
     ap.add_argument("--k", type=int, default=50, help="top-K candidates to return")
     args = ap.parse_args()
     run_once(args.n, args.k)
+
 
 if __name__ == "__main__":
     main()

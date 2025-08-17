@@ -9,19 +9,33 @@ def test_export_hash_golden(monkeypatch):
     monkeypatch.setattr(gen_layers, "_next_month_tag", lambda dt: "2025-09")
     client = TestClient(app)
 
-    DATA = {"pairings":[
-      {"id":"P1","layover_city":"SAN","redeye":False,"rest_hours":12},
-      {"id":"P2","layover_city":"SJU","redeye":False,"rest_hours":11},
-      {"id":"P3","layover_city":"XXX","redeye":True,"rest_hours":9}
-    ]}
-    pref = {
-      "pilot_id":"u1","airline":"UAL","base":"EWR","seat":"FO","equip":["73G"],
-      "hard_constraints":{"no_red_eyes": True},
-      "soft_prefs":{"layovers":{"prefer":["SAN","SJU"],"weight":1.0}}
+    DATA = {
+        "pairings": [
+            {"id": "P1", "layover_city": "SAN", "redeye": False, "rest_hours": 12},
+            {"id": "P2", "layover_city": "SJU", "redeye": False, "rest_hours": 11},
+            {"id": "P3", "layover_city": "XXX", "redeye": True, "rest_hours": 9},
+        ]
     }
-    ctx = {"ctx_id":"ctx-u1","pilot_id":"u1","airline":"UAL","base":"EWR","seat":"FO",
-           "equip":["73G"],"seniority_percentile":0.5,"commuting_profile":{},
-           "default_weights":{"layovers":1.0}}
+    pref = {
+        "pilot_id": "u1",
+        "airline": "UAL",
+        "base": "EWR",
+        "seat": "FO",
+        "equip": ["73G"],
+        "hard_constraints": {"no_red_eyes": True},
+        "soft_prefs": {"layovers": {"prefer": ["SAN", "SJU"], "weight": 1.0}},
+    }
+    ctx = {
+        "ctx_id": "ctx-u1",
+        "pilot_id": "u1",
+        "airline": "UAL",
+        "base": "EWR",
+        "seat": "FO",
+        "equip": ["73G"],
+        "seniority_percentile": 0.5,
+        "commuting_profile": {},
+        "default_weights": {"layovers": 1.0},
+    }
 
     # Optimize → TopK
     fb = {
@@ -46,4 +60,7 @@ def test_export_hash_golden(monkeypatch):
 
     # Known-good hash for this frozen month + payload
     assert artifact["month"] == "2025-09"
-    assert artifact["export_hash"] == "84bc797693de6955fb1029c46ef21ae669e221771a87ed06bfdcf223cd76cd56"
+    assert (
+        artifact["export_hash"]
+        == "84bc797693de6955fb1029c46ef21ae669e221771a87ed06bfdcf223cd76cd56"
+    )

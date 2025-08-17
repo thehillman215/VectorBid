@@ -17,9 +17,9 @@ T = TypeVar("T", bound="GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGet")
 class GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGet:
     """ """
 
-    additional_properties: dict[str, "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty"] = (
-        _attrs_field(init=False, factory=dict)
-    )
+    additional_properties: dict[
+        str, "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty"
+    ] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         field_dict: dict[str, Any] = {}
@@ -45,18 +45,24 @@ class GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGet:
 
             additional_properties[prop_name] = additional_property
 
-        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get.additional_properties = additional_properties
+        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get.additional_properties = (
+            additional_properties
+        )
         return get_all_schemas_schemas_get_response_get_all_schemas_schemas_get
 
     @property
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty":
+    def __getitem__(
+        self, key: str
+    ) -> "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty":
         return self.additional_properties[key]
 
     def __setitem__(
-        self, key: str, value: "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty"
+        self,
+        key: str,
+        value: "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty",
     ) -> None:
         self.additional_properties[key] = value
 

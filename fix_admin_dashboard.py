@@ -1,14 +1,13 @@
-
 # Read the file
-with open('src/api/admin_unified.py') as f:
+with open("src/api/admin_unified.py") as f:
     content = f.read()
 
 # Replace the problematic template lines
-old_storage = '{{ "%.1f"|format(packets|sum(attribute=\'size_mb\', default=0)) }} MB'
-new_storage = '{{ storage_mb }} MB'
+old_storage = "{{ \"%.1f\"|format(packets|sum(attribute='size_mb', default=0)) }} MB"
+new_storage = "{{ storage_mb }} MB"
 
-old_airlines = '{{ packets|map(attribute=\'airline\')|unique|list|length }}'
-new_airlines = '{{ unique_airlines }}'
+old_airlines = "{{ packets|map(attribute='airline')|unique|list|length }}"
+new_airlines = "{{ unique_airlines }}"
 
 content = content.replace(old_storage, new_storage)
 content = content.replace(old_airlines, new_airlines)
@@ -29,17 +28,17 @@ calculation_code = """
 """
 
 # Find where to insert the calculations
-pattern = r'(    return render_template_string\(dashboard_html,)'
-replacement = calculation_code + r'\1'
+pattern = r"(    return render_template_string\(dashboard_html,)"
+replacement = calculation_code + r"\1"
 content = re.sub(pattern, replacement, content)
 
 # Update the render_template_string call to include new variables
-old_render = 'return render_template_string(dashboard_html, packets=packets, contracts=contracts)'
-new_render = 'return render_template_string(dashboard_html, packets=packets, contracts=contracts, storage_mb=storage_mb, unique_airlines=unique_airlines)'
+old_render = "return render_template_string(dashboard_html, packets=packets, contracts=contracts)"
+new_render = "return render_template_string(dashboard_html, packets=packets, contracts=contracts, storage_mb=storage_mb, unique_airlines=unique_airlines)"
 content = content.replace(old_render, new_render)
 
 # Write the fixed content
-with open('src/api/admin_unified.py', 'w') as f:
+with open("src/api/admin_unified.py", "w") as f:
     f.write(content)
 
 print("Dashboard fixed!")

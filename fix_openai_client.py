@@ -1,7 +1,7 @@
 import re
 
 # Read the file
-with open('src/lib/pbs_command_generator.py') as f:
+with open("src/lib/pbs_command_generator.py") as f:
     content = f.read()
 
 # Fix the OpenAI client initialization - remove the timeout parameter that might be causing issues
@@ -17,10 +17,10 @@ new_client = """self.client = OpenAI(
 content = content.replace(old_client, new_client)
 
 # Also fix any 'proxies' parameter if it exists
-content = re.sub(r',\s*proxies=[^)]+', '', content)
+content = re.sub(r",\s*proxies=[^)]+", "", content)
 
 # Write back
-with open('src/lib/pbs_command_generator.py', 'w') as f:
+with open("src/lib/pbs_command_generator.py", "w") as f:
     f.write(content)
 
 print("Fixed OpenAI client initialization!")

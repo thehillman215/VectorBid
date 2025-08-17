@@ -6,10 +6,12 @@ from app.models import BidLayerArtifact
 
 ArtifactLike = Union[BidLayerArtifact, dict]
 
+
 def _to_plain_dict(artifact: ArtifactLike) -> dict:
     if isinstance(artifact, BidLayerArtifact):
         return artifact.model_dump()
     return artifact  # assume dict-like
+
 
 def lint_artifact(artifact: ArtifactLike) -> dict[str, list[str]]:
     data = _to_plain_dict(artifact)
@@ -41,6 +43,7 @@ def lint_artifact(artifact: ArtifactLike) -> dict[str, list[str]]:
             warnings.append(f"layer {n}: unexpected prefer '{layer.get('prefer')}'")
 
     return {"errors": errors, "warnings": warnings}
+
 
 # Back-compat alias expected by routes
 def lint_layers(artifact: ArtifactLike) -> dict[str, list[str]]:

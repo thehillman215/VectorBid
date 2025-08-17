@@ -18,10 +18,12 @@ BIDS_DIR.mkdir(exist_ok=True)
 METADATA_DIR.mkdir(exist_ok=True)
 
 
-def save_bid_packet(month_tag: str,
-                    file_stream: BinaryIO,
-                    filename: Optional[str] = None,
-                    metadata: Optional[Dict] = None) -> Dict:
+def save_bid_packet(
+    month_tag: str,
+    file_stream: BinaryIO,
+    filename: Optional[str] = None,
+    metadata: Optional[Dict] = None,
+) -> Dict:
     """Save a bid packet file with metadata.
 
     Args:
@@ -49,7 +51,7 @@ def save_bid_packet(month_tag: str,
         metadata_path = METADATA_DIR / f"{month_tag}.json"
 
         # Save the file
-        with open(file_path, 'wb') as f:
+        with open(file_path, "wb") as f:
             file_stream.seek(0)
             f.write(file_stream.read())
 
@@ -61,11 +63,11 @@ def save_bid_packet(month_tag: str,
             "file_size": file_path.stat().st_size,
             "created_at": datetime.utcnow().isoformat(),
             "file_type": ext,
-            **(metadata or {})
+            **(metadata or {}),
         }
 
         # Save metadata
-        with open(metadata_path, 'w') as f:
+        with open(metadata_path, "w") as f:
             json.dump(file_metadata, f, indent=2)
 
         logger.info(f"Saved bid packet {month_tag} to {file_path}")
@@ -85,7 +87,7 @@ def get_bid_packet_path(month_tag: str) -> Optional[Path]:
     Returns:
         Path to the file if it exists, None otherwise
     """
-    for ext in ['.pdf', '.csv', '.txt']:
+    for ext in [".pdf", ".csv", ".txt"]:
         file_path = BIDS_DIR / f"{month_tag}{ext}"
         if file_path.exists():
             return file_path
@@ -107,7 +109,7 @@ def get_bid_packet_info(month_tag: str) -> Optional[Dict]:
         return None
 
     try:
-        with open(metadata_path, 'r') as f:
+        with open(metadata_path, "r") as f:
             return json.load(f)
     except Exception as e:
         logger.error(f"Failed to read metadata for {month_tag}: {e}")
@@ -124,7 +126,7 @@ def list_bid_packages() -> List[Dict]:
 
     for metadata_file in METADATA_DIR.glob("*.json"):
         try:
-            with open(metadata_file, 'r') as f:
+            with open(metadata_file, "r") as f:
                 metadata = json.load(f)
                 packages.append(metadata)
         except Exception as e:
@@ -132,7 +134,7 @@ def list_bid_packages() -> List[Dict]:
             continue
 
     # Sort by month_tag (newest first)
-    packages.sort(key=lambda x: x.get('month_tag', ''), reverse=True)
+    packages.sort(key=lambda x: x.get("month_tag", ""), reverse=True)
     return packages
 
 
@@ -191,24 +193,24 @@ def get_matching_bid_packet(profile: Dict) -> Optional[Dict]:
         score = 0
 
         # Prefer current month
-        if package.get('month_tag') == current_month:
+        if package.get("month_tag") == current_month:
             score += 100
 
         # Match airline
-        if package.get('airline') == profile.get('airline'):
+        if package.get("airline") == profile.get("airline"):
             score += 50
 
         # Match base (if specified in package)
-        package_base = package.get('base', '').upper()
-        profile_base = profile.get('base', '').upper()
+        package_base = package.get("base", "").upper()
+        profile_base = profile.get("base", "").upper()
         if package_base and package_base == profile_base:
             score += 30
         elif not package_base:  # Package applies to all bases
             score += 10
 
         # Match fleet (if specified in package)
-        package_fleet = package.get('fleet', '')
-        profile_fleet = profile.get('fleet', [])
+        package_fleet = package.get("fleet", "")
+        profile_fleet = profile.get("fleet", [])
         if package_fleet and package_fleet in profile_fleet:
             score += 20
         elif not package_fleet:  # Package applies to all fleets
@@ -238,17 +240,20 @@ def get_admin_stats() -> Dict:
         # Calculate stats
         total_packages = len(packages)
         active_packages = len(
-            [p for p in packages if p.get('month_tag', '') >= current_month])
-        total_trips = sum(p.get('trip_count', 0) for p in packages)
+            [p for p in packages if p.get("month_tag", "") >= current_month]
+        )
+        total_trips = sum(p.get("trip_count", 0) for p in packages)
 
         # File size stats
-        total_size = sum(p.get('file_size', 0) for p in packages)
+        total_size = sum(p.get("file_size", 0) for p in packages)
 
         # Recent activity (packages uploaded in last 30 days)
         cutoff_date = datetime.now().timestamp() - (30 * 24 * 60 * 60)
         recent_packages = [
-            p for p in packages if datetime.fromisoformat(
-                p.get('created_at', '1970-01-01')).timestamp() > cutoff_date
+            p
+            for p in packages
+            if datetime.fromisoformat(p.get("created_at", "1970-01-01")).timestamp()
+            > cutoff_date
         ]
 
         return {
@@ -257,9 +262,8 @@ def get_admin_stats() -> Dict:
             "total_trips": total_trips,
             "total_size_mb": round(total_size / (1024 * 1024), 2),
             "recent_uploads": len(recent_packages),
-            "airlines":
-            list(set(p.get('airline', 'Unknown') for p in packages)),
-            "latest_month": packages[0].get('month_tag') if packages else None,
+            "airlines": list(set(p.get("airline", "Unknown") for p in packages)),
+            "latest_month": packages[0].get("month_tag") if packages else None,
             "active_pilots": 0,  # This would come from user database
         }
 
@@ -292,12 +296,11 @@ def cleanup_old_packages(days_old: int = 365) -> int:
         deleted_count = 0
 
         for package in packages:
-            created_at = package.get('created_at', '1970-01-01')
+            created_at = package.get("created_at", "1970-01-01")
             if datetime.fromisoformat(created_at).timestamp() < cutoff_date:
-                if delete_bid_package(package['month_tag']):
+                if delete_bid_package(package["month_tag"]):
                     deleted_count += 1
-                    logger.info(
-                        f"Cleaned up old package: {package['month_tag']}")
+                    logger.info(f"Cleaned up old package: {package['month_tag']}")
 
         return deleted_count
 
@@ -318,5 +321,5 @@ def export_package_manifest() -> Dict:
         "export_date": datetime.utcnow().isoformat(),
         "total_packages": len(packages),
         "packages": packages,
-        "statistics": get_admin_stats()
+        "statistics": get_admin_stats(),
     }
