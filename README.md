@@ -20,3 +20,9 @@ Legacy:
 
 Benchmark helper:
   PYTHONPATH=. python scripts/bench_10k.py
+
+## Security
+
+Admin bearer tokens are never written to logs in clear text. Only the first
+six characters plus a short hash are recorded, preventing exposure of the full
+token while still allowing basic traceability.

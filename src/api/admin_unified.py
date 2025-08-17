@@ -9,6 +9,7 @@ Version: 2.0.0
 import logging
 import os
 import secrets
+import hashlib
 from datetime import datetime
 from functools import wraps
 
@@ -44,6 +45,25 @@ except Exception:  # pragma: no cover - fallback for legacy paths
     BidPacket = None
 # Configure logging
 logger = logging.getLogger(__name__)
+
+
+def _redact_token(token: str) -> str:
+    """Return a redacted representation of a bearer token."""
+    if not token:
+        return ""
+    prefix = token[:6]
+    token_hash = hashlib.sha256(token.encode()).hexdigest()[:8]
+    return f"{prefix}...{token_hash}"
+
+
+def log_action(action: str, token: str | None = None, **details) -> None:
+    """Log admin actions while avoiding plain text token storage."""
+    if token:
+        details['token'] = _redact_token(token)
+    if details:
+        logger.info("%s | %s", action, details)
+    else:
+        logger.info(action)
 
 # ============================================
 # CONFIGURATION
@@ -128,11 +148,11 @@ def login():
         if token and secrets.compare_digest(token, AdminConfig.BEARER_TOKEN):
             session['admin_token'] = token
             session['admin_login_time'] = datetime.utcnow().isoformat()
-            logger.info("Admin logged in successfully")
+            log_action("admin_login", token=token)
             return redirect(url_for('admin.dashboard'))
         else:
             error = "Invalid token"
-            logger.warning("Failed admin login attempt")
+            log_action("admin_login_failed", token=token)
     else:
         error = None
 
@@ -200,9 +220,10 @@ def login():
 @admin_bp.route('/logout')
 def logout():
     """Admin logout"""
+    token = session.get('admin_token')
     session.pop('admin_token', None)
     session.pop('admin_login_time', None)
-    logger.info("Admin logged out")
+    log_action("admin_logout", token=token)
     return redirect(url_for('admin.login'))
 
 
