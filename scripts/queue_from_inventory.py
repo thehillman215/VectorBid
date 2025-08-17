@@ -1,4 +1,4 @@
-import csv, datetime, re, sys
+import csv, datetime, sys
 from pathlib import Path
 
 inv = Path("merge_inventory.csv")
@@ -9,6 +9,8 @@ today = datetime.date.today().isoformat()
 out_csv = Path(f"VectorBid_Merge_Queue_{today}.csv")
 out_merge = Path("merge_queue.txt")
 out_hold  = Path("merge_hold.txt")
+
+RESERVED = {"origin","main","master","HEAD","release",""}
 
 def guess_category(branch: str) -> str:
     b = branch.lower()
@@ -30,7 +32,6 @@ def strategy(category:str, conflicts:str, ahead:int) -> str:
     if category=="dep-bump": return "merge-commit"
     if category in ("chore","docs"): return "squash"
     if category=="experiment": return "cherry-pick"
-    # features
     if conflicts=="no" and ahead <= 25: return "rebase"
     return "merge-commit"
 
@@ -43,10 +44,12 @@ rows=[]
 with inv.open() as f:
     rdr = csv.DictReader(f)
     for r in rdr:
-        b = r["branch"]
-        ahead = int(r["ahead"])
-        behind = int(r["behind"])
-        conflicts = r["conflicts"].strip().lower()
+        b = (r.get("branch","") or "").strip()
+        if b in RESERVED or b.startswith("release/"):  # skip junk/reserved
+            continue
+        ahead = int(r.get("ahead", "0") or 0)
+        behind = int(r.get("behind", "0") or 0)
+        conflicts = (r.get("conflicts","") or "").strip().lower()
         cat = guess_category(b)
         risk = risk_level(ahead, behind, conflicts)
         strat = strategy(cat, conflicts, ahead)
@@ -58,7 +61,7 @@ with inv.open() as f:
             "branch": b,
             "ahead_of_main": ahead,
             "behind_main": behind,
-            "last_commit_date": r["last_commit"],
+            "last_commit_date": r.get("last_commit",""),
             "owner": r.get("author",""),
             "category": cat,
             "risk": risk,
@@ -85,22 +88,20 @@ rows.sort(key=lambda x: (
     x["branch"]
 ))
 
-# write CSV
 fields = ["branch","ahead_of_main","behind_main","last_commit_date","owner",
           "category","risk","merge_strategy","conflicts_expected",
           "test_status","ci_checks","flags_needed","notes","decision","target_window"]
+
 with out_csv.open("w", newline="") as f:
     w=csv.DictWriter(f, fieldnames=fields); w.writeheader(); w.writerows(rows)
 
-# write merge_queue.txt and merge_hold.txt
 with out_merge.open("w") as fm, out_hold.open("w") as fh:
     for r in rows:
-        line = f'{r["branch"]}'
+        line = r["branch"]
         comment = f'# {r["category"]} {r["risk"]} {r["merge_strategy"]}'
         if r["decision"]=="MERGE" and r["conflicts_expected"]=="no":
             fm.write(f"{line}  {comment}\n")
         elif r["decision"]=="MERGE" and r["conflicts_expected"]=="yes":
-            # still put in hold: rebase first
             fh.write(f"{line}  {comment}  # CONFLICT: rebase first\n")
         else:
             fh.write(f"{line}  {comment}  # {r['decision']}\n")

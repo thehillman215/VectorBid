@@ -2,12 +2,17 @@
 set -euo pipefail
 git fetch --all --prune
 OUT="merge_inventory.csv"
-echo "branch,ahead,behind,last_commit,author,conflicts" > "$OUT"
 BASE="origin/release/2025-08-17"
 git rev-parse --verify "$BASE" >/dev/null 2>&1 || BASE="origin/main"
-for rb in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -Ev 'origin/(HEAD|main|master|release/)'); do
+echo "branch,ahead,behind,last_commit,author,conflicts" > "$OUT"
+
+# List only real remote branches on origin (no HEAD pointer, no main/master, no release/*)
+for rb in $(git branch -r --format="%(refname:short)" \
+              | sed '/->/d' \
+              | grep -E '^origin/' \
+              | grep -Ev '^origin/(main|master|release/)'); do
   b="${rb#origin/}"
-  read A B < <(git rev-list --left-right --count origin/main...$rb)
+  read A B < <(git rev-list --left-right --count origin/main..."$rb")
   last=$(git log -1 --pretty='%cI' "$rb")
   auth=$(git log -1 --pretty='%an' "$rb")
   git reset --hard "$BASE" >/dev/null 2>&1

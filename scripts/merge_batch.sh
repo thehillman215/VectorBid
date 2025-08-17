@@ -6,13 +6,13 @@ APP_IMPORT="${APP_IMPORT:-app.main:app}"
 PORT="${PORT:-8000}"
 
 git fetch --all --prune
-git checkout "$BASE_BRANCH"
+git checkout "$BASE_BRANCH" >/dev/null 2>&1 || { echo "Missing $BASE_BRANCH"; exit 1; }
 git pull --ff-only || true
 
 i=0
-while IFS= read -r line; do
+while IFS= read -r line || [[ -n "$line" ]]; do
   BRANCH=$(echo "$line" | awk '{print $1}')
-  [[ -z "$BRANCH" ]] && continue
+  [[ -z "${BRANCH:-}" ]] && continue
   i=$((i+1))
   echo "=== [$i] Merging $BRANCH into $BASE_BRANCH ==="
   if git merge --no-ff "origin/$BRANCH" -m "merge($BRANCH): roll into $BASE_BRANCH"; then
