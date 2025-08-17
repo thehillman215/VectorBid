@@ -10,9 +10,7 @@ sys.path.insert(0, str(project_root))
 
 import pytest
 
-from app import db
-
-# Import the main app instance and database
+# Import the SQLAlchemy instance from the core extensions
 from main import app
 
 
@@ -20,16 +18,11 @@ from main import app
 def test_app():
     """Create and configure a test Flask application."""
     app.config["TESTING"] = True
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "TEST_DATABASE_URL", "sqlite:///:memory:"
-    )
     app.config["SECRET_KEY"] = "test-secret-key"
     app.config["ADMIN_BEARER_TOKEN"] = "test-admin-token"
 
     with app.app_context():
-        db.create_all()
         yield app
-        db.drop_all()
 
 
 @pytest.fixture

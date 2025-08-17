@@ -36,6 +36,9 @@ from src.lib.personas import PILOT_PERSONAS
 from src.lib.services.db import get_profile, save_profile
 from src.lib.subscription_manager import SubscriptionManager
 
+# Local bid packet helpers
+from src.core.bid_packets import get_bid_packet_info, save_bid_packet
+
 try:
     from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
 except ImportError:
@@ -598,19 +601,24 @@ def enhanced_dashboard():
     # Get dashboard statistics
     stats = get_dashboard_stats()
 
-    # Get current month for bid period display
-    from datetime import datetime
-    current_month = datetime.now().strftime("%B %Y")
+    # Determine current month and check for matching bid packet
+    now = datetime.now()
+    current_month = now.strftime("%B %Y")
+    month_tag = now.strftime("%Y%m")
+    packet_info = get_bid_packet_info(month_tag)
 
     # Add persona name to profile for display
     if profile.get('persona'):
         profile['persona_name'] = PILOT_PERSONAS.get(profile['persona'], {}).get('name', 'Custom')
 
-    return render_template("enhanced_dashboard.html",
-                         profile=profile,
-                         stats=stats,
-                         personas=PILOT_PERSONAS,
-                         current_month=current_month)
+    return render_template(
+        "enhanced_dashboard.html",
+        profile=profile,
+        stats=stats,
+        personas=PILOT_PERSONAS,
+        current_month=current_month,
+        packet_info=packet_info,
+    )
 
 
 @bp.route("/api/dashboard-stats")
@@ -618,6 +626,24 @@ def api_dashboard_stats():
     """API endpoint for dashboard statistics"""
     stats = get_dashboard_stats()
     return jsonify(stats)
+
+
+@bp.route("/upload-bid", methods=["POST"])
+def upload_bid_packet():
+    """Pilot-facing endpoint to upload a bid packet PDF."""
+    month_tag = request.form.get("month_tag")
+    file = request.files.get("file")
+    if not month_tag or not file:
+        return jsonify({"error": "month_tag and file required"}), 400
+    if not (month_tag.isdigit() and len(month_tag) == 6):
+        return jsonify({"error": "Invalid month_tag"}), 400
+
+    try:
+        metadata = save_bid_packet(file, month_tag)
+    except ValueError as exc:  # invalid file type
+        return jsonify({"error": str(exc)}), 400
+
+    return jsonify({"status": "ok", "stored": month_tag, "metadata": metadata})
 
 
 @bp.route("/preferences/advanced")

@@ -242,6 +242,51 @@
                 </div>
             </div>
         </div>
+        {% if packet_info %}
+        <!-- Detected bid packet digest -->
+        <div class="action-card">
+            <h5><i class="fas fa-file-alt text-success"></i> Detected Packet: {{ packet_info.month_tag }}</h5>
+            <p class="text-muted mb-1">{{ packet_info.filename }} ({{ packet_info.file_size }} bytes)</p>
+            <small class="text-muted">Uploaded {{ packet_info.created_at }}</small>
+        </div>
+        {% else %}
+        <!-- Upload prompt when no packet present -->
+        <div class="action-card">
+            <h5><i class="fas fa-upload text-warning"></i> Upload Bid Packet</h5>
+            <form id="packetUploadForm" class="mt-2" enctype="multipart/form-data">
+                <div class="row g-2">
+                    <div class="col-sm-4">
+                        <input type="text" name="month_tag" class="form-control" placeholder="YYYYMM" pattern="\d{6}" required>
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="file" name="file" class="form-control" accept=".pdf" required>
+                    </div>
+                    <div class="col-sm-2">
+                        <button class="btn btn-success w-100" type="submit">Upload</button>
+                    </div>
+                </div>
+                <div id="uploadStatus" class="text-muted mt-2" style="display:none;">Uploading...</div>
+            </form>
+        </div>
+        <script>
+        const uploadForm=document.getElementById('packetUploadForm');
+        if(uploadForm){
+            uploadForm.addEventListener('submit', async (e)=>{
+                e.preventDefault();
+                const status=document.getElementById('uploadStatus');
+                status.style.display='block';
+                const res=await fetch('/upload-bid',{method:'POST',body:new FormData(uploadForm)});
+                if(res.ok){
+                    status.textContent='Upload complete. Reloading...';
+                    window.location.reload();
+                }else{
+                    const err=await res.json().catch(()=>({}));
+                    status.textContent='Error: '+(err.error||'upload failed');
+                }
+            });
+        }
+        </script>
+        {% endif %}
 
         <div class="row">
             <!-- Main Content -->
