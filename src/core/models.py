@@ -23,10 +23,15 @@ class BidPacket(db.Model):
     __tablename__ = 'bid_packets'
 
     id = db.Column(db.Integer, primary_key=True)
-    month_tag = db.Column(db.String(6), unique=True)
+    month_tag = db.Column(db.String(6))
+    airline = db.Column(db.String(50), nullable=False)
     filename = db.Column(db.String(255))
     file_data = db.Column(db.LargeBinary)
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('month_tag', 'airline', name='uix_bid_packets_month_tag_airline'),
+    )
 
 class BidAnalysis(db.Model):
     __tablename__ = 'bid_analyses'
