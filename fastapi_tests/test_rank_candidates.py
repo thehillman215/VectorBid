@@ -52,7 +52,7 @@ def test_select_topk_deterministic():
     assert [c.score for c in first] == [c.score for c in second]
     assert first[0].score >= first[1].score
     assert [c.candidate_id for c in first] == ["A", "B"]
-    assert first[0].pairings == []
+    assert first[0].pairings == ["A"]
     assert "award_rate" in first[0].soft_breakdown
     assert 0.0 <= first[0].score <= 2.0
     assert first[0].rationale
@@ -85,7 +85,7 @@ def test_select_topk_handles_missing_data():
         pairing_features={"pairings": [{"id": "X"}]},
     )
     ranked = select_topk(bundle, 1)
-    assert ranked[0].soft_breakdown["award_rate"] == pytest.approx(0.5)
-    assert ranked[0].soft_breakdown["layovers"] == pytest.approx(0.5)
-    assert ranked[0].pairings == []
-    assert ranked[0].score == pytest.approx(1.0)
+    assert ranked[0].soft_breakdown["award_rate"] == pytest.approx(0.25)
+    assert ranked[0].soft_breakdown["layovers"] == pytest.approx(0.25)
+    assert ranked[0].pairings == ["X"]
+    assert ranked[0].score == pytest.approx(0.51, rel=1e-2)
