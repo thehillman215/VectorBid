@@ -2,10 +2,21 @@ import csv
 import os
 import re
 from io import StringIO
-from typing import List, Dict, Any
+from typing import List, TypedDict
+
+__all__ = ["parse_schedule"]
 
 
-def parse_schedule(data: bytes, filename: str) -> List[Dict[str, Any]]:
+class Trip(TypedDict, total=False):
+    """Dictionary representation of a single trip."""
+
+    id: str
+    days: int
+    credit: float
+    raw: str
+
+
+def parse_schedule(data: bytes, filename: str) -> List[Trip]:
     """Parse schedule data from CSV or simple text format.
 
     Parameters
@@ -17,13 +28,13 @@ def parse_schedule(data: bytes, filename: str) -> List[Dict[str, Any]]:
 
     Returns
     -------
-    list of dict
-        Parsed trip entries. Each entry contains at minimum an ``id`` key
-        and may include ``days``, ``credit``, and ``raw`` fields.
+    list of Trip
+        Parsed trip entries. Each entry contains at minimum an ``id`` key and
+        may include ``days``, ``credit``, and ``raw`` fields.
     """
     text = data.decode("utf-8")
     ext = os.path.splitext(filename)[1].lower()
-    trips: List[Dict[str, Any]] = []
+    trips: List[Trip] = []
 
     if ext == ".csv":
         reader = csv.DictReader(StringIO(text))
@@ -32,7 +43,7 @@ def parse_schedule(data: bytes, filename: str) -> List[Dict[str, Any]]:
             days = row.get("Days") or row.get("days")
             credit = row.get("Credit") or row.get("credit")
             if trip_id:
-                trip: Dict[str, Any] = {"id": str(trip_id)}
+                trip: Trip = {"id": str(trip_id)}
                 if days:
                     try:
                         trip["days"] = int(days)
