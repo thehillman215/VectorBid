@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid - AI-Powered PBS Assistant</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-blue-900 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">✈️</span>
+                    <h1 class="text-2xl font-bold">VectorBid</h1>
+                    <span class="text-sm text-blue-200">AI-Powered PBS Assistant</span>
+                </div>
+                <div class="text-sm">
+                    <span hx-get="/health-check" hx-trigger="load, every 30s" hx-target="#status"></span>
+                    <span id="status" class="text-green-300">● Online</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
