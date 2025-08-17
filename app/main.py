@@ -65,3 +65,7 @@ if _os.getenv("ENABLE_UI") == "1":
         print("✅ UI routes added")
     except Exception as e:
         print(f"⚠️ UI disabled: {e}")
+
+# --- meta routes ---
+from app.routes.meta import router as meta_router
+app.include_router(meta_router)
