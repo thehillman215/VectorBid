@@ -4,9 +4,7 @@ Database models for VectorBid
 
 from datetime import datetime
 
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from src.core.extensions import db
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -16,6 +14,8 @@ class User(db.Model):
     name = db.Column(db.String(100))
     airline = db.Column(db.String(50))
     base = db.Column(db.String(50))
+    role = db.Column(db.String(20), default='user')
+    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_active = db.Column(db.DateTime)
 
@@ -26,7 +26,9 @@ class BidPacket(db.Model):
     month_tag = db.Column(db.String(6))
     airline = db.Column(db.String(50), nullable=False)
     filename = db.Column(db.String(255))
-    file_data = db.Column(db.LargeBinary)
+    airline = db.Column(db.String(50))
+    pdf_data = db.Column(db.LargeBinary)
+    file_size = db.Column(db.Integer)
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -41,3 +43,15 @@ class BidAnalysis(db.Model):
     preferences = db.Column(db.Text)
     commands = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class AdminActionLog(db.Model):
+    """Audit log of admin actions"""
+
+    __tablename__ = 'admin_action_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    admin_id = db.Column(db.String(120))
+    action = db.Column(db.String(50), nullable=False)
+    target = db.Column(db.String(255))

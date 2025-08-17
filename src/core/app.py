@@ -6,6 +6,7 @@ Flask application factory for VectorBid - FIXED VERSION
 import os
 
 from flask import Flask
+from src.core.extensions import db
 
 
 def create_app():
@@ -27,6 +28,13 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///vectorbid.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+    # Initialize extensions
+    db.init_app(app)
+    with app.app_context():
+        # Import models to register tables
+        import src.core.models  # noqa: F401
+        db.create_all()
 
     # Debug: Print paths to verify they're correct
     print(f"Template folder: {template_folder}")
