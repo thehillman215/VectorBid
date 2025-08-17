@@ -1,4 +1,4 @@
-from __future__ import annotations
+from app.compat.validate_router import router as compat_validate_router
 
 import json
 from contextlib import asynccontextmanager
@@ -48,6 +48,7 @@ def get_all_schemas() -> dict[str, dict]:
 
 from app.api import router as api_router
 
+app.include_router(compat_validate_router)
 app.include_router(api_router)
 
 
