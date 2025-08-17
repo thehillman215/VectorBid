@@ -182,16 +182,6 @@ def validate_feasibility(bundle: FeatureBundle, rules: Any) -> Dict[str, Any]:
     raise NotImplementedError("Implemented in PR2")
 PY
 
-cat > app/optimize/__init__.py <<'PY'
-from .optimizer import rank_candidates  # noqa: F401
-PY
-cat > app/optimize/optimizer.py <<'PY'
-from typing import List, Any
-from app.models import FeatureBundle, CandidateSchedule
-def rank_candidates(bundle: FeatureBundle, feasible_pairings: List[Any], K: int = 50) -> List[CandidateSchedule]:
-    raise NotImplementedError("Implemented in PR2")
-PY
-
 cat > app/strategy/__init__.py <<'PY'
 from .engine import propose_strategy  # noqa: F401
 PY
