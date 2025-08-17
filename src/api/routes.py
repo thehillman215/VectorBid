@@ -115,7 +115,12 @@ def index():
 
 @bp.route("/process", methods=["POST", "GET"])
 def process():
-    """Process schedule file and preferences - main form handler"""
+    """Handle preference submission and redirect to appropriate page.
+
+    When called via POST, the submitted preferences are appended to the
+    query string and the user is redirected to the PBS results page. For
+    any other request method, the user is sent back to the index page.
+    """
     if request.method == "POST":
         preferences = request.form.get('preferences', '')
         return redirect(url_for('main.pbs_results', preferences=preferences))
