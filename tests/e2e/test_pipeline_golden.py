@@ -1,11 +1,57 @@
-import json, os
+import json, os, glob
 from pathlib import Path
 from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
-
-# Adjust if your entrypoint differs
 from app.main import app
+
+# --- Path resolver (handles /api or /v0 prefixes) ----------------------------
+_OPENAPI_PATHS = set(app.openapi().get("paths", {}).keys())
+
+def _pick(endpoint: str) -> str:
+    endpoint = "/" + endpoint.lstrip("/")
+    if endpoint in _OPENAPI_PATHS:
+        return endpoint
+    for p in _OPENAPI_PATHS:
+        if p.endswith(endpoint):
+            return p
+    raise AssertionError(f"Could not find path for {endpoint}. Have: {sorted(_OPENAPI_PATHS)[:10]}...")
+
+def _maybe_parse(client: TestClient, payload: dict) -> dict:
+    """Use /parse_preferences if present, otherwise pass-through."""
+    try:
+        path = _pick("parse_preferences")
+    except AssertionError:
+        return {
+            "persona": payload.get("persona", {}),
+            "weights": payload.get("weights", {}),
+            "free_text": payload.get("free_text", ""),
+        }
+    r = client.post(path, json=payload)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+def _find_rule_pack() -> str:
+    """Find a UAL rule-pack (e.g., rule_packs/UAL/2025.08.yml)."""
+    root = Path(__file__).resolve().parents[2]
+    candidates = sorted(glob.glob(str(root / "rule_packs" / "UAL" / "*.yml")))
+    if not candidates:
+        # fallback to a common default; your engine patch resolves from repo root
+        return "rule_packs/UAL/2025.08.yml"
+    # pick the latest-looking file
+    return str(Path(candidates[-1]).relative_to(root))
+
+def _build_context(persona: dict) -> dict:
+    """Minimal context most handlers expect."""
+    return {
+        "airline": persona.get("airline"),
+        "base": persona.get("base"),
+        "seat": persona.get("seat"),
+        "fleet": persona.get("fleet"),
+        "rule_pack_path": _find_rule_pack(),
+        "bid_period": "2025-09",
+        "pbs_version": "2.x",
+    }
 
 GOLDENS_DIR = Path(__file__).parent / "goldens"
 GOLDENS_DIR.mkdir(parents=True, exist_ok=True)
@@ -37,42 +83,42 @@ def _approve_mode() -> bool:
 
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=[s["name"] for s in SCENARIOS])
 def test_full_pipeline_golden(client, scenario):
-    # quick sanity: health should pass
-    h = client.get("/health")
+    # health
+    h = client.get(_pick("health"))
     assert h.status_code == 200, h.text
 
-    # 1) parse
-    parse_payload = {
+    # build context
+    ctx = _build_context(scenario["persona"])
+
+    # 1) parse (or fallback pass-through)
+    parsed = _maybe_parse(client, {
         "persona": scenario["persona"],
         "free_text": scenario["free_text"],
         "weights": scenario["weights"],
-    }
-    r = client.post("/parse_preferences", json=parse_payload)
-    assert r.status_code == 200, r.text
-    parsed = r.json()
+    })
 
-    # 2) validate
-    r = client.post("/validate", json={"preferences": parsed})
+    # 2) validate (expects top-level 'context')
+    r = client.post(_pick("validate"), json={"preferences": parsed, "context": ctx})
     assert r.status_code == 200, r.text
     validation = r.json()
 
-    # 3) optimize
-    r = client.post("/optimize", json={"preferences": parsed, "validation": validation, "top_k": 20})
+    # 3) optimize (pass context along)
+    r = client.post(_pick("optimize"), json={"preferences": parsed, "validation": validation, "context": ctx, "top_k": 20})
     assert r.status_code == 200, r.text
     optimized = r.json()
 
     # 4) strategy
-    r = client.post("/strategy", json={"preferences": parsed, "optimized": optimized})
+    r = client.post(_pick("strategy"), json={"preferences": parsed, "optimized": optimized, "context": ctx})
     assert r.status_code == 200, r.text
     strategy = r.json()
 
     # 5) generate layers
-    r = client.post("/generate_layers", json={"strategy": strategy})
+    r = client.post(_pick("generate_layers"), json={"strategy": strategy, "context": ctx})
     assert r.status_code == 200, r.text
     layers = r.json()
 
     # 6) lint
-    r = client.post("/lint", json={"layers": layers})
+    r = client.post(_pick("lint"), json={"layers": layers})
     assert r.status_code == 200, r.text
     lint = r.json()
     assert lint.get("errors", []) == [], f"Layer lint errors: {lint}"

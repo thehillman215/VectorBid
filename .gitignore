@@ -120,3 +120,4 @@ exports/*
 # backups
 *.backup
 contracts/openapi.json
+contracts/openapi.json
