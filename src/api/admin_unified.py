@@ -14,6 +14,7 @@ from functools import wraps
 
 from flask import (
     Blueprint,
+    current_app,
     jsonify,
     redirect,
     render_template_string,
@@ -104,6 +105,40 @@ def require_bearer_token(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+# ============================================
+# RATE LIMITING UTILITIES
+# ============================================
+
+upload_counters = {}
+
+
+def check_rate_limit():
+    """Simple in-memory rate limiter for upload endpoints."""
+    # During tests we don't want rate limits to interfere with results.
+    if current_app.config.get('TESTING'):
+        upload_counters.clear()
+        return True
+
+    client_ip = request.remote_addr or 'global'
+    now = datetime.utcnow()
+    hour_key = now.strftime('%Y%m%d%H')
+
+    client_counts = upload_counters.setdefault(client_ip, {})
+    count = client_counts.get(hour_key, 0)
+
+    if count >= AdminConfig.MAX_UPLOADS_PER_HOUR:
+        return False
+
+    client_counts[hour_key] = count + 1
+
+    # Remove counters for previous hours to prevent growth
+    for key in list(client_counts.keys()):
+        if key != hour_key:
+            del client_counts[key]
+
+    return True
 
 
 # ============================================
@@ -576,6 +611,12 @@ def api_upload_bid_packet():
                 'error': 'Airline is required'
             }), 400
 
+        if not check_rate_limit():
+            return jsonify({
+                'success': False,
+                'error': 'Rate limit exceeded'
+            }), 429
+
         result = manager.upload_bid_packet(file, month_tag, airline)
 
         if result['success']:
@@ -618,6 +659,12 @@ def api_upload_contract():
                 'success': False,
                 'error': 'Airline is required'
             }), 400
+
+        if not check_rate_limit():
+            return jsonify({
+                'success': False,
+                'error': 'Rate limit exceeded'
+            }), 429
 
         result = manager.upload_contract(file, airline, version)
 
