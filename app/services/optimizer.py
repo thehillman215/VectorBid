@@ -57,21 +57,7 @@ def _get(obj: Any, name: str, default=None):
     return _to_dict(obj).get(name, default)
 
 
-# Scoring factors used when ranking pairings. The first entry represents
-# analytic data (award rate) while the remaining entries correspond to soft
-# preference categories from ``SoftPrefs``.
-SCORING_CATEGORIES = [
-    "award_rate",
-    "layovers",
-    "pairing_length",
-    "report_time",
-    "release_time",
-    "credit",
-    "weekend_priority",
-    "commutable",
-]
-
-DEFAULT_WEIGHTS: Dict[str, float] = {k: 1.0 for k in SCORING_CATEGORIES}
+DEFAULT_WEIGHTS: Dict[str, float] = {"award_rate": 1.0, "layovers": 1.0}
 
 PERSONA_WEIGHTS: Dict[str, Dict[str, float]] = {
     "family_first": {"layovers": 1.2},
@@ -109,6 +95,106 @@ def _get_seniority_adjustment(bundle: FeatureBundle) -> float:
     seniority = max(0.0, min(seniority, 1.0))
     return 0.9 + 0.2 * seniority
 
+
+def _score_days_off(bundle: FeatureBundle, pairing: Any, weights: Dict[str, float]) -> float:
+    """Score whether pairing avoids requested days off."""
+
+    req = set(
+        _to_dict(_get(_get(bundle.preference_schema, "hard_constraints", {}), "days_off", []))
+        or []
+    )
+    pairing_days = set(_get(pairing, "dates", []) or _get(pairing, "duty_days", []) or [])
+    if not req or not pairing_days:
+        base = 0.0
+    else:
+        base = 1.0 if not req.intersection(pairing_days) else 0.0
+    return weights.get("days_off", 0.0) * base
+
+
+def _score_block_hours(pairing: Any, weights: Dict[str, float]) -> float:
+    """Favor higher block or credit hours."""
+
+    block = float(_get(pairing, "block_hours", _get(pairing, "credit_hours", 0.0)) or 0.0)
+    base = min(block, 100.0) / 100.0
+    return weights.get("block_hours", 0.0) * base
+
+
+def _score_duty_hours(pairing: Any, weights: Dict[str, float]) -> float:
+    """Higher score for lower duty hours."""
+
+    duty = float(_get(pairing, "duty_hours", _get(pairing, "duty_time", 0.0)) or 0.0)
+    if duty <= 0:
+        base = 0.0
+    else:
+        base = max(0.0, 1.0 - min(duty, 16.0) / 16.0)
+    return weights.get("duty_hours", 0.0) * base
+
+
+def _score_layover_quality(pairing: Any, weights: Dict[str, float]) -> float:
+    """Use rest hours as a proxy for layover quality."""
+
+    rest = float(_get(pairing, "rest_hours", _get(pairing, "layover_rest_hours", 0.0)) or 0.0)
+    base = min(rest, 24.0) / 24.0
+    return weights.get("layover_quality", 0.0) * base
+
+
+def _score_report_time(bundle: FeatureBundle, pairing: Any, weights: Dict[str, float]) -> float:
+    """Score later report times higher."""
+
+    time_str = _get(pairing, "report_time", "") or ""
+    digits = str(time_str).replace(":", "")
+    if len(digits) == 4 and digits.isdigit():
+        minutes = int(digits[:2]) * 60 + int(digits[2:])
+        base = minutes / (24 * 60)
+    else:
+        base = 0.0
+    return weights.get("report_time", 0.0) * base
+
+
+def _score_commutability(pairing: Any, weights: Dict[str, float]) -> float:
+    """Binary score if pairing is marked commutable."""
+
+    is_commutable = _get(pairing, "is_commutable", None)
+    if is_commutable is None:
+        base = 0.0
+    else:
+        base = 1.0 if is_commutable else 0.0
+    return weights.get("commutability", 0.0) * base
+
+
+def _score_trip_length(bundle: FeatureBundle, pairing: Any, weights: Dict[str, float]) -> float:
+    """Score against preferred trip lengths."""
+
+    prefs_d = _to_dict(_get(bundle.preference_schema, "soft_prefs", {}))
+    length_d = _to_dict(prefs_d.get("pairing_length"))
+    prefer = set(length_d.get("prefer") or [])
+    avoid = set(length_d.get("avoid") or [])
+    pref_w = float(length_d.get("weight", 1.0) or 1.0)
+    length = int(
+        _get(pairing, "trip_length", _get(pairing, "days", _get(pairing, "duration_days", 0))) or 0
+    )
+    if length == 0:
+        base = 0.0
+    elif length in prefer:
+        base = 1.0
+    elif length in avoid:
+        base = 0.0
+    else:
+        base = 0.5
+    return weights.get("trip_length", 0.0) * pref_w * base
+
+
+def _score_equipment(bundle: FeatureBundle, pairing: Any, weights: Dict[str, float]) -> float:
+    """Score if the pairing's equipment matches pilot preferences."""
+
+    desired = set(_get(bundle.preference_schema, "equip", []) or [])
+    equip = _get(pairing, "equipment", _get(pairing, "equip", None))
+    if not equip or not desired:
+        base = 0.0
+    else:
+        base = 1.0 if equip in desired else 0.0
+    return weights.get("equipment", 0.0) * base
+
 def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
     """
     Legacy-compatible Top-K selection:
@@ -120,8 +206,12 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
     weights = _get_scoring_weights(bundle)
     seniority_factor = _get_seniority_adjustment(bundle)
 
-    # soft prefs / weights
+    # soft prefs / weights for layovers
     prefs_d = _to_dict(_get(bundle.preference_schema, "soft_prefs", {}))
+    layovers_d = _to_dict(prefs_d.get("layovers"))
+    prefer = set(layovers_d.get("prefer") or [])
+    avoid = set(layovers_d.get("avoid") or [])
+    pref_w = layovers_d.get("weight", 1.0)
 
     # award rates
     base_stats_d = _to_dict(_get(bundle.analytics_features, "base_stats", {}))
@@ -134,26 +224,25 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
 
         award = _to_dict(base_stats_d.get(city, {})).get("award_rate", 0.5)
 
+        if city in prefer:
+            pref_score = 1.0
+        elif city in avoid:
+            pref_score = 0.0
+        else:
+            pref_score = 0.5
+
         breakdown: dict[str, float] = {
-            "award_rate": weights.get("award_rate", 0.0) * award
+            "award_rate": weights.get("award_rate", 0.0) * award,
+            "layovers": weights.get("layovers", 0.0) * pref_w * pref_score,
+            "days_off": _score_days_off(bundle, p, weights),
+            "block_hours": _score_block_hours(p, weights),
+            "duty_hours": _score_duty_hours(p, weights),
+            "layover_quality": _score_layover_quality(p, weights),
+            "report_time": _score_report_time(bundle, p, weights),
+            "commutability": _score_commutability(p, weights),
+            "trip_length": _score_trip_length(bundle, p, weights),
+            "equipment": _score_equipment(bundle, p, weights),
         }
-
-        for factor in SCORING_CATEGORIES:
-            if factor == "award_rate":
-                continue
-            cat_prefs = _to_dict(prefs_d.get(factor))
-            prefer = set(cat_prefs.get("prefer") or [])
-            avoid = set(cat_prefs.get("avoid") or [])
-            pref_w = cat_prefs.get("weight", 1.0)
-            val = _get(p, "layover_city" if factor == "layovers" else factor, None)
-            if val in prefer:
-                pref_score = 1.0
-            elif val in avoid:
-                pref_score = 0.0
-            else:
-                pref_score = 0.5
-            breakdown[factor] = weights.get(factor, 0.0) * pref_w * pref_score
-
         score = sum(breakdown.values()) * seniority_factor
         items.append((score, -i, pid, breakdown, p))  # stable: earlier wins ties
 

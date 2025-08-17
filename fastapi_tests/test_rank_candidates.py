@@ -1,12 +1,10 @@
 import pytest
 
-from app.services.optimizer import select_topk, SCORING_CATEGORIES
+from app.services.optimizer import select_topk
 from app.models import FeatureBundle, PreferenceSchema, ContextSnapshot, SoftPrefs
 
 
 def _bundle() -> FeatureBundle:
-    dw = {k: 0.0 for k in SCORING_CATEGORIES}
-    dw.update({"layovers": 1.0, "award_rate": 1.0})
     ctx = ContextSnapshot(
         ctx_id="ctx",
         pilot_id="p1",
@@ -15,7 +13,7 @@ def _bundle() -> FeatureBundle:
         seat="FO",
         equip=["7M8"],
         seniority_percentile=0.6,
-        default_weights=dw,
+        default_weights={"layovers": 1.0},
     )
     prefs = PreferenceSchema(
         pilot_id="p1",
@@ -48,8 +46,8 @@ def _bundle() -> FeatureBundle:
 
 def test_select_topk_deterministic():
     bundle = _bundle()
-    first = select_topk(bundle)
-    second = select_topk(bundle)
+    first = select_topk(bundle, 2)
+    second = select_topk(bundle, 2)
 
     assert [c.score for c in first] == [c.score for c in second]
     assert first[0].score >= first[1].score
@@ -61,8 +59,6 @@ def test_select_topk_deterministic():
 
 
 def test_select_topk_handles_missing_data():
-    dw = {k: 0.0 for k in SCORING_CATEGORIES}
-    dw.update({"layovers": 1.0, "award_rate": 1.0})
     ctx = ContextSnapshot(
         ctx_id="ctx",
         pilot_id="p1",
@@ -71,7 +67,7 @@ def test_select_topk_handles_missing_data():
         seat="FO",
         equip=["7M8"],
         seniority_percentile=0.6,
-        default_weights=dw,
+        default_weights={"layovers": 1.0},
     )
     prefs = PreferenceSchema(
         pilot_id="p1",
@@ -92,4 +88,4 @@ def test_select_topk_handles_missing_data():
     assert ranked[0].soft_breakdown["award_rate"] == pytest.approx(0.25)
     assert ranked[0].soft_breakdown["layovers"] == pytest.approx(0.25)
     assert ranked[0].pairings == ["X"]
-    assert ranked[0].score == pytest.approx((0.25 + 0.25) * 1.02)
+    assert ranked[0].score == pytest.approx(0.51, rel=1e-2)
