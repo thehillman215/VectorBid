@@ -57,7 +57,21 @@ def _get(obj: Any, name: str, default=None):
     return _to_dict(obj).get(name, default)
 
 
-DEFAULT_WEIGHTS: Dict[str, float] = {"award_rate": 1.0, "layovers": 1.0}
+# Scoring factors used when ranking pairings. The first entry represents
+# analytic data (award rate) while the remaining entries correspond to soft
+# preference categories from ``SoftPrefs``.
+SCORING_CATEGORIES = [
+    "award_rate",
+    "layovers",
+    "pairing_length",
+    "report_time",
+    "release_time",
+    "credit",
+    "weekend_priority",
+    "commutable",
+]
+
+DEFAULT_WEIGHTS: Dict[str, float] = {k: 1.0 for k in SCORING_CATEGORIES}
 
 PERSONA_WEIGHTS: Dict[str, Dict[str, float]] = {
     "family_first": {"layovers": 1.2},
@@ -95,7 +109,7 @@ def _get_seniority_adjustment(bundle: FeatureBundle) -> float:
     seniority = max(0.0, min(seniority, 1.0))
     return 0.9 + 0.2 * seniority
 
-def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
+def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
     """
     Legacy-compatible Top-K selection:
     - DO NOT hard-filter here (legacy scored all pairings; later stages enforce rules)
@@ -108,10 +122,6 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
 
     # soft prefs / weights
     prefs_d = _to_dict(_get(bundle.preference_schema, "soft_prefs", {}))
-    layovers_d = _to_dict(prefs_d.get("layovers"))
-    prefer = set(layovers_d.get("prefer") or [])
-    avoid = set(layovers_d.get("avoid") or [])
-    pref_w = layovers_d.get("weight", 1.0)
 
     # award rates
     base_stats_d = _to_dict(_get(bundle.analytics_features, "base_stats", {}))
@@ -124,23 +134,31 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
 
         award = _to_dict(base_stats_d.get(city, {})).get("award_rate", 0.5)
 
-        if city in prefer:
-            pref_score = 1.0
-        elif city in avoid:
-            pref_score = 0.0
-        else:
-            pref_score = 0.5
-
-        breakdown = {
-            "award_rate": weights.get("award_rate", 0.0) * award,
-            "layovers": weights.get("layovers", 0.0) * pref_w * pref_score,
+        breakdown: dict[str, float] = {
+            "award_rate": weights.get("award_rate", 0.0) * award
         }
+
+        for factor in SCORING_CATEGORIES:
+            if factor == "award_rate":
+                continue
+            cat_prefs = _to_dict(prefs_d.get(factor))
+            prefer = set(cat_prefs.get("prefer") or [])
+            avoid = set(cat_prefs.get("avoid") or [])
+            pref_w = cat_prefs.get("weight", 1.0)
+            val = _get(p, "layover_city" if factor == "layovers" else factor, None)
+            if val in prefer:
+                pref_score = 1.0
+            elif val in avoid:
+                pref_score = 0.0
+            else:
+                pref_score = 0.5
+            breakdown[factor] = weights.get(factor, 0.0) * pref_w * pref_score
+
         score = sum(breakdown.values()) * seniority_factor
         items.append((score, -i, pid, breakdown, p))  # stable: earlier wins ties
 
     winners = heapq.nlargest(K, items, key=itemgetter(0, 1))
 
-    # Keep pairings empty (legacy hashing behavior)
     result: list[CandidateSchedule] = []
     for winner_score, _neg_i, pid, breakdown, pairing in winners:
         result.append(
@@ -149,7 +167,7 @@ def select_topk(bundle: FeatureBundle, K: int) -> list[CandidateSchedule]:
                 score=winner_score,
                 hard_ok=True,
                 soft_breakdown=breakdown,
-                pairings=[],
+                pairings=[pid],
                 rationale=_generate_rationale(pairing, breakdown),
             )
         )
