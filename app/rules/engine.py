@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+from datetime import datetime, time
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Iterable, List
 
 import yaml
 
@@ -9,14 +11,97 @@ from app.models import FeatureBundle
 from app.rules.models import HardRule, RulePack
 
 
+<<<<<<< HEAD
 def load_rule_pack(path: str) -> RulePack:
     """Load a YAML rule pack, resolving relative paths robustly."""
+=======
+# ---------------------------------------------------------------------------
+# RulePack dataclass
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class RulePack:
+    """Container for airline rule configuration.
+
+    The structure is intentionally lightweight – only the pieces required by the
+    simplified validation engine are modelled.  ``far117`` contains parameters
+    for FAA legality checks while ``union`` stores contract restrictions.
+    """
+
+    far117: Dict[str, Any] = field(default_factory=dict)
+    union: Dict[str, Any] = field(default_factory=dict)
+
+    # --- FAR 117 helpers -------------------------------------------------
+    def get_max_duty_hours(self, start_time: str | time | datetime) -> float:
+        """Return maximum duty period for a given report time."""
+
+        if isinstance(start_time, str):
+            start = datetime.strptime(start_time, "%H:%M").time()
+        elif isinstance(start_time, datetime):
+            start = start_time.time()
+        else:
+            start = start_time
+
+        hour = start.hour + start.minute / 60.0
+        for limit in self.far117.get("duty_limits", []):
+            start_h = float(limit.get("start", 0))
+            end_h = float(limit.get("end", 24))
+            if start_h <= hour < end_h:
+                return float(limit.get("max", 8))
+        # default fallback
+        return float(self.far117.get("default_duty_limit", 8))
+
+    def get_min_rest(self, duty_hours: float) -> float:
+        """Return minimum rest required following ``duty_hours`` duty."""
+
+        if duty_hours is None:
+            return float(self.far117.get("min_rest", 9))
+
+        threshold = float(self.far117.get("extended_duty_threshold", 14))
+        base_rest = float(self.far117.get("min_rest", 9))
+        extended_rest = float(self.far117.get("extended_rest", 10))
+        return extended_rest if duty_hours > threshold else base_rest
+
+
+# ---------------------------------------------------------------------------
+# Rule pack loading
+# ---------------------------------------------------------------------------
+
+
+def _default_rule_pack() -> RulePack:
+    """Hard coded UAL defaults used when YAML files are missing."""
+
+    default_cfg = {
+        "far117": {
+            "min_rest": 9,
+            "extended_rest": 10,
+            "extended_duty_threshold": 14,
+            "duty_limits": [
+                {"start": 5, "end": 12, "max": 9},
+                {"start": 12, "end": 17, "max": 8.5},
+                {"start": 0, "end": 5, "max": 8},
+                {"start": 17, "end": 24, "max": 8},
+            ],
+            "max_block_hours_per_week": 32,
+        },
+        "union": {
+            "min_days_off_per_month": 12,
+            # "default" key acts as fallback for any base not explicitly listed.
+            "max_block_hours_per_base": {"default": 100},
+        },
+    }
+    return RulePack(**default_cfg)
+
+
+def load_rule_pack(path: str) -> RulePack:
+    """Load a YAML rule pack from ``path`` or return defaults if missing."""
+
+>>>>>>> Add Flask dependencies and Replit DB fallback
     pth = Path(path)
-    candidates = []
-    if pth.is_absolute():
-        candidates.append(pth)
-    else:
+    if not pth.is_absolute():
         repo_root = Path(__file__).resolve().parents[2]
+<<<<<<< HEAD
         candidates.extend([repo_root / path, Path.cwd() / path])
     for c in candidates:
         c = c.resolve()
@@ -42,11 +127,50 @@ def _eval_hard(
 
 def validate_feasibility(bundle: FeatureBundle, rules: RulePack) -> dict[str, Any]:
     pref = bundle.preference_schema.model_dump()
+=======
+        pth = repo_root / pth
+
+    if pth.exists():
+        with pth.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+        cfg = _default_rule_pack()
+        # merge loaded config
+        cfg.far117.update(data.get("far117", {}))
+        cfg.union.update(data.get("union", {}))
+        return cfg
+    # fall back to hard coded defaults
+    return _default_rule_pack()
+
+
+# ---------------------------------------------------------------------------
+# Validation Engine
+# ---------------------------------------------------------------------------
+
+
+def _check_days_off(pair_days: Iterable[str], requested_off: Iterable[str]) -> str | None:
+    for d in pair_days:
+        if d in requested_off:
+            return d
+    return None
+
+
+def validate_feasibility(bundle: FeatureBundle, rules: RulePack) -> Dict[str, Any]:
+    """Validate a bundle of pairings against the provided ``RulePack``."""
+
+    pref = bundle.preference_schema
+    hard = pref.hard_constraints
+>>>>>>> Add Flask dependencies and Replit DB fallback
     pairings = bundle.pairing_features.get("pairings", [])
-    violations: list[dict[str, Any]] = []
-    feasible: list[dict[str, Any]] = []
+
+    violations: List[Dict[str, Any]] = []
+    feasible: List[Dict[str, Any]] = []
+
+    requested_off = set(hard.days_off)
+
     for p in pairings:
+        pid = p.get("id")
         ok = True
+<<<<<<< HEAD
         for r in rules.hard:
             if not _eval_hard(pref, p, r, rules):
                 ok = False
@@ -278,3 +402,82 @@ def validate_feasibility(pairings, rules=None, context=None):  # type: ignore[ov
                 # If a worker fails, skip that item (keeps endpoint robust)
                 pass
     return results
+=======
+
+        # --- Pilot hard constraints --------------------------------------
+        conflict = _check_days_off(p.get("days", []), requested_off)
+        if conflict:
+            violations.append({
+                "pairing_id": pid,
+                "violation": f"Works on requested day off: {conflict}",
+            })
+            ok = False
+
+        red_eye_flag = p.get("is_red_eye", p.get("redeye"))
+        if hard.no_red_eyes and red_eye_flag:
+            violations.append({
+                "pairing_id": pid,
+                "violation": "Red eye trip not allowed",
+            })
+            ok = False
+
+        if hard.max_duty_hours_per_day and p.get("duty_hours", 0) > hard.max_duty_hours_per_day:
+            violations.append({
+                "pairing_id": pid,
+                "violation": f"Duty hours exceed pilot limit {hard.max_duty_hours_per_day}",
+            })
+            ok = False
+
+        # --- FAR 117 legality -------------------------------------------
+        report = p.get("report_time")
+        if report is not None:
+            max_duty = rules.get_max_duty_hours(report)
+            if p.get("duty_hours", 0) > max_duty:
+                violations.append({
+                    "pairing_id": pid,
+                    "violation": f"Duty {p.get('duty_hours')}h exceeds FAR117 limit {max_duty}h",
+                })
+                ok = False
+
+        rest = p.get("rest_hours")
+        if rest is not None:
+            min_rest = rules.get_min_rest(p.get("duty_hours", 0))
+            if rest < min_rest:
+                violations.append({
+                    "pairing_id": pid,
+                    "violation": f"Rest {rest}h below FAR117 minimum {min_rest}h",
+                })
+                ok = False
+
+        # --- Union contract checks --------------------------------------
+        base = bundle.context.base
+        limit_map = rules.union.get("max_block_hours_per_base", {})
+        max_block = limit_map.get(base, limit_map.get("default"))
+        if max_block is not None and p.get("block_hours", 0) > max_block:
+            violations.append({
+                "pairing_id": pid,
+                "violation": f"Block hours exceed base limit {max_block}",
+            })
+            ok = False
+
+        if ok:
+            feasible.append(p)
+
+    # schedule wide check for days off
+    days_off_count = len(requested_off)
+    min_days = rules.union.get("min_days_off_per_month")
+    if min_days and days_off_count < min_days:
+        violations.append({
+            "pairing_id": None,
+            "violation": f"Minimum days off not met ({days_off_count} < {min_days})",
+        })
+
+    stats = {
+        "total_pairings": len(pairings),
+        "feasible_count": len(feasible),
+        "days_off": days_off_count,
+    }
+
+    return {"violations": violations, "feasible_pairings": feasible, "stats": stats}
+
+>>>>>>> Add Flask dependencies and Replit DB fallback
