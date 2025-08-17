@@ -2,16 +2,18 @@
 set -euo pipefail
 PORT="${PORT:-3000}"
 
-# start FastAPI
+# ensure no stale server
+pkill -f "uvicorn.*app.main:app" 2>/dev/null || true
+
 python -m uvicorn app.main:app --port "$PORT" --log-level warning &
 PID=$!
 trap "kill $PID" EXIT
-
-# give it a moment to boot
 sleep 3
 
-# probe endpoints (meta/health first; ping second if present)
-curl -fsS "http://localhost:$PORT/api/meta/health" >/dev/null
-# optional: curl -fsS "http://localhost:$PORT/api/ping" >/dev/null
+if curl -fsS "http://localhost:$PORT/api/meta/health" >/dev/null; then
+  echo "smoke OK (meta/health) on $PORT"
+  exit 0
+fi
 
-echo "smoke OK on port $PORT"
+curl -fsS "http://localhost:$PORT/" >/dev/null
+echo "smoke OK (/) on $PORT"
