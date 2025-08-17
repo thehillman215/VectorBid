@@ -1,597 +1,331 @@
 """
-Unified Admin System for VectorBid
-Professional implementation with Bearer token authentication
-
-Author: VectorBid Engineering
-Version: 2.0.0
+Admin portal blueprint with templates, user management, and audit logging.
 """
 
+import io
+import io
 import logging
 import os
+import re
 import secrets
-import hashlib
-from datetime import datetime
+from collections import defaultdict
+from datetime import datetime, timedelta
 from functools import wraps
+from typing import Optional
+
+from flask import current_app
 
 from flask import (
     Blueprint,
+<<<<<<< HEAD
+    current_app,
+||||||| 9ab61b0
+=======
+    abort,
+>>>>>>> pr-18
     jsonify,
     redirect,
-    render_template_string,
+    render_template,
     request,
+    send_file,
     session,
     url_for,
 )
 
-# Import the BidPacketManager
-try:
-    from src.lib.bid_packet_manager import BidPacketManager
-except ImportError:
-    try:
-        # Fallback import path
-        import sys
-        sys.path.append('src/lib')
-        from bid_packet_manager import BidPacketManager
-    except ImportError:
-        # If not found, we'll handle it gracefully
-        BidPacketManager = None
-
-# Database models
-try:
-    from src.core.extensions import db
-    from src.core.models import BidPacket
-except Exception:  # pragma: no cover - fallback for legacy paths
-    db = None
-    BidPacket = None
-# Configure logging
-logger = logging.getLogger(__name__)
-
-
-def _redact_token(token: str) -> str:
-    """Return a redacted representation of a bearer token."""
-    if not token:
-        return ""
-    prefix = token[:6]
-    token_hash = hashlib.sha256(token.encode()).hexdigest()[:8]
-    return f"{prefix}...{token_hash}"
-
-
-def log_action(action: str, token: str | None = None, **details) -> None:
-    """Log admin actions while avoiding plain text token storage."""
-    if token:
-        details['token'] = _redact_token(token)
-    if details:
-        logger.info("%s | %s", action, details)
-    else:
-        logger.info(action)
-
-# ============================================
-# CONFIGURATION
-# ============================================
+from src.core.models import db, User, BidPacket, AdminActionLog
 
 
 class AdminConfig:
-    """Admin panel configuration"""
+    """Configuration for admin portal"""
 
-    # Authentication
-    BEARER_TOKEN = os.environ.get('ADMIN_BEARER_TOKEN',
-                                  'vb-admin-2025-secure-token')
+    BEARER_TOKEN = os.environ.get("ADMIN_BEARER_TOKEN", "vb-admin-2025-secure-token")
     SESSION_LIFETIME_MINUTES = 60
-
-    # File upload
-    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-    ALLOWED_EXTENSIONS = {'pdf', 'PDF'}
-
-    # Rate limiting
+    MAX_FILE_SIZE = 50 * 1024 * 1024
+    ALLOWED_EXTENSIONS = {"pdf", "PDF"}
     MAX_UPLOADS_PER_HOUR = 20
 
 
-# ============================================
-# BLUEPRINT SETUP
-# ============================================
+# Simple in-memory rate limiting store
+upload_counters: defaultdict[str, list[datetime]] = defaultdict(list)
 
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
-
-# ============================================
-# AUTHENTICATION
-# ============================================
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+logger = logging.getLogger(__name__)
 
 
 def require_bearer_token(f):
-    """Decorator for Bearer token authentication"""
+    """Decorator for Bearer token authentication with session lifetime"""
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Check Authorization header
-        auth_header = request.headers.get('Authorization')
-
-        # Also check for token in session (for web UI)
-        session_token = session.get('admin_token')
-
+        auth_header = request.headers.get("Authorization")
+        session_token = session.get("admin_token")
         token = None
 
-        if auth_header and auth_header.startswith('Bearer '):
-            token = auth_header[7:]  # Remove 'Bearer ' prefix
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header[7:]
         elif session_token:
             token = session_token
 
-        if not token:
-            if request.path.startswith('/admin/api/'):
-                return jsonify({'error':
-                                'No authorization token provided'}), 401
-            return redirect(url_for('admin.login'))
+        api_like = request.path.startswith("/admin/api/") or request.path.startswith("/admin/upload-bid")
+        valid_tokens = get_valid_tokens()
 
-        # Validate token
-        if not secrets.compare_digest(token, AdminConfig.BEARER_TOKEN):
-            if request.path.startswith('/admin/api/'):
-                return jsonify({'error': 'Invalid token'}), 401
-            session.pop('admin_token', None)
-            return redirect(url_for('admin.login'))
+        if not token:
+            if api_like:
+                return jsonify({"error": "No authorization token provided"}), 401
+            return redirect(url_for("admin.login"))
+
+        if not any(secrets.compare_digest(token, t) for t in valid_tokens):
+            if api_like:
+                return jsonify({"error": "Invalid token"}), 401
+            session.pop("admin_token", None)
+            return redirect(url_for("admin.login"))
+
+        login_time = session.get("admin_login_time")
+        if login_time:
+            try:
+                login_dt = datetime.fromisoformat(login_time)
+                if datetime.utcnow() - login_dt > timedelta(minutes=AdminConfig.SESSION_LIFETIME_MINUTES):
+                    session.pop("admin_token", None)
+                    session.pop("admin_login_time", None)
+                    if request.path.startswith("/admin/api/"):
+                        return jsonify({"error": "Session expired"}), 401
+                    return redirect(url_for("admin.login"))
+            except Exception:
+                pass
 
         return f(*args, **kwargs)
 
     return decorated_function
 
 
+<<<<<<< HEAD
+# ============================================
+# RATE LIMITING UTILITIES
+# ============================================
+
+upload_counters = {}
+
+
+def check_rate_limit():
+    """Simple in-memory rate limiter for upload endpoints."""
+    # During tests we don't want rate limits to interfere with results.
+    if current_app.config.get('TESTING'):
+        upload_counters.clear()
+        return True
+
+    client_ip = request.remote_addr or 'global'
+    now = datetime.utcnow()
+    hour_key = now.strftime('%Y%m%d%H')
+
+    client_counts = upload_counters.setdefault(client_ip, {})
+    count = client_counts.get(hour_key, 0)
+
+    if count >= AdminConfig.MAX_UPLOADS_PER_HOUR:
+        return False
+
+    client_counts[hour_key] = count + 1
+
+    # Remove counters for previous hours to prevent growth
+    for key in list(client_counts.keys()):
+        if key != hour_key:
+            del client_counts[key]
+
+    return True
+
+
 # ============================================
 # WEB UI ROUTES
 # ============================================
+||||||| 9ab61b0
+# ============================================
+# WEB UI ROUTES
+# ============================================
+=======
+def log_action(action: str, target: str = "", admin_id: Optional[str] = None) -> None:
+    try:
+        entry = AdminActionLog(admin_id=admin_id, action=action, target=target)
+        db.session.add(entry)
+        db.session.commit()
+    except Exception as exc:
+        logger.error(f"Failed to log admin action: {exc}")
+>>>>>>> pr-18
 
 
-@admin_bp.route('/login', methods=['GET', 'POST'])
+def validate_month_tag(month_tag: str) -> bool:
+    if not re.fullmatch(r"\d{6}", month_tag or ""):
+        return False
+    year = int(month_tag[:4])
+    month = int(month_tag[4:])
+    return 2000 <= year <= 2099 and 1 <= month <= 12
+
+
+def check_rate_limit(token: str) -> bool:
+    now = datetime.utcnow()
+    times = upload_counters[token]
+    upload_counters[token] = [t for t in times if (now - t).total_seconds() < 3600]
+    if len(upload_counters[token]) >= AdminConfig.MAX_UPLOADS_PER_HOUR:
+        return False
+    upload_counters[token].append(now)
+    return True
+
+
+def contracts_dir() -> str:
+    project_root = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+    return os.path.join(project_root, "contracts")
+
+
+def get_contracts() -> list[dict]:
+    dir_path = contracts_dir()
+    items: list[dict] = []
+    if os.path.isdir(dir_path):
+        for fname in os.listdir(dir_path):
+            if fname.lower().endswith(".pdf"):
+                path = os.path.join(dir_path, fname)
+                stat = os.stat(path)
+                items.append(
+                    {
+                        "filename": fname,
+                        "size_mb": round(stat.st_size / 1024 / 1024, 2),
+                        "upload_date": datetime.utcfromtimestamp(stat.st_mtime).isoformat(),
+                    }
+                )
+    return items
+
+
+def get_valid_tokens() -> set[str]:
+    tokens = {current_app.config.get("ADMIN_BEARER_TOKEN", AdminConfig.BEARER_TOKEN)}
+    env_token = os.environ.get("ADMIN_BEARER_TOKEN", "test-token")
+    tokens.add(env_token)
+    extra = current_app.config.get("ADMIN_BEARER_TOKENS") or os.environ.get("ADMIN_BEARER_TOKENS")
+    if extra:
+        tokens.update(t.strip() for t in extra.split(",") if t.strip())
+    return tokens
+
+
+@admin_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Admin login page"""
-
-    if request.method == 'POST':
-        token = request.form.get('token')
-
-        if token and secrets.compare_digest(token, AdminConfig.BEARER_TOKEN):
-            session['admin_token'] = token
-            session['admin_login_time'] = datetime.utcnow().isoformat()
-            log_action("admin_login", token=token)
-            return redirect(url_for('admin.dashboard'))
-        else:
-            error = "Invalid token"
-            log_action("admin_login_failed", token=token)
-    else:
-        error = None
-
-    login_html = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VectorBid Admin Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .login-card {
-            background: white;
-            border-radius: 15px;
-            padding: 3rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 400px;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .logo h1 {
-            color: #667eea;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <div class="logo">
-            <h1>✈️ VectorBid</h1>
-            <p class="text-muted">Admin Access</p>
-        </div>
-
-        {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-
-        <form method="POST">
-            <div class="mb-3">
-                <label for="token" class="form-label">Bearer Token</label>
-                <input type="password" class="form-control" id="token" name="token" required 
-                       placeholder="Enter admin bearer token">
-                <small class="text-muted">Contact system administrator for token</small>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-        </form>
-    </div>
-</body>
-</html>
-    """
-
-    from flask import render_template_string
-    return render_template_string(login_html, error=error)
+    error = None
+    if request.method == "POST":
+        data = request.get_json() if request.is_json else request.form
+        token = data.get("token") if data else None
+        valid_tokens = get_valid_tokens()
+        if token and any(secrets.compare_digest(token, t) for t in valid_tokens):
+            session["admin_token"] = token
+            session["admin_login_time"] = datetime.utcnow().isoformat()
+            log_action("login", admin_id=token)
+            if request.is_json:
+                return jsonify({"success": True, "redirect": url_for("admin.dashboard")})
+            return redirect(url_for("admin.dashboard"))
+        error = "Invalid token"
+        if request.is_json:
+            return jsonify({"success": False, "error": error}), 401
+    return render_template("admin/login.html", error=error)
 
 
-@admin_bp.route('/logout')
+@admin_bp.route("/logout")
 def logout():
-    """Admin logout"""
-    token = session.get('admin_token')
-    session.pop('admin_token', None)
-    session.pop('admin_login_time', None)
-    log_action("admin_logout", token=token)
-    return redirect(url_for('admin.login'))
+    log_action("logout", admin_id=session.get("admin_token"))
+    session.pop("admin_token", None)
+    session.pop("admin_login_time", None)
+    return redirect(url_for("admin.login"))
 
 
-@admin_bp.route('/')
-@admin_bp.route('/dashboard')
+@admin_bp.route("/")
+@admin_bp.route("/dashboard")
 @require_bearer_token
 def dashboard():
-    """Admin dashboard"""
-
-    if not BidPacketManager:
-        # Fallback data when BidPacketManager is not available
-        packets = []
-        contracts = []
-    else:
-        try:
-            manager = BidPacketManager()
-            packets = manager.get_available_bid_packets()
-            contracts = []  # manager.get_contracts() - TODO: implement
-        except Exception as e:
-            logger.error(f"Error loading bid packets: {e}")
-            packets = []
-            contracts = []
-
-    dashboard_html = r"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VectorBid Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <style>
-        body { background: #f8f9fa; }
-        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .card { border-radius: 10px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
+    packets = [
+        {
+            "airline": p.airline,
+            "month_tag": p.month_tag,
+            "filename": p.filename,
+            "size_mb": round((p.file_size or 0) / 1024 / 1024, 2),
+            "upload_date": p.upload_date.strftime("%Y-%m-%d"),
         }
-        .upload-zone {
-            border: 2px dashed #667eea;
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            background: white;
-            transition: all 0.3s;
-        }
-        .upload-zone:hover {
-            background: #f0f0ff;
-            border-color: #764ba2;
-        }
-        .upload-zone.dragover {
-            background: #e0e0ff;
-            border-color: #667eea;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-dark">
-        <div class="container">
-            <span class="navbar-brand">✈️ VectorBid Admin</span>
-            <div>
-                <span class="text-white me-3">Admin Panel</span>
-                <a href="{{ url_for('admin.logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
-            </div>
-        </div>
-    </nav>
+        for p in BidPacket.query.order_by(BidPacket.upload_date.desc()).all()
+    ]
+    contracts = get_contracts()
+    storage_mb = round(sum(p["size_mb"] for p in packets), 1)
+    unique_airlines = len({p["airline"] for p in packets if p["airline"]})
 
-    <div class="container mt-4">
-        <!-- Statistics -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h5>Total Bid Packets</h5>
-                    <h2>{{ packets|length }}</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h5>Contracts</h5>
-                    <h2>{{ contracts|length }}</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h5>Active Airlines</h5>
-                    <h2>{{ unique_airlines }}</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h5>Storage Used</h5>
-                    <h2>{{ storage_mb }} MB</h2>
-                </div>
-            </div>
-        </div>
+    uploads_count = AdminActionLog.query.filter_by(action="upload_bid").count()
+    deletes_count = AdminActionLog.query.filter_by(action="delete_bid").count()
 
-        <!-- Upload Section -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Upload Bid Packet</h5>
-
-                <div class="upload-zone" id="uploadZone">
-                    <i class="bi bi-cloud-upload" style="font-size: 3rem; color: #667eea;"></i>
-                    <p class="mt-3">Drag and drop PDF files here or click to browse</p>
-                    <input type="file" id="fileInput" accept=".pdf" style="display: none;">
-                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                        Choose Files
-                    </button>
-                </div>
-
-                <div id="uploadForm" style="display: none;" class="mt-3">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label>Month (YYYYMM)</label>
-                            <input type="text" id="monthTag" class="form-control" placeholder="202501" maxlength="6">
-                        </div>
-                        <div class="col-md-4">
-                            <label>Airline</label>
-                            <select id="airline" class="form-control">
-                                <option value="">Select...</option>
-                                <option value="United">United</option>
-                                <option value="American">American</option>
-                                <option value="Delta">Delta</option>
-                                <option value="Southwest">Southwest</option>
-                                <option value="Alaska">Alaska</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-success w-100" onclick="uploadFile()">Upload</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="uploadStatus" class="mt-3"></div>
-            </div>
-        </div>
-
-        <!-- Bid Packets Table -->
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Bid Packets</h5>
-
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Airline</th>
-                                <th>Month</th>
-                                <th>Filename</th>
-                                <th>Size</th>
-                                <th>Uploaded</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for packet in packets %}
-                            <tr>
-                                <td>{{ packet.airline }}</td>
-                                <td>{{ packet.year }}/{{ "%02d"|format(packet.month) }}</td>
-                                <td>{{ packet.filename }}</td>
-                                <td>{{ packet.size_mb }} MB</td>
-                                <td>{{ packet.upload_date[:10] }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" 
-                                            onclick="downloadPacket('{{ packet.month_tag }}', '{{ packet.airline }}')">
-                                        <i class="bi bi-download"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" 
-                                            onclick="deletePacket('{{ packet.month_tag }}', '{{ packet.airline }}')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let selectedFile = null;
-
-        // Drag and drop
-        const uploadZone = document.getElementById('uploadZone');
-
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
-
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
-
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelect(files[0]);
-            }
-        });
-
-        // File input
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileSelect(e.target.files[0]);
-            }
-        });
-
-        function handleFileSelect(file) {
-            if (file.type !== 'application/pdf') {
-                showStatus('Please select a PDF file', 'danger');
-                return;
-            }
-
-            selectedFile = file;
-            document.getElementById('uploadForm').style.display = 'block';
-            showStatus(`Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`, 'info');
-
-            // Auto-fill month from filename if possible
-            const match = file.name.match(/(\d{6})/);
-            if (match) {
-                document.getElementById('monthTag').value = match[1];
-            }
-        }
-
-        async function uploadFile() {
-            if (!selectedFile) {
-                showStatus('Please select a file', 'danger');
-                return;
-            }
-
-            const monthTag = document.getElementById('monthTag').value;
-            const airline = document.getElementById('airline').value;
-
-            if (!monthTag || monthTag.length !== 6) {
-                showStatus('Please enter valid month (YYYYMM)', 'danger');
-                return;
-            }
-
-            if (!airline) {
-                showStatus('Please select an airline', 'danger');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('month_tag', monthTag);
-            formData.append('airline', airline);
-
-            showStatus('Uploading...', 'info');
-
-            try {
-                const response = await fetch('/admin/api/upload-bid-packet', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showStatus('Upload successful!', 'success');
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showStatus(result.error || 'Upload failed', 'danger');
-                }
-            } catch (error) {
-                showStatus('Upload error: ' + error, 'danger');
-            }
-        }
-
-        async function deletePacket(monthTag, airline) {
-            if (!confirm(`Delete bid packet for ${airline} ${monthTag}?`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/admin/api/delete-bid-packet/${monthTag}/${airline}`, {
-                    method: 'DELETE'
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    location.reload();
-                } else {
-                    alert(result.error || 'Delete failed');
-                }
-            } catch (error) {
-                alert('Delete error: ' + error);
-            }
-        }
-
-        function downloadPacket(monthTag, airline) {
-            window.location.href = `/admin/api/download-bid-packet/${monthTag}/${airline}`;
-        }
-
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('uploadStatus');
-            statusDiv.className = `alert alert-${type}`;
-            statusDiv.textContent = message;
-            statusDiv.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
-    """
+    return render_template(
+        "admin/dashboard.html",
+        packets=packets,
+        contracts=contracts,
+        storage_mb=storage_mb,
+        unique_airlines=unique_airlines,
+        metrics={"uploads": uploads_count, "deletes": deletes_count},
+        allowed_extensions=list(AdminConfig.ALLOWED_EXTENSIONS),
+    )
 
 
-    # Calculate statistics
-    storage_mb = sum(p.get('size_mb', 0) for p in packets) if packets else 0
-    storage_mb = round(storage_mb, 1)
-
-    airlines = set(p.get('airline', '') for p in packets if p.get('airline'))
-    unique_airlines = len(airlines)
-
-
-    # Calculate statistics
-    storage_mb = sum(p.get('size_mb', 0) for p in packets) if packets else 0
-    storage_mb = round(storage_mb, 1)
-
-    airlines = set(p.get('airline', '') for p in packets if p.get('airline'))
-    unique_airlines = len(airlines)
-
-    return render_template_string(dashboard_html,
-                                  packets=packets,
-                                  contracts=contracts,
-                                  storage_mb=storage_mb,
-                                  unique_airlines=unique_airlines)
+@admin_bp.route("/users")
+@require_bearer_token
+def manage_users():
+    users = User.query.order_by(User.email).all()
+    return render_template("admin/users.html", users=users)
 
 
-# ============================================
-# API ROUTES
-# ============================================
+@admin_bp.route("/api/update-user/<user_id>", methods=["POST"])
+@require_bearer_token
+def api_update_user(user_id: str):
+    user = User.query.get_or_404(user_id)
+    role = request.form.get("role")
+    active = request.form.get("is_active")
+    if role:
+        user.role = role
+    if active is not None:
+        user.is_active = active.lower() in {"true", "1", "yes", "on"}
+    db.session.commit()
+    log_action("update_user", user_id, session.get("admin_token"))
+    return jsonify({"success": True})
 
 
-@admin_bp.route('/api/upload-bid-packet', methods=['POST'])
+@admin_bp.route("/logs")
+@require_bearer_token
+def view_logs():
+    logs = (
+        AdminActionLog.query.order_by(AdminActionLog.timestamp.desc())
+        .limit(100)
+        .all()
+    )
+    return render_template("admin/logs.html", logs=logs)
+
+
+@admin_bp.route("/api/upload-bid-packet", methods=["POST"])
 @require_bearer_token
 def api_upload_bid_packet():
-    """API endpoint for bid packet upload"""
+    token = session.get("admin_token") or request.headers.get("Authorization", "")[7:]
+    if not check_rate_limit(token):
+        return jsonify({"success": False, "error": "Rate limit exceeded"}), 429
 
-    if not BidPacketManager:
-        return jsonify({
-            'success': False,
-            'error': 'BidPacketManager not available'
-        }), 500
+    file = request.files.get("file")
+    month_tag = request.form.get("month_tag")
+    airline = request.form.get("airline")
 
-    try:
-        manager = BidPacketManager()
+    if not file:
+        return jsonify({"success": False, "error": "No file provided"}), 400
+    if not month_tag or not validate_month_tag(month_tag):
+        return jsonify({"success": False, "error": "Invalid month_tag"}), 400
+    if not airline:
+        airline = ""
 
-        file = request.files.get('file')
-        month_tag = request.form.get('month_tag')
-        airline = request.form.get('airline')
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in AdminConfig.ALLOWED_EXTENSIONS:
+        return jsonify({"success": False, "error": "Invalid file type"}), 400
 
-        if not file:
-            return jsonify({
-                'success': False,
-                'error': 'No file provided'
-            }), 400
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+    if size > AdminConfig.MAX_FILE_SIZE:
+        return jsonify({"success": False, "error": "File too large"}), 400
 
+<<<<<<< HEAD
         if not month_tag:
             return jsonify({
                 'success': False,
@@ -604,32 +338,12 @@ def api_upload_bid_packet():
                 'error': 'Airline is required'
             }), 400
 
-        # Check if a bid packet already exists for this month and airline
-        existing = None
-        if BidPacket is not None and db is not None:
-            query = BidPacket.query.filter_by(month_tag=month_tag)
-            if hasattr(BidPacket, 'airline'):
-                query = query.filter_by(airline=airline)
-            existing = query.first()
+        if not check_rate_limit():
+            return jsonify({
+                'success': False,
+                'error': 'Rate limit exceeded'
+            }), 429
 
-        if existing:
-            # Update existing record instead of failing due to unique constraint
-            file_data = file.read()
-            existing.filename = file.filename
-            if hasattr(existing, 'file_data'):
-                existing.file_data = file_data
-            if hasattr(existing, 'pdf_data'):
-                existing.pdf_data = file_data
-            if hasattr(existing, 'file_size'):
-                existing.file_size = len(file_data)
-            existing.upload_date = datetime.utcnow()
-            if hasattr(existing, 'airline'):
-                existing.airline = airline
-            db.session.commit()
-            logger.info(f"Bid packet updated: {airline} {month_tag}")
-            return jsonify({'success': True, 'updated': True}), 200
-
-        # No existing record; proceed with standard upload
         result = manager.upload_bid_packet(file, month_tag, airline)
 
         if result['success']:
@@ -641,8 +355,187 @@ def api_upload_bid_packet():
     except Exception as e:
         logger.error(f"Upload error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+||||||| 9ab61b0
+        if not month_tag:
+            return jsonify({
+                'success': False,
+                'error': 'Month tag is required'
+            }), 400
+
+        if not airline:
+            return jsonify({
+                'success': False,
+                'error': 'Airline is required'
+            }), 400
+
+        result = manager.upload_bid_packet(file, month_tag, airline)
+
+        if result['success']:
+            logger.info(f"Bid packet uploaded: {airline} {month_tag}")
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+
+    except Exception as e:
+        logger.error(f"Upload error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+=======
+    data = file.read()
+    packet = BidPacket(
+        month_tag=month_tag,
+        filename=file.filename,
+        airline=airline,
+        pdf_data=data,
+        file_size=size,
+    )
+    db.session.add(packet)
+    db.session.commit()
+    log_action("upload_bid", f"{airline}-{month_tag}", token)
+    return jsonify({"success": True, "stored": month_tag})
+>>>>>>> pr-18
 
 
+<<<<<<< HEAD
+@admin_bp.route('/api/upload-contract', methods=['POST'])
+@require_bearer_token
+def api_upload_contract():
+    """API endpoint for contract upload"""
+
+    if not BidPacketManager:
+        return jsonify({
+            'success': False,
+            'error': 'BidPacketManager not available'
+        }), 500
+
+    try:
+        manager = BidPacketManager()
+
+        file = request.files.get('file')
+        airline = request.form.get('airline')
+        version = request.form.get('version')
+
+        if not file:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
+
+        if not airline:
+            return jsonify({
+                'success': False,
+                'error': 'Airline is required'
+            }), 400
+
+        if not check_rate_limit():
+            return jsonify({
+                'success': False,
+                'error': 'Rate limit exceeded'
+            }), 429
+
+        result = manager.upload_contract(file, airline, version)
+
+        if result['success']:
+            logger.info(f"Contract uploaded: {airline}")
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+
+    except Exception as e:
+        logger.error(f"Contract upload error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin_bp.route('/api/delete-bid-packet/<month_tag>/<airline>',
+                methods=['DELETE'])
+@require_bearer_token
+def api_delete_bid_packet(month_tag: str, airline: str):
+    """API endpoint to delete bid packet"""
+
+    if not BidPacketManager:
+        return jsonify({
+            'success': False,
+            'error': 'BidPacketManager not available'
+        }), 500
+
+    try:
+        manager = BidPacketManager()
+        result = manager.delete_bid_packet(month_tag, airline)
+
+        if result['success']:
+            logger.info(f"Bid packet deleted: {airline} {month_tag}")
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+
+    except Exception as e:
+        logger.error(f"Delete error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin_bp.route('/api/download-bid-packet/<month_tag>/<airline>')
+@require_bearer_token
+def api_download_bid_packet(month_tag: str, airline: str):
+    """API endpoint to download bid packet"""
+
+    if not BidPacketManager:
+        return jsonify({
+            'success': False,
+            'error': 'BidPacketManager not available'
+        }), 500
+
+    try:
+        manager = BidPacketManager()
+        file_data = manager.get_bid_packet_file(month_tag, airline)
+
+        if file_data:
+            from flask import Response
+            data, filename = file_data
+            return Response(data,
+                            mimetype='application/pdf',
+                            headers={
+                                'Content-Disposition':
+                                f'attachment; filename={filename}'
+                            })
+        else:
+            return jsonify({'error': 'File not found'}), 404
+
+    except Exception as e:
+        logger.error(f"Download error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@admin_bp.route('/api/list-bid-packets')
+@require_bearer_token
+def api_list_bid_packets():
+    """API endpoint to list all bid packets"""
+
+    if not BidPacketManager:
+        return jsonify({
+            'success': False,
+            'error': 'BidPacketManager not available'
+        }), 500
+
+    try:
+        manager = BidPacketManager()
+        packets = manager.get_available_bid_packets()
+        return jsonify({
+            'success': True,
+            'packets': packets,
+            'count': len(packets)
+        }), 200
+
+    except Exception as e:
+        logger.error(f"List error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================
+# LEGACY COMPATIBILITY
+# ============================================
+
+
+@admin_bp.route('/upload-bid', methods=['POST'])
+||||||| 9ab61b0
 @admin_bp.route('/api/upload-contract', methods=['POST'])
 @require_bearer_token
 def api_upload_contract():
@@ -776,11 +669,107 @@ def api_list_bid_packets():
 
 
 @admin_bp.route('/upload-bid', methods=['POST'])
+=======
+@admin_bp.route("/upload-bid", methods=["POST"])
+>>>>>>> pr-18
 @require_bearer_token
 def legacy_upload_bid():
-    """Legacy upload endpoint for backward compatibility"""
-    return api_upload_bid_packet()
+    resp = api_upload_bid_packet()
+    status = resp[1] if isinstance(resp, tuple) else resp.status_code
+    if status == 200:
+        data = resp[0].get_json() if isinstance(resp, tuple) else resp.get_json()
+        return jsonify({"status": "ok", "stored": data.get("stored")}), 200
+    return resp
 
 
-# Export the blueprint
+@admin_bp.route(
+    "/api/delete-bid-packet/<month_tag>/<airline>", methods=["DELETE"]
+)
+@require_bearer_token
+def api_delete_bid_packet(month_tag: str, airline: str):
+    packet = BidPacket.query.filter_by(month_tag=month_tag, airline=airline).first()
+    if not packet:
+        return jsonify({"success": False, "error": "Packet not found"}), 404
+    db.session.delete(packet)
+    db.session.commit()
+    log_action("delete_bid", f"{airline}-{month_tag}", session.get("admin_token"))
+    return jsonify({"success": True})
+
+
+@admin_bp.route(
+    "/api/download-bid-packet/<month_tag>/<airline>", methods=["GET"]
+)
+@require_bearer_token
+def api_download_bid_packet(month_tag: str, airline: str):
+    packet = BidPacket.query.filter_by(month_tag=month_tag, airline=airline).first()
+    if not packet:
+        abort(404)
+    return send_file(
+        io.BytesIO(packet.pdf_data),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=packet.filename,
+    )
+
+
+@admin_bp.route("/api/upload-contract", methods=["POST"])
+@require_bearer_token
+def api_upload_contract():
+    token = session.get("admin_token") or request.headers.get("Authorization", "")[7:]
+    if not check_rate_limit(token):
+        return jsonify({"success": False, "error": "Rate limit exceeded"}), 429
+
+    file = request.files.get("file")
+    airline = request.form.get("airline")
+    version = request.form.get("version") or datetime.utcnow().strftime("%Y%m%d")
+
+    if not file:
+        return jsonify({"success": False, "error": "No file provided"}), 400
+    if not airline:
+        return jsonify({"success": False, "error": "Airline is required"}), 400
+
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in AdminConfig.ALLOWED_EXTENSIONS:
+        return jsonify({"success": False, "error": "Invalid file type"}), 400
+
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+    if size > AdminConfig.MAX_FILE_SIZE:
+        return jsonify({"success": False, "error": "File too large"}), 400
+
+    os.makedirs(contracts_dir(), exist_ok=True)
+    filename = f"contract_{airline}_{version}.pdf"
+    file.save(os.path.join(contracts_dir(), filename))
+    log_action("upload_contract", f"{airline}-{version}", token)
+    return jsonify({"success": True})
+
+
+@admin_bp.route("/api/list-contracts")
+@require_bearer_token
+def api_list_contracts():
+    return jsonify({"success": True, "contracts": get_contracts()})
+
+
+@admin_bp.route("/api/download-contract/<filename>")
+@require_bearer_token
+def api_download_contract(filename: str):
+    path = os.path.join(contracts_dir(), filename)
+    if not os.path.exists(path):
+        abort(404)
+    return send_file(path, as_attachment=True)
+
+
+@admin_bp.route("/api/delete-contract/<filename>", methods=["DELETE"])
+@require_bearer_token
+def api_delete_contract(filename: str):
+    path = os.path.join(contracts_dir(), filename)
+    if not os.path.exists(path):
+        return jsonify({"success": False, "error": "Not found"}), 404
+    os.remove(path)
+    log_action("delete_contract", filename, session.get("admin_token"))
+    return jsonify({"success": True})
+
+
+# Export blueprint
 unified_admin = admin_bp
