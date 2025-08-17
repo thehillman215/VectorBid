@@ -9,3 +9,5 @@ pytest>=8,<9
 httpx>=0.28,<0.29
 
 watchfiles>=0.22,<1
+
+uvicorn>=0.29
