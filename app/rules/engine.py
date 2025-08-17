@@ -164,3 +164,54 @@ if not callable(globals().get("validate_feasibility")):
             if _vb_extract_rest_hours(p) < 10.0:
                 out.append({"id":"rest_min_10","pairing_id":_vb_pairing_id(p),"reason":"Rest < 10h","check":"pairing.rest_hours >= 10","severity":"hard"})
         return out
+
+# ------------------------------------------------------------
+# Recursive deep-merge + multi-pack support (back-compat safe)
+# ------------------------------------------------------------
+from typing import Sequence as _VB_Seq
+
+# deep merge utility (dicts only); overlay wins for scalars/lists
+try:
+    _vb_deep_update  # type: ignore[name-defined]
+except NameError:
+    def _vb_deep_update(base: dict, overlay: dict) -> dict:
+        for k, v in (overlay or {}).items():
+            if k in base and isinstance(base[k], dict) and isinstance(v, dict):
+                _vb_deep_update(base[k], v)
+            else:
+                base[k] = v
+        return base
+
+# Keep a handle to the existing *single-path* loader we already have
+try:
+    _vb_single_loader = load_rule_pack  # type: ignore[name-defined]
+except Exception:  # pragma: no cover
+    _vb_single_loader = None  # type: ignore
+
+def load_rule_pack(path: str | _VB_Seq[str], force_reload: bool = False):  # type: ignore[override]
+    """
+    Extended loader:
+      - If 'path' is a string: delegate to the existing single-pack loader.
+      - If 'path' is a sequence of paths: load each pack, then deep-merge
+        the resulting dicts so nested rule fields are preserved.
+    Always returns a unified {"hard": [...], "soft": [...]} and falls back
+    to DEFAULT_RULES if needed.
+    """
+    # single pack: use the existing stable implementation
+    if not isinstance(path, (list, tuple)):
+        if _vb_single_loader is not None:
+            return _vb_single_loader(path, force_reload=force_reload)  # type: ignore[misc]
+        # Extreme fallback
+        return _vb_load_default_rules_from_file()
+
+    # multi-pack: deep-merge all, then normalize shape
+    acc: dict = {}
+    for p in path:
+        try:
+            d = _vb_single_loader(p, force_reload=force_reload) if _vb_single_loader else {}
+        except Exception:
+            d = {}
+        acc = _vb_deep_update(acc or {}, d or {})
+
+    merged = _vb_merge_rule_dict(acc)
+    return merged if merged.get("hard") else DEFAULT_RULES
