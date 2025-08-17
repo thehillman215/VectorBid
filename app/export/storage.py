@@ -44,12 +44,10 @@ def write_artifact(artifact: ArtifactLike, base_dir: Path) -> Path:
     data = _to_dict(artifact)
 
     # ensure deterministic, truthful export_hash
-    export_hash = data.get("export_hash") or _compute_hash(data)
-    # if present but mismatched, correct it
-    if data.get("export_hash") != export_hash:
-        data["export_hash"] = export_hash
-    else:
-        data["export_hash"] = export_hash
+    # always recompute the hash from core fields so a stale or missing
+    # value on the input artifact cannot leak through.
+    export_hash = _compute_hash(data)
+    data["export_hash"] = export_hash
 
     airline = _sanitize_airline(data.get("airline"))
     month = _sanitize_month(data.get("month"))
