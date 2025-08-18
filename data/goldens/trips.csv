@@ -1,0 +1,3 @@
+trip_id,pairing_id,day,origin,destination
+EWR-73N-001-T1,EWR-73N-001,5,DEN,EWR
+EWR-73N-001-T2,EWR-73N-001,3,LAX,EWR
