@@ -15,13 +15,15 @@ class IngestionService:
 
     def __init__(self):
         self.supported_formats = {
-            '.csv': self._parse_csv,
-            '.jsonl': self._parse_jsonl,
-            '.pdf': self._parse_pdf,
-            '.txt': self._parse_txt
+            ".csv": self._parse_csv,
+            ".jsonl": self._parse_jsonl,
+            ".pdf": self._parse_pdf,
+            ".txt": self._parse_txt,
         }
 
-    def ingest(self, file_content: bytes, filename: str, request: IngestionRequest) -> IngestionResponse:
+    def ingest(
+        self, file_content: bytes, filename: str, request: IngestionRequest
+    ) -> IngestionResponse:
         """Ingest a bid package file and return parsed summary."""
         try:
             # Determine file format
@@ -30,7 +32,7 @@ class IngestionService:
                 return IngestionResponse(
                     success=False,
                     summary={},
-                    error=f"Unsupported file format: {file_ext}. Supported: {list(self.supported_formats.keys())}"
+                    error=f"Unsupported file format: {file_ext}. Supported: {list(self.supported_formats.keys())}",
                 )
 
             # Parse the file
@@ -52,8 +54,8 @@ class IngestionService:
                     "base": request.base,
                     "fleet": request.fleet,
                     "seat": request.seat,
-                    "parsed_data": summary
-                }
+                    "parsed_data": summary,
+                },
             )
 
             package_id = bid_package_store.store(bid_package, file_content)
@@ -64,14 +66,12 @@ class IngestionService:
             return IngestionResponse(
                 success=True,
                 summary=summary,
-                message=f"Successfully ingested {filename}"
+                message=f"Successfully ingested {filename}",
             )
 
         except Exception as e:
             return IngestionResponse(
-                success=False,
-                summary={},
-                error=f"Failed to ingest file: {str(e)}"
+                success=False, summary={}, error=f"Failed to ingest file: {str(e)}"
             )
 
     def _parse_csv(self, file_content: bytes, filename: str) -> list[Pairing]:
@@ -116,9 +116,15 @@ class IngestionService:
         # For now, return mock data
         return self._create_mock_trips()
 
-    def _create_summary(self, parsed_data: Any, request: IngestionRequest) -> dict[str, Any]:
+    def _create_summary(
+        self, parsed_data: Any, request: IngestionRequest
+    ) -> dict[str, Any]:
         """Create a summary from parsed data."""
-        if isinstance(parsed_data, list) and parsed_data and isinstance(parsed_data[0], Pairing):
+        if (
+            isinstance(parsed_data, list)
+            and parsed_data
+            and isinstance(parsed_data[0], Pairing)
+        ):
             # PBS parser format
             pairings = parsed_data
             trips = []
@@ -131,9 +137,15 @@ class IngestionService:
                 "pairings": len(pairings),
                 "date_span": f"{request.month}",
                 "credit_total": self._estimate_credit_total(trips),
-                "bases": list({p.pairing_id.split('-')[0] for p in pairings if '-' in p.pairing_id}),
+                "bases": list(
+                    {
+                        p.pairing_id.split("-")[0]
+                        for p in pairings
+                        if "-" in p.pairing_id
+                    }
+                ),
                 "fleet": request.fleet,
-                "format": "pbs_parser"
+                "format": "pbs_parser",
             }
         else:
             # Generic format (from PDF/TXT parsers)
@@ -146,7 +158,7 @@ class IngestionService:
                 "credit_total": self._estimate_credit_total_generic(trips),
                 "bases": [request.base],
                 "fleet": request.fleet,
-                "format": "generic"
+                "format": "generic",
             }
 
     def _estimate_credit_total(self, trips: list[Trip]) -> float:
@@ -169,8 +181,20 @@ class IngestionService:
         from app.services.pbs_parser.contracts import Trip
 
         trips = [
-            Trip(trip_id="MOCK-001", pairing_id="MOCK-PAIR-001", day=1, origin="SFO", destination="LAX"),
-            Trip(trip_id="MOCK-002", pairing_id="MOCK-PAIR-001", day=2, origin="LAX", destination="SFO"),
+            Trip(
+                trip_id="MOCK-001",
+                pairing_id="MOCK-PAIR-001",
+                day=1,
+                origin="SFO",
+                destination="LAX",
+            ),
+            Trip(
+                trip_id="MOCK-002",
+                pairing_id="MOCK-PAIR-001",
+                day=2,
+                origin="LAX",
+                destination="SFO",
+            ),
         ]
 
         return [
@@ -179,7 +203,7 @@ class IngestionService:
                 base="SFO",
                 fleet="737",
                 month="2025-09-01",
-                trips=trips
+                trips=trips,
             )
         ]
 
@@ -191,15 +215,15 @@ class IngestionService:
                 "days": 2,
                 "credit_hours": 10.5,
                 "route": "SFO-LAX-SFO",
-                "equipment": "737"
+                "equipment": "737",
             },
             {
                 "trip_id": "MOCK-002",
                 "days": 3,
                 "credit_hours": 15.2,
                 "route": "SFO-ORD-SFO",
-                "equipment": "737"
-            }
+                "equipment": "737",
+            },
         ]
 
 

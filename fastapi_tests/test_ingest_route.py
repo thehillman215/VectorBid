@@ -21,7 +21,7 @@ class TestIngestRoute:
             "base": "SFO",
             "fleet": "737",
             "seat": "FO",
-            "pilot_id": "pilot_001"
+            "pilot_id": "pilot_001",
         }
 
         response = client.post("/api/ingest", files=files, data=data)
@@ -46,7 +46,7 @@ EWR-73N-001,EWR,73N,2025-09-01"""
             "base": "EWR",
             "fleet": "73N",
             "seat": "FO",
-            "pilot_id": "pilot_001"
+            "pilot_id": "pilot_001",
         }
 
         # Test without mocking first to see if it works
@@ -62,14 +62,20 @@ EWR-73N-001,EWR,73N,2025-09-01"""
         """Test successful JSONL ingestion."""
         jsonl_content = """{"pairing_id": "SFO-737-001", "base": "SFO", "fleet": "737", "month": "2025-09-01", "trips": []}"""
 
-        files = {"file": ("test.jsonl", io.BytesIO(jsonl_content.encode()), "application/jsonl")}
+        files = {
+            "file": (
+                "test.jsonl",
+                io.BytesIO(jsonl_content.encode()),
+                "application/jsonl",
+            )
+        }
         data = {
             "airline": "UAL",
             "month": "2025-09",
             "base": "SFO",
             "fleet": "737",
             "seat": "CA",
-            "pilot_id": "pilot_002"
+            "pilot_id": "pilot_002",
         }
 
         response = client.post("/api/ingest", files=files, data=data)
@@ -90,7 +96,7 @@ EWR-73N-001,EWR,73N,2025-09-01"""
             "base": "DEN",
             "fleet": "787",
             "seat": "FO",
-            "pilot_id": "pilot_003"
+            "pilot_id": "pilot_003",
         }
 
         response = client.post("/api/ingest", files=files, data=data)
@@ -108,7 +114,7 @@ EWR-73N-001,EWR,73N,2025-09-01"""
             "base": "SFO",
             "fleet": "737",
             "seat": "FO",
-            "pilot_id": "pilot_001"
+            "pilot_id": "pilot_001",
         }
 
         response = client.post("/api/ingest", data=data)
@@ -124,7 +130,7 @@ EWR-73N-001,EWR,73N,2025-09-01"""
             "base": "SFO",
             "fleet": "737",
             "seat": "FO",
-            "pilot_id": "pilot_001"
+            "pilot_id": "pilot_001",
         }
 
         response = client.post("/api/ingest", files=files, data=data)
@@ -136,14 +142,20 @@ EWR-73N-001,EWR,73N,2025-09-01"""
 
     def test_ingest_unsupported_format(self):
         """Test ingestion with unsupported file format."""
-        files = {"file": ("test.doc", io.BytesIO(b"Mock Word document"), "application/msword")}
+        files = {
+            "file": (
+                "test.doc",
+                io.BytesIO(b"Mock Word document"),
+                "application/msword",
+            )
+        }
         data = {
             "airline": "UAL",
             "month": "2025-09",
             "base": "SFO",
             "fleet": "737",
             "seat": "FO",
-            "pilot_id": "pilot_001"
+            "pilot_id": "pilot_001",
         }
 
         response = client.post("/api/ingest", files=files, data=data)
@@ -178,7 +190,7 @@ EWR-73N-001,EWR,73N,2025-09-01"""
             "base": "SFO",
             "fleet": "737",
             "seat": "FO",
-            "pilot_id": "pilot_001"
+            "pilot_id": "pilot_001",
         }
 
         response = client.post("/api/ingest", files=files, data=data)

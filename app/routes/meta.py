@@ -14,7 +14,7 @@ def meta_health():
         "service": "api",
         "version": "1.0.0",
         "py": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-        "now": datetime.now().isoformat()
+        "now": datetime.now().isoformat(),
     }
 
 
@@ -26,23 +26,32 @@ def meta_parsers():
             {
                 "extension": ".csv",
                 "description": "Comma-separated values with pairings and trips",
-                "fields": ["pairing_id", "base", "fleet", "month", "trip_id", "day", "origin", "destination"]
+                "fields": [
+                    "pairing_id",
+                    "base",
+                    "fleet",
+                    "month",
+                    "trip_id",
+                    "day",
+                    "origin",
+                    "destination",
+                ],
             },
             {
                 "extension": ".jsonl",
                 "description": "JSON Lines format with pairing objects",
-                "fields": ["pairing_id", "base", "fleet", "month", "trips"]
+                "fields": ["pairing_id", "base", "fleet", "month", "trips"],
             },
             {
                 "extension": ".pdf",
                 "description": "PDF bid packages (United Airlines format supported)",
-                "fields": ["trip_id", "days", "credit_hours", "route", "equipment"]
+                "fields": ["trip_id", "days", "credit_hours", "route", "equipment"],
             },
             {
                 "extension": ".txt",
                 "description": "Text files with trip information",
-                "fields": ["trip_id", "days", "credit_hours", "route"]
-            }
+                "fields": ["trip_id", "days", "credit_hours", "route"],
+            },
         ],
         "required_fields": {
             "airline": "Airline code (e.g., UAL)",
@@ -50,7 +59,7 @@ def meta_parsers():
             "base": "Pilot base (e.g., SFO)",
             "fleet": "Aircraft fleet (e.g., 737)",
             "seat": "Pilot seat (FO or CA)",
-            "pilot_id": "Pilot identifier"
+            "pilot_id": "Pilot identifier",
         },
-        "parser_version": "1.0.0"
+        "parser_version": "1.0.0",
     }

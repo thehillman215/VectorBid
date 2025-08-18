@@ -52,19 +52,22 @@ class BidPackageStore:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT OR REPLACE INTO bid_packages
             (id, pilot_id, airline, month, meta, created_at, hash)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            package_id,
-            bid_package.pilot_id,
-            bid_package.airline,
-            bid_package.month,
-            json.dumps(bid_package.meta),
-            bid_package.created_at.isoformat(),
-            file_hash
-        ))
+        """,
+            (
+                package_id,
+                bid_package.pilot_id,
+                bid_package.airline,
+                bid_package.month,
+                json.dumps(bid_package.meta),
+                bid_package.created_at.isoformat(),
+                file_hash,
+            ),
+        )
 
         conn.commit()
         conn.close()
@@ -76,10 +79,13 @@ class BidPackageStore:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT id, pilot_id, airline, month, meta, created_at, hash
             FROM bid_packages WHERE id = ?
-        """, (package_id,))
+        """,
+            (package_id,),
+        )
 
         row = cursor.fetchone()
         conn.close()
@@ -94,7 +100,7 @@ class BidPackageStore:
             month=row[3],
             meta=json.loads(row[4]),
             created_at=datetime.fromisoformat(row[5]),
-            hash=row[6]
+            hash=row[6],
         )
 
     def list_by_pilot(self, pilot_id: str) -> list[BidPackage]:
@@ -102,10 +108,13 @@ class BidPackageStore:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT id, pilot_id, airline, month, meta, created_at, hash
             FROM bid_packages WHERE pilot_id = ? ORDER BY created_at DESC
-        """, (pilot_id,))
+        """,
+            (pilot_id,),
+        )
 
         rows = cursor.fetchall()
         conn.close()
@@ -118,7 +127,7 @@ class BidPackageStore:
                 month=row[3],
                 meta=json.loads(row[4]),
                 created_at=datetime.fromisoformat(row[5]),
-                hash=row[6]
+                hash=row[6],
             )
             for row in rows
         ]

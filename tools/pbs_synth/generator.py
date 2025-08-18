@@ -18,7 +18,7 @@ def generate_pairings(
     rng = Random(seed)
     pairings: list[Pairing] = []
     for i in range(count):
-        pairing_id = f"{base}-{fleet}-{i+1:03d}"
+        pairing_id = f"{base}-{fleet}-{i + 1:03d}"
         trips: list[Trip] = []
         for t in range(rng.randint(1, 3)):
             day = rng.randint(1, 28)
@@ -27,7 +27,7 @@ def generate_pairings(
             destination = rng.choice(dest_choices)
             trips.append(
                 Trip(
-                    trip_id=f"{pairing_id}-T{t+1}",
+                    trip_id=f"{pairing_id}-T{t + 1}",
                     pairing_id=pairing_id,
                     day=day,
                     origin=origin,
