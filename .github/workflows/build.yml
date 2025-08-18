@@ -2,6 +2,7 @@ name: Build and Push
 on:
   push:
     branches: [staging, main]
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -13,14 +14,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set image tag
+      - name: Compute Docker tags
         run: |
-          SHA="${GITHUB_SHA::7}"
-          REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-ci}}"
-          REF="${REF//\//-}"
-          REF="$(echo "$REF" | sed 's/[^A-Za-z0-9_.-]/-/g')"
-          REF="${REF:-ci}"
-          echo "IMAGE_TAG=build-${REF}-${SHA}" >> "$GITHUB_ENV"
+          SHA7="${GITHUB_SHA::7}"
+
+          # Base name: pr-<num> for PRs, else sanitized branch
+          if [[ "$GITHUB_REF" == refs/pull/* ]]; then
+            PR_NUM="$(echo "$GITHUB_REF" | cut -d/ -f3)"
+            BASE="pr-${PR_NUM}"
+          else
+            REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-ci}}"
+            REF="${REF//\//-}"
+            REF="$(echo "$REF" | sed 's/[^A-Za-z0-9_.-]/-/g')"
+            BASE="${REF:-ci}"
+          fi
+
+          # Always prefix to avoid leading dash issues
+          TAG1="build-${BASE}"
+          TAG2="build-${BASE}-${SHA7}"
+
+          echo "TAG1=${TAG1}" >> "$GITHUB_ENV"
+          echo "TAG2=${TAG2}" >> "$GITHUB_ENV"
 
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
@@ -35,5 +49,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/vectorbid:${{ env.IMAGE_TAG }}
+          # Repo must be lowercase; pin path explicitly
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/vectorbid:${{ env.TAG1 }}
+            ghcr.io/${{ github.repository_owner }}/vectorbid:${{ env.TAG2 }}
