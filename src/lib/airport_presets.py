@@ -169,7 +169,7 @@ def test_persona_scoring():
         # Sort by boost
         results.sort(key=lambda x: x[2], reverse=True)
 
-        for trip_id, routing, boost, reasoning in results:
+        for trip_id, _routing, boost, reasoning in results:
             reasoning_str = (
                 "; ".join(reasoning) if reasoning else "no international preference"
             )

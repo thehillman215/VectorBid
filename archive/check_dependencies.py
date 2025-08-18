@@ -115,7 +115,7 @@ def main():
             name: str
             value: TestEnum
 
-        test_obj = TestClass("test", TestEnum.VALUE)
+        TestClass("test", TestEnum.VALUE)
         print("✅ Dataclass and Enum creation working")
 
     except Exception as e:
@@ -125,7 +125,7 @@ def main():
         # Test Flask import and basic setup
         from flask import Flask
 
-        app = Flask(__name__)
+        Flask(__name__)
         print("✅ Flask application creation working")
 
     except Exception as e:

@@ -73,10 +73,10 @@ def enhanced_international_scoring(trip, preferences_lower):
     if len(found_destinations) > 1:
         total_boost += 10  # Multi-city international bonus
         key_factors.append("multi_city_international")
-        reasoning_parts.append(f"multi-city international route")
+        reasoning_parts.append("multi-city international route")
     elif len(found_destinations) == 1:
         key_factors.append("international_route")
-        reasoning_parts.append(f"international route")
+        reasoning_parts.append("international route")
 
     # Apply preference-based multipliers
     if found_destinations:  # Only boost if actually international
@@ -163,7 +163,7 @@ def test_enhanced_scoring():
         # Sort by boost (descending)
         results.sort(key=lambda x: x[2], reverse=True)
 
-        for trip_id, routing, boost, reasoning in results:
+        for trip_id, _routing, boost, reasoning in results:
             reasoning_str = "; ".join(reasoning) if reasoning else "domestic route"
             print(f"  {trip_id} (+{boost:2d}): {reasoning_str}")
 

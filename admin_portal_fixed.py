@@ -58,13 +58,13 @@ def dashboard():
     <style>
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
         .dashboard-card { background: white; border-radius: 15px; padding: 2rem; margin: 2rem 0; }
-        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; 
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
                      padding: 1.5rem; border-radius: 10px; text-align: center; margin-bottom: 1rem; }
         .stat-number { font-size: 2.5rem; font-weight: bold; }
-        .upload-zone { 
-            border: 2px dashed #667eea; 
-            border-radius: 10px; 
-            padding: 2rem; 
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 2rem;
             text-align: center;
             background: #f8f9fa;
             cursor: pointer;
@@ -75,7 +75,7 @@ def dashboard():
             justify-content: center;
             align-items: center;
         }
-        .upload-zone:hover { 
+        .upload-zone:hover {
             background: #e9ecef;
             border-color: #764ba2;
         }
@@ -153,7 +153,7 @@ def dashboard():
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Month (YYYYMM) *</label>
-                                    <input type="text" class="form-control" id="month_tag" 
+                                    <input type="text" class="form-control" id="month_tag"
                                            placeholder="202502" pattern="[0-9]{6}" maxlength="6" required>
                                 </div>
                                 <div class="upload-zone" id="bidUploadZone">
@@ -190,7 +190,7 @@ def dashboard():
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Contract Version</label>
-                                    <input type="text" class="form-control" id="contract_version" 
+                                    <input type="text" class="form-control" id="contract_version"
                                            placeholder="2024-2028 (optional)">
                                 </div>
                                 <div class="upload-zone" id="contractUploadZone">
@@ -498,7 +498,7 @@ def login():
     <title>Admin Login - VectorBid</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                min-height: 100vh; display: flex; align-items: center; }
         .login-card { background: white; border-radius: 15px; padding: 2rem; }
     </style>

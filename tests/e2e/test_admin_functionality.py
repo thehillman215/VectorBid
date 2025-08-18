@@ -94,7 +94,7 @@ class TestAdminFunctionality:
             "x-frame-options",
             "strict-transport-security",
         ]
-        present_headers = [h for h in security_headers if h in headers]
+        [h for h in security_headers if h in headers]
 
         # At least content-type should be set properly
         assert "content-type" in headers

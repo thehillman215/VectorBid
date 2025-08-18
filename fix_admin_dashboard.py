@@ -14,17 +14,17 @@ content = content.replace(old_airlines, new_airlines)
 
 # Now we need to add the calculations before the render_template_string call
 # Find the line "return render_template_string(dashboard_html,"
-import re
+import re  # noqa: E402
 
 # Add calculations before the return statement
 calculation_code = """
     # Calculate statistics
     storage_mb = sum(p.get('size_mb', 0) for p in packets) if packets else 0
     storage_mb = round(storage_mb, 1)
-    
+
     airlines = set(p.get('airline', '') for p in packets if p.get('airline'))
     unique_airlines = len(airlines)
-    
+
 """
 
 # Find where to insert the calculations

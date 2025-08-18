@@ -2,9 +2,7 @@
 Enhanced PBS System with Conflict Resolution
 """
 
-from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
-import re
 
 
 @dataclass
@@ -12,17 +10,16 @@ class ConflictResolution:
     """Represents a conflict with resolution options"""
 
     description: str
-    option_a: Dict
-    option_b: Dict
+    option_a: dict
+    option_b: dict
     recommendation: str
 
 
 def generate_advanced_pbs_strategy(
-    preferences_text: str, pilot_profile: Dict = None
-) -> Dict:
+    preferences_text: str, pilot_profile: dict = None
+) -> dict:
     """Generate PBS strategy with conflict detection"""
 
-    commands = []
     conflicts = []
     text_lower = preferences_text.lower()
 

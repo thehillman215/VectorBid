@@ -4,12 +4,11 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Union
 
 from app.generate.layers import _canonical_sha256  # consistent with generator
 from app.models import BidLayerArtifact
 
-ArtifactLike = Union[BidLayerArtifact, dict]
+ArtifactLike = BidLayerArtifact | dict
 
 _AIRLINE_RE = re.compile(r"^[A-Z0-9_-]{2,8}$")
 _MONTH_RE = re.compile(r"^\d{4}-\d{2}$")

@@ -1,8 +1,7 @@
 """Enhanced TXT parser with United Airlines support."""
 
-import re
-import io
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,7 @@ def parse_txt(blob: bytes) -> list[dict]:
 
         found_trips = []
 
-        for line_num, line in enumerate(lines, 1):
+        for _line_num, line in enumerate(lines, 1):
             line = line.strip()
             if not line or len(line) < 8:
                 continue

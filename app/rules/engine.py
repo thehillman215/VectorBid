@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
 from app.models import FeatureBundle
 
-DEFAULT_RULES: Dict[str, Any] = {
+DEFAULT_RULES: dict[str, Any] = {
     "hard": [
         {
             "id": "rest_min_10",
@@ -19,12 +19,12 @@ DEFAULT_RULES: Dict[str, Any] = {
     "soft": [],
 }
 
-_RULE_CACHE: Dict[str, Dict[str, Any]] = {}
+_RULE_CACHE: dict[str, dict[str, Any]] = {}
 
 
-def _merge_sections(data: Dict[str, Any]) -> Dict[str, Any]:
-    hard: list[Dict[str, Any]] = []
-    soft: list[Dict[str, Any]] = []
+def _merge_sections(data: dict[str, Any]) -> dict[str, Any]:
+    hard: list[dict[str, Any]] = []
+    soft: list[dict[str, Any]] = []
     for section in ("far117", "union"):
         sec = data.get(section) or {}
         hard.extend(sec.get("hard") or [])
@@ -32,7 +32,7 @@ def _merge_sections(data: Dict[str, Any]) -> Dict[str, Any]:
     return {"hard": hard, "soft": soft}
 
 
-def load_rule_pack(path: str, force_reload: bool = False) -> Dict[str, Any]:
+def load_rule_pack(path: str, force_reload: bool = False) -> dict[str, Any]:
     """Load a YAML rule pack and merge sections to hard/soft lists.
 
     Returns DEFAULT_RULES when the file is missing or malformed. Results are
@@ -68,8 +68,8 @@ def load_rule_pack(path: str, force_reload: bool = False) -> Dict[str, Any]:
 
 
 def validate_feasibility(
-    bundle: FeatureBundle, rules: Dict[str, Any]
-) -> Dict[str, Any]:
+    bundle: FeatureBundle, rules: dict[str, Any]
+) -> dict[str, Any]:
     """Very small feasibility check used by tests.
 
     Flags pairings that are red-eyes when the preference disallows them or
@@ -77,8 +77,8 @@ def validate_feasibility(
     ``feasible_pairings`` lists.
     """
 
-    violations: list[Dict[str, Any]] = []
-    feasible: list[Dict[str, Any]] = []
+    violations: list[dict[str, Any]] = []
+    feasible: list[dict[str, Any]] = []
 
     pref = bundle.preference_schema.model_dump()
     pairings = bundle.pairing_features.get("pairings", [])

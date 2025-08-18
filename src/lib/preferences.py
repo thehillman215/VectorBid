@@ -128,7 +128,7 @@ def test_preferences():
     print("=" * 50)
 
     # Test persona access
-    for persona_id, persona_data in FLYING_PERSONAS.items():
+    for _persona_id, persona_data in FLYING_PERSONAS.items():
         print(f"✓ {persona_data['name']}: {persona_data['description']}")
 
     # Test conversion function

@@ -2,10 +2,9 @@
 Subscription Management System for VectorBid
 """
 
+import json
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, Optional, List, Tuple
-import json
 from pathlib import Path
 
 
@@ -22,7 +21,7 @@ class SubscriptionManager:
         self.data_file = Path("data/subscriptions.json")
         self.data_file.parent.mkdir(exist_ok=True)
 
-    def create_new_user_subscription(self, user_id: str) -> Dict:
+    def create_new_user_subscription(self, user_id: str) -> dict:
         """Create a new free trial subscription"""
         subscription = {
             "user_id": user_id,
@@ -37,7 +36,7 @@ class SubscriptionManager:
         self._save_subscription(subscription)
         return subscription
 
-    def get_user_subscription(self, user_id: str) -> Optional[Dict]:
+    def get_user_subscription(self, user_id: str) -> dict | None:
         """Get user subscription"""
         subs = self._load_subscriptions()
 
@@ -46,7 +45,7 @@ class SubscriptionManager:
 
         return subs[user_id]
 
-    def check_feature_access(self, user_id: str, feature: str) -> Tuple[bool, str]:
+    def check_feature_access(self, user_id: str, feature: str) -> tuple[bool, str]:
         """Check if user has access to feature"""
         subscription = self.get_user_subscription(user_id)
 
@@ -56,7 +55,7 @@ class SubscriptionManager:
         # For MVP, all features available during trial
         return True, "Access granted"
 
-    def _save_subscription(self, subscription: Dict):
+    def _save_subscription(self, subscription: dict):
         """Save subscription to file"""
         subs = self._load_subscriptions()
         subs[subscription["user_id"]] = subscription
@@ -64,14 +63,14 @@ class SubscriptionManager:
         with open(self.data_file, "w") as f:
             json.dump(subs, f, indent=2)
 
-    def _load_subscriptions(self) -> Dict:
+    def _load_subscriptions(self) -> dict:
         """Load subscriptions from file"""
         if self.data_file.exists():
-            with open(self.data_file, "r") as f:
+            with open(self.data_file) as f:
                 return json.load(f)
         return {}
 
-    def get_pricing_page_data(self) -> Dict:
+    def get_pricing_page_data(self) -> dict:
         """Get pricing page data"""
         return {
             "tiers": [
