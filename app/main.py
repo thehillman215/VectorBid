@@ -50,6 +50,12 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/ping", tags=["Meta"])
+def ping() -> dict[str, str]:
+    """Simple liveness check."""
+    return {"ping": "pong"}
+
+
 @app.get("/schemas", tags=["Meta"])
 def get_all_schemas() -> dict[str, dict]:
     return {cls.__name__: cls.model_json_schema() for cls in MODELS}

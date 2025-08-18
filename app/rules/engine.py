@@ -5,8 +5,10 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from pydantic import ValidationError
 
 from app.models import FeatureBundle
+from app.rules.models import RulePack
 
 DEFAULT_RULES: dict[str, Any] = {
     "hard": [
@@ -54,7 +56,13 @@ def load_rule_pack(path: str, force_reload: bool = False) -> dict[str, Any]:
     try:
         with pth.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
-        merged = _merge_sections(data)
+        try:
+            rp = RulePack.model_validate(data)
+        except ValidationError as e:
+            logging.error("invalid rule pack %s: %s", path, e)
+            _RULE_CACHE[key] = DEFAULT_RULES
+            return DEFAULT_RULES
+        merged = _merge_sections(rp.model_dump())
         if not merged["hard"] or not merged["soft"]:
             logging.error("rule pack missing required keys")
             _RULE_CACHE[key] = DEFAULT_RULES
