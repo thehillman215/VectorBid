@@ -55,6 +55,9 @@ Homepage = "https://github.com/vectorbid/vectorbid"
 Repository = "https://github.com/vectorbid/vectorbid.git"
 Issues = "https://github.com/vectorbid/vectorbid/issues"
 
+[project.scripts]
+vb = "vb.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["*"]

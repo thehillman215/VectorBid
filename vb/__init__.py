@@ -1,0 +1,1 @@
+"""VectorBid command line interface."""
