@@ -173,7 +173,7 @@ def test_with_openai_api():
                 reasoning = result.get(
                     "reasoning", result.get("comment", "No reasoning")
                 )
-                print(f"  {i+1}. {trip_id} (Score: {score})")
+                print(f"  {i + 1}. {trip_id} (Score: {score})")
                 print(f"     → {reasoning}")
             print("-" * 40)
 

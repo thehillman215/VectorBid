@@ -25,13 +25,9 @@ class GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property = (
-            cls()
-        )
+        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property = cls()
 
-        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property.additional_properties = (
-            d
-        )
+        get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property.additional_properties = d
         return get_all_schemas_schemas_get_response_get_all_schemas_schemas_get_additional_property
 
     @property

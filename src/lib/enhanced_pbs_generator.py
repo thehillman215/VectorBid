@@ -601,7 +601,9 @@ class EnhancedPBSGenerator:
                 (
                     0
                     if cmd.command_type == CommandType.AVOID
-                    else 1 if cmd.command_type == CommandType.PREFER else 2
+                    else 1
+                    if cmd.command_type == CommandType.PREFER
+                    else 2
                 ),
             )
         )

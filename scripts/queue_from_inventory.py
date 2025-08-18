@@ -150,7 +150,7 @@ with out_csv.open("w", newline="") as f:
 with out_merge.open("w") as fm, out_hold.open("w") as fh:
     for r in rows:
         line = r["branch"]
-        comment = f'# {r["category"]} {r["risk"]} {r["merge_strategy"]}'
+        comment = f"# {r['category']} {r['risk']} {r['merge_strategy']}"
         if r["decision"] == "MERGE" and r["conflicts_expected"] == "no":
             fm.write(f"{line}  {comment}\n")
         elif r["decision"] == "MERGE" and r["conflicts_expected"] == "yes":

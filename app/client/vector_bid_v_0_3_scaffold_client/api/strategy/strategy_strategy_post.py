@@ -34,13 +34,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[
-    Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]
-]:
+) -> Optional[Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]]:
     if response.status_code == 200:
-        response_200 = StrategyStrategyPostResponseStrategyStrategyPost.from_dict(
-            response.json()
-        )
+        response_200 = StrategyStrategyPostResponseStrategyStrategyPost.from_dict(response.json())
 
         return response_200
     if response.status_code == 422:
@@ -55,9 +51,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[
-    Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]
-]:
+) -> Response[Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -70,9 +64,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: StrategyStrategyPostPayload,
-) -> Response[
-    Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]
-]:
+) -> Response[Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]]:
     r"""Strategy
 
      Body:
@@ -106,9 +98,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: StrategyStrategyPostPayload,
-) -> Optional[
-    Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]
-]:
+) -> Optional[Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]]:
     r"""Strategy
 
      Body:
@@ -137,9 +127,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: StrategyStrategyPostPayload,
-) -> Response[
-    Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]
-]:
+) -> Response[Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]]:
     r"""Strategy
 
      Body:
@@ -171,9 +159,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: StrategyStrategyPostPayload,
-) -> Optional[
-    Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]
-]:
+) -> Optional[Union[HTTPValidationError, StrategyStrategyPostResponseStrategyStrategyPost]]:
     r"""Strategy
 
      Body:

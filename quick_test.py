@@ -51,7 +51,7 @@ for input_text, expected_min in tests:
 
 # Summary
 print("=" * 50)
-print(f"SCORE: {passed}/{total} passed ({passed/total*100:.0f}%)")
+print(f"SCORE: {passed}/{total} passed ({passed / total * 100:.0f}%)")
 
 if passed == total:
     print("🎉 PERFECT! NLP is working great!")

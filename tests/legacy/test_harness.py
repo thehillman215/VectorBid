@@ -191,7 +191,7 @@ def test_ai_fallback_ranking():
 
     print(f"  Preferences: {preferences}")
     for i, trip in enumerate(ranked_trips):
-        print(f"  {i+1}. {trip['trip_id']}: {trip['score']}/10 - {trip['reasoning']}")
+        print(f"  {i + 1}. {trip['trip_id']}: {trip['score']}/10 - {trip['reasoning']}")
 
     return ranked_trips
 
@@ -315,8 +315,8 @@ def benchmark_united_performance():
     duration = (end - start).total_seconds()
 
     print(f"  ✅ Processed {len(large_trip_set)} United trips in {duration:.3f}s")
-    print(f"  Rate: {len(large_trip_set)/duration:.0f} trips/second")
-    print(f"  Average score: {total_scores/len(large_trip_set):.1f}/10")
+    print(f"  Rate: {len(large_trip_set) / duration:.0f} trips/second")
+    print(f"  Average score: {total_scores / len(large_trip_set):.1f}/10")
 
 
 def run_united_tests():

@@ -42,9 +42,9 @@ def test_nlp(description, input_text, min_commands=1, must_contain=None):
     return passed
 
 
-print(f"\n{BOLD}{'='*70}{RESET}")
+print(f"\n{BOLD}{'=' * 70}{RESET}")
 print(f"{BOLD}VECTORBID HARDCORE PILOT LANGUAGE TEST SUITE{RESET}")
-print(f"{BOLD}{'='*70}{RESET}")
+print(f"{BOLD}{'=' * 70}{RESET}")
 
 total_tests = 0
 passed_tests = 0
@@ -347,9 +347,9 @@ for desc, input_text, min_cmd in test_cases:
 # ========================================
 # FINAL RESULTS
 # ========================================
-print(f"\n{BOLD}{'='*70}{RESET}")
+print(f"\n{BOLD}{'=' * 70}{RESET}")
 print(f"{BOLD}FINAL RESULTS{RESET}")
-print(f"{BOLD}{'='*70}{RESET}")
+print(f"{BOLD}{'=' * 70}{RESET}")
 
 percentage = (passed_tests / total_tests) * 100
 print(f"\nTotal Score: {passed_tests}/{total_tests} tests passed ({percentage:.1f}%)")

@@ -165,7 +165,9 @@ def preview_bid_package(month_tag):
                 preview_html = f"""
                 <div class="card">
                     <div class="card-header">
-                        <h5><i class="fas fa-file-pdf me-2"></i>{bid_info.get('filename', 'Unknown')}</h5>
+                        <h5><i class="fas fa-file-pdf me-2"></i>{
+                    bid_info.get("filename", "Unknown")
+                }</h5>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
@@ -173,16 +175,24 @@ def preview_bid_package(month_tag):
                                 <strong>Month:</strong> {month_tag[:4]}-{month_tag[4:]}
                             </div>
                             <div class="col-md-4">
-                                <strong>File Size:</strong> {bid_info.get('file_size', 0) / 1024:.1f} KB
+                                <strong>File Size:</strong> {
+                    bid_info.get("file_size", 0) / 1024:.1f} KB
                             </div>
                             <div class="col-md-4">
-                                <strong>Total Trips:</strong> {len(parsed_trips) if parsed_trips else 0}
+                                <strong>Total Trips:</strong> {
+                    len(parsed_trips) if parsed_trips else 0
+                }
                             </div>
                         </div>
                         
-                        {'<div class="alert alert-success"><i class="fas fa-check me-2"></i>Parsing successful!</div>' if parsed_trips else '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>No trips found</div>'}
+                        {
+                    '<div class="alert alert-success"><i class="fas fa-check me-2"></i>Parsing successful!</div>'
+                    if parsed_trips
+                    else '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>No trips found</div>'
+                }
                         
-                        {f'''
+                        {
+                    f'''
                         <h6>Sample Trips (First 5):</h6>
                         <div class="table-responsive">
                             <table class="table table-sm table-dark">
@@ -195,11 +205,14 @@ def preview_bid_package(month_tag):
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {''.join([f"<tr><td>{trip.get('trip_id', 'N/A')}</td><td>{trip.get('days', 'N/A')}</td><td>{trip.get('credit_hours', 'N/A')}</td><td>{trip.get('routing', 'N/A')}</td></tr>" for trip in parsed_trips[:5]])}
+                                    {"".join([f"<tr><td>{trip.get('trip_id', 'N/A')}</td><td>{trip.get('days', 'N/A')}</td><td>{trip.get('credit_hours', 'N/A')}</td><td>{trip.get('routing', 'N/A')}</td></tr>" for trip in parsed_trips[:5]])}
                                 </tbody>
                             </table>
                         </div>
-                        ''' if parsed_trips else ''}
+                        '''
+                    if parsed_trips
+                    else ""
+                }
                     </div>
                 </div>
                 """
@@ -210,13 +223,13 @@ def preview_bid_package(month_tag):
                 return f"""
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>{bid_info.get('filename', 'Unknown')}</h5>
+                        <h5 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>{bid_info.get("filename", "Unknown")}</h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-danger">
                             <strong>Parsing Error:</strong> {str(parse_error)}
                         </div>
-                        <p><strong>File Size:</strong> {bid_info.get('file_size', 0) / 1024:.1f} KB</p>
+                        <p><strong>File Size:</strong> {bid_info.get("file_size", 0) / 1024:.1f} KB</p>
                         <p><strong>Month:</strong> {month_tag[:4]}-{month_tag[4:]}</p>
                     </div>
                 </div>
@@ -363,8 +376,8 @@ def format_bid_packet_list(bid_packets):
             <div class="d-flex w-100 justify-content-between align-items-start">
                 <div class="flex-grow-1">
                     <h6 class="mb-1">{display_date}</h6>
-                    <p class="mb-1 small text-muted">{packet.get('filename', 'Unknown file')}</p>
-                    <p class="mb-0 small text-info">{packet.get('file_size', 0) / 1024:.1f} KB</p>
+                    <p class="mb-1 small text-muted">{packet.get("filename", "Unknown file")}</p>
+                    <p class="mb-0 small text-info">{packet.get("file_size", 0) / 1024:.1f} KB</p>
                 </div>
                 <div class="text-end">
                     <small class="text-success d-block">Active</small>

@@ -78,7 +78,9 @@ def compat_validate(payload: Dict[str, Any] = Body(...)) -> Dict[str, Any]:
     violations: List[Dict[str, Any]]
     try:
         try:
-            violations = list(validate_feasibility(pairings, DEFAULT_RULES, context) or [])  # type: ignore[arg-type]
+            violations = list(
+                validate_feasibility(pairings, DEFAULT_RULES, context) or []
+            )  # type: ignore[arg-type]
         except TypeError:
             try:
                 violations = list(validate_feasibility(pairings, DEFAULT_RULES) or [])

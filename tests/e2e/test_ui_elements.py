@@ -190,9 +190,9 @@ class TestUIElements:
                 ) or second_element.get_attribute("name")
 
                 if first_id and second_id:
-                    assert (
-                        first_id != second_id
-                    ), "Focus should move between different elements"
+                    assert first_id != second_id, (
+                        "Focus should move between different elements"
+                    )
 
     def test_skip_links(self, page: Page, base_url: str):
         """Test skip links for accessibility."""

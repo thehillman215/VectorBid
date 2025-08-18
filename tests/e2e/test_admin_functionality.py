@@ -155,6 +155,6 @@ class TestAdminFunctionality:
         response_text = response.text()
         sensitive_terms = ["token", "password", "secret", "key"]
         for term in sensitive_terms:
-            assert (
-                term.lower() not in response_text.lower()
-            ), f"Response may contain sensitive information: {term}"
+            assert term.lower() not in response_text.lower(), (
+                f"Response may contain sensitive information: {term}"
+            )

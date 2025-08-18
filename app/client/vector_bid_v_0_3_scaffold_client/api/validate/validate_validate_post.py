@@ -34,13 +34,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[
-    Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]
-]:
+) -> Optional[Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]]:
     if response.status_code == 200:
-        response_200 = ValidateValidatePostResponseValidateValidatePost.from_dict(
-            response.json()
-        )
+        response_200 = ValidateValidatePostResponseValidateValidatePost.from_dict(response.json())
 
         return response_200
     if response.status_code == 422:
@@ -55,9 +51,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[
-    Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]
-]:
+) -> Response[Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -70,9 +64,7 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: ValidateValidatePostPayload,
-) -> Response[
-    Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]
-]:
+) -> Response[Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]]:
     r"""Validate
 
      Body:
@@ -109,9 +101,7 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: ValidateValidatePostPayload,
-) -> Optional[
-    Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]
-]:
+) -> Optional[Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]]:
     r"""Validate
 
      Body:
@@ -143,9 +133,7 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: ValidateValidatePostPayload,
-) -> Response[
-    Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]
-]:
+) -> Response[Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]]:
     r"""Validate
 
      Body:
@@ -180,9 +168,7 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: ValidateValidatePostPayload,
-) -> Optional[
-    Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]
-]:
+) -> Optional[Union[HTTPValidationError, ValidateValidatePostResponseValidateValidatePost]]:
     r"""Validate
 
      Body:

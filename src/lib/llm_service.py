@@ -176,7 +176,7 @@ Be specific and practical in your reasoning. Focus on the factors that matter mo
     ) -> str:
         """Create the user prompt for trip ranking."""
         trips_text = "\n".join(
-            f"{i+1}. {summary}" for i, summary in enumerate(trip_summaries)
+            f"{i + 1}. {summary}" for i, summary in enumerate(trip_summaries)
         )
 
         return f"""Please analyze and rank these airline trips based on the pilot's preferences.

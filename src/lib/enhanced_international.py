@@ -80,7 +80,6 @@ def enhanced_international_scoring(trip, preferences_lower):
 
     # Apply preference-based multipliers
     if found_destinations:  # Only boost if actually international
-
         # General international preference
         if "international" in preferences_lower:
             score_boost += total_boost

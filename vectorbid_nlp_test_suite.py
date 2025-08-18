@@ -331,9 +331,9 @@ def run_full_test_suite(llm_function=None) -> dict:
     for test_case in PILOT_TEST_CASES:
         print(f"\n[{test_case['category']}] Testing: {test_case['id']}")
         print(
-            f"  Input: \"{test_case['input'][:60]}...\""
+            f'  Input: "{test_case["input"][:60]}..."'
             if len(test_case["input"]) > 60
-            else f"  Input: \"{test_case['input']}\""
+            else f'  Input: "{test_case["input"]}"'
         )
 
         result = run_nlp_test(test_case, llm_function)
@@ -380,7 +380,7 @@ def run_full_test_suite(llm_function=None) -> dict:
     print("\n📊 Overall Results:")
     print(f"  • Total Tests: {results['total_tests']}")
     print(
-        f"  • Passed: {results['passed']} ({results['passed']/results['total_tests']*100:.1f}%)"
+        f"  • Passed: {results['passed']} ({results['passed'] / results['total_tests'] * 100:.1f}%)"
     )
     print(f"  • Failed: {results['failed']}")
     print(f"  • Average Score: {results['average_score']:.1f}/100")
@@ -390,7 +390,7 @@ def run_full_test_suite(llm_function=None) -> dict:
         print(f"\n  {category}:")
         print(f"    • Tests: {stats['total']}")
         print(
-            f"    • Pass Rate: {stats['passed']}/{stats['total']} ({stats['passed']/stats['total']*100:.1f}%)"
+            f"    • Pass Rate: {stats['passed']}/{stats['total']} ({stats['passed'] / stats['total'] * 100:.1f}%)"
         )
         print(f"    • Avg Score: {stats['avg_score']:.1f}/100")
 
@@ -411,7 +411,9 @@ def run_full_test_suite(llm_function=None) -> dict:
             else (
                 "C"
                 if results["average_score"] >= 70
-                else "D" if results["average_score"] >= 60 else "F"
+                else "D"
+                if results["average_score"] >= 60
+                else "F"
             )
         )
     )

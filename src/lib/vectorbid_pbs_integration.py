@@ -152,14 +152,14 @@ class VectorBidPBSService:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         file_content = f"""VectorBid Generated PBS Commands
-Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 File: {filename_prefix}_{timestamp}.txt
 
-{'=' * 60}
+{"=" * 60}
 
 {pbs_output}
 
-{'=' * 60}
+{"=" * 60}
 VectorBid - AI-Powered Pilot Schedule Optimization
 For questions or support, contact: support@vectorbid.com
 
@@ -305,7 +305,7 @@ def enhanced_download_pbs_filters():
         response = make_response(file_content)
         response.headers["Content-Type"] = "text/plain; charset=utf-8"
         response.headers["Content-Disposition"] = (
-            f'attachment; filename=vectorbid_50layer_pbs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
+            f"attachment; filename=vectorbid_50layer_pbs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         )
 
         return response

@@ -88,7 +88,7 @@ def main():
     t = time.time() - t0
     pr.disable()
 
-    print(f"/optimize x{args.runs} for N={args.n}, K={args.k}: {t*1000:.1f} ms total")
+    print(f"/optimize x{args.runs} for N={args.n}, K={args.k}: {t * 1000:.1f} ms total")
 
     s = io.StringIO()
     stats = pstats.Stats(pr, stream=s).sort_stats("cumulative")

@@ -62,7 +62,7 @@ for i, test in enumerate(test_cases, 1):
     print(
         f"Pilot: {test['profile'].get('seniority', 50)}% seniority at {test['profile'].get('base', 'Unknown')}"
     )
-    print(f"Input: \"{test['input'][:100]}...\"")
+    print(f'Input: "{test["input"][:100]}..."')
     print("-" * 40)
 
     # Generate commands

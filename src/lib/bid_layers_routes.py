@@ -270,7 +270,7 @@ def toggle_layer(layer_number: int):
             {
                 "success": True,
                 "is_active": layer_to_toggle.is_active,
-                "message": f'Layer {"activated" if layer_to_toggle.is_active else "deactivated"}',
+                "message": f"Layer {'activated' if layer_to_toggle.is_active else 'deactivated'}",
             }
         )
 

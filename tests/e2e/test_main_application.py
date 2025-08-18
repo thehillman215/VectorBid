@@ -143,9 +143,9 @@ class TestMainApplication:
                 v for v in violations if v["impact"] in ["critical", "serious"]
             ]
 
-            assert (
-                len(critical_violations) == 0
-            ), f"Page {url} has {len(critical_violations)} critical accessibility violations: {critical_violations}"
+            assert len(critical_violations) == 0, (
+                f"Page {url} has {len(critical_violations)} critical accessibility violations: {critical_violations}"
+            )
 
     def test_csrf_protection(self, page: Page, base_url: str):
         """Test CSRF protection on forms."""

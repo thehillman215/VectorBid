@@ -52,9 +52,7 @@ def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
 ) -> Optional[Union[ExportExportPostResponseExportExportPost, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = ExportExportPostResponseExportExportPost.from_dict(
-            response.json()
-        )
+        response_200 = ExportExportPostResponseExportExportPost.from_dict(response.json())
 
         return response_200
     if response.status_code == 422:

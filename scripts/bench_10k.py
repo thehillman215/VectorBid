@@ -115,8 +115,8 @@ def run_once(n: int, k: int) -> None:
     print("\n=== VectorBid bench ===")
     print(f"pairings: {n:,}   K: {k}")
     for kstep in ["validate", "optimize", "strategy", "generate_layers", "lint"]:
-        print(f"{kstep:16s} {timings[kstep]*1000:8.1f} ms")
-    print(f"{'total':16s} {total*1000:8.1f} ms")
+        print(f"{kstep:16s} {timings[kstep] * 1000:8.1f} ms")
+    print(f"{'total':16s} {total * 1000:8.1f} ms")
 
     if violations:
         print(f"violations: {len(violations)} (sample: {violations[:2]})")

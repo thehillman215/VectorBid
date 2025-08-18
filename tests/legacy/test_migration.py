@@ -202,7 +202,7 @@ def test_existing_profiles():
         # Test first few profiles
         test_count = min(3, len(profiles))
         for i, (uid, profile) in enumerate(list(profiles.items())[:test_count]):
-            print(f"\n   Testing profile {i+1}: {uid}")
+            print(f"\n   Testing profile {i + 1}: {uid}")
 
             # Test validation
             validation = validate_profile(profile)

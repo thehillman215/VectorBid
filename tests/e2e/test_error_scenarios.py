@@ -251,6 +251,6 @@ class TestErrorScenarios:
                 "syntax error",
             ]
             for indicator in sql_error_indicators:
-                assert (
-                    indicator not in error_text or "error" not in error_text
-                ), f"Possible SQL error exposed: {indicator}"
+                assert indicator not in error_text or "error" not in error_text, (
+                    f"Possible SQL error exposed: {indicator}"
+                )
