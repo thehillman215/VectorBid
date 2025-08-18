@@ -1,3 +1,4 @@
+import os
 import tempfile
 #!/usr/bin/env python3
 """
@@ -368,7 +369,7 @@ if __name__ == "__main__":
 
         # Save results for inspection
         try:
-            with tmp_path = tempfile.join(tempfile.gettempdir(), "united_test_results.json")
+            with tmp_path = os.path.join(tempfile.gettempdir(), "united_test_results.json")
             with open(tmp_path, "w") as f:
                 json.dump(results, f, indent=2, default=str)
             print("\n💾 Results saved to /tmp/united_test_results.json")
