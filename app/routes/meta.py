@@ -1,5 +1,6 @@
 import sys
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter
 
@@ -7,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/api/meta/health")
-def meta_health():
+def meta_health() -> dict[str, Any]:
     """Health check endpoint with service details."""
     return {
         "ok": True,
@@ -19,7 +20,7 @@ def meta_health():
 
 
 @router.get("/api/meta/parsers")
-def meta_parsers():
+def meta_parsers() -> dict[str, Any]:
     """Get supported parser formats and fields."""
     return {
         "supported_formats": [

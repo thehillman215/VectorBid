@@ -18,7 +18,7 @@ class BidPackageStore:
         self.db_path = db_path
         self._init_db()
 
-    def _init_db(self):
+    def _init_db(self) -> None:
         """Initialize SQLite database with bid_packages table."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()

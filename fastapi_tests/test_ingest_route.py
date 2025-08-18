@@ -182,7 +182,7 @@ EWR-73N-001,EWR,73N,2025-09-01"""
         """Test ingestion with a large file."""
         # Create a 1MB file
         large_content = b"x" * (1024 * 1024)
-        
+
         files = {"file": ("large.csv", io.BytesIO(large_content), "text/csv")}
         data = {
             "airline": "UAL",
@@ -190,16 +190,16 @@ EWR-73N-001,EWR,73N,2025-09-01"""
             "base": "SFO",
             "fleet": "737",
             "seat": "FO",
-            "pilot_id": "pilot_001"
+            "pilot_id": "pilot_001",
         }
-        
+
         response = client.post("/api/ingest", files=files, data=data)
-        
+
         assert response.status_code == 200
         result = response.json()
         assert result["success"] is True
         assert "summary" in result
-    
+
     def test_ingest_golden_csv_data(self):
         """Test ingestion with actual golden CSV data."""
         # Create a simple CSV file that matches our parser expectations
@@ -208,7 +208,7 @@ EWR-73N-001,EWR,73N,2025-09-01"""
         combined_csv += b"trip_id,pairing_id,day,origin,destination\n"
         combined_csv += b"EWR-73N-001-T1,EWR-73N-001,5,DEN,EWR\n"
         combined_csv += b"EWR-73N-001-T2,EWR-73N-001,3,LAX,EWR\n"
-        
+
         files = {"file": ("golden_combined.csv", io.BytesIO(combined_csv), "text/csv")}
         data = {
             "airline": "UAL",
@@ -216,11 +216,11 @@ EWR-73N-001,EWR,73N,2025-09-01"""
             "base": "EWR",
             "fleet": "73N",
             "seat": "FO",
-            "pilot_id": "pilot_golden"
+            "pilot_id": "pilot_golden",
         }
-        
+
         response = client.post("/api/ingest", files=files, data=data)
-        
+
         assert response.status_code == 200
         result = response.json()
         assert result["success"] is True
