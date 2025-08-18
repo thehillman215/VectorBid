@@ -1,0 +1,105 @@
+# VectorBid Build Phase: Architecture, Data, UI, and Process Updates (v0.3)
+
+---
+
+## Purpose
+This document translates the MVP v0.3 blueprint into concrete build-phase guidance. It focuses on system architecture, schema contracts, onboarding UI flows, Git workflow, compliance mappings, and legacy cleanup.
+
+---
+
+## 1. Unified Technical Architecture
+- **Frontend**: SPA web UI for registration, profile setup, bid packet upload, preference entry (text + sliders), and results (violations, Top-K, layers, exports).
+- **Backend**: FastAPI monolith exposing endpoints for parse → validate → optimize → generate → lint → export.
+- **Data ingestion**: Uploaded bid packets (PDF/CSV) parsed into Trip/Leg objects (Pydantic models).
+- **Context enrichment**: Profile + historical data combined into ContextSnapshot before downstream steps.
+- **LLM pipeline**: NLP parser interprets free-text into PreferenceSchema. Strategy engine suggests weight adjustments. LLMs never enforce legality.
+- **Rule engine**: Deterministic filter based on FAR/UPA YAML rule packs.
+- **Optimizer**: Multi-objective (CP-SAT/beam search).
+- **Layer generator + Linter**: PBS 2.x layer construction, contradiction/shadowing fixes.
+- **Storage/Observability**: PostgreSQL + object store. Tables: pilots, preferences, rule_packs, bid_packages, candidates, exports, audit. Metrics + tracing.
+- **Security**: JWT/OIDC, encryption, signed exports.
+
+Placement: document in `ARCHITECTURE.md`.
+
+---
+
+## 2. Data Contracts & Parsing Logic
+- **PreferenceSchema v1**: Inputs = profile + hard/soft constraints + weights. Strict JSON/Pydantic validation.
+- **CandidateSchedule**: Ranked outputs, score breakdown, rationale.
+- **BidLayerArtifact**: PBS 2.x filters, lint results, export hash.
+- **Trip/Leg models**: Parsed from airline bid packets.
+- Parsing: custom PDF/CSV extractors per airline. Normalize timezones, formats.
+
+Placement: `DATA_CONTRACTS.md` (schemas, parsing notes, code references).
+
+---
+
+## 3. Onboarding Flows & UI
+- **Profile setup**: seniority, base, seat, equipment, commuter flag, home airport.
+- **Preference wizard**:
+  - Persona selection (default weights).
+  - Free-text entry (live parse preview).
+  - Sliders for soft prefs.
+  - Toggles/date pickers for hard constraints.
+- **Results views**:
+  - Violations panel (with one-click fixes).
+  - Top-K table with rationale.
+  - Layers View (human + PBS raw text).
+  - What-if bar for re-ranking.
+
+Placement: `UI_FLOWS.md` with diagrams/wireframes.
+
+---
+
+## 4. Simplified Git Workflow (Solo Founder)
+- **Branch model**: main always deployable; short-lived feature/ branches; hotfix/ for urgent fixes.
+- **Commits**: Conventional Commits (feat:/fix:/docs:).
+- **PRs**: squash-merge only, status checks must pass.
+- **CI**: lint + unit tests + smoke tests (`/ping`, `/health`).
+- **Branch protection**: enforce checks, require up-to-date branches, squash merges only.
+
+Placement: `GIT_WORKFLOW.md`.
+
+---
+
+## 5. Preference Compliance Mappings
+Key user preferences → CBA/FAR rules:
+- **Days off**: UPA §5-E-4-a → ≥12 per month.
+- **Duty hours**: UPA §5-E-1 / FAR 117 → ≤13h unaugmented.
+- **Flight time per day**: UPA §5-B-3 → ≤8h (9h if one leg).
+- **Breaks**: UPA §5-E-3 → ≥1.5h after 5h duty.
+- **Rest**: FAR 117 → ≥10h between duties.
+- **No red-eye**: Company rule (via rule pack, not in CBA).
+- **Commute windows**: Preference only, not contractual.
+
+Placement: `RULE_PACKS.md` with YAML snippets + human-readable mapping table.
+
+---
+
+## 6. Legacy Cleanup
+- **Flask code**: archive `src/`.
+- **PBS sandbox stubs**: remove, rely on canned packages.
+- **Outdated diagrams/docs**: archive with README marker.
+- **Replit artifacts**: ignore; not part of FastAPI build.
+- **Unused stubs/tools**: delete or mark deprecated.
+
+Placement: `LEGACY.md` (summary), ADRs for architectural shifts.
+
+---
+
+## 7. Modular Documentation Plan
+- `ARCHITECTURE.md` — System overview.
+- `DATA_CONTRACTS.md` — Schemas + parsing.
+- `UI_FLOWS.md` — Onboarding + UI.
+- `GIT_WORKFLOW.md` — Branching/CI rules.
+- `RULE_PACKS.md` — Legal mappings.
+- `LEGACY.md` — Cleanup log.
+
+---
+
+## Next Steps
+- Populate `/docs` with the above.
+- Implement vertical slice (Parse → Validate → Optimize).
+- Add ADRs for FastAPI adoption, schema-first approach, rule pack format, export hashing.
+- Set up CI enforcement for schema/rule pack changes.
+- Cut MVP-0.3 milestone and begin execution.
