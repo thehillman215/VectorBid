@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid - AI-Powered Pilot Scheduling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .persona-card { transition: all 0.3s ease; }
+        .persona-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .persona-card.selected { ring: 2px; ring-blue-500; background: rgba(59, 130, 246, 0.1); }
+        .slider-container input[type="range"] { -webkit-appearance: none; appearance: none; }
+        .slider-container input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #3B82F6; cursor: pointer; }
+        .slider-container input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #3B82F6; cursor: pointer; border: none; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-plane text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">VectorBid</h1>
+                </div>
+                <div class="text-sm text-gray-500">
+                    AI-Powered Pilot Scheduling
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Step Indicator -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex items-center text-blue-600">
+                        <div class="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full text-sm font-medium">1</div>
+                        <span class="ml-2 text-sm font-medium">Choose Persona</span>
+                    </div>
+                    <div class="w-16 h-0.5 bg-gray-300 mx-4"></div>
+                    <div class="flex items-center text-gray-400" id="step2">
+                        <div class="flex items-center justify-center w-8 h-8 bg-gray-300 text-gray-600 rounded-full text-sm font-medium">2</div>
+                        <span class="ml-2 text-sm font-medium">Preferences</span>
+                    </div>
+                    <div class="w-16 h-0.5 bg-gray-300 mx-4"></div>
+                    <div class="flex items-center text-gray-400" id="step3">
+                        <div class="flex items-center justify-center w-8 h-8 bg-gray-300 text-gray-600 rounded-full text-sm font-medium">3</div>
+                        <span class="ml-2 text-sm font-medium">Results</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Persona Selection -->
+        <div id="persona-step" class="fade-in">
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Choose Your Flying Style</h2>
+                <p class="text-gray-600 mb-6">Select a persona that best matches your bidding preferences, or choose Custom to create your own.</p>
+                
+                <div class="grid md:grid-cols-3 gap-4" id="persona-grid">
+                    <!-- Personas will be loaded here -->
+                </div>
+                
+                <div class="mt-6 flex justify-end">
+                    <button id="next-to-preferences" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Continue to Preferences
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Preferences -->
+        <div id="preferences-step" class="hidden">
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Free Text Input -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Describe Your Preferences</h3>
+                    <textarea 
+                        id="preferences-text"
+                        class="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="I want weekends off, prefer morning departures, avoid red-eyes..."
+                    ></textarea>
+                    
+                    <!-- Live Preview -->
+                    <div id="parsed-preview" class="mt-4 hidden">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Parsed Preferences:</h4>
+                        <div id="parsed-content" class="bg-gray-50 p-3 rounded-md text-sm"></div>
+                    </div>
+                </div>
+
+                <!-- Weights and Constraints -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Fine-tune Weights</h3>
+                    
+                    <!-- Weight Sliders -->
+                    <div class="space-y-4">
+                        <div class="slider-container">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Weekend Priority</label>
+                            <input type="range" id="weekend-weight" min="0" max="1" step="0.1" value="0.5" class="w-full h-2 bg-gray-200 rounded-lg">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Low</span>
+                                <span id="weekend-value">0.5</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-container">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Credit Hours</label>
+                            <input type="range" id="credit-weight" min="0" max="1" step="0.1" value="0.5" class="w-full h-2 bg-gray-200 rounded-lg">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Low</span>
+                                <span id="credit-value">0.5</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-container">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Trip Length</label>
+                            <input type="range" id="trip-weight" min="0" max="1" step="0.1" value="0.5" class="w-full h-2 bg-gray-200 rounded-lg">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Short</span>
+                                <span id="trip-value">0.5</span>
+                                <span>Long</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hard Constraints -->
+                    <h4 class="text-md font-semibold text-gray-900 mt-6 mb-3">Hard Constraints</h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="no-weekends" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-700">No weekend flying</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="no-redeyes" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-700">No red-eye flights</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="domestic-only" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-700">Domestic flights only</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-between">
+                <button id="back-to-persona" class="text-gray-600 hover:text-gray-800 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Persona
+                </button>
+                <button id="compile-bid" class="bg-green-600 text-white px-8 py-3 rounded-md hover:bg-green-700 transition-colors text-lg font-medium">
+                    <i class="fas fa-magic mr-2"></i>
+                    Compile My Bid
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Results -->
+        <div id="results-step" class="hidden">
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Your Optimized Schedule</h2>
+                    <div class="flex space-x-2">
+                        <button id="view-schedule" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            Schedule View
+                        </button>
+                        <button id="view-layers" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors">
+                            Layers View
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schedule Results -->
+                <div id="schedule-results">
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <!-- Ranked Candidates -->
+                        <div class="lg:col-span-2">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Ranked Candidates</h3>
+                            <div id="candidates-list" class="space-y-4">
+                                <!-- Candidates will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Violations Panel -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Constraint Analysis</h3>
+                            <div id="violations-panel" class="bg-gray-50 rounded-lg p-4">
+                                <!-- Violations will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PBS Layers Results -->
+                <div id="layers-results" class="hidden">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">PBS Bid Layers</h3>
+                    <div id="layers-list" class="space-y-4">
+                        <!-- Layers will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button id="back-to-preferences" class="text-gray-600 hover:text-gray-800 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Preferences
+                </button>
+                <div class="space-x-2">
+                    <button id="export-bid" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Bid
+                    </button>
+                    <button id="start-over" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition-colors">
+                        Start Over
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span class="ml-3 text-gray-700">Optimizing your schedule...</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

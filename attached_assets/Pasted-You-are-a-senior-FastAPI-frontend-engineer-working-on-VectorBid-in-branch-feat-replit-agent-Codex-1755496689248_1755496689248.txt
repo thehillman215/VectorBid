@@ -1,0 +1,40 @@
+You are a senior FastAPI + frontend engineer working on VectorBid in branch feat/replit-agent.
+Codex is already handling: conflict cleanup, rule pack authoring/validation, CLI, CI, docs.
+Do NOT touch those areas.
+
+Your scope:
+1) Frontend polish
+   - Ensure the SPA flows match the MVP blueprint:
+     persona picker, free-text box, sliders for weights, hard-constraint toggles, results table, layers view, violations panel, and what-if re-rank.
+   - Add basic Tailwind UI with clean forms and results table.
+   - Wire free-text box → POST /parse_preferences → live preview of parsed prefs.
+   - Wire submit → POST /optimize → display ranked results and rationales.
+   - Wire layers tab → POST /generate_layers → show PBS-style filters.
+
+2) Backend API wiring
+   - Ensure FastAPI exposes endpoints: /parse_preferences, /validate_constraints, /optimize, /generate_layers, /lint, /exports/:id, /explain/:candidate_id.
+   - Stub them with minimal return payloads matching schemas (PreferenceSchema, CandidateSchedule, BidLayerArtifact).
+   - Include example JSON responses so the frontend can develop independently.
+
+3) Schema & mocks
+   - Use Pydantic models from data_contracts (PreferenceSchema v1, CandidateSchedule, BidLayerArtifact).
+   - If logic is missing, return deterministic stub data (fixtures) so UI renders correctly.
+
+4) Developer quality of life
+   - Add hot-reload for uvicorn in dev.
+   - Add one-click “dev up” script that starts FastAPI + frontend.
+   - Update DEVELOPER_QUICKSTART.md with these steps.
+
+Constraints:
+- Do not edit rule packs, CI, CLI, or conflict markers (Codex owns these).
+- Keep PR small and scoped, squash into feat/replit-agent.
+- Follow conventional commits (feat:, fix:, docs:, chore:).
+
+Acceptance:
+- Visiting the SPA allows selecting a persona, typing free-text, adjusting sliders, and clicking “Compile My Bid”.
+- The UI calls FastAPI stubs and renders a fake but valid CandidateSchedule and BidLayerArtifact.
+- Developer can run `./dev.sh` to spin up backend + frontend.
+
+Deliverables:
+- Changed files list + rationale.
+- Instructions for me to run UI locally and see mock results.
