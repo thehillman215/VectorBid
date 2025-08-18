@@ -2,30 +2,50 @@
 set -euo pipefail
 
 PORT="${PORT:-8080}"
-UVICORN_CMD="uvicorn app.main:app --host 127.0.0.1 --port ${PORT} --log-level warning"
+HOST="127.0.0.1"
+APP="app.main:app"
+LOG="uvicorn.log"
 
-# start API
-$UVICORN_CMD > uvicorn.log 2>&1 &
-PID=$!
+start_uvicorn() {
+  uvicorn "${APP}" --host "${HOST}" --port "${PORT}" --log-level warning > "${LOG}" 2>&1 &
+  echo $! > uvicorn.pid
+}
 
-# wait for health
-python - <<'PY'
-import time, urllib.request, sys, os
-port = int(os.getenv("PORT","8080"))
-for _ in range(60):
+wait_ready() {
+  python - <<'PY'
+import os, time, urllib.request, sys, json
+host="127.0.0.1"; port=int(os.getenv("PORT","8080"))
+url=f"http://{host}:{port}/api/meta/health"
+for i in range(60):
     try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/meta/health", timeout=1) as r:
+        with urllib.request.urlopen(url, timeout=1) as r:
             if r.status == 200:
-                print("READY"); sys.exit(0)
+                data=json.load(r)
+                if isinstance(data, dict) and data.get("ok") is True:
+                    print("READY")
+                    sys.exit(0)
     except Exception:
-        time.sleep(1)
-sys.exit("Server did not start")
+        pass
+    time.sleep(1)
+print("FAILED TO START"); sys.exit(1)
 PY
+}
 
-# smoke
-curl -fsS "http://127.0.0.1:${PORT}/api/meta/health" | tee /dev/stderr
+stop_uvicorn() {
+  if [[ -f uvicorn.pid ]]; then
+    kill -TERM "$(cat uvicorn.pid)" 2>/dev/null || true
+    sleep 1
+    pkill -f "uvicorn ${APP}" 2>/dev/null || true
+    rm -f uvicorn.pid
+  fi
+}
 
-# stop API
-kill -TERM "$PID" || true
-sleep 1
-pkill -f "uvicorn app.main:app" || true
+trap 'echo "[trap] stopping"; stop_uvicorn' EXIT
+
+start_uvicorn
+wait_ready
+
+# smoke probe
+curl -fsS "http://${HOST}:${PORT}/api/meta/health" | tee /dev/stderr > /tmp/health.json
+
+echo "[ok] smoke passed"
