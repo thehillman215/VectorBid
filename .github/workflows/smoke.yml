@@ -16,26 +16,5 @@ jobs:
           cache: "pip"
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Start API (background)
-        run: |
-          nohup uvicorn app.main:app --host 127.0.0.1 --port 8080 > uvicorn.log 2>&1 &
-          echo $! > uvicorn.pid
-          python - <<'PY'
-          import time, urllib.request
-          for _ in range(60):
-              try:
-                  urllib.request.urlopen("http://127.0.0.1:8080/api/meta/health", timeout=1)
-                  print("READY"); break
-              except Exception:
-                  time.sleep(1)
-          else:
-              raise SystemExit("Server did not start")
-          PY
-      - name: Smoke check
-        run: curl -fsS http://127.0.0.1:8080/api/meta/health | tee /dev/stderr | python -c "import sys, json; assert json.load(sys.stdin).get('ok') is True"
-      - name: Stop API
-        if: always()
-        run: |
-          kill -TERM "$(cat uvicorn.pid)" || true
-          sleep 1
-          pkill -f "uvicorn app.main:app" || true
+      - name: Run smoke test
+        run: PORT=8080 bash scripts/smoke.sh
