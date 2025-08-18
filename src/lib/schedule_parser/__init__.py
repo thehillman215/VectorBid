@@ -4,7 +4,6 @@ Unified entry-point.  Call:
     from schedule_parser import parse_schedule
 """
 
-import mimetypes
 import pathlib
 
 from .csv_parser import parse_csv

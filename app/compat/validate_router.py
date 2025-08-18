@@ -6,6 +6,9 @@ from app.rules.engine import DEFAULT_RULES, validate_feasibility
 
 router = APIRouter()
 
+# Ruff B008: avoid calling Body in defaults at definition time
+_BODY_REQUIRED = Body(...)
+
 
 def _normalize_pairings(raw: Any) -> list[dict[str, Any]]:
     # Accept:
@@ -73,7 +76,7 @@ def _fallback_violations(pairings: list[dict[str, Any]]) -> list[dict[str, Any]]
 
 
 @router.post("/validate", include_in_schema=False, tags=["compat"])
-def compat_validate(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
+def compat_validate(payload: dict[str, Any] = _BODY_REQUIRED) -> dict[str, Any]:
     pairings = _normalize_pairings(payload.get("pairings"))
     context: dict[str, Any] = dict(payload.get("context") or {})
     # Try calling the validator with decreasing arity (3 -> 2 -> 1)
