@@ -19,7 +19,6 @@ jobs:
           REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-ci}}"
           REF="${REF//\//-}"; REF="${REF//[^A-Za-z0-9_.-]/-}"
           REF="${REF:-ci}"
-          echo "IMAGE_TAG=${REF}-${SHA}" >> "$GITHUB_ENV"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
