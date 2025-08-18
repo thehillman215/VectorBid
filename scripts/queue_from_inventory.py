@@ -1,4 +1,6 @@
-import csv, datetime, sys
+import csv
+import datetime
+import sys
 from pathlib import Path
 
 inv = Path("merge_inventory.csv")

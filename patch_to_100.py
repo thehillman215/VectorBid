@@ -40,7 +40,7 @@ def add_final_patterns():
     # Enhanced credit maximization (specific phrases)
     if 'maximize credit hour' in text_lower or 'max credit hour' in text_lower:
         filters.append("MAXIMIZE CREDIT_TIME")
-        filters.append("PREFER HIGH_CREDIT_TRIPS") 
+        filters.append("PREFER HIGH_CREDIT_TRIPS")
         filters.append("MAXIMIZE MONTHLY_CREDIT")
 
     # Slam-clicker lifestyle (pilot who goes straight to hotel)

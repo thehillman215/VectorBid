@@ -3,11 +3,11 @@ Enhanced Preferences Manager for VectorBid
 Handles advanced user preference management, learning, and optimization
 """
 
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-import json
-from src.lib.services.db import get_profile, save_profile
+from datetime import datetime
+from typing import Any
+
 from src.lib.personas import PILOT_PERSONAS
+from src.lib.services.db import get_profile, save_profile
 
 
 class PreferencesManager:
@@ -24,7 +24,7 @@ class PreferencesManager:
             "credit_hours": 0.8,
         }
 
-    def get_user_preferences(self, user_id: str) -> Dict[str, Any]:
+    def get_user_preferences(self, user_id: str) -> dict[str, Any]:
         """Get comprehensive user preferences including learned patterns"""
         profile = get_profile(user_id)
 
@@ -38,7 +38,7 @@ class PreferencesManager:
 
         return preferences
 
-    def update_preferences(self, user_id: str, updates: Dict[str, Any]) -> bool:
+    def update_preferences(self, user_id: str, updates: dict[str, Any]) -> bool:
         """Update user preferences with learning integration"""
         try:
             profile = get_profile(user_id)
@@ -81,8 +81,8 @@ class PreferencesManager:
             return False
 
     def learn_from_selections(
-        self, user_id: str, selected_trips: List[Dict], rejected_trips: List[Dict]
-    ) -> Dict[str, Any]:
+        self, user_id: str, selected_trips: list[dict], rejected_trips: list[dict]
+    ) -> dict[str, Any]:
         """Learn from user trip selections to improve recommendations"""
         patterns = {
             "preferred_departure_times": [],
@@ -111,7 +111,7 @@ class PreferencesManager:
 
         return patterns
 
-    def get_smart_suggestions(self, user_id: str) -> List[Dict[str, Any]]:
+    def get_smart_suggestions(self, user_id: str) -> list[dict[str, Any]]:
         """Generate smart preference suggestions based on profile and industry data"""
         profile = get_profile(user_id)
         suggestions = []
@@ -191,7 +191,7 @@ class PreferencesManager:
 
         return suggestions
 
-    def generate_preference_report(self, user_id: str) -> Dict[str, Any]:
+    def generate_preference_report(self, user_id: str) -> dict[str, Any]:
         """Generate comprehensive preference analysis report"""
         profile = get_profile(user_id)
         preferences = self.get_user_preferences(user_id)
@@ -219,17 +219,17 @@ class PreferencesManager:
 
         return report
 
-    def _get_learned_patterns(self, user_id: str) -> Dict[str, Any]:
+    def _get_learned_patterns(self, user_id: str) -> dict[str, Any]:
         """Retrieve learned preference patterns"""
         profile = get_profile(user_id)
         return profile.get("learned_patterns", {})
 
-    def _get_preference_history(self, user_id: str) -> List[Dict]:
+    def _get_preference_history(self, user_id: str) -> list[dict]:
         """Get history of preference changes"""
         profile = get_profile(user_id)
         return profile.get("preference_history", [])
 
-    def _track_preference_change(self, user_id: str, changes: Dict[str, Any]):
+    def _track_preference_change(self, user_id: str, changes: dict[str, Any]):
         """Track preference changes for learning"""
         profile = get_profile(user_id)
         history = profile.get("preference_history", [])
@@ -249,7 +249,7 @@ class PreferencesManager:
         profile["preference_history"] = history
         save_profile(user_id, profile)
 
-    def _get_optimization_suggestions(self, profile: Dict[str, Any]) -> List[str]:
+    def _get_optimization_suggestions(self, profile: dict[str, Any]) -> list[str]:
         """Generate optimization suggestions based on profile completeness"""
         suggestions = []
 
@@ -268,7 +268,7 @@ class PreferencesManager:
 
         return suggestions
 
-    def _calculate_optimization_score(self, profile: Dict[str, Any]) -> float:
+    def _calculate_optimization_score(self, profile: dict[str, Any]) -> float:
         """Calculate how optimized the user's preferences are (0-100)"""
         score = 0
         max_score = 100
@@ -299,7 +299,7 @@ class PreferencesManager:
 
         return min(score, max_score)
 
-    def _calculate_completeness(self, profile: Dict[str, Any]) -> Dict[str, Any]:
+    def _calculate_completeness(self, profile: dict[str, Any]) -> dict[str, Any]:
         """Calculate profile completeness breakdown"""
         required_fields = ["airline", "base", "seat", "seniority"]
         preference_fields = ["persona", "custom_preferences"]

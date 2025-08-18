@@ -1,6 +1,7 @@
 import json
-from app.models import BidLayerArtifact, Layer, Filter
-from app.export.storage import write_artifact, _compute_hash
+
+from app.export.storage import _compute_hash, write_artifact
+from app.models import BidLayerArtifact, Filter, Layer
 
 
 def _sample_artifact():

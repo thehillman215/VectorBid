@@ -69,9 +69,7 @@ def upload_bid():
 
     file_data = file.stream.read()
     file_stream = BytesIO(file_data)
-    bid_packet = services_bids.save_bid_packet(
-        month_tag, file_stream, file.filename or "upload.pdf"
-    )
+    services_bids.save_bid_packet(month_tag, file_stream, file.filename or "upload.pdf")
 
     return jsonify({"status": "ok", "stored": month_tag})
 
@@ -184,13 +182,13 @@ def preview_bid_package(month_tag):
                 }
                             </div>
                         </div>
-                        
+
                         {
                     '<div class="alert alert-success"><i class="fas fa-check me-2"></i>Parsing successful!</div>'
                     if parsed_trips
                     else '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>No trips found</div>'
                 }
-                        
+
                         {
                     f'''
                         <h6>Sample Trips (First 5):</h6>
@@ -265,7 +263,7 @@ def admin_dashboard():
                 </span>
             </div>
         </nav>
-        
+
         <div class="container my-4">
             <div class="row">
                 <div class="col-lg-8">
@@ -279,25 +277,25 @@ def admin_dashboard():
                             <form id="uploadForm" enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <label for="month_tag" class="form-label">Month Tag (YYYYMM format)</label>
-                                    <input type="text" class="form-control" id="month_tag" name="month_tag" 
+                                    <input type="text" class="form-control" id="month_tag" name="month_tag"
                                            placeholder="202508" pattern="[0-9]{{6}}" required>
                                     <div class="form-text">Enter 6-digit format: Year + Month (e.g., 202508 for August 2025)</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="file" class="form-label">Bid Package PDF</label>
-                                    <input type="file" class="form-control" id="file" name="file" 
+                                    <input type="file" class="form-control" id="file" name="file"
                                            accept=".pdf" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-cloud-upload-alt me-2"></i>Upload Bid Package
                                 </button>
                             </form>
-                            
+
                             <div id="uploadStatus" class="mt-3" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-4">
                     <div class="card">
                         <div class="card-header">
@@ -312,18 +310,18 @@ def admin_dashboard():
                 </div>
             </div>
         </div>
-        
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             document.getElementById('uploadForm').addEventListener('submit', async function(e) {{
                 e.preventDefault();
-                
+
                 const formData = new FormData(this);
                 const statusDiv = document.getElementById('uploadStatus');
-                
+
                 statusDiv.style.display = 'block';
                 statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Uploading...</div>';
-                
+
                 try {{
                     const response = await fetch('/admin/upload-bid', {{
                         method: 'POST',
@@ -332,12 +330,12 @@ def admin_dashboard():
                             'Authorization': 'Bearer {os.environ.get("ADMIN_BEARER_TOKEN", "")}'
                         }}
                     }});
-                    
+
                     if (response.ok) {{
                         const result = await response.json();
                         statusDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check me-2"></i>Successfully uploaded bid package: ' + result.stored + '</div>';
                         this.reset();
-                        
+
                         // Refresh page after 2 seconds to show new bid package
                         setTimeout(() => location.reload(), 2000);
                     }} else {{
@@ -381,7 +379,7 @@ def format_bid_packet_list(bid_packets):
                 </div>
                 <div class="text-end">
                     <small class="text-success d-block">Active</small>
-                    <button class="btn btn-outline-primary btn-sm mt-1" 
+                    <button class="btn btn-outline-primary btn-sm mt-1"
                             onclick="validateBidPackage('{month_tag}')"
                             data-month="{month_tag}">
                         <i class="fas fa-search me-1"></i>Preview
@@ -411,12 +409,12 @@ def format_bid_packet_list(bid_packets):
             </div>
         </div>
     </div>
-    
+
     <script>
         async function validateBidPackage(monthTag) {
             const modal = new bootstrap.Modal(document.getElementById('validationModal'));
             const content = document.getElementById('validationContent');
-            
+
             // Show loading
             content.innerHTML = `
                 <div class="text-center">
@@ -425,7 +423,7 @@ def format_bid_packet_list(bid_packets):
                 </div>
             `;
             modal.show();
-            
+
             try {
                 const response = await fetch(`/admin/preview-bid/${monthTag}`, {
                     headers: {
@@ -434,7 +432,7 @@ def format_bid_packet_list(bid_packets):
         + """\''
                     }
                 });
-                
+
                 if (response.ok) {
                     const html = await response.text();
                     content.innerHTML = html;

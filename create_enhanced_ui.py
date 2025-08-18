@@ -1,5 +1,3 @@
-import os
-
 # Create the enhanced UI with all suggested features
 ui_route = '''from fastapi import APIRouter, Request, Form, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -21,7 +19,7 @@ PERSONAS = {
     },
     "family": {
         "name": "👨‍👩‍👧‍👦 Family First",
-        "icon": "👨‍👩‍👧‍👦", 
+        "icon": "👨‍👩‍👧‍👦",
         "badges": ["Weekends Off", "No Holidays", "Predictable"],
         "default_text": "I need weekends off for family time. Avoid all major holidays (Thanksgiving, Christmas, New Year). Want a predictable schedule with no surprises. School events are important - need flexibility for those dates.",
         "priorities": {"time_home": 9, "weekends": 10, "pay": 3, "comfort": 7}
@@ -68,7 +66,7 @@ def get_pilot_history(pilot_id: str) -> dict:
         },
         "common_requests": [
             "Weekends off",
-            "Christmas off", 
+            "Christmas off",
             "SAN layovers"
         ]
     }
@@ -79,7 +77,7 @@ def get_pilot_profile(pilot_id: Optional[str]) -> dict:
             "pilot_id": pilot_id,
             "name": "Captain Sarah Chen",
             "airline": "UAL",
-            "base": "EWR", 
+            "base": "EWR",
             "seat": "CPT",
             "equipment": "787",
             "seniority": "1234",
@@ -91,13 +89,13 @@ def get_pilot_profile(pilot_id: Optional[str]) -> dict:
 async def index(request: Request, pilot_id: Optional[str] = Cookie(None)):
     """Main bidding page"""
     profile = get_pilot_profile(pilot_id)
-    
+
     if not profile:
         return RedirectResponse(url="/onboarding", status_code=302)
-    
+
     history = get_pilot_history(pilot_id)
     saved_prefs = SAVED_PREFERENCES.get(pilot_id, [])
-    
+
     return templates.TemplateResponse("smart_bid.html", {
         "request": request,
         "profile": profile,
@@ -128,28 +126,28 @@ async def generate_pbs(
 ):
     """Generate PBS commands"""
     profile = get_pilot_profile(pilot_id)
-    
+
     pbs_layers = ["START PAIRINGS"]
-    
+
     # Parse priorities
     if priority_weekends >= 8:
         pbs_layers.extend([
             "AVOID PAIRINGS",
             "  IF DOW CONTAINS SA,SU"
         ])
-    
+
     if priority_time_home >= 8:
         pbs_layers.extend([
-            "AVOID PAIRINGS", 
+            "AVOID PAIRINGS",
             "  IF TAFB > 48:00"
         ])
-    
+
     if priority_pay >= 8:
         pbs_layers.extend([
             "PREFER PAIRINGS",
             "  IF CREDIT > 5:30 POINTS +100"
         ])
-    
+
     # Parse text preferences
     pref_lower = preferences.lower()
     if "red-eye" in pref_lower or "redeye" in pref_lower:
@@ -157,19 +155,19 @@ async def generate_pbs(
             "AVOID PAIRINGS",
             "  IF REPORT < 0600 OR REPORT > 2300"
         ])
-    
+
     if "christmas" in pref_lower:
         pbs_layers.extend([
             "AVOID PAIRINGS",
             "  IF DATE IN (24DEC, 25DEC, 26DEC)"
         ])
-    
+
     if "san" in pref_lower.upper() or "SAN" in preferences:
         pbs_layers.extend([
             "PREFER PAIRINGS",
             "  IF LAYOVER = SAN POINTS +50"
         ])
-    
+
     # Award with seniority
     pbs_layers.extend([
         "",
@@ -178,7 +176,7 @@ async def generate_pbs(
         "",
         "END PAIRINGS"
     ])
-    
+
     results = {
         "pbs_layers": pbs_layers,
         "profile": profile,
@@ -192,7 +190,7 @@ async def generate_pbs(
             "blocked": 18
         }
     }
-    
+
     return templates.TemplateResponse("pbs_results.html", {
         "request": request,
         "results": results

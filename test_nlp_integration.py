@@ -19,12 +19,12 @@ def test_nlp():
         from src.api.pbs_fix import natural_language_to_pbs_filters
 
         print("Imported from pbs_fix")
-    except:
+    except Exception:
         try:
             from src.api.routes import natural_language_to_pbs_filters
 
             print("Imported from routes")
-        except:
+        except Exception:
             print("ERROR: Could not import natural_language_to_pbs_filters")
             print("Check that it exists in src/api/pbs_fix.py or src/api/routes.py")
             return

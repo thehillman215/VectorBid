@@ -1,4 +1,5 @@
-import csv, io
+import csv
+import io
 
 
 def parse_csv(blob: bytes) -> list[dict]:
@@ -40,7 +41,7 @@ def parse_csv(blob: bytes) -> list[dict]:
                     continue
 
     except Exception as e:
-        raise RuntimeError(f"CSV parsing failed: {e}")
+        raise RuntimeError(f"CSV parsing failed: {e}") from e
 
     if not trips:
         raise RuntimeError("CSV contained no trips / header mismatch")

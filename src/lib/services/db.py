@@ -1,9 +1,10 @@
 """Enhanced database service for user profile management."""
 
-from typing import Dict, Any, Optional
-from replit import db
-from datetime import datetime, date
 import json
+from datetime import date, datetime
+from typing import Any
+
+from replit import db
 
 PROFILE_KEY = "user:{uid}:profile"
 
@@ -33,7 +34,7 @@ DEFAULT_PROFILE = {
 }
 
 
-def get_profile(uid: str) -> Dict[str, Any]:
+def get_profile(uid: str) -> dict[str, Any]:
     """Get user profile by user ID.
 
     Args:
@@ -52,7 +53,7 @@ def get_profile(uid: str) -> Dict[str, Any]:
     return profile
 
 
-def save_profile(uid: str, data: Dict[str, Any]) -> None:
+def save_profile(uid: str, data: dict[str, Any]) -> None:
     """Save user profile data.
 
     Args:
@@ -63,7 +64,7 @@ def save_profile(uid: str, data: Dict[str, Any]) -> None:
 
     # Handle special data types for JSON storage
     for key, value in data.items():
-        if isinstance(value, (date, datetime)):
+        if isinstance(value, date | datetime):
             # Convert date/datetime to ISO string for JSON storage
             profile[key] = value.isoformat()
         elif key == "fleet" and isinstance(value, list):
@@ -81,7 +82,7 @@ def save_profile(uid: str, data: Dict[str, Any]) -> None:
     db[PROFILE_KEY.format(uid=uid)] = profile
 
 
-def get_seniority_analysis(uid: str) -> Optional[Dict[str, Any]]:
+def get_seniority_analysis(uid: str) -> dict[str, Any] | None:
     """Get seniority analysis for user.
 
     Args:
@@ -106,7 +107,7 @@ def get_seniority_analysis(uid: str) -> Optional[Dict[str, Any]]:
     }
 
 
-def calculate_seniority_category(percentile: Optional[float]) -> str:
+def calculate_seniority_category(percentile: float | None) -> str:
     """Calculate seniority category from percentile.
 
     Args:
@@ -175,7 +176,7 @@ def update_seniority_analysis(
     )
 
 
-def get_all_profiles() -> Dict[str, Dict[str, Any]]:
+def get_all_profiles() -> dict[str, dict[str, Any]]:
     """Get all user profiles (for admin/debugging).
 
     Returns:
@@ -190,7 +191,7 @@ def get_all_profiles() -> Dict[str, Dict[str, Any]]:
     return profiles
 
 
-def validate_profile(profile: Dict[str, Any]) -> Dict[str, Any]:
+def validate_profile(profile: dict[str, Any]) -> dict[str, Any]:
     """Validate profile data and return validation results.
 
     Args:
@@ -311,7 +312,7 @@ def import_profiles(filename: str = "profile_backup.json") -> int:
         Number of profiles imported
     """
     try:
-        with open(filename, "r") as f:
+        with open(filename) as f:
             profiles = json.load(f)
 
         imported = 0
@@ -331,12 +332,12 @@ def import_profiles(filename: str = "profile_backup.json") -> int:
 
 
 # Backwards compatibility functions
-def get_user_profile(uid: str) -> Dict[str, Any]:
+def get_user_profile(uid: str) -> dict[str, Any]:
     """Legacy function name - use get_profile instead."""
     return get_profile(uid)
 
 
-def save_user_profile(uid: str, data: Dict[str, Any]) -> None:
+def save_user_profile(uid: str, data: dict[str, Any]) -> None:
     """Legacy function name - use save_profile instead."""
     return save_profile(uid, data)
 

@@ -8,9 +8,8 @@ United Airlines specific parsing patterns.
 Built for scalability - easy to add other airlines later.
 """
 
-import re
 import logging
-from typing import Dict, List, Optional
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ class UnitedPatterns:
         ]
 
 
-def parse_united_content(text_content: str, filename: str = "") -> List[Dict]:
+def parse_united_content(text_content: str, filename: str = "") -> list[dict]:
     """
     Parse United Airlines bid packet content.
 
@@ -139,7 +138,7 @@ def parse_united_content(text_content: str, filename: str = "") -> List[Dict]:
 
 def _extract_united_trip(
     match: re.Match, line: str, confidence: float, pattern_name: str, line_num: int
-) -> Optional[Dict]:
+) -> dict | None:
     """Extract United trip data from regex match."""
     try:
         groups = match.groupdict()
@@ -273,7 +272,7 @@ class AirlineParserRegistry:
     }
 
     @classmethod
-    def parse(cls, text_content: str, airline: str, filename: str = "") -> List[Dict]:
+    def parse(cls, text_content: str, airline: str, filename: str = "") -> list[dict]:
         """Parse content using airline-specific parser."""
         parser = cls._parsers.get(airline.lower())
         if parser:
@@ -301,7 +300,7 @@ class AirlineParserRegistry:
         return "united"
 
     @classmethod
-    def get_supported_airlines(cls) -> List[str]:
+    def get_supported_airlines(cls) -> list[str]:
         """Get list of supported airlines."""
         return list(cls._parsers.keys())
 
@@ -311,7 +310,7 @@ class AirlineParserRegistry:
 # =========================================
 
 
-def parse_with_united_patterns(text_content: str, filename: str = "") -> List[Dict]:
+def parse_with_united_patterns(text_content: str, filename: str = "") -> list[dict]:
     """
     Main integration function for existing VectorBid code.
     Drop-in replacement that focuses on United Airlines.

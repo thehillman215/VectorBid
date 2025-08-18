@@ -131,7 +131,6 @@ class TestUIElements:
         page.goto(base_url)
 
         # Check for loading indicators (if any)
-        loading_indicators = page.locator(".loading, .spinner, [aria-label*='loading']")
         # Loading indicators are optional, but if present should be properly labeled
 
     def test_error_states_ui(self, page: Page, base_url: str):
@@ -235,24 +234,6 @@ class TestUIElements:
             # Check role is valid
             role = element.get_attribute("role")
             if role:
-                valid_roles = [
-                    "button",
-                    "link",
-                    "navigation",
-                    "main",
-                    "banner",
-                    "contentinfo",
-                    "complementary",
-                    "form",
-                    "search",
-                    "application",
-                    "dialog",
-                    "alert",
-                    "status",
-                    "progressbar",
-                    "tab",
-                    "tabpanel",
-                    "tablist",
-                ]
+                pass
                 # This is informational - many custom roles exist
                 # assert role in valid_roles, f"Unknown ARIA role: {role}"

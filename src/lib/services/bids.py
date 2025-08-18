@@ -1,11 +1,10 @@
 """Enhanced bid packet storage service with metadata support."""
 
-import os
 import json
 import logging
-from pathlib import Path
 from datetime import datetime
-from typing import Optional, Dict, List, Any, BinaryIO
+from pathlib import Path
+from typing import BinaryIO
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +20,9 @@ METADATA_DIR.mkdir(exist_ok=True)
 def save_bid_packet(
     month_tag: str,
     file_stream: BinaryIO,
-    filename: Optional[str] = None,
-    metadata: Optional[Dict] = None,
-) -> Dict:
+    filename: str | None = None,
+    metadata: dict | None = None,
+) -> dict:
     """Save a bid packet file with metadata.
 
     Args:
@@ -78,7 +77,7 @@ def save_bid_packet(
         raise
 
 
-def get_bid_packet_path(month_tag: str) -> Optional[Path]:
+def get_bid_packet_path(month_tag: str) -> Path | None:
     """Get the file path for a bid packet.
 
     Args:
@@ -94,7 +93,7 @@ def get_bid_packet_path(month_tag: str) -> Optional[Path]:
     return None
 
 
-def get_bid_packet_info(month_tag: str) -> Optional[Dict]:
+def get_bid_packet_info(month_tag: str) -> dict | None:
     """Get metadata for a bid packet.
 
     Args:
@@ -109,14 +108,14 @@ def get_bid_packet_info(month_tag: str) -> Optional[Dict]:
         return None
 
     try:
-        with open(metadata_path, "r") as f:
+        with open(metadata_path) as f:
             return json.load(f)
     except Exception as e:
         logger.error(f"Failed to read metadata for {month_tag}: {e}")
         return None
 
 
-def list_bid_packages() -> List[Dict]:
+def list_bid_packages() -> list[dict]:
     """List all available bid packages with metadata.
 
     Returns:
@@ -126,7 +125,7 @@ def list_bid_packages() -> List[Dict]:
 
     for metadata_file in METADATA_DIR.glob("*.json"):
         try:
-            with open(metadata_file, "r") as f:
+            with open(metadata_file) as f:
                 metadata = json.load(f)
                 packages.append(metadata)
         except Exception as e:
@@ -138,7 +137,7 @@ def list_bid_packages() -> List[Dict]:
     return packages
 
 
-def get_all_bid_packets() -> List[Dict]:
+def get_all_bid_packets() -> list[dict]:
     """Alias for list_bid_packages for backward compatibility."""
     return list_bid_packages()
 
@@ -172,7 +171,7 @@ def delete_bid_package(month_tag: str) -> bool:
         return False
 
 
-def get_matching_bid_packet(profile: Dict) -> Optional[Dict]:
+def get_matching_bid_packet(profile: dict) -> dict | None:
     """Find the best matching bid packet for a pilot's profile.
 
     Args:
@@ -227,7 +226,7 @@ def get_matching_bid_packet(profile: Dict) -> Optional[Dict]:
     return None
 
 
-def get_admin_stats() -> Dict:
+def get_admin_stats() -> dict:
     """Get statistics for the admin dashboard.
 
     Returns:
@@ -262,7 +261,7 @@ def get_admin_stats() -> Dict:
             "total_trips": total_trips,
             "total_size_mb": round(total_size / (1024 * 1024), 2),
             "recent_uploads": len(recent_packages),
-            "airlines": list(set(p.get("airline", "Unknown") for p in packages)),
+            "airlines": list({p.get("airline", "Unknown") for p in packages}),
             "latest_month": packages[0].get("month_tag") if packages else None,
             "active_pilots": 0,  # This would come from user database
         }
@@ -309,7 +308,7 @@ def cleanup_old_packages(days_old: int = 365) -> int:
         return 0
 
 
-def export_package_manifest() -> Dict:
+def export_package_manifest() -> dict:
     """Export a manifest of all bid packages.
 
     Returns:

@@ -1,5 +1,3 @@
-import os
-
 # Create a base template with navigation
 base_template = """<!DOCTYPE html>
 <html>
@@ -33,12 +31,12 @@ base_template = """<!DOCTYPE html>
             </div>
         </div>
     </nav>
-    
+
     <!-- Main Content -->
     <main>
         {% block content %}{% endblock %}
     </main>
-    
+
     {% block scripts %}{% endblock %}
 </body>
 </html>"""
@@ -66,16 +64,16 @@ index_with_nav = """{% extends "base_nav.html" %}
 <div class="container mx-auto px-4 py-8">
     <div class="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
         <h1 class="text-3xl font-bold mb-4">Welcome to VectorBid</h1>
-        
+
         <div class="space-y-4">
             <a href="/test-panel" class="block w-full bg-yellow-500 text-white py-3 px-6 rounded-lg text-center hover:bg-yellow-600">
                 🧪 Open Test Control Panel
             </a>
-            
+
             <a href="/onboarding" class="block w-full bg-blue-600 text-white py-3 px-6 rounded-lg text-center hover:bg-blue-700">
                 👤 Setup Profile (First Time)
             </a>
-            
+
             {% if profile %}
             <div class="border-t pt-4 mt-4">
                 <p class="text-gray-600 mb-3">Logged in as: <strong>{{ profile.name }}</strong></p>

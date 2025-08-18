@@ -72,10 +72,9 @@ class TestErrorScenarios:
             # Create a fake large file (simulated)
             # In a real test, you might create a temporary large file
             # For now, just test that the interface exists and has size limits
-            file_input = file_inputs.first
 
             # Check if there are size restrictions in place
-            max_size_indicators = page.locator("text=MB, text=size, text=limit")
+            page.locator("text=MB, text=size, text=limit")
             # This is informational - good UX would show file size limits
 
     def test_invalid_user_session(self, page: Page, base_url: str):
@@ -145,7 +144,7 @@ class TestErrorScenarios:
         if forms.count() > 0:
             form = forms.first
             if form.is_visible():
-                action = form.get_attribute("action") or ""
+                form.get_attribute("action") or ""
                 method = form.get_attribute("method") or "GET"
 
                 if method.upper() == "POST":
@@ -165,7 +164,7 @@ class TestErrorScenarios:
         expect(page.locator("body")).to_be_visible()
 
         # Should show appropriate error messages if database is down
-        error_indicators = page.locator("text=error, text=unavailable, text=try again")
+        page.locator("text=error, text=unavailable, text=try again")
         # Error messages are acceptable and expected if database is down
 
     def test_memory_leaks_basic(self, page: Page, base_url: str):

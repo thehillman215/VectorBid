@@ -2,21 +2,20 @@ from __future__ import annotations
 
 """Utility helpers for managing bid packet files and metadata."""
 
-import json
-from datetime import datetime
-from pathlib import Path
-from typing import Optional
+import json  # noqa: E402
+from datetime import datetime  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 # Directories for storing bid packets and metadata
 BIDS_DIR = Path("bids")
 METADATA_DIR = BIDS_DIR / "metadata"
 
 
-def get_bid_packet_info(month_tag: str) -> Optional[dict]:
+def get_bid_packet_info(month_tag: str) -> dict | None:
     """Return metadata for the given month tag if it exists."""
     meta_file = METADATA_DIR / f"{month_tag}.json"
     if meta_file.exists():
-        with open(meta_file, "r", encoding="utf-8") as f:
+        with open(meta_file, encoding="utf-8") as f:
             return json.load(f)
     return None
 
