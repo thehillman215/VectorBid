@@ -16,7 +16,7 @@ class TestAdminFunctionality:
         """Test admin upload with invalid bearer token."""
         response = page.request.post(
             f"{base_url}/admin/upload-bid",
-            headers={"Authorization": "Bearer invalid_token"}
+            headers={"Authorization": "Bearer invalid_token"},
         )
         assert response.status == 401
 
@@ -25,10 +25,7 @@ class TestAdminFunctionality:
         # Set a test admin token (this would need to match ADMIN_BEARER_TOKEN env var)
         headers = {"Authorization": "Bearer test_admin_token"}
 
-        response = page.request.post(
-            f"{base_url}/admin/upload-bid",
-            headers=headers
-        )
+        response = page.request.post(f"{base_url}/admin/upload-bid", headers=headers)
         # Should return 400 for missing data
         assert response.status in [400, 401]  # 401 if token doesn't match env
 
@@ -37,10 +34,7 @@ class TestAdminFunctionality:
         headers = {"Authorization": "Bearer test_admin_token"}
 
         # Try GET request
-        response = page.request.get(
-            f"{base_url}/admin/upload-bid",
-            headers=headers
-        )
+        response = page.request.get(f"{base_url}/admin/upload-bid", headers=headers)
         assert response.status in [405, 401]  # Method not allowed or unauthorized
 
     def test_admin_endpoints_not_publicly_accessible(self, page: Page, base_url: str):
@@ -55,7 +49,11 @@ class TestAdminFunctionality:
             try:
                 page.goto(f"{base_url}{path}")
                 # Should not load successfully or should show unauthorized
-                expect(page).to_have_url(lambda url: "/admin" not in url or "401" in page.content() or "Unauthorized" in page.content())
+                expect(page).to_have_url(
+                    lambda url: "/admin" not in url
+                    or "401" in page.content()
+                    or "Unauthorized" in page.content()
+                )
             except Exception:
                 # Navigation might fail, which is expected for protected routes
                 pass
@@ -75,8 +73,7 @@ class TestAdminFunctionality:
         responses = []
         for _ in range(5):
             response = page.request.post(
-                f"{base_url}/admin/upload-bid",
-                headers=headers
+                f"{base_url}/admin/upload-bid", headers=headers
             )
             responses.append(response.status)
 
@@ -92,11 +89,15 @@ class TestAdminFunctionality:
         headers = response.headers
 
         # These are informational - not all may be present in development
-        security_headers = ['x-content-type-options', 'x-frame-options', 'strict-transport-security']
-        present_headers = [h for h in security_headers if h in headers]
+        security_headers = [
+            "x-content-type-options",
+            "x-frame-options",
+            "strict-transport-security",
+        ]
+        [h for h in security_headers if h in headers]
 
         # At least content-type should be set properly
-        assert 'content-type' in headers
+        assert "content-type" in headers
 
     def test_admin_endpoint_input_validation(self, page: Page, base_url: str):
         """Test input validation on admin endpoints."""
@@ -111,9 +112,9 @@ class TestAdminFunctionality:
                 "file": {
                     "name": "test.pdf",
                     "mimeType": "application/pdf",
-                    "buffer": b"fake pdf content"
-                }
-            }
+                    "buffer": b"fake pdf content",
+                },
+            },
         )
 
         # Should reject invalid input (either 400 for validation or 401 for auth)
@@ -132,9 +133,9 @@ class TestAdminFunctionality:
                 "file": {
                     "name": "test.txt",
                     "mimeType": "text/plain",
-                    "buffer": b"not a pdf"
-                }
-            }
+                    "buffer": b"not a pdf",
+                },
+            },
         )
 
         # Should reject non-PDF files (either 400 for validation or 401 for auth)
@@ -145,16 +146,15 @@ class TestAdminFunctionality:
         # This is more of a code review item, but we can test the endpoint behavior
         headers = {"Authorization": "Bearer test_admin_token"}
 
-        response = page.request.post(
-            f"{base_url}/admin/upload-bid",
-            headers=headers
-        )
+        response = page.request.post(f"{base_url}/admin/upload-bid", headers=headers)
 
         # Should handle the request (fail for missing data, but not crash)
         assert response.status in [400, 401, 422]
 
         # Response should not leak sensitive information
         response_text = response.text()
-        sensitive_terms = ['token', 'password', 'secret', 'key']
+        sensitive_terms = ["token", "password", "secret", "key"]
         for term in sensitive_terms:
-            assert term.lower() not in response_text.lower(), f"Response may contain sensitive information: {term}"
+            assert term.lower() not in response_text.lower(), (
+                f"Response may contain sensitive information: {term}"
+            )

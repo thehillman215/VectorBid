@@ -55,7 +55,7 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
             _RULES = load_rule_pack(RULE_PACK_PATH, force_reload=True)
         return validate_feasibility(bundle, _RULES)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/optimize", tags=["Optimize"])
@@ -64,6 +64,8 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     K = int(payload.get("K", 50))
     topk = select_topk(bundle, K)
     return {"candidates": [c.model_dump() for c in topk]}
+
+
 @router.post("/strategy", tags=["Strategy"])
 def strategy(payload: dict[str, Any]) -> dict[str, Any]:
     """
@@ -78,7 +80,7 @@ def strategy(payload: dict[str, Any]) -> dict[str, Any]:
         directives: StrategyDirectives = propose_strategy(bundle, topk)
         return {"directives": directives.model_dump()}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/generate_layers", tags=["Generate"])
@@ -95,7 +97,7 @@ def generate_layers(payload: dict[str, Any]) -> dict[str, Any]:
         artifact: BidLayerArtifact = candidates_to_layers(topk, bundle)
         return {"artifact": artifact.model_dump()}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/lint", tags=["Generate"])
@@ -107,12 +109,10 @@ def lint(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         return lint_layers(payload["artifact"])
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/export",
-             tags=["Export"],
-             dependencies=[Depends(require_api_key)])
+@router.post("/export", tags=["Export"], dependencies=[Depends(require_api_key)])
 def export(payload: dict[str, Any]) -> dict[str, str]:
     """
     Protected when VECTORBID_API_KEY is set.
@@ -132,4 +132,4 @@ def export(payload: dict[str, Any]) -> dict[str, str]:
 
         return {"export_path": str(out_path)}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e

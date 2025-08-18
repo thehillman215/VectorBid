@@ -1,7 +1,5 @@
-import os
-
 # Create enhanced UI route with personas and sliders
-ui_route = '''from fastapi import APIRouter, Request, Form
+ui_route = """from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
@@ -16,7 +14,7 @@ PERSONAS = {
         "priorities": {"time_home": 10, "pay": 5, "easy_trips": 7}
     },
     "family": {
-        "name": "👨‍👩‍👧‍👦 Family First", 
+        "name": "👨‍👩‍👧‍👦 Family First",
         "defaults": "Weekends off, no holidays, predictable schedule, home every night if possible",
         "priorities": {"time_home": 10, "weekends": 10, "pay": 3}
     },
@@ -59,65 +57,65 @@ async def run_pipeline(
 ):
     # Generate PBS based on persona + custom preferences + priorities
     pbs_layers = []
-    
+
     # Apply persona defaults
     if persona in PERSONAS:
         persona_data = PERSONAS[persona]
-        
+
         # High priority items go first in PBS
         if priority_weekends >= 8:
             pbs_layers.extend([
                 "AVOID PAIRINGS",
                 "  IF DOW CONTAINS SA,SU"
             ])
-        
+
         if priority_time_home >= 8:
             pbs_layers.extend([
                 "PREFER PAIRINGS",
                 "  IF TAFB < 48:00"  # Time away from base < 48 hours
             ])
-    
+
     # Parse custom preferences
     pref_lower = preferences.lower()
-    
+
     if "weekend" in pref_lower:
         pbs_layers.extend([
             "AVOID PAIRINGS",
             "  IF DOW CONTAINS SA,SU"
         ])
-    
+
     if "red-eye" in pref_lower or "redeye" in pref_lower:
         pbs_layers.extend([
             "AVOID PAIRINGS",
             "  IF REPORT < 0600 OR RELEASE > 2300"
         ])
-    
+
     if "SAN" in preferences.upper():
         pbs_layers.extend([
             "PREFER PAIRINGS",
             "  IF LAYOVER = SAN POINTS +100"
         ])
-    
+
     if "christmas" in pref_lower or "holiday" in pref_lower:
         pbs_layers.extend([
             "AVOID PAIRINGS",
             "  IF DATE IN (24DEC, 25DEC, 26DEC, 31DEC, 01JAN)"
         ])
-    
+
     # Add priority-based scoring
     if priority_pay >= 7:
         pbs_layers.extend([
             "PREFER PAIRINGS",
             "  IF CREDIT > 5:30 POINTS +50"
         ])
-    
+
     # Default award
     pbs_layers.extend([
         "",
         "AWARD PAIRINGS",
         "  IN SENIORITY ORDER"
     ])
-    
+
     results = {
         "pbs_layers": pbs_layers,
         "airline": airline,
@@ -131,12 +129,12 @@ async def run_pipeline(
             "comfort": priority_comfort
         }
     }
-    
+
     return templates.TemplateResponse("pilot_results.html", {
         "request": request,
         "results": results
     })
-'''
+"""
 
 with open("app/routes/ui.py", "w") as f:
     f.write(ui_route)

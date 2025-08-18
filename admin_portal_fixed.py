@@ -1,6 +1,7 @@
 """
 Fixed Admin Portal with Working Contract Upload
 """
+
 import sys
 from functools import wraps
 
@@ -14,28 +15,32 @@ from flask import (
     url_for,
 )
 
-sys.path.append('src/lib')
+sys.path.append("src/lib")
 
 from bid_packet_manager import BidPacketManager
 
-admin_portal = Blueprint('admin_portal', __name__, url_prefix='/admin')
+admin_portal = Blueprint("admin_portal", __name__, url_prefix="/admin")
 
-ADMIN_PASSWORD = 'vectorbid2025'
-ALLOWED_EXTENSIONS = {'pdf'}
+ADMIN_PASSWORD = "vectorbid2025"
+ALLOWED_EXTENSIONS = {"pdf"}
+
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('admin_logged_in'):
-            return redirect(url_for('admin_portal.login'))
+        if not session.get("admin_logged_in"):
+            return redirect(url_for("admin_portal.login"))
         return f(*args, **kwargs)
+
     return decorated_function
 
-@admin_portal.route('/')
-@admin_portal.route('/dashboard')
+
+@admin_portal.route("/")
+@admin_portal.route("/dashboard")
 @admin_required
 def dashboard():
     """Admin dashboard with working uploads"""
@@ -53,13 +58,13 @@ def dashboard():
     <style>
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
         .dashboard-card { background: white; border-radius: 15px; padding: 2rem; margin: 2rem 0; }
-        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; 
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
                      padding: 1.5rem; border-radius: 10px; text-align: center; margin-bottom: 1rem; }
         .stat-number { font-size: 2.5rem; font-weight: bold; }
-        .upload-zone { 
-            border: 2px dashed #667eea; 
-            border-radius: 10px; 
-            padding: 2rem; 
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 2rem;
             text-align: center;
             background: #f8f9fa;
             cursor: pointer;
@@ -70,7 +75,7 @@ def dashboard():
             justify-content: center;
             align-items: center;
         }
-        .upload-zone:hover { 
+        .upload-zone:hover {
             background: #e9ecef;
             border-color: #764ba2;
         }
@@ -148,7 +153,7 @@ def dashboard():
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Month (YYYYMM) *</label>
-                                    <input type="text" class="form-control" id="month_tag" 
+                                    <input type="text" class="form-control" id="month_tag"
                                            placeholder="202502" pattern="[0-9]{6}" maxlength="6" required>
                                 </div>
                                 <div class="upload-zone" id="bidUploadZone">
@@ -185,7 +190,7 @@ def dashboard():
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Contract Version</label>
-                                    <input type="text" class="form-control" id="contract_version" 
+                                    <input type="text" class="form-control" id="contract_version"
                                            placeholder="2024-2028 (optional)">
                                 </div>
                                 <div class="upload-zone" id="contractUploadZone">
@@ -421,64 +426,67 @@ def dashboard():
     """
     return render_template_string(dashboard_html, packets=packets)
 
-@admin_portal.route('/api/upload-bid-packet', methods=['POST'])
+
+@admin_portal.route("/api/upload-bid-packet", methods=["POST"])
 @admin_required
 def upload_bid_packet():
     """API endpoint for bid packet upload"""
     try:
         manager = BidPacketManager()
 
-        file = request.files.get('file')
-        month_tag = request.form.get('month_tag')
-        airline = request.form.get('airline')
+        file = request.files.get("file")
+        month_tag = request.form.get("month_tag")
+        airline = request.form.get("airline")
 
         if not file:
-            return jsonify({'success': False, 'error': 'No file provided'})
+            return jsonify({"success": False, "error": "No file provided"})
         if not month_tag:
-            return jsonify({'success': False, 'error': 'Month tag is required'})
+            return jsonify({"success": False, "error": "Month tag is required"})
         if not airline:
-            return jsonify({'success': False, 'error': 'Airline is required'})
+            return jsonify({"success": False, "error": "Airline is required"})
 
         if not allowed_file(file.filename):
-            return jsonify({'success': False, 'error': 'Invalid file type. PDF only.'})
+            return jsonify({"success": False, "error": "Invalid file type. PDF only."})
 
         result = manager.upload_bid_packet(file, month_tag, airline)
         return jsonify(result)
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({"success": False, "error": str(e)})
 
-@admin_portal.route('/api/upload-contract', methods=['POST'])
+
+@admin_portal.route("/api/upload-contract", methods=["POST"])
 @admin_required
 def upload_contract():
     """API endpoint for contract upload"""
     try:
         manager = BidPacketManager()
 
-        file = request.files.get('file')
-        airline = request.form.get('airline')
-        version = request.form.get('version', None)
+        file = request.files.get("file")
+        airline = request.form.get("airline")
+        version = request.form.get("version", None)
 
         if not file:
-            return jsonify({'success': False, 'error': 'No file provided'})
+            return jsonify({"success": False, "error": "No file provided"})
         if not airline:
-            return jsonify({'success': False, 'error': 'Airline is required'})
+            return jsonify({"success": False, "error": "Airline is required"})
 
         if not allowed_file(file.filename):
-            return jsonify({'success': False, 'error': 'Invalid file type. PDF only.'})
+            return jsonify({"success": False, "error": "Invalid file type. PDF only."})
 
         result = manager.upload_pilot_contract(file, airline, version)
         return jsonify(result)
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({"success": False, "error": str(e)})
 
-@admin_portal.route('/login', methods=['GET', 'POST'])
+
+@admin_portal.route("/login", methods=["GET", "POST"])
 def login():
     """Admin login"""
-    if request.method == 'POST':
-        password = request.form.get('password')
+    if request.method == "POST":
+        password = request.form.get("password")
         if password == ADMIN_PASSWORD:
-            session['admin_logged_in'] = True
-            return redirect(url_for('admin_portal.dashboard'))
+            session["admin_logged_in"] = True
+            return redirect(url_for("admin_portal.dashboard"))
         error = "Invalid password"
     else:
         error = None
@@ -490,7 +498,7 @@ def login():
     <title>Admin Login - VectorBid</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                min-height: 100vh; display: flex; align-items: center; }
         .login-card { background: white; border-radius: 15px; padding: 2rem; }
     </style>
@@ -523,8 +531,9 @@ def login():
     """
     return render_template_string(login_html, error=error)
 
-@admin_portal.route('/logout')
+
+@admin_portal.route("/logout")
 def logout():
     """Admin logout"""
-    session.pop('admin_logged_in', None)
-    return redirect('/admin/login')
+    session.pop("admin_logged_in", None)
+    return redirect("/admin/login")

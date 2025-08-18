@@ -7,7 +7,9 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.lint_lint_post_payload import LintLintPostPayload
-from ...models.lint_lint_post_response_lint_lint_post import LintLintPostResponseLintLintPost
+from ...models.lint_lint_post_response_lint_lint_post import (
+    LintLintPostResponseLintLintPost,
+)
 from ...types import Response
 
 

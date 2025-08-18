@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python - <<'PY'
+try:
+    import uvicorn  # noqa: F401
+except Exception:
+    import sys, subprocess
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "uvicorn>=0.29"])
+PY
+set -euo pipefail
 PORT="${PORT:-3000}"
 
 # ensure no stale server

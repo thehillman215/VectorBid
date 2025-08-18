@@ -4,24 +4,28 @@ Enhanced 50-Layer Bidding System for VectorBid
 Integrates comprehensive PBS command generation with layered strategy management
 """
 
-from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
-from enum import Enum
-import json
 from datetime import datetime
+from typing import Any
 
 # Import our enhanced PBS generator
-from enhanced_pbs_generator import EnhancedPBSGenerator, PBSCommand, CommandType, Priority
+from enhanced_pbs_generator import (
+    CommandType,
+    EnhancedPBSGenerator,
+    PBSCommand,
+    Priority,
+)
 
 
 @dataclass
 class BidLayer:
     """Represents a single bid layer with multiple filters"""
+
     layer_number: int
     name: str
     description: str
     priority: Priority
-    commands: List[PBSCommand] = field(default_factory=list)
+    commands: list[PBSCommand] = field(default_factory=list)
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.now)
 
@@ -30,32 +34,29 @@ class BidLayer:
         command.layer_number = self.layer_number
         self.commands.append(command)
 
-    def get_pbs_output(self) -> List[str]:
+    def get_pbs_output(self) -> list[str]:
         """Get PBS command strings for this layer"""
         return [cmd.to_pbs_string() for cmd in self.commands if self.is_active]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert layer to dictionary for storage/API"""
         return {
-            'layer_number':
-            self.layer_number,
-            'name':
-            self.name,
-            'description':
-            self.description,
-            'priority':
-            self.priority.name,
-            'is_active':
-            self.is_active,
-            'commands': [{
-                'command_type': cmd.command_type.value,
-                'subject': cmd.subject,
-                'condition': cmd.condition,
-                'value': cmd.value,
-                'explanation': cmd.explanation
-            } for cmd in self.commands],
-            'created_at':
-            self.created_at.isoformat()
+            "layer_number": self.layer_number,
+            "name": self.name,
+            "description": self.description,
+            "priority": self.priority.name,
+            "is_active": self.is_active,
+            "commands": [
+                {
+                    "command_type": cmd.command_type.value,
+                    "subject": cmd.subject,
+                    "condition": cmd.condition,
+                    "value": cmd.value,
+                    "explanation": cmd.explanation,
+                }
+                for cmd in self.commands
+            ],
+            "created_at": self.created_at.isoformat(),
         }
 
 
@@ -66,74 +67,64 @@ class Enhanced50LayerSystem:
 
     def __init__(self, user_id: str = None):
         self.user_id = user_id
-        self.layers: List[BidLayer] = []
+        self.layers: list[BidLayer] = []
         self.max_layers = 50
         self.pbs_generator = EnhancedPBSGenerator()
         self.pilot_profile = {}
 
         # Pre-defined layer templates for common strategies
         self.layer_templates = {
-            'critical_constraints': {
-                'name':
-                'Critical Constraints',
-                'description':
-                'Must-have requirements that cannot be compromised',
-                'priority':
-                Priority.CRITICAL,
-                'examples':
-                ['AVOID RESERVE', 'OFF specific dates', 'Base requirements']
+            "critical_constraints": {
+                "name": "Critical Constraints",
+                "description": "Must-have requirements that cannot be compromised",
+                "priority": Priority.CRITICAL,
+                "examples": [
+                    "AVOID RESERVE",
+                    "OFF specific dates",
+                    "Base requirements",
+                ],
             },
-            'weekend_strategy': {
-                'name': 'Weekend Strategy',
-                'description': 'Weekend work preferences',
-                'priority': Priority.HIGH,
-                'examples': ['Weekend avoidance', 'Weekend preferences']
+            "weekend_strategy": {
+                "name": "Weekend Strategy",
+                "description": "Weekend work preferences",
+                "priority": Priority.HIGH,
+                "examples": ["Weekend avoidance", "Weekend preferences"],
             },
-            'timing_preferences': {
-                'name':
-                'Timing Preferences',
-                'description':
-                'Departure times, red-eye avoidance, commuter needs',
-                'priority':
-                Priority.HIGH,
-                'examples':
-                ['No early starts', 'Commuter timing', 'Red-eye avoidance']
+            "timing_preferences": {
+                "name": "Timing Preferences",
+                "description": "Departure times, red-eye avoidance, commuter needs",
+                "priority": Priority.HIGH,
+                "examples": ["No early starts", "Commuter timing", "Red-eye avoidance"],
             },
-            'trip_characteristics': {
-                'name':
-                'Trip Characteristics',
-                'description':
-                'Duration, destinations, aircraft preferences',
-                'priority':
-                Priority.MEDIUM,
-                'examples':
-                ['Short trips', 'International routes', 'Aircraft types']
+            "trip_characteristics": {
+                "name": "Trip Characteristics",
+                "description": "Duration, destinations, aircraft preferences",
+                "priority": Priority.MEDIUM,
+                "examples": ["Short trips", "International routes", "Aircraft types"],
             },
-            'quality_of_life': {
-                'name':
-                'Quality of Life',
-                'description':
-                'Work-life balance optimizations',
-                'priority':
-                Priority.MEDIUM,
-                'examples':
-                ['Max days off', 'Layover preferences', 'Credit optimization']
+            "quality_of_life": {
+                "name": "Quality of Life",
+                "description": "Work-life balance optimizations",
+                "priority": Priority.MEDIUM,
+                "examples": [
+                    "Max days off",
+                    "Layover preferences",
+                    "Credit optimization",
+                ],
             },
-            'tie_breakers': {
-                'name':
-                'Tie Breakers',
-                'description':
-                'Final preferences for close decisions',
-                'priority':
-                Priority.LOW,
-                'examples': [
-                    'Specific destinations', 'Crew preferences',
-                    'Equipment comfort'
-                ]
-            }
+            "tie_breakers": {
+                "name": "Tie Breakers",
+                "description": "Final preferences for close decisions",
+                "priority": Priority.LOW,
+                "examples": [
+                    "Specific destinations",
+                    "Crew preferences",
+                    "Equipment comfort",
+                ],
+            },
         }
 
-    def set_pilot_profile(self, profile: Dict[str, Any]):
+    def set_pilot_profile(self, profile: dict[str, Any]):
         """Set pilot profile for personalized layer generation"""
         self.pilot_profile = profile
         self.pbs_generator.set_pilot_profile(profile)
@@ -166,23 +157,27 @@ class Enhanced50LayerSystem:
 
             # Determine layer name based on command types and priority
             layer_name = self._determine_layer_name(layer_commands)
-            layer_description = self._generate_layer_description(
-                layer_commands)
+            layer_description = self._generate_layer_description(layer_commands)
 
             layer = BidLayer(
                 layer_number=layer_num,
                 name=layer_name,
                 description=layer_description,
-                priority=layer_commands[0].
-                priority,  # Use first command's priority
-                commands=layer_commands)
+                priority=layer_commands[0].priority,  # Use first command's priority
+                commands=layer_commands,
+            )
 
             self.layers.append(layer)
 
         return len(self.layers)
 
-    def add_custom_layer(self, name: str, description: str, priority: Priority,
-                         commands: List[Dict[str, str]]) -> bool:
+    def add_custom_layer(
+        self,
+        name: str,
+        description: str,
+        priority: Priority,
+        commands: list[dict[str, str]],
+    ) -> bool:
         """
         Add a custom layer with user-defined commands
         """
@@ -190,24 +185,27 @@ class Enhanced50LayerSystem:
             return False
 
         layer_number = len(self.layers) + 1
-        layer = BidLayer(layer_number=layer_number,
-                         name=name,
-                         description=description,
-                         priority=priority)
+        layer = BidLayer(
+            layer_number=layer_number,
+            name=name,
+            description=description,
+            priority=priority,
+        )
 
         # Convert command dictionaries to PBSCommand objects
         for cmd_dict in commands:
             try:
                 command = PBSCommand(
-                    command_type=CommandType(cmd_dict['command_type']),
-                    subject=cmd_dict['subject'],
-                    condition=cmd_dict['condition'],
-                    value=cmd_dict['value'],
+                    command_type=CommandType(cmd_dict["command_type"]),
+                    subject=cmd_dict["subject"],
+                    condition=cmd_dict["condition"],
+                    value=cmd_dict["value"],
                     priority=priority,
-                    explanation=cmd_dict.get('explanation', ''),
-                    layer_number=layer_number)
+                    explanation=cmd_dict.get("explanation", ""),
+                    layer_number=layer_number,
+                )
                 layer.add_command(command)
-            except (KeyError, ValueError) as e:
+            except (KeyError, ValueError):
                 continue  # Skip invalid commands
 
         if layer.commands:  # Only add if it has valid commands
@@ -222,24 +220,30 @@ class Enhanced50LayerSystem:
         if not layer:
             return False
 
-        if 'name' in kwargs:
-            layer.name = kwargs['name']
-        if 'description' in kwargs:
-            layer.description = kwargs['description']
-        if 'is_active' in kwargs:
-            layer.is_active = kwargs['is_active']
-        if 'priority' in kwargs:
-            layer.priority = kwargs['priority']
+        if "name" in kwargs:
+            layer.name = kwargs["name"]
+        if "description" in kwargs:
+            layer.description = kwargs["description"]
+        if "is_active" in kwargs:
+            layer.is_active = kwargs["is_active"]
+        if "priority" in kwargs:
+            layer.priority = kwargs["priority"]
             # Update all commands in the layer
             for cmd in layer.commands:
-                cmd.priority = kwargs['priority']
+                cmd.priority = kwargs["priority"]
 
         return True
 
     def delete_layer(self, layer_number: int) -> bool:
         """Delete a layer and renumber subsequent layers"""
-        layer_index = next((i for i, layer in enumerate(self.layers)
-                            if layer.layer_number == layer_number), None)
+        layer_index = next(
+            (
+                i
+                for i, layer in enumerate(self.layers)
+                if layer.layer_number == layer_number
+            ),
+            None,
+        )
 
         if layer_index is None:
             return False
@@ -255,7 +259,7 @@ class Enhanced50LayerSystem:
 
         return True
 
-    def reorder_layers(self, new_order: List[int]) -> bool:
+    def reorder_layers(self, new_order: list[int]) -> bool:
         """Reorder layers based on new priority order"""
         if len(new_order) != len(self.layers):
             return False
@@ -273,22 +277,20 @@ class Enhanced50LayerSystem:
 
             self.layers = reordered_layers
             return True
-        except:
+        except Exception:
             return False
 
-    def get_layer(self, layer_number: int) -> Optional[BidLayer]:
+    def get_layer(self, layer_number: int) -> BidLayer | None:
         """Get a specific layer by number"""
         return next(
-            (layer
-             for layer in self.layers if layer.layer_number == layer_number),
-            None)
+            (layer for layer in self.layers if layer.layer_number == layer_number), None
+        )
 
-    def get_active_layers(self) -> List[BidLayer]:
+    def get_active_layers(self) -> list[BidLayer]:
         """Get only active layers"""
         return [layer for layer in self.layers if layer.is_active]
 
-    def generate_final_pbs_output(self,
-                                  include_explanations: bool = False) -> str:
+    def generate_final_pbs_output(self, include_explanations: bool = False) -> str:
         """Generate final PBS output for copy-paste into airline system"""
         active_layers = self.get_active_layers()
 
@@ -296,10 +298,11 @@ class Enhanced50LayerSystem:
             return "No active layers found. Please create bid layers first."
 
         output_lines = [
-            f"VectorBid 50-Layer PBS Strategy",
+            "VectorBid 50-Layer PBS Strategy",
             f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"Active Layers: {len(active_layers)} of {len(self.layers)}",
-            "=" * 50, ""
+            "=" * 50,
+            "",
         ]
 
         for layer in active_layers:
@@ -317,73 +320,83 @@ class Enhanced50LayerSystem:
             output_lines.append("")  # Blank line between layers
 
         # Add summary and instructions
-        output_lines.extend([
-            "=" * 50,
-            "SUMMARY:",
-            f"Total Commands: {sum(len(layer.commands) for layer in active_layers)}",
-            f"Priority Breakdown:",
-        ])
+        output_lines.extend(
+            [
+                "=" * 50,
+                "SUMMARY:",
+                f"Total Commands: {sum(len(layer.commands) for layer in active_layers)}",
+                "Priority Breakdown:",
+            ]
+        )
 
         # Count commands by priority
         priority_counts = {}
         for layer in active_layers:
             for cmd in layer.commands:
-                priority_counts[cmd.priority.name] = priority_counts.get(
-                    cmd.priority.name, 0) + 1
+                priority_counts[cmd.priority.name] = (
+                    priority_counts.get(cmd.priority.name, 0) + 1
+                )
 
         for priority, count in priority_counts.items():
             output_lines.append(f"  {priority}: {count} commands")
 
-        output_lines.extend([
-            "", "USAGE INSTRUCTIONS:",
-            "1. Copy the commands above (Layer by Layer)",
-            "2. Log into your airline's PBS system",
-            "3. Enter commands in layer order (1, 2, 3...)",
-            "4. Review and adjust based on current bid packets",
-            "5. Submit your bid before deadline", "",
-            "⚠️  IMPORTANT: Always review commands against actual",
-            "   trip data before submitting your bid!"
-        ])
+        output_lines.extend(
+            [
+                "",
+                "USAGE INSTRUCTIONS:",
+                "1. Copy the commands above (Layer by Layer)",
+                "2. Log into your airline's PBS system",
+                "3. Enter commands in layer order (1, 2, 3...)",
+                "4. Review and adjust based on current bid packets",
+                "5. Submit your bid before deadline",
+                "",
+                "⚠️  IMPORTANT: Always review commands against actual",
+                "   trip data before submitting your bid!",
+            ]
+        )
 
         return "\n".join(output_lines)
 
-    def export_strategy(self) -> Dict[str, Any]:
+    def export_strategy(self) -> dict[str, Any]:
         """Export complete strategy for saving/sharing"""
         return {
-            'user_id': self.user_id,
-            'created_at': datetime.now().isoformat(),
-            'pilot_profile': self.pilot_profile,
-            'total_layers': len(self.layers),
-            'active_layers': len(self.get_active_layers()),
-            'layers': [layer.to_dict() for layer in self.layers]
+            "user_id": self.user_id,
+            "created_at": datetime.now().isoformat(),
+            "pilot_profile": self.pilot_profile,
+            "total_layers": len(self.layers),
+            "active_layers": len(self.get_active_layers()),
+            "layers": [layer.to_dict() for layer in self.layers],
         }
 
-    def import_strategy(self, strategy_data: Dict[str, Any]) -> bool:
+    def import_strategy(self, strategy_data: dict[str, Any]) -> bool:
         """Import a saved strategy"""
         try:
             self.layers = []
 
-            for layer_data in strategy_data.get('layers', []):
+            for layer_data in strategy_data.get("layers", []):
                 # Recreate commands
                 commands = []
-                for cmd_data in layer_data.get('commands', []):
+                for cmd_data in layer_data.get("commands", []):
                     command = PBSCommand(
-                        command_type=CommandType(cmd_data['command_type']),
-                        subject=cmd_data['subject'],
-                        condition=cmd_data['condition'],
-                        value=cmd_data['value'],
-                        priority=Priority[layer_data['priority']],
-                        explanation=cmd_data['explanation'],
-                        layer_number=layer_data['layer_number'])
+                        command_type=CommandType(cmd_data["command_type"]),
+                        subject=cmd_data["subject"],
+                        condition=cmd_data["condition"],
+                        value=cmd_data["value"],
+                        priority=Priority[layer_data["priority"]],
+                        explanation=cmd_data["explanation"],
+                        layer_number=layer_data["layer_number"],
+                    )
                     commands.append(command)
 
                 # Recreate layer
-                layer = BidLayer(layer_number=layer_data['layer_number'],
-                                 name=layer_data['name'],
-                                 description=layer_data['description'],
-                                 priority=Priority[layer_data['priority']],
-                                 commands=commands,
-                                 is_active=layer_data['is_active'])
+                layer = BidLayer(
+                    layer_number=layer_data["layer_number"],
+                    name=layer_data["name"],
+                    description=layer_data["description"],
+                    priority=Priority[layer_data["priority"]],
+                    commands=commands,
+                    is_active=layer_data["is_active"],
+                )
 
                 self.layers.append(layer)
 
@@ -391,7 +404,7 @@ class Enhanced50LayerSystem:
         except (KeyError, ValueError):
             return False
 
-    def get_layer_statistics(self) -> Dict[str, Any]:
+    def get_layer_statistics(self) -> dict[str, Any]:
         """Get statistics about the current layer configuration"""
         active_layers = self.get_active_layers()
 
@@ -408,20 +421,20 @@ class Enhanced50LayerSystem:
                 priorities[priority] = priorities.get(priority, 0) + 1
 
         return {
-            'total_layers': len(self.layers),
-            'active_layers': len(active_layers),
-            'total_commands':
-            sum(len(layer.commands) for layer in active_layers),
-            'command_types': command_types,
-            'priority_distribution': priorities,
-            'layers_by_priority': {
-                priority.name:
-                len([l for l in active_layers if l.priority == priority])
+            "total_layers": len(self.layers),
+            "active_layers": len(active_layers),
+            "total_commands": sum(len(layer.commands) for layer in active_layers),
+            "command_types": command_types,
+            "priority_distribution": priorities,
+            "layers_by_priority": {
+                priority.name: len(
+                    [layer for layer in active_layers if layer.priority == priority]
+                )
                 for priority in Priority
-            }
+            },
         }
 
-    def validate_strategy(self) -> List[str]:
+    def validate_strategy(self) -> list[str]:
         """Validate the current strategy for potential issues"""
         issues = []
 
@@ -449,53 +462,55 @@ class Enhanced50LayerSystem:
         # Check for direct conflicts (avoiding and preferring the same thing)
         for avoid_cmd in avoid_commands:
             for prefer_cmd in prefer_commands:
-                if (avoid_cmd.subject == prefer_cmd.subject
-                        and avoid_cmd.condition == prefer_cmd.condition
-                        and avoid_cmd.value == prefer_cmd.value):
+                if (
+                    avoid_cmd.subject == prefer_cmd.subject
+                    and avoid_cmd.condition == prefer_cmd.condition
+                    and avoid_cmd.value == prefer_cmd.value
+                ):
                     issues.append(
                         f"Conflict: Layer {avoid_cmd.layer_number} avoids "
-                        f"what Layer {prefer_cmd.layer_number} prefers")
+                        f"what Layer {prefer_cmd.layer_number} prefers"
+                    )
 
         # Check for too many critical constraints
         critical_layers = [
-            l for l in active_layers if l.priority == Priority.CRITICAL
+            layer for layer in active_layers if layer.priority == Priority.CRITICAL
         ]
         if len(critical_layers) > 5:
             issues.append(
                 f"Too many critical constraints ({len(critical_layers)}). "
-                "Consider reducing to 3-5 most important.")
+                "Consider reducing to 3-5 most important."
+            )
 
         # Check layer distribution
         if len(active_layers) < 5:
             issues.append("Very few layers - consider adding more preferences")
         elif len(active_layers) > 40:
-            issues.append(
-                "Many layers - consider consolidating similar preferences")
+            issues.append("Many layers - consider consolidating similar preferences")
 
         return issues
 
-    def _determine_layer_name(self, commands: List[PBSCommand]) -> str:
+    def _determine_layer_name(self, commands: list[PBSCommand]) -> str:
         """Determine appropriate name for a layer based on its commands"""
         if not commands:
             return "Empty Layer"
 
         # Check command types and subjects to categorize
-        subjects = set(cmd.subject for cmd in commands)
-        command_types = set(cmd.command_type for cmd in commands)
+        command_types = {cmd.command_type for cmd in commands}
 
-        if 'RESERVE' in ' '.join(cmd.value for cmd in commands):
+        if "RESERVE" in " ".join(cmd.value for cmd in commands):
             return "Reserve Preferences"
-        elif any('WEEKEND' in cmd.value for cmd in commands):
+        elif any("WEEKEND" in cmd.value for cmd in commands):
             return "Weekend Strategy"
-        elif any('TIME' in cmd.condition for cmd in commands):
+        elif any("TIME" in cmd.condition for cmd in commands):
             return "Timing Preferences"
-        elif any('DESTINATION' in cmd.condition for cmd in commands):
+        elif any("DESTINATION" in cmd.condition for cmd in commands):
             return "Route Preferences"
-        elif any('AIRCRAFT' in cmd.condition for cmd in commands):
+        elif any("AIRCRAFT" in cmd.condition for cmd in commands):
             return "Equipment Preferences"
-        elif any('DUTY_DAYS' in cmd.condition for cmd in commands):
+        elif any("DUTY_DAYS" in cmd.condition for cmd in commands):
             return "Trip Length"
-        elif any('LAYOVER' in cmd.condition for cmd in commands):
+        elif any("LAYOVER" in cmd.condition for cmd in commands):
             return "Layover Strategy"
         elif commands[0].priority == Priority.CRITICAL:
             return "Critical Constraints"
@@ -506,7 +521,7 @@ class Enhanced50LayerSystem:
         else:
             return f"Layer {commands[0].layer_number}"
 
-    def _generate_layer_description(self, commands: List[PBSCommand]) -> str:
+    def _generate_layer_description(self, commands: list[PBSCommand]) -> str:
         """Generate description for a layer based on its commands"""
         if not commands:
             return "No commands defined"
@@ -520,10 +535,9 @@ class Enhanced50LayerSystem:
         for cmd in commands[:3]:  # Max 3 for brevity
             cmd_summaries.append(f"{cmd.command_type.value} {cmd.subject}")
 
-        return f"Contains {len(commands)} command(s): " + ", ".join(
-            cmd_summaries)
+        return f"Contains {len(commands)} command(s): " + ", ".join(cmd_summaries)
 
-    def _generate_default_strategy(self) -> List[PBSCommand]:
+    def _generate_default_strategy(self) -> list[PBSCommand]:
         """Generate a default strategy when no preferences are provided"""
         return self.pbs_generator._generate_default_commands()
 
@@ -537,9 +551,8 @@ def integrate_with_vectorbid():
     # This would replace the simple natural_language_to_pbs_filters function
 
     def enhanced_preference_processing(
-            preferences: str,
-            user_id: str = None,
-            pilot_profile: Dict[str, Any] = None) -> Dict[str, Any]:
+        preferences: str, user_id: str = None, pilot_profile: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """
         Enhanced replacement for natural_language_to_pbs_filters
         Returns comprehensive PBS strategy instead of simple command list
@@ -556,8 +569,7 @@ def integrate_with_vectorbid():
         num_layers = bid_system.generate_layers_from_preferences(preferences)
 
         # Generate outputs
-        pbs_output = bid_system.generate_final_pbs_output(
-            include_explanations=True)
+        pbs_output = bid_system.generate_final_pbs_output(include_explanations=True)
         simple_commands = []
 
         # Extract simple commands for backward compatibility
@@ -572,13 +584,13 @@ def integrate_with_vectorbid():
         issues = bid_system.validate_strategy()
 
         return {
-            'layers': num_layers,
-            'commands': simple_commands,  # For backward compatibility
-            'pbs_output': pbs_output,
-            'strategy_data': bid_system.export_strategy(),
-            'statistics': stats,
-            'validation_issues': issues,
-            'bid_system': bid_system  # For further manipulation
+            "layers": num_layers,
+            "commands": simple_commands,  # For backward compatibility
+            "pbs_output": pbs_output,
+            "strategy_data": bid_system.export_strategy(),
+            "statistics": stats,
+            "validation_issues": issues,
+            "bid_system": bid_system,  # For further manipulation
         }
 
     return enhanced_preference_processing
@@ -591,12 +603,12 @@ if __name__ == "__main__":
 
     # Set pilot profile
     profile = {
-        'airline': 'United',
-        'base': 'IAH',
-        'fleet': ['737', '757'],
-        'seniority': 1234,
-        'is_commuter': True,
-        'home_airport': 'DEN'
+        "airline": "United",
+        "base": "IAH",
+        "fleet": ["737", "757"],
+        "seniority": 1234,
+        "is_commuter": True,
+        "home_airport": "DEN",
     }
     system.set_pilot_profile(profile)
 

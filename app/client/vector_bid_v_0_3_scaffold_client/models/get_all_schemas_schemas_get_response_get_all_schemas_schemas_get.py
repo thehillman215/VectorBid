@@ -56,7 +56,9 @@ class GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGet:
         return self.additional_properties[key]
 
     def __setitem__(
-        self, key: str, value: "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty"
+        self,
+        key: str,
+        value: "GetAllSchemasSchemasGetResponseGetAllSchemasSchemasGetAdditionalProperty",
     ) -> None:
         self.additional_properties[key] = value
 

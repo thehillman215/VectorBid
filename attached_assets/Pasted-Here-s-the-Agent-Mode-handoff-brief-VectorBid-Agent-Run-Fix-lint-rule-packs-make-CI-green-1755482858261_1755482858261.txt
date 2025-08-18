@@ -1,0 +1,94 @@
+Here’s the Agent Mode handoff brief.
+
+# VectorBid — Agent Run: “Fix lint + rule-packs, make CI green”
+
+## Scope
+
+* Work only on branch: `agent/fix-lint-and-rules`.
+* Goal: CI green on PR to `main` with squash-merge. No API/contract changes.
+
+## Current state
+
+* Many Ruff violations across repo. Examples seen: `F401`, `W293`, `E402`, `F841`, `C401`, `B904`.
+* Rule-pack loader logs “rule pack missing required keys” when merged `hard/soft` are empty.
+* Rule pack to fix: `rule_packs/UAL/2025.08.yml` must use `far117.*` and `union.*` and both buckets non-empty.
+
+## Guardrails
+
+* Do not change public response/request schemas.
+* Do not alter optimizer or strategy logic beyond lint-only edits.
+* Keep functional behavior identical unless a test proves an actual bug.
+
+## Work plan (loop until green)
+
+1. **Lint auto-fix pass**
+
+   * Run: `ruff check . --fix` then `ruff format .`
+   * Resolve any remaining violations surgically (unused imports, whitespace, late imports).
+   * Example to verify: `tests/legacy/test_migration.py` must remove unused `needs_seniority_update`.
+
+2. **Rule-pack sanity**
+
+   * Ensure `rule_packs/UAL/2025.08.yml` conforms:
+
+     * Structure:
+
+       ```yaml
+       version: '2025.08'
+       airline: UAL
+       far117:
+         hard: [ ... ]
+         soft: [ ... ]
+       union:
+         hard: [ ... ]
+         soft: [ ... ]
+       id: UAL-2025-08
+       rules: []
+       ```
+     * Both `far117.hard|soft` and/or `union.hard|soft` must be non-empty.
+   * Verify with:
+
+     ```python
+     from app.rules.engine import load_rule_pack
+     rp = load_rule_pack("rule_packs/UAL/2025.08.yml", True)
+     assert rp["hard"] and rp["soft"]
+     ```
+   * If still empty, migrate any top-level `hard/soft` into `union.*` and seed minimal no-op rules only if necessary.
+
+3. **Tests + smoke**
+
+   * Fast tests first: `PYTHONPATH=. PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q fastapi_tests -c pytest.ini`
+   * Full tests: `PYTHONPATH=. PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q -c pytest.ini`
+   * Smoke: `PORT=8000 scripts/smoke.sh`
+
+4. **CI tripwire**
+
+   * Add a tiny unit test that fails if merged rule-pack buckets are empty:
+
+     * New file: `fastapi_tests/test_rulepacks_nonempty.py`
+     * Assert `load_rule_pack(... )["hard"]` and `["soft"]` truthy for current month packs.
+   * Ensure exception chaining is B904-compliant where caught (e.g., `raise ... from e`).
+
+5. **Pre-commit (optional but preferred)**
+
+   * Add basic pre-commit config to run Ruff on staged Python files to prevent regressions.
+
+## Deliverables
+
+* PR titled: `chore(ci): repo-wide lint fixes + rule-pack sanity; make CI green`
+* PR body checklist:
+
+  * [x] Ruff clean
+  * [x] Rule-pack loader silent and buckets non-empty
+  * [x] fastapi\_tests green
+  * [x] full pytest green
+  * [x] smoke OK
+  * [x] adds guard test for rule-pack emptiness
+
+## Exit criteria
+
+* All GitHub checks pass on the PR.
+* No changes to public schemas.
+* No runtime “rule pack missing required keys” logs during smoke.
+
+If anything blocks progress, pause and report the exact failing file and error lines.

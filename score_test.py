@@ -6,7 +6,7 @@ Tests the most important pilot language patterns
 
 import sys
 
-sys.path.insert(0, 'src')
+sys.path.insert(0, "src")
 from api.pbs_fix import natural_language_to_pbs_filters
 
 
@@ -60,15 +60,22 @@ for desc, input_text, min_exp in tests:
 # Complex multi-preference tests
 print("\n[COMPLEX PREFERENCES]")
 complex_tests = [
-    ("Kitchen sink",
-     "I want weekends off, no red-eyes, commutable trips, avoid reserve, prefer 737",
-     5),
-    ("Commuter lifestyle",
-     "Commute from Phoenix to Denver, need late shows and early releases", 3),
-    ("Senior demands",
-     "Senior pilot, want international flights, good hotels, no reserve", 3),
-    ("Junior reality", "Junior FO, just need to avoid reserve and build time",
-     3),
+    (
+        "Kitchen sink",
+        "I want weekends off, no red-eyes, commutable trips, avoid reserve, prefer 737",
+        5,
+    ),
+    (
+        "Commuter lifestyle",
+        "Commute from Phoenix to Denver, need late shows and early releases",
+        3,
+    ),
+    (
+        "Senior demands",
+        "Senior pilot, want international flights, good hotels, no reserve",
+        3,
+    ),
+    ("Junior reality", "Junior FO, just need to avoid reserve and build time", 3),
 ]
 
 for desc, input_text, min_exp in complex_tests:
@@ -117,7 +124,6 @@ if percentage >= 90:
 elif percentage >= 80:
     print("✅ EXCELLENT! Ready for pilot testing!")
 elif percentage >= 70:
-
     print("👍 GOOD! Solid foundation!")
 elif percentage >= 60:
     print("⚠️  ACCEPTABLE for MVP")

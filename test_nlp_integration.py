@@ -2,26 +2,11 @@
 
 # Test cases for VectorBid NLP
 TEST_CASES = [
-    {
-        "input": "I want weekends off",
-        "expected": 2
-    },
-    {
-        "input": "No early morning departures",
-        "expected": 1
-    },
-    {
-        "input": "I need commutable trips, no red-eyes, and max credit",
-        "expected": 3
-    },
-    {
-        "input": "Family first - home every night if possible",
-        "expected": 2
-    },
-    {
-        "input": "No red-eyes or early departures, prefer 3-day trips",
-        "expected": 3
-    },
+    {"input": "I want weekends off", "expected": 2},
+    {"input": "No early morning departures", "expected": 1},
+    {"input": "I need commutable trips, no red-eyes, and max credit", "expected": 3},
+    {"input": "Family first - home every night if possible", "expected": 2},
+    {"input": "No red-eyes or early departures, prefer 3-day trips", "expected": 3},
 ]
 
 
@@ -32,16 +17,16 @@ def test_nlp():
     # Try to import the function
     try:
         from src.api.pbs_fix import natural_language_to_pbs_filters
+
         print("Imported from pbs_fix")
-    except:
+    except Exception:
         try:
             from src.api.routes import natural_language_to_pbs_filters
+
             print("Imported from routes")
-        except:
+        except Exception:
             print("ERROR: Could not import natural_language_to_pbs_filters")
-            print(
-                "Check that it exists in src/api/pbs_fix.py or src/api/routes.py"
-            )
+            print("Check that it exists in src/api/pbs_fix.py or src/api/routes.py")
             return
 
     # Run tests
@@ -53,8 +38,7 @@ def test_nlp():
         num_commands = len(result)
 
         if num_commands >= test["expected"]:
-            print(
-                f"PASS: '{test['input'][:30]}...' -> {num_commands} commands")
+            print(f"PASS: '{test['input'][:30]}...' -> {num_commands} commands")
             passed += 1
         else:
             print(f"FAIL: '{test['input'][:30]}...'")

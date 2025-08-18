@@ -64,8 +64,7 @@ def main():
         if check_import(lib, desc):
             std_success += 1
 
-    print(
-        f"\n📊 Standard Libraries: {std_success}/{len(standard_libs)} working")
+    print(f"\n📊 Standard Libraries: {std_success}/{len(standard_libs)} working")
 
     # Check third-party libraries (that might not be installed)
     print("\n🔌 Third-party Libraries:")
@@ -82,9 +81,7 @@ def main():
         if check_import(lib, desc):
             third_success += 1
 
-    print(
-        f"\n📊 Third-party Libraries: {third_success}/{len(third_party)} working"
-    )
+    print(f"\n📊 Third-party Libraries: {third_success}/{len(third_party)} working")
 
     # Check our custom modules
     print("\n🏗️ VectorBid Files:")
@@ -118,7 +115,7 @@ def main():
             name: str
             value: TestEnum
 
-        test_obj = TestClass("test", TestEnum.VALUE)
+        TestClass("test", TestEnum.VALUE)
         print("✅ Dataclass and Enum creation working")
 
     except Exception as e:
@@ -127,7 +124,8 @@ def main():
     try:
         # Test Flask import and basic setup
         from flask import Flask
-        app = Flask(__name__)
+
+        Flask(__name__)
         print("✅ Flask application creation working")
 
     except Exception as e:
@@ -135,9 +133,10 @@ def main():
 
     # Summary
     print("\n" + "=" * 50)
-    total_checks = len(standard_libs) + len(third_party) + len(
-        custom_files) + 2
-    total_success = std_success + third_success + custom_success + 2  # +2 for basic tests
+    total_checks = len(standard_libs) + len(third_party) + len(custom_files) + 2
+    total_success = (
+        std_success + third_success + custom_success + 2
+    )  # +2 for basic tests
 
     print(f"📋 Overall System Health: {total_success}/{total_checks}")
 

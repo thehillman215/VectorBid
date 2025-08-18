@@ -8,29 +8,32 @@ def fix_test_file():
     """Fix the hardcore test file"""
     print("Fixing hardcore_pilot_test.py...")
 
-    with open('hardcore_pilot_test.py') as f:
+    with open("hardcore_pilot_test.py") as f:
         content = f.read()
 
     # Fix all test cases that are missing the 4th parameter
     # Replace problematic patterns
     fixes = [
         # Fix Category 5
-        ('("Birthday off",\n     "Need March 15th off for my birthday every year",\n     1),',
-         '("Birthday off",\n     "Need March 15th off for my birthday every year",\n     1, []),'
-         ),
-        ('("Anniversary planning",\n     "Wedding anniversary June 20-22 need those days off",\n     1),',
-         '("Anniversary planning",\n     "Wedding anniversary June 20-22 need those days off",\n     1, []),'
-         ),
-        ('("School schedule",\n     "Kids spring break March 10-17 want to be off",\n     1),',
-         '("School schedule",\n     "Kids spring break March 10-17 want to be off",\n     1, []),'
-         ),
+        (
+            '("Birthday off",\n     "Need March 15th off for my birthday every year",\n     1),',
+            '("Birthday off",\n     "Need March 15th off for my birthday every year",\n     1, []),',
+        ),
+        (
+            '("Anniversary planning",\n     "Wedding anniversary June 20-22 need those days off",\n     1),',
+            '("Anniversary planning",\n     "Wedding anniversary June 20-22 need those days off",\n     1, []),',
+        ),
+        (
+            '("School schedule",\n     "Kids spring break March 10-17 want to be off",\n     1),',
+            '("School schedule",\n     "Kids spring break March 10-17 want to be off",\n     1, []),',
+        ),
     ]
 
     for old, new in fixes:
         content = content.replace(old, new)
 
     # Write fixed version
-    with open('hardcore_pilot_test_fixed.py', 'w') as f:
+    with open("hardcore_pilot_test_fixed.py", "w") as f:
         f.write(content)
 
     print("✅ Created hardcore_pilot_test_fixed.py")
@@ -40,11 +43,11 @@ def add_missing_patterns():
     """Add the missing patterns to pbs_fix.py"""
     print("\nAdding missing patterns to pbs_fix.py...")
 
-    with open('src/api/pbs_fix.py') as f:
+    with open("src/api/pbs_fix.py") as f:
         content = f.read()
 
     # Check if patterns already exist
-    if 'deadheading' in content.lower():
+    if "deadheading" in content.lower():
         print("⚠️  Deadheading pattern already exists")
         return
 
@@ -58,7 +61,7 @@ def add_missing_patterns():
         return
 
     # New patterns to add
-    new_patterns = '''
+    new_patterns = """
     # ==========================================
     # MISSING PATTERNS FIX
     # ==========================================
@@ -99,14 +102,15 @@ def add_missing_patterns():
     if 'newark' in text_lower or 'ewr' in text_lower:
         filters.append("PREFER TRIPS FROM BASE EWR")
 
-    '''
+    """
 
     # Insert the new patterns
-    content = content[:insertion_point] + new_patterns + "\n    " + content[
-        insertion_point:]
+    content = (
+        content[:insertion_point] + new_patterns + "\n    " + content[insertion_point:]
+    )
 
     # Write back
-    with open('src/api/pbs_fix.py', 'w') as f:
+    with open("src/api/pbs_fix.py", "w") as f:
         f.write(content)
 
     print("✅ Added missing patterns to pbs_fix.py")
@@ -117,19 +121,23 @@ def test_patterns():
     print("\nTesting fixes...")
 
     import sys
-    sys.path.insert(0, 'src')
+
+    sys.path.insert(0, "src")
 
     # Reload the module to get new changes
     import importlib
 
     import api.pbs_fix
+
     importlib.reload(api.pbs_fix)
 
     from api.pbs_fix import natural_language_to_pbs_filters
 
     tests = [
-        "Avoid deadheading", "Minimize TAFB but maximize credit",
-        "Want London or Frankfurt trips", "Kids have soccer Tuesday evenings"
+        "Avoid deadheading",
+        "Minimize TAFB but maximize credit",
+        "Want London or Frankfurt trips",
+        "Kids have soccer Tuesday evenings",
     ]
 
     print("\nQuick pattern test:")

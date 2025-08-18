@@ -4,12 +4,11 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Union
 
 from app.generate.layers import _canonical_sha256  # consistent with generator
 from app.models import BidLayerArtifact
 
-ArtifactLike = Union[BidLayerArtifact, dict]
+ArtifactLike = BidLayerArtifact | dict
 
 _AIRLINE_RE = re.compile(r"^[A-Z0-9_-]{2,8}$")
 _MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
@@ -52,7 +51,7 @@ def write_artifact(artifact: ArtifactLike, base_dir: Path) -> Path:
     airline = _sanitize_airline(data.get("airline"))
     month = _sanitize_month(data.get("month"))
 
-    out_dir = (Path(base_dir).expanduser().resolve() / airline / month)
+    out_dir = Path(base_dir).expanduser().resolve() / airline / month
     out_dir.mkdir(parents=True, exist_ok=True)
 
     target = out_dir / f"{export_hash}.json"

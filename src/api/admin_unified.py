@@ -3,7 +3,6 @@ Admin portal blueprint with templates, user management, and audit logging.
 """
 
 import io
-import io
 import logging
 import os
 import re
@@ -11,13 +10,11 @@ import secrets
 from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Optional
-
-from flask import current_app
 
 from flask import (
     Blueprint,
     abort,
+    current_app,
     jsonify,
     redirect,
     render_template,
@@ -27,7 +24,7 @@ from flask import (
     url_for,
 )
 
-from src.core.models import db, User, BidPacket, AdminActionLog
+from src.core.models import AdminActionLog, BidPacket, User, db
 
 
 class AdminConfig:
@@ -61,7 +58,9 @@ def require_bearer_token(f):
         elif session_token:
             token = session_token
 
-        api_like = request.path.startswith("/admin/api/") or request.path.startswith("/admin/upload-bid")
+        api_like = request.path.startswith("/admin/api/") or request.path.startswith(
+            "/admin/upload-bid"
+        )
         valid_tokens = get_valid_tokens()
 
         if not token:
@@ -79,7 +78,9 @@ def require_bearer_token(f):
         if login_time:
             try:
                 login_dt = datetime.fromisoformat(login_time)
-                if datetime.utcnow() - login_dt > timedelta(minutes=AdminConfig.SESSION_LIFETIME_MINUTES):
+                if datetime.utcnow() - login_dt > timedelta(
+                    minutes=AdminConfig.SESSION_LIFETIME_MINUTES
+                ):
                     session.pop("admin_token", None)
                     session.pop("admin_login_time", None)
                     if request.path.startswith("/admin/api/"):
@@ -93,7 +94,7 @@ def require_bearer_token(f):
     return decorated_function
 
 
-def log_action(action: str, target: str = "", admin_id: Optional[str] = None) -> None:
+def log_action(action: str, target: str = "", admin_id: str | None = None) -> None:
     try:
         entry = AdminActionLog(admin_id=admin_id, action=action, target=target)
         db.session.add(entry)
@@ -139,7 +140,9 @@ def get_contracts() -> list[dict]:
                     {
                         "filename": fname,
                         "size_mb": round(stat.st_size / 1024 / 1024, 2),
-                        "upload_date": datetime.utcfromtimestamp(stat.st_mtime).isoformat(),
+                        "upload_date": datetime.utcfromtimestamp(
+                            stat.st_mtime
+                        ).isoformat(),
                     }
                 )
     return items
@@ -149,7 +152,9 @@ def get_valid_tokens() -> set[str]:
     tokens = {current_app.config.get("ADMIN_BEARER_TOKEN", AdminConfig.BEARER_TOKEN)}
     env_token = os.environ.get("ADMIN_BEARER_TOKEN", "test-token")
     tokens.add(env_token)
-    extra = current_app.config.get("ADMIN_BEARER_TOKENS") or os.environ.get("ADMIN_BEARER_TOKENS")
+    extra = current_app.config.get("ADMIN_BEARER_TOKENS") or os.environ.get(
+        "ADMIN_BEARER_TOKENS"
+    )
     if extra:
         tokens.update(t.strip() for t in extra.split(",") if t.strip())
     return tokens
@@ -167,7 +172,9 @@ def login():
             session["admin_login_time"] = datetime.utcnow().isoformat()
             log_action("login", admin_id=token)
             if request.is_json:
-                return jsonify({"success": True, "redirect": url_for("admin.dashboard")})
+                return jsonify(
+                    {"success": True, "redirect": url_for("admin.dashboard")}
+                )
             return redirect(url_for("admin.dashboard"))
         error = "Invalid token"
         if request.is_json:
@@ -241,9 +248,7 @@ def api_update_user(user_id: str):
 @require_bearer_token
 def view_logs():
     logs = (
-        AdminActionLog.query.order_by(AdminActionLog.timestamp.desc())
-        .limit(100)
-        .all()
+        AdminActionLog.query.order_by(AdminActionLog.timestamp.desc()).limit(100).all()
     )
     return render_template("admin/logs.html", logs=logs)
 
@@ -301,9 +306,7 @@ def legacy_upload_bid():
     return resp
 
 
-@admin_bp.route(
-    "/api/delete-bid-packet/<month_tag>/<airline>", methods=["DELETE"]
-)
+@admin_bp.route("/api/delete-bid-packet/<month_tag>/<airline>", methods=["DELETE"])
 @require_bearer_token
 def api_delete_bid_packet(month_tag: str, airline: str):
     packet = BidPacket.query.filter_by(month_tag=month_tag, airline=airline).first()
@@ -315,9 +318,7 @@ def api_delete_bid_packet(month_tag: str, airline: str):
     return jsonify({"success": True})
 
 
-@admin_bp.route(
-    "/api/download-bid-packet/<month_tag>/<airline>", methods=["GET"]
-)
+@admin_bp.route("/api/download-bid-packet/<month_tag>/<airline>", methods=["GET"])
 @require_bearer_token
 def api_download_bid_packet(month_tag: str, airline: str):
     packet = BidPacket.query.filter_by(month_tag=month_tag, airline=airline).first()

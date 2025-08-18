@@ -1,17 +1,12 @@
-
-
 # ============== FIXED PBS GENERATION ==============
 def get_dashboard_stats():
     """Get statistics for dashboard display"""
     return {
-        'trips_count': 142,  # TODO: Get from database
-        'match_score': 85,
-        'days_off': 12,
-        'block_hours': 72.5,
-        'trips_trend': {
-            'direction': 'up',
-            'value': 12
-        }
+        "trips_count": 142,  # TODO: Get from database
+        "match_score": 85,
+        "days_off": 12,
+        "block_hours": 72.5,
+        "trips_trend": {"direction": "up", "value": 12},
     }
 
 
@@ -19,7 +14,7 @@ def get_dashboard_stats():
 Enhanced routes with conflict resolution
 """
 
-from flask import (
+from flask import (  # noqa: E402
     Blueprint,
     jsonify,
     redirect,
@@ -30,21 +25,20 @@ from flask import (
     url_for,
 )
 
-from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers
-from src.lib.pbs_command_generator import generate_pbs_commands
-from src.lib.personas import PILOT_PERSONAS
-from src.lib.services.db import get_profile, save_profile
-from src.lib.subscription_manager import SubscriptionManager
-
 # Local bid packet helpers
-from src.core.bid_packets import get_bid_packet_info, save_bid_packet
+from src.core.bid_packets import get_bid_packet_info, save_bid_packet  # noqa: E402
+from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers  # noqa: E402
+from src.lib.pbs_command_generator import generate_pbs_commands  # noqa: E402
+from src.lib.personas import PILOT_PERSONAS  # noqa: E402
+from src.lib.services.db import get_profile, save_profile  # noqa: E402
+from src.lib.subscription_manager import SubscriptionManager  # noqa: E402
 
 try:
     from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
 except ImportError:
     generate_advanced_pbs_strategy = None
 
-from datetime import datetime
+from datetime import datetime  # noqa: E402
 
 # Fixed PBS generation functions
 
@@ -54,12 +48,12 @@ bp = Blueprint("main", __name__)
 @bp.route("/")
 def index():
     """Main dashboard - redirect to enhanced dashboard or show basic version"""
-    user_id = session.get('user_id', 'demo_pilot')
+    user_id = session.get("user_id", "demo_pilot")
     profile = get_profile(user_id)
 
     # If user has completed profile, show enhanced dashboard
-    if profile.get('onboard_complete') or profile.get('airline'):
-        return redirect(url_for('main.enhanced_dashboard'))
+    if profile.get("onboard_complete") or profile.get("airline"):
+        return redirect(url_for("main.enhanced_dashboard"))
 
     # Get subscription info
     manager = SubscriptionManager()
@@ -67,11 +61,10 @@ def index():
 
     # Use the proper template file instead of inline HTML
     try:
-        return render_template("index.html",
-                               subscription=subscription,
-                               user_id=user_id,
-                               profile=profile)
-    except:
+        return render_template(
+            "index.html", subscription=subscription, user_id=user_id, profile=profile
+        )
+    except Exception:
         # Fallback to simple HTML if template not found
         return f"""
         <!DOCTYPE html>
@@ -85,7 +78,7 @@ def index():
                 <div class="container">
                     <span class="navbar-brand">✈️ VectorBid</span>
                     <div>
-                        <span class="badge bg-success">{subscription.get('tier', 'Free') if subscription else 'Free'}</span>
+                        <span class="badge bg-success">{subscription.get("tier", "Free") if subscription else "Free"}</span>
                         <a href="/admin/" class="btn btn-outline-light btn-sm ms-2">Admin</a>
                     </div>
                 </div>
@@ -101,7 +94,7 @@ def index():
                                 <form action="/process" method="post">
                                     <div class="mb-3">
                                         <label class="form-label">Enter your preferences:</label>
-                                        <textarea name="preferences" class="form-control" rows="4" 
+                                        <textarea name="preferences" class="form-control" rows="4"
                                             placeholder="I want weekends off and prefer short trips..."></textarea>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Generate PBS Commands</button>
@@ -125,17 +118,17 @@ def process():
     any other request method, the user is sent back to the index page.
     """
     if request.method == "POST":
-        preferences = request.form.get('preferences', '')
-        return redirect(url_for('main.pbs_results', preferences=preferences))
+        preferences = request.form.get("preferences", "")
+        return redirect(url_for("main.pbs_results", preferences=preferences))
     else:
-        return redirect(url_for('main.index'))
+        return redirect(url_for("main.index"))
 
 
 @bp.route("/pbs-results")
 def pbs_results():
     """Display PBS results with conflict resolution"""
-    preferences = request.args.get('preferences', 'Default preferences')
-    check_conflicts = request.args.get('check_conflicts') == 'on'
+    preferences = request.args.get("preferences", "Default preferences")
+    check_conflicts = request.args.get("check_conflicts") == "on"
 
     # Use advanced strategy if available and conflicts requested
     if check_conflicts and generate_advanced_pbs_strategy:
@@ -217,18 +210,22 @@ def pbs_results():
 </body>
 </html>
         """
-        return render_template_string(results_html,
-                                      preferences=preferences,
-                                      commands=result.get('commands', []),
-                                      conflicts=result.get('conflicts', []))
+        return render_template_string(
+            results_html,
+            preferences=preferences,
+            commands=result.get("commands", []),
+            conflicts=result.get("conflicts", []),
+        )
     else:
         # Use basic generator
         try:
             result = generate_pbs_commands(preferences)
-            return render_template("pbs_results.html",
-                                   commands=result.get('commands', []),
-                                   formatted=result.get('formatted', ''),
-                                   preferences=preferences)
+            return render_template(
+                "pbs_results.html",
+                commands=result.get("commands", []),
+                formatted=result.get("formatted", ""),
+                preferences=preferences,
+            )
         except Exception as e:
             # Fallback if PBS generator fails - show actual error for debugging
             return f"""
@@ -294,39 +291,43 @@ def pricing():
 </body>
 </html>
     """
-    return render_template_string(pricing_html, tiers=pricing_data['tiers'])
+    return render_template_string(pricing_html, tiers=pricing_data["tiers"])
 
 
 @bp.route("/health")
 def health():
     """Health check"""
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat()
-    })
+    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
 
-@bp.route('/admin')
+
+@bp.route("/admin")
 def admin_redirect():
     """Redirect to admin dashboard"""
-    return redirect('/admin/dashboard')
+    return redirect("/admin/dashboard")
 
-@bp.route('/onboarding')
+
+@bp.route("/onboarding")
 def onboarding():
     """Pilot profile onboarding wizard"""
-    return render_template('onboarding.html', step=1)
+    return render_template("onboarding.html", step=1)
 
-@bp.route('/onboarding/submit', methods=['POST'])
+
+@bp.route("/onboarding/submit", methods=["POST"])
 def onboarding_submit():
     """Handle onboarding form submission"""
     try:
         # Collect pilot profile data
         profile_data = {
-            'airline': request.form.get('airline', ''),
-            'base': request.form.get('base', ''),
-            'seat': request.form.get('seat', ''),
-            'fleet': request.form.get('fleet', '').split(',') if request.form.get('fleet') else [],
-            'seniority': int(request.form.get('seniority', 5000)),
-            'onboarded': True
+            "airline": request.form.get("airline", ""),
+            "base": request.form.get("base", ""),
+            "seat": request.form.get("seat", ""),
+            "fleet": (
+                request.form.get("fleet", "").split(",")
+                if request.form.get("fleet")
+                else []
+            ),
+            "seniority": int(request.form.get("seniority", 5000)),
+            "onboarded": True,
         }
 
         # Save profile (using demo user ID for now)
@@ -334,20 +335,21 @@ def onboarding_submit():
         save_profile(user_id, profile_data)
 
         # Redirect to personas page
-        return redirect(url_for('main.personas'))
+        return redirect(url_for("main.personas"))
 
     except Exception as e:
         return f"Error saving profile: {str(e)}", 400
 
-@bp.route('/personas')
+
+@bp.route("/personas")
 def personas():
     """Display available pilot personas after onboarding"""
     # Check if pilot has completed profile (simplified for demo)
     user_id = "demo_pilot"
     profile = get_profile(user_id)
 
-    if not profile.get('onboarded'):
-        return redirect(url_for('main.onboarding'))
+    if not profile.get("onboarded"):
+        return redirect(url_for("main.onboarding"))
     personas_html = """
 <!DOCTYPE html>
 <html>
@@ -408,13 +410,16 @@ def personas():
 </body>
 </html>
     """
-    return render_template_string(personas_html, personas=PILOT_PERSONAS, profile=profile)
+    return render_template_string(
+        personas_html, personas=PILOT_PERSONAS, profile=profile
+    )
 
-@bp.route('/bid-layers/generate', methods=['POST'])
+
+@bp.route("/bid-layers/generate", methods=["POST"])
 def generate_bid_layers():
     """Generate 20-layer PBS bid strategy with pilot profile and persona"""
-    preferences = request.form.get('preferences', '')
-    persona_id = request.form.get('persona', '')
+    preferences = request.form.get("preferences", "")
+    persona_id = request.form.get("persona", "")
 
     # Get pilot profile
     user_id = "demo_pilot"
@@ -424,7 +429,7 @@ def generate_bid_layers():
     persona = None
     if persona_id and persona_id in PILOT_PERSONAS:
         persona = PILOT_PERSONAS[persona_id]
-        preferences = persona['preferences']
+        preferences = persona["preferences"]
 
     # Generate full 20-layer PBS bid strategy
     bid_layers = generate_pbs_compliant_bid_layers(preferences, profile)
@@ -522,14 +527,14 @@ def generate_bid_layers():
 
     <!-- Bootstrap JavaScript (must be loaded after DOM elements) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         function copyCommands() {
             const commands = document.querySelector('pre').textContent;
             navigator.clipboard.writeText(commands);
             alert('Commands copied to clipboard!');
         }
-        
+
         // Initialize Bootstrap components after DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing Bootstrap accordion...');
@@ -545,11 +550,13 @@ def generate_bid_layers():
 </html>
     """
 
-    return render_template_string(results_html,
-                                 preferences=preferences,
-                                 bid_layers=bid_layers,
-                                 profile=profile,
-                                 persona=persona)
+    return render_template_string(
+        results_html,
+        preferences=preferences,
+        bid_layers=bid_layers,
+        profile=profile,
+        persona=persona,
+    )
 
 
 @bp.route("/api/generate-pbs", methods=["POST"])
@@ -557,8 +564,8 @@ def api_generate_pbs():
     """Generate PBS commands API"""
     try:
         data = request.get_json()
-        preferences = data.get('preferences', '')
-        check_conflicts = data.get('check_conflicts', False)
+        preferences = data.get("preferences", "")
+        check_conflicts = data.get("check_conflicts", False)
 
         if check_conflicts and generate_advanced_pbs_strategy:
             result = generate_advanced_pbs_strategy(preferences)
@@ -567,40 +574,40 @@ def api_generate_pbs():
 
         return jsonify(result)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 # Add missing routes for navigation
 @bp.route("/preferences")
 def preferences():
-    return "Preferences page under development. <a href=\"/\">Back to Dashboard</a>"
+    return 'Preferences page under development. <a href="/">Back to Dashboard</a>'
 
 
 @bp.route("/schedule")
 def schedule():
-    return "Schedule page under development. <a href=\"/\">Back to Dashboard</a>"
+    return 'Schedule page under development. <a href="/">Back to Dashboard</a>'
 
 
 @bp.route("/history")
 def history():
-    return "History page under development. <a href=\"/\">Back to Dashboard</a>"
+    return 'History page under development. <a href="/">Back to Dashboard</a>'
 
 
 @bp.route("/profile")
 def user_profile():
     """Enhanced user profile page"""
-    user_id = session.get('user_id', 'demo_pilot')
+    user_id = session.get("user_id", "demo_pilot")
     profile = get_profile(user_id)
 
-    return render_template("user_profile.html",
-                         profile=profile,
-                         personas=PILOT_PERSONAS)
+    return render_template(
+        "user_profile.html", profile=profile, personas=PILOT_PERSONAS
+    )
 
 
 @bp.route("/dashboard")
 def enhanced_dashboard():
     """Enhanced dashboard with metrics and personalized content"""
-    user_id = session.get('user_id', 'demo_pilot')
+    user_id = session.get("user_id", "demo_pilot")
     profile = get_profile(user_id)
 
     # Get dashboard statistics
@@ -613,8 +620,10 @@ def enhanced_dashboard():
     packet_info = get_bid_packet_info(month_tag)
 
     # Add persona name to profile for display
-    if profile.get('persona'):
-        profile['persona_name'] = PILOT_PERSONAS.get(profile['persona'], {}).get('name', 'Custom')
+    if profile.get("persona"):
+        profile["persona_name"] = PILOT_PERSONAS.get(profile["persona"], {}).get(
+            "name", "Custom"
+        )
 
     return render_template(
         "enhanced_dashboard.html",
@@ -654,7 +663,7 @@ def upload_bid_packet():
 @bp.route("/preferences/advanced")
 def advanced_preferences():
     """Advanced preferences management page"""
-    user_id = session.get('user_id', 'demo_pilot')
+    user_id = session.get("user_id", "demo_pilot")
 
     # Import preferences manager
     from src.lib.preferences_manager import preferences_manager
@@ -666,22 +675,24 @@ def advanced_preferences():
 
     # Get current persona if selected
     current_persona = None
-    if profile.get('persona'):
-        current_persona = PILOT_PERSONAS.get(profile['persona'])
+    if profile.get("persona"):
+        current_persona = PILOT_PERSONAS.get(profile["persona"])
 
-    return render_template("preferences_advanced.html",
-                         profile=profile,
-                         optimization_score=report['optimization_score'],
-                         suggestions=suggestions,
-                         learning_data=report.get('learning_data', {}),
-                         current_persona=current_persona)
+    return render_template(
+        "preferences_advanced.html",
+        profile=profile,
+        optimization_score=report["optimization_score"],
+        suggestions=suggestions,
+        learning_data=report.get("learning_data", {}),
+        current_persona=current_persona,
+    )
 
 
 @bp.route("/api/preferences/advanced", methods=["POST"])
 def api_save_advanced_preferences():
     """Save advanced preferences via API"""
     try:
-        user_id = session.get('user_id', 'demo_pilot')
+        user_id = session.get("user_id", "demo_pilot")
         data = request.get_json()
 
         # Import preferences manager
@@ -691,9 +702,14 @@ def api_save_advanced_preferences():
         success = preferences_manager.update_preferences(user_id, data)
 
         if success:
-            return jsonify({'success': True, 'message': 'Preferences saved successfully'})
+            return jsonify(
+                {"success": True, "message": "Preferences saved successfully"}
+            )
         else:
-            return jsonify({'success': False, 'message': 'Error saving preferences'}), 500
+            return (
+                jsonify({"success": False, "message": "Error saving preferences"}),
+                500,
+            )
 
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+        return jsonify({"success": False, "message": str(e)}), 500

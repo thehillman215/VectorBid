@@ -15,9 +15,9 @@ class TestUIElements:
         elements_to_check = [
             'select[name="airline"]',
             'input[name="base"]',
-            '.seat-option',
+            ".seat-option",
             'button[type="submit"]',
-            '.progress-bar'
+            ".progress-bar",
         ]
 
         for selector in elements_to_check:
@@ -51,11 +51,11 @@ class TestUIElements:
             # Step 1
             page.locator('select[name="airline"]').select_option("United")
             page.locator('input[name="base"]').fill("IAH")
-            page.locator('.seat-option').first.click()
+            page.locator(".seat-option").first.click()
             page.locator('button[type="submit"]').click()
 
             # Step 2
-            page.locator('.fleet-chip').first.click()
+            page.locator(".fleet-chip").first.click()
             page.locator('input[name="seniority"]').fill("1000")
             page.locator('button[type="submit"]').click()
 
@@ -108,8 +108,8 @@ class TestUIElements:
         # Test different screen sizes
         screen_sizes = [
             (1920, 1080),  # Desktop
-            (768, 1024),   # Tablet
-            (375, 667),    # Mobile
+            (768, 1024),  # Tablet
+            (375, 667),  # Mobile
         ]
 
         for width, height in screen_sizes:
@@ -131,7 +131,6 @@ class TestUIElements:
         page.goto(base_url)
 
         # Check for loading indicators (if any)
-        loading_indicators = page.locator(".loading, .spinner, [aria-label*='loading']")
         # Loading indicators are optional, but if present should be properly labeled
 
     def test_error_states_ui(self, page: Page, base_url: str):
@@ -182,11 +181,17 @@ class TestUIElements:
 
             # They should be different elements (if multiple focusable elements exist)
             if page.locator("input, select, button, a").count() > 1:
-                first_id = first_element.get_attribute("id") or first_element.get_attribute("name")
-                second_id = second_element.get_attribute("id") or second_element.get_attribute("name")
+                first_id = first_element.get_attribute(
+                    "id"
+                ) or first_element.get_attribute("name")
+                second_id = second_element.get_attribute(
+                    "id"
+                ) or second_element.get_attribute("name")
 
                 if first_id and second_id:
-                    assert first_id != second_id, "Focus should move between different elements"
+                    assert first_id != second_id, (
+                        "Focus should move between different elements"
+                    )
 
     def test_skip_links(self, page: Page, base_url: str):
         """Test skip links for accessibility."""
@@ -194,7 +199,9 @@ class TestUIElements:
         page.goto(base_url)
 
         # Look for skip links (optional but good for accessibility)
-        skip_links = page.locator("a[href='#main'], a[href='#content'], a:has-text('Skip')")
+        skip_links = page.locator(
+            "a[href='#main'], a[href='#content'], a:has-text('Skip')"
+        )
 
         # If skip links exist, they should be functional
         for i in range(skip_links.count()):
@@ -227,10 +234,6 @@ class TestUIElements:
             # Check role is valid
             role = element.get_attribute("role")
             if role:
-                valid_roles = [
-                    "button", "link", "navigation", "main", "banner", "contentinfo",
-                    "complementary", "form", "search", "application", "dialog",
-                    "alert", "status", "progressbar", "tab", "tabpanel", "tablist"
-                ]
+                pass
                 # This is informational - many custom roles exist
                 # assert role in valid_roles, f"Unknown ARIA role: {role}"

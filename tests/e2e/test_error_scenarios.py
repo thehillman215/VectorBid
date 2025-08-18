@@ -50,10 +50,12 @@ class TestErrorScenarios:
 
         # Filter out expected/harmless errors
         critical_errors = [
-            error for error in js_errors
-            if not any(harmless in error.lower() for harmless in [
-                "favicon", "replit", "third-party", "extension"
-            ])
+            error
+            for error in js_errors
+            if not any(
+                harmless in error.lower()
+                for harmless in ["favicon", "replit", "third-party", "extension"]
+            )
         ]
 
         assert len(critical_errors) == 0, f"JavaScript errors found: {critical_errors}"
@@ -70,10 +72,9 @@ class TestErrorScenarios:
             # Create a fake large file (simulated)
             # In a real test, you might create a temporary large file
             # For now, just test that the interface exists and has size limits
-            file_input = file_inputs.first
 
             # Check if there are size restrictions in place
-            max_size_indicators = page.locator("text=MB, text=size, text=limit")
+            page.locator("text=MB, text=size, text=limit")
             # This is informational - good UX would show file size limits
 
     def test_invalid_user_session(self, page: Page, base_url: str):
@@ -109,7 +110,8 @@ class TestErrorScenarios:
         page.goto(f"{base_url}/onboarding")
 
         # Try to submit with unusual data
-        page.evaluate("""
+        page.evaluate(
+            """
             const form = document.querySelector('form');
             if (form) {
                 // Add hidden input with unusual data
@@ -119,7 +121,8 @@ class TestErrorScenarios:
                 input.value = '<script>alert("xss")</script>';
                 form.appendChild(input);
             }
-        """)
+        """
+        )
 
         # Submit form
         submit_btn = page.locator('button[type="submit"]')
@@ -141,7 +144,7 @@ class TestErrorScenarios:
         if forms.count() > 0:
             form = forms.first
             if form.is_visible():
-                action = form.get_attribute("action") or ""
+                form.get_attribute("action") or ""
                 method = form.get_attribute("method") or "GET"
 
                 if method.upper() == "POST":
@@ -161,7 +164,7 @@ class TestErrorScenarios:
         expect(page.locator("body")).to_be_visible()
 
         # Should show appropriate error messages if database is down
-        error_indicators = page.locator("text=error, text=unavailable, text=try again")
+        page.locator("text=error, text=unavailable, text=try again")
         # Error messages are acceptable and expected if database is down
 
     def test_memory_leaks_basic(self, page: Page, base_url: str):
@@ -239,6 +242,14 @@ class TestErrorScenarios:
 
             # Should not show database error details
             error_text = page.content().lower()
-            sql_error_indicators = ["sql", "database", "table", "column", "syntax error"]
+            sql_error_indicators = [
+                "sql",
+                "database",
+                "table",
+                "column",
+                "syntax error",
+            ]
             for indicator in sql_error_indicators:
-                assert indicator not in error_text or "error" not in error_text, f"Possible SQL error exposed: {indicator}"
+                assert indicator not in error_text or "error" not in error_text, (
+                    f"Possible SQL error exposed: {indicator}"
+                )
