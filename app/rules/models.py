@@ -7,6 +7,8 @@ class FAR117(BaseModel):
     """FAR117 regulatory parameters."""
 
     min_rest_hours: int = 10
+    hard: list[HardRule] = Field(default_factory=list)
+    soft: list[SoftRule] = Field(default_factory=list)
 
 
 class UnionRules(BaseModel):
@@ -14,6 +16,8 @@ class UnionRules(BaseModel):
 
     max_duty_hours_per_day: int | None = None
     no_red_eyes: bool = False
+    hard: list[HardRule] = Field(default_factory=list)
+    soft: list[SoftRule] = Field(default_factory=list)
 
 
 class HardRule(BaseModel):
