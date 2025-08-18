@@ -41,7 +41,7 @@ smoke.api:
 	kill $$pid; wait $$pid 2>/dev/null || true; \
 	echo "smoke OK"
 
-# Requires Codex generator to exist in tools/pbs_synth
+# Requires Codex generator in tools/pbs_synth
 MONTH ?= 2025-09
 BASE  ?= EWR
 FLEET ?= 73N
