@@ -1,18 +1,23 @@
 version: "2025.08"
 airline: UAL
 far117:
-  min_rest_hours: 10
+  hard:
+    - id: FAR117_MIN_REST
+      desc: Rest >= 10h
+      check: pairing.rest_hours >= 10
+  soft:
+    - id: FAR117_SOFT_DUTY_LIMIT
+      desc: Prefer duty time under 14h
+      weight: 0.3
+      score: "pairing.duty_hours <= 14 ? 1.0 : 0.7"
 union:
-  max_duty_hours_per_day: 16
-hard:
-  - id: FAR117_MIN_REST
-    desc: Rest >= 10h
-    check: pairing.rest_hours >= 10
-  - id: NO_REDEYE_IF_SET
-    when: pref.hard_constraints.no_red_eyes
-    check: pairing.redeye == false
-soft:
-  - id: PREFER_LAYOVER_CITY
-    weight: pref.soft_prefs.layovers.weight
-    # Quote the ternary so YAML treats it as a string
-    score: "city in pref.soft_prefs.layovers.prefer ? 1.0 : (city in pref.soft_prefs.layovers.avoid ? 0.0 : 0.5)"
+  hard:
+    - id: NO_REDEYE_IF_SET
+      when: pref.hard_constraints.no_red_eyes
+      check: pairing.redeye == false
+  soft:
+    - id: PREFER_LAYOVER_CITY
+      weight: pref.soft_prefs.layovers.weight
+      score: "city in pref.soft_prefs.layovers.prefer ? 1.0 : (city in pref.soft_prefs.layovers.avoid ? 0.0 : 0.5)"
+id: UAL-2025-08
+rules: []

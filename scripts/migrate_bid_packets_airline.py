@@ -8,7 +8,7 @@ includes an ``airline`` column and a composite unique constraint on
 """
 
 from src.core.app import create_app
-from src.core.models import db, BidPacket
+from src.core.models import BidPacket, db
 
 
 def migrate() -> None:

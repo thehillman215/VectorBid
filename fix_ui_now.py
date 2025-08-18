@@ -1,7 +1,7 @@
 import os
 
 # Read the current ui.py
-with open("app/routes/ui.py", "r") as f:
+with open("app/routes/ui.py") as f:
     content = f.read()
 
 # Fix the main index route to return smart_bid.html
@@ -14,7 +14,6 @@ content = content.replace(
 if "smart_bid.html" not in content:
     print("⚠️ smart_bid.html not found in routes, fixing...")
     # Find the index function and fix it
-    import re
 
     pattern = (
         r'(def index.*?)(return templates\.TemplateResponse\(["\'])\w+\.html(["\'])'

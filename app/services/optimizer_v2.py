@@ -1,6 +1,10 @@
 from __future__ import annotations
-from typing import Any, Dict, Mapping, Sequence, Optional, List, Tuple, Union
-import math, os, re
+
+import math
+import os
+import re
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 try:
     from pydantic import BaseModel, Field
@@ -18,7 +22,7 @@ except Exception:
 
 
 # === Public surface expected by tests ===
-SCORING_CATEGORIES: Tuple[str, ...] = (
+SCORING_CATEGORIES: tuple[str, ...] = (
     "layovers",
     "award_rate",
     "text_relevance",
@@ -60,8 +64,8 @@ def _coerce_id(d: Mapping[str, Any]) -> str:
     return str(d.get("id") or d)
 
 
-def _tokenize(s: str) -> List[str]:
-    return [t.lower() for t in _WORD_RE.findall((s or ""))]
+def _tokenize(s: str) -> list[str]:
+    return [t.lower() for t in _WORD_RE.findall(s or "")]
 
 
 def _extract_text_blob(item: Mapping[str, Any]) -> str:
@@ -72,7 +76,7 @@ def _extract_text_blob(item: Mapping[str, Any]) -> str:
     return " ".join([v for v in item.values() if isinstance(v, str)])
 
 
-def _as_dict(obj: Any) -> Dict[str, Any]:
+def _as_dict(obj: Any) -> dict[str, Any]:
     if obj is None:
         return {}
     if isinstance(obj, Mapping):
@@ -108,17 +112,17 @@ def _get_in(obj: Any, *path: str, default: Any = None) -> Any:
 
 
 # === Weights API ===
-def _derive_defaults_from_bundle(bundle_like: Any) -> Dict[str, float]:
+def _derive_defaults_from_bundle(bundle_like: Any) -> dict[str, float]:
     """
     If context.default_weights is empty/zeroed, bootstrap sensible defaults:
       - layovers: from preference_schema.soft_prefs.layovers.weight (or 1.0 if 'prefer' exists)
       - award_rate: 1.0 if analytics.base_stats present
     """
-    out: Dict[str, float] = {}
+    out: dict[str, float] = {}
     prefs = _get_in(bundle_like, "preference_schema") or {}
     p_lay = _get_in(prefs, "soft_prefs", "layovers", "weight")
     prefer = _get_in(prefs, "soft_prefs", "layovers", "prefer", default=[])
-    if isinstance(p_lay, (int, float)) and p_lay > 0:
+    if isinstance(p_lay, int | float) and p_lay > 0:
         out["layovers"] = float(p_lay)
     elif isinstance(prefer, Sequence) and len(prefer) > 0:
         out["layovers"] = 1.0
@@ -130,12 +134,12 @@ def _derive_defaults_from_bundle(bundle_like: Any) -> Dict[str, float]:
 
 
 def _get_scoring_weights(
-    bundle_or_categories: Optional[Union[Sequence[str], Mapping[str, Any], Any]] = None,
-    overrides: Optional[Mapping[str, float]] = None,
+    bundle_or_categories: Sequence[str] | Mapping[str, Any] | Any | None = None,
+    overrides: Mapping[str, float] | None = None,
     *,
     normalize: bool = True,
-) -> Dict[str, float]:
-    base: Dict[str, float]
+) -> dict[str, float]:
+    base: dict[str, float]
     is_bundle = bundle_or_categories is not None and (
         (
             isinstance(bundle_or_categories, Mapping)
@@ -152,7 +156,7 @@ def _get_scoring_weights(
         # start with context defaults
         base = {}
         for k, v in dict(dw).items():
-            if isinstance(v, (int, float)) and v > 0:
+            if isinstance(v, int | float) and v > 0:
                 base[str(k)] = float(v)
         # if nothing positive, derive from prefs/analytics
         if sum(base.values()) <= 0:
@@ -189,7 +193,7 @@ def _get_scoring_weights(
 
 
 # === Low-level rank_candidates (kept) ===
-def _normalize_v2_to_v1(items: Sequence[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+def _normalize_v2_to_v1(items: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     out = []
     for it in items:
         rid = _coerce_id(it)
@@ -207,12 +211,12 @@ def _normalize_v2_to_v1(items: Sequence[Mapping[str, Any]]) -> List[Dict[str, An
 
 def _fallback_v1_rank(
     candidates: Sequence[Mapping[str, Any]],
-    query: Union[str, Any],
+    query: str | Any,
     *,
     top_k: int = 10,
     strategy: str = "bm25",
     **kwargs: Any,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     q = str(query) if not isinstance(query, str) else query
     q_tokens = _tokenize(q) or ["*"]
     q_weight = {
@@ -239,12 +243,12 @@ def _fallback_v1_rank(
 
 def rank_candidates(
     candidates: Sequence[Mapping[str, Any]],
-    query: Union[str, Any],
+    query: str | Any,
     *,
     top_k: int = 10,
     strategy: str = "bm25",
     **kwargs: Any,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     use_v2 = os.getenv("OPTIMIZER_V2", "0") == "1" and callable(_rank_v2)
     if use_v2:
         out = _rank_v2(
@@ -285,12 +289,12 @@ def rank_candidates(
 class RankedCandidate(BaseModel):
     candidate_id: str
     score: float
-    rationale: Optional[str] = None
-    soft_breakdown: Dict[str, float] = Field(default_factory=dict)
-    pairings: List[str] = Field(default_factory=list)
+    rationale: str | None = None
+    soft_breakdown: dict[str, float] = Field(default_factory=dict)
+    pairings: list[str] = Field(default_factory=list)
 
 
-def _extract_bundle(bundle: Any) -> Dict[str, Any]:
+def _extract_bundle(bundle: Any) -> dict[str, Any]:
     b = _as_dict(bundle)
     context = b.get("context") or _as_dict(getattr(bundle, "context", None))
     prefs = b.get("preference_schema") or _as_dict(
@@ -328,9 +332,9 @@ def _score_pairing(
     prefs: Mapping[str, Any],
     analytics: Mapping[str, Any],
     W: Mapping[str, float],
-) -> Tuple[float, List[str], Dict[str, float]]:
+) -> tuple[float, list[str], dict[str, float]]:
     notes = []
-    bd = {k: 0.0 for k in SCORING_CATEGORIES}  # exact key set
+    bd = dict.fromkeys(SCORING_CATEGORIES, 0.0)  # exact key set
 
     # Layovers: 1.0 if explicit match; if data missing (no city or prefer list), neutral 0.5
     city = p.get("layover_city") or p.get("city")
@@ -348,7 +352,7 @@ def _score_pairing(
 
     # Award rate: neutral 0.5 if missing
     rate = _get_in(analytics, "base_stats", str(city), "award_rate", default=None)
-    rate_missing = not isinstance(rate, (int, float))
+    rate_missing = not isinstance(rate, int | float)
     if rate_missing:
         rate = 0.5
     bd["award_rate"] = W.get("award_rate", 0.0) * float(rate)
@@ -360,7 +364,7 @@ def _score_pairing(
         if bool(p.get("redeye", False)):
             pen_raw += 1.0
         rest = p.get("rest_hours")
-        if isinstance(rest, (int, float)) and rest < 10:
+        if isinstance(rest, int | float) and rest < 10:
             pen_raw += 0.5
         if pen_raw:
             bd["fatigue_risk"] = -fatigue_w * pen_raw
@@ -371,7 +375,7 @@ def _score_pairing(
 
     # Seniority as additive bonus equal to 10% * base * percentile (keeps sum(breakdown)==score)
     sp = ctx.get("seniority_percentile")
-    if isinstance(sp, (int, float)):
+    if isinstance(sp, int | float):
         sp_eff = (
             min(float(sp), 0.2) if rate_missing else float(sp)
         )  # slight dampening when analytics missing
@@ -383,7 +387,7 @@ def _score_pairing(
 
 def select_topk(
     bundle: Any, top_k: int = 10, *, strategy: str = "bm25", **kwargs: Any
-) -> List[RankedCandidate]:
+) -> list[RankedCandidate]:
     parts = _extract_bundle(bundle)
     ctx, prefs, analytics, pairings = (
         parts["context"],

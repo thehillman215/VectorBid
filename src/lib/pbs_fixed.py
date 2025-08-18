@@ -175,7 +175,7 @@ def _fallback_pbs_generation(preferences_text):
             if any(word in text_lower for word in context_words):
                 filters.append(f"AVOID TRIPS ON DAY {day}")
                 logger.info(f"Added date avoidance filter for day {day}")
-    except:
+    except Exception:
         pass  # Skip date parsing if it fails
 
     # Specific city preferences
@@ -237,7 +237,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
                 profile = get_profile(user_id)
                 if profile:
                     pilot_profile = profile
-            except:
+            except Exception:
                 pass
 
         # Process preferences with enhanced system

@@ -8,7 +8,7 @@ from schedule_parser import parse_schedule
 # Sample text compatible with new parser format
 sample_united_text = """PILOT MONTHLY BID PACKAGE - NOVEMBER 2024
 105 4-Day Trip Credit: 18.30
-201 3-Day Trip Credit: 14.45  
+201 3-Day Trip Credit: 14.45
 308 2-Day Trip Credit: 8.15
 412 5-Day Trip Credit: 22.30
 """

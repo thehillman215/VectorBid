@@ -3,13 +3,12 @@ Admin Analytics System for VectorBid
 """
 
 from datetime import datetime
-from typing import Dict, List
 
 
 class PilotAnalytics:
     """Analytics for individual pilots"""
 
-    def get_pilot_analytics(self, user_id: str) -> Dict:
+    def get_pilot_analytics(self, user_id: str) -> dict:
         """Get pilot analytics"""
         return {
             "user_id": user_id,
@@ -41,7 +40,7 @@ class BroadcastSystem:
     def __init__(self):
         self.messages = []
 
-    def create_broadcast(self, message_type: str, content: str) -> Dict:
+    def create_broadcast(self, message_type: str, content: str) -> dict:
         """Create a broadcast message"""
         message = {
             "id": f"msg_{len(self.messages) + 1}",
@@ -52,7 +51,7 @@ class BroadcastSystem:
         self.messages.append(message)
         return message
 
-    def get_broadcast_analytics(self) -> Dict:
+    def get_broadcast_analytics(self) -> dict:
         """Get broadcast analytics"""
         return {"total_sent": len(self.messages), "recent_messages": self.messages[-5:]}
 
@@ -64,7 +63,7 @@ class AdminDashboard:
         self.pilot_analytics = PilotAnalytics()
         self.broadcast_system = BroadcastSystem()
 
-    def get_dashboard_data(self) -> Dict:
+    def get_dashboard_data(self) -> dict:
         """Get dashboard data"""
         return {
             "system_stats": {

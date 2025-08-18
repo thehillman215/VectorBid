@@ -94,7 +94,7 @@ def run_once(n: int, k: int) -> None:
     r = client.post("/strategy", json={"feature_bundle": bundle, "candidates": topk})
     r.raise_for_status()
     timings["strategy"] = time.time() - t0
-    directives = r.json()["directives"]
+    r.json()["directives"]
 
     t0 = time.time()
     r = client.post(

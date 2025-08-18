@@ -1,12 +1,12 @@
 import pytest
 
-from app.services.optimizer import select_topk
 from app.models import (
+    ContextSnapshot,
     FeatureBundle,
     PreferenceSchema,
     SoftPrefs,
-    ContextSnapshot,
 )
+from app.services.optimizer import select_topk
 
 
 def _build_bundle():

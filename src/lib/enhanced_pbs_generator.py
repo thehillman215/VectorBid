@@ -5,9 +5,9 @@ Handles complete PBS syntax based on airline industry research
 """
 
 import re
-from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 
 class CommandType(Enum):
@@ -52,7 +52,7 @@ class EnhancedPBSGenerator:
     """
 
     def __init__(self):
-        self.commands: List[PBSCommand] = []
+        self.commands: list[PBSCommand] = []
         self.pilot_profile = {}
 
         # Aircraft mapping for United Airlines
@@ -83,11 +83,11 @@ class EnhancedPBSGenerator:
             "commutable_end": 2000,  # 8:00 PM or earlier
         }
 
-    def set_pilot_profile(self, profile: Dict[str, Any]):
+    def set_pilot_profile(self, profile: dict[str, Any]):
         """Set pilot profile for personalized command generation"""
         self.pilot_profile = profile
 
-    def parse_natural_language(self, preferences: str) -> List[PBSCommand]:
+    def parse_natural_language(self, preferences: str) -> list[PBSCommand]:
         """
         Parse natural language preferences into PBS commands
         This is the main entry point that replaces natural_language_to_pbs_filters()
@@ -534,7 +534,7 @@ class EnhancedPBSGenerator:
                             layer_number=1,
                         )
                     )
-                except:
+                except Exception:
                     pass  # Skip if can't parse date
 
     def _process_work_life_balance(self, text: str):
@@ -559,7 +559,7 @@ class EnhancedPBSGenerator:
                 )
                 break
 
-    def _generate_default_commands(self) -> List[PBSCommand]:
+    def _generate_default_commands(self) -> list[PBSCommand]:
         """Generate sensible default commands when no preferences given"""
         defaults = [
             PBSCommand(
@@ -655,7 +655,7 @@ class EnhancedPBSGenerator:
 
         return "\n".join(output_lines)
 
-    def get_commands_by_layer(self) -> Dict[int, List[PBSCommand]]:
+    def get_commands_by_layer(self) -> dict[int, list[PBSCommand]]:
         """Return commands organized by layer number"""
         layers = {}
         for cmd in self.commands:
@@ -664,7 +664,7 @@ class EnhancedPBSGenerator:
             layers[cmd.layer_number].append(cmd)
         return layers
 
-    def validate_commands(self) -> List[str]:
+    def validate_commands(self) -> list[str]:
         """Validate PBS commands for syntax errors"""
         errors = []
         for cmd in self.commands:
@@ -680,8 +680,8 @@ if __name__ == "__main__":
 
     # Test with sample preferences
     test_preferences = """
-    I want weekends off and no early morning departures. 
-    I'm a commuter living in Denver, so I need trips that start after 10 AM. 
+    I want weekends off and no early morning departures.
+    I'm a commuter living in Denver, so I need trips that start after 10 AM.
     I prefer short trips, no red-eyes, and I need to be home for my daughter's birthday on the 15th.
     I want to avoid reserve at all costs.
     """

@@ -55,9 +55,8 @@ def migrate_database():
 
     try:
         # Import Flask app and models
-        from models import db
-
         from app import create_app
+        from models import db
 
         app = create_app()
         with app.app_context():
@@ -67,7 +66,7 @@ def migrate_database():
             migrations = [
                 # BidPacket enhancements
                 """
-                ALTER TABLE bid_packet 
+                ALTER TABLE bid_packet
                 ADD COLUMN IF NOT EXISTS airline VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS aircraft VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS bid_month VARCHAR(20),
@@ -75,22 +74,22 @@ def migrate_database():
                 """,
                 # User activity tracking
                 """
-                ALTER TABLE user_profile 
+                ALTER TABLE user_profile
                 ADD COLUMN IF NOT EXISTS login_count INTEGER DEFAULT 0,
                 ADD COLUMN IF NOT EXISTS last_login TIMESTAMP,
                 ADD COLUMN IF NOT EXISTS profile_completion_date TIMESTAMP;
                 """,
                 # Create indexes for better performance
                 """
-                CREATE INDEX IF NOT EXISTS idx_bid_packet_airline 
+                CREATE INDEX IF NOT EXISTS idx_bid_packet_airline
                 ON bid_packet(airline);
                 """,
                 """
-                CREATE INDEX IF NOT EXISTS idx_bid_packet_aircraft 
+                CREATE INDEX IF NOT EXISTS idx_bid_packet_aircraft
                 ON bid_packet(aircraft);
                 """,
                 """
-                CREATE INDEX IF NOT EXISTS idx_bid_packet_month 
+                CREATE INDEX IF NOT EXISTS idx_bid_packet_month
                 ON bid_packet(bid_month);
                 """,
             ]
@@ -121,9 +120,8 @@ def verify_migration():
     print("🔍 Verifying migration...")
 
     try:
-        from models import db
-
         from app import create_app
+        from models import db
 
         app = create_app()
         with app.app_context():

@@ -4,17 +4,15 @@ Enhanced 50-Layer Bidding System for VectorBid
 Integrates comprehensive PBS command generation with layered strategy management
 """
 
-from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
-from enum import Enum
-import json
 from datetime import datetime
+from typing import Any
 
 # Import our enhanced PBS generator
 from enhanced_pbs_generator import (
+    CommandType,
     EnhancedPBSGenerator,
     PBSCommand,
-    CommandType,
     Priority,
 )
 
@@ -27,7 +25,7 @@ class BidLayer:
     name: str
     description: str
     priority: Priority
-    commands: List[PBSCommand] = field(default_factory=list)
+    commands: list[PBSCommand] = field(default_factory=list)
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.now)
 
@@ -36,11 +34,11 @@ class BidLayer:
         command.layer_number = self.layer_number
         self.commands.append(command)
 
-    def get_pbs_output(self) -> List[str]:
+    def get_pbs_output(self) -> list[str]:
         """Get PBS command strings for this layer"""
         return [cmd.to_pbs_string() for cmd in self.commands if self.is_active]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert layer to dictionary for storage/API"""
         return {
             "layer_number": self.layer_number,
@@ -69,7 +67,7 @@ class Enhanced50LayerSystem:
 
     def __init__(self, user_id: str = None):
         self.user_id = user_id
-        self.layers: List[BidLayer] = []
+        self.layers: list[BidLayer] = []
         self.max_layers = 50
         self.pbs_generator = EnhancedPBSGenerator()
         self.pilot_profile = {}
@@ -126,7 +124,7 @@ class Enhanced50LayerSystem:
             },
         }
 
-    def set_pilot_profile(self, profile: Dict[str, Any]):
+    def set_pilot_profile(self, profile: dict[str, Any]):
         """Set pilot profile for personalized layer generation"""
         self.pilot_profile = profile
         self.pbs_generator.set_pilot_profile(profile)
@@ -178,7 +176,7 @@ class Enhanced50LayerSystem:
         name: str,
         description: str,
         priority: Priority,
-        commands: List[Dict[str, str]],
+        commands: list[dict[str, str]],
     ) -> bool:
         """
         Add a custom layer with user-defined commands
@@ -207,7 +205,7 @@ class Enhanced50LayerSystem:
                     layer_number=layer_number,
                 )
                 layer.add_command(command)
-            except (KeyError, ValueError) as e:
+            except (KeyError, ValueError):
                 continue  # Skip invalid commands
 
         if layer.commands:  # Only add if it has valid commands
@@ -261,7 +259,7 @@ class Enhanced50LayerSystem:
 
         return True
 
-    def reorder_layers(self, new_order: List[int]) -> bool:
+    def reorder_layers(self, new_order: list[int]) -> bool:
         """Reorder layers based on new priority order"""
         if len(new_order) != len(self.layers):
             return False
@@ -279,16 +277,16 @@ class Enhanced50LayerSystem:
 
             self.layers = reordered_layers
             return True
-        except:
+        except Exception:
             return False
 
-    def get_layer(self, layer_number: int) -> Optional[BidLayer]:
+    def get_layer(self, layer_number: int) -> BidLayer | None:
         """Get a specific layer by number"""
         return next(
             (layer for layer in self.layers if layer.layer_number == layer_number), None
         )
 
-    def get_active_layers(self) -> List[BidLayer]:
+    def get_active_layers(self) -> list[BidLayer]:
         """Get only active layers"""
         return [layer for layer in self.layers if layer.is_active]
 
@@ -300,7 +298,7 @@ class Enhanced50LayerSystem:
             return "No active layers found. Please create bid layers first."
 
         output_lines = [
-            f"VectorBid 50-Layer PBS Strategy",
+            "VectorBid 50-Layer PBS Strategy",
             f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"Active Layers: {len(active_layers)} of {len(self.layers)}",
             "=" * 50,
@@ -327,7 +325,7 @@ class Enhanced50LayerSystem:
                 "=" * 50,
                 "SUMMARY:",
                 f"Total Commands: {sum(len(layer.commands) for layer in active_layers)}",
-                f"Priority Breakdown:",
+                "Priority Breakdown:",
             ]
         )
 
@@ -359,7 +357,7 @@ class Enhanced50LayerSystem:
 
         return "\n".join(output_lines)
 
-    def export_strategy(self) -> Dict[str, Any]:
+    def export_strategy(self) -> dict[str, Any]:
         """Export complete strategy for saving/sharing"""
         return {
             "user_id": self.user_id,
@@ -370,7 +368,7 @@ class Enhanced50LayerSystem:
             "layers": [layer.to_dict() for layer in self.layers],
         }
 
-    def import_strategy(self, strategy_data: Dict[str, Any]) -> bool:
+    def import_strategy(self, strategy_data: dict[str, Any]) -> bool:
         """Import a saved strategy"""
         try:
             self.layers = []
@@ -406,7 +404,7 @@ class Enhanced50LayerSystem:
         except (KeyError, ValueError):
             return False
 
-    def get_layer_statistics(self) -> Dict[str, Any]:
+    def get_layer_statistics(self) -> dict[str, Any]:
         """Get statistics about the current layer configuration"""
         active_layers = self.get_active_layers()
 
@@ -429,12 +427,14 @@ class Enhanced50LayerSystem:
             "command_types": command_types,
             "priority_distribution": priorities,
             "layers_by_priority": {
-                priority.name: len([l for l in active_layers if l.priority == priority])
+                priority.name: len(
+                    [layer for layer in active_layers if layer.priority == priority]
+                )
                 for priority in Priority
             },
         }
 
-    def validate_strategy(self) -> List[str]:
+    def validate_strategy(self) -> list[str]:
         """Validate the current strategy for potential issues"""
         issues = []
 
@@ -473,7 +473,9 @@ class Enhanced50LayerSystem:
                     )
 
         # Check for too many critical constraints
-        critical_layers = [l for l in active_layers if l.priority == Priority.CRITICAL]
+        critical_layers = [
+            layer for layer in active_layers if layer.priority == Priority.CRITICAL
+        ]
         if len(critical_layers) > 5:
             issues.append(
                 f"Too many critical constraints ({len(critical_layers)}). "
@@ -488,14 +490,13 @@ class Enhanced50LayerSystem:
 
         return issues
 
-    def _determine_layer_name(self, commands: List[PBSCommand]) -> str:
+    def _determine_layer_name(self, commands: list[PBSCommand]) -> str:
         """Determine appropriate name for a layer based on its commands"""
         if not commands:
             return "Empty Layer"
 
         # Check command types and subjects to categorize
-        subjects = set(cmd.subject for cmd in commands)
-        command_types = set(cmd.command_type for cmd in commands)
+        command_types = {cmd.command_type for cmd in commands}
 
         if "RESERVE" in " ".join(cmd.value for cmd in commands):
             return "Reserve Preferences"
@@ -520,7 +521,7 @@ class Enhanced50LayerSystem:
         else:
             return f"Layer {commands[0].layer_number}"
 
-    def _generate_layer_description(self, commands: List[PBSCommand]) -> str:
+    def _generate_layer_description(self, commands: list[PBSCommand]) -> str:
         """Generate description for a layer based on its commands"""
         if not commands:
             return "No commands defined"
@@ -536,7 +537,7 @@ class Enhanced50LayerSystem:
 
         return f"Contains {len(commands)} command(s): " + ", ".join(cmd_summaries)
 
-    def _generate_default_strategy(self) -> List[PBSCommand]:
+    def _generate_default_strategy(self) -> list[PBSCommand]:
         """Generate a default strategy when no preferences are provided"""
         return self.pbs_generator._generate_default_commands()
 
@@ -550,8 +551,8 @@ def integrate_with_vectorbid():
     # This would replace the simple natural_language_to_pbs_filters function
 
     def enhanced_preference_processing(
-        preferences: str, user_id: str = None, pilot_profile: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        preferences: str, user_id: str = None, pilot_profile: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """
         Enhanced replacement for natural_language_to_pbs_filters
         Returns comprehensive PBS strategy instead of simple command list

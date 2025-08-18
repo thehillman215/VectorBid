@@ -11,7 +11,7 @@ try:
     from api.pbs_fix import natural_language_to_pbs_filters
 
     print("✅ Imported from pbs_fix")
-except:
+except Exception:
     print("❌ Could not import from pbs_fix")
     sys.exit(1)
 

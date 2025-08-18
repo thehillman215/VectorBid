@@ -3,7 +3,6 @@ Admin portal blueprint with templates, user management, and audit logging.
 """
 
 import io
-import io
 import logging
 import os
 import re
@@ -11,13 +10,11 @@ import secrets
 from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Optional
-
-from flask import current_app
 
 from flask import (
     Blueprint,
     abort,
+    current_app,
     jsonify,
     redirect,
     render_template,
@@ -27,7 +24,7 @@ from flask import (
     url_for,
 )
 
-from src.core.models import db, User, BidPacket, AdminActionLog
+from src.core.models import AdminActionLog, BidPacket, User, db
 
 
 class AdminConfig:
@@ -97,7 +94,7 @@ def require_bearer_token(f):
     return decorated_function
 
 
-def log_action(action: str, target: str = "", admin_id: Optional[str] = None) -> None:
+def log_action(action: str, target: str = "", admin_id: str | None = None) -> None:
     try:
         entry = AdminActionLog(admin_id=admin_id, action=action, target=target)
         db.session.add(entry)

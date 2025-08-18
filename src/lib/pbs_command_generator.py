@@ -14,10 +14,8 @@ import os
 import re
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from functools import lru_cache
-from typing import Any, Optional, Union
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -119,14 +117,14 @@ class GenerationResult:
 class PilotProfile:
     """Structured pilot profile data"""
 
-    base: Optional[str] = None
-    seniority: Optional[int] = None
-    fleet: Optional[list[str]] = None
-    flying_style: Optional[str] = None
+    base: str | None = None
+    seniority: int | None = None
+    fleet: list[str] | None = None
+    flying_style: str | None = None
     commuter: bool = False
 
     @classmethod
-    def from_dict(cls, data: Optional[dict]) -> "PilotProfile":
+    def from_dict(cls, data: dict | None) -> "PilotProfile":
         if not data:
             return cls()
 
@@ -206,9 +204,7 @@ class CommandCache:
         combined = f"{preferences}:{profile_str}"
         return hashlib.md5(combined.encode()).hexdigest()
 
-    def get(
-        self, preferences: str, profile: PilotProfile
-    ) -> Optional[GenerationResult]:
+    def get(self, preferences: str, profile: PilotProfile) -> GenerationResult | None:
         """Retrieve from cache if valid"""
         if not Config.USE_CACHE:
             return None
@@ -271,7 +267,7 @@ class LLMGenerator:
 
     def generate(
         self, preferences: str, profile: PilotProfile
-    ) -> Optional[list[PBSCommand]]:
+    ) -> list[PBSCommand] | None:
         """Generate PBS commands using LLM"""
 
         if not self.client:
@@ -662,7 +658,7 @@ class PBSCommandGenerator:
         logger.info("PBS Command Generator initialized")
 
     def generate(
-        self, preferences_text: str, pilot_profile: Optional[dict] = None
+        self, preferences_text: str, pilot_profile: dict | None = None
     ) -> dict:
         """
         Generate PBS commands from preferences
@@ -771,7 +767,7 @@ class PBSCommandGenerator:
     def _calculate_stats(self, commands: list[PBSCommand], method: str) -> dict:
         """Calculate generation statistics"""
 
-        categories = set(cmd.category for cmd in commands)
+        categories = {cmd.category for cmd in commands}
         avg_confidence = (
             sum(cmd.confidence for cmd in commands) / len(commands) if commands else 0
         )
@@ -867,11 +863,11 @@ class PBSCommandGenerator:
 # ============================================
 
 # Singleton instance
-_generator_instance: Optional[PBSCommandGenerator] = None
+_generator_instance: PBSCommandGenerator | None = None
 
 
 def generate_pbs_commands(
-    preferences_text: str, pilot_profile: Optional[dict] = None
+    preferences_text: str, pilot_profile: dict | None = None
 ) -> dict:
     """
     Generate PBS commands from natural language preferences
@@ -969,7 +965,7 @@ if __name__ == "__main__":
     print("=" * 80)
     print("PBS COMMAND GENERATOR - COMPREHENSIVE TEST SUITE")
     print("=" * 80)
-    print(f"Configuration:")
+    print("Configuration:")
     print(f"  LLM Enabled: {Config.USE_LLM}")
     print(f"  Model: {Config.OPENAI_MODEL}")
     print(f"  Caching: {Config.USE_CACHE}")
@@ -988,7 +984,7 @@ if __name__ == "__main__":
             print(f"  [{cmd['priority']}] {cmd['command']}")
             print(f"      → {cmd['explanation']}")
 
-        print(f"\nStatistics:")
+        print("\nStatistics:")
         print(f"  Method: {result['stats']['generation_method']}")
         print(f"  Quality: {result['stats']['quality_score']}/100")
         print(f"  Categories: {', '.join(result['stats'].get('category_list', []))}")
