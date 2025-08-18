@@ -27,6 +27,7 @@ except ImportError:
     # Fallback for environments without OAuth model
     class OAuth:
         pass
+
     class User:
         pass
 

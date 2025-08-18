@@ -11,7 +11,6 @@ def patch_fallback_ranking():
     Instructions to modify your existing _fallback_ranking method in llm_service.py
     """
 
-
     print("🔧 Integration Instructions:")
     print("=" * 50)
     print("1. Add import at top of llm_service.py:")

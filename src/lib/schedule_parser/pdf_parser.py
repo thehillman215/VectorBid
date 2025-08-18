@@ -159,23 +159,23 @@ def _extract_united_routing(context: str) -> str:
 
     # Common United hubs and airports
     airports = {
-            "IAH",
-            "DEN",
-            "EWR",
-            "SFO",
-            "LAX",
-            "ORD",
-            "LAS",
-            "LGA",
-            "BNA",
-            "FLL",
-            "CUN",
-            "DFW",
-            "ATL",
-            "PHX",
-            "SEA",
-            "BOS",
-        }
+        "IAH",
+        "DEN",
+        "EWR",
+        "SFO",
+        "LAX",
+        "ORD",
+        "LAS",
+        "LGA",
+        "BNA",
+        "FLL",
+        "CUN",
+        "DFW",
+        "ATL",
+        "PHX",
+        "SEA",
+        "BOS",
+    }
 
     # Find airport code patterns
     airport_pattern = re.compile(r"\b([A-Z]{3})\b")

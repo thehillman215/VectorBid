@@ -427,7 +427,9 @@ class Enhanced50LayerSystem:
             "command_types": command_types,
             "priority_distribution": priorities,
             "layers_by_priority": {
-                priority.name: len([layer for layer in active_layers if layer.priority == priority])
+                priority.name: len(
+                    [layer for layer in active_layers if layer.priority == priority]
+                )
                 for priority in Priority
             },
         }
@@ -471,7 +473,9 @@ class Enhanced50LayerSystem:
                     )
 
         # Check for too many critical constraints
-        critical_layers = [layer for layer in active_layers if layer.priority == Priority.CRITICAL]
+        critical_layers = [
+            layer for layer in active_layers if layer.priority == Priority.CRITICAL
+        ]
         if len(critical_layers) > 5:
             issues.append(
                 f"Too many critical constraints ({len(critical_layers)}). "

@@ -69,9 +69,7 @@ def upload_bid():
 
     file_data = file.stream.read()
     file_stream = BytesIO(file_data)
-    services_bids.save_bid_packet(
-        month_tag, file_stream, file.filename or "upload.pdf"
-    )
+    services_bids.save_bid_packet(month_tag, file_stream, file.filename or "upload.pdf")
 
     return jsonify({"status": "ok", "stored": month_tag})
 
