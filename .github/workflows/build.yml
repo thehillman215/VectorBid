@@ -8,33 +8,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    permissions: { contents: read, packages: write }
     steps:
       - uses: actions/checkout@v4
 
       - name: Compute Docker tags
         run: |
           SHA7="${GITHUB_SHA::7}"
-
-          # Base name: pr-<num> for PRs, else sanitized branch
           if [[ "$GITHUB_REF" == refs/pull/* ]]; then
-            PR_NUM="$(echo "$GITHUB_REF" | cut -d/ -f3)"
-            BASE="pr-${PR_NUM}"
+            PR="$(echo "$GITHUB_REF" | cut -d/ -f3)"
+            BASE="pr-${PR}"
           else
             REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-ci}}"
             REF="${REF//\//-}"
             REF="$(echo "$REF" | sed 's/[^A-Za-z0-9_.-]/-/g')"
             BASE="${REF:-ci}"
           fi
-
-          # Always prefix to avoid leading dash issues
-          TAG1="build-${BASE}"
-          TAG2="build-${BASE}-${SHA7}"
-
-          echo "TAG1=${TAG1}" >> "$GITHUB_ENV"
-          echo "TAG2=${TAG2}" >> "$GITHUB_ENV"
+          echo "TAG1=build-${BASE}" >> "$GITHUB_ENV"
+          echo "TAG2=build-${BASE}-${SHA7}" >> "$GITHUB_ENV"
 
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
@@ -51,7 +42,6 @@ jobs:
         with:
           context: .
           push: true
-          # Repo must be lowercase; pin path explicitly
           tags: |
             ghcr.io/${{ github.repository_owner }}/vectorbid:${{ env.TAG1 }}
             ghcr.io/${{ github.repository_owner }}/vectorbid:${{ env.TAG2 }}
