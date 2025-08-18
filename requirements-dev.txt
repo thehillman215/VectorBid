@@ -11,3 +11,7 @@ httpx>=0.28,<0.29
 watchfiles>=0.22,<1
 
 uvicorn>=0.29
+
+fastapi>=0.110
+pydantic>=2
+starlette>=0.37
