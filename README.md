@@ -1,16 +1,25 @@
 # VectorBid
 
-## State of the repo
-- Minimal FastAPI service exposing /ping and /health.
-- UAL rule packs live in `rule_packs/` and validate via Pydantic.
-- Tiny rule engine checks FAR117_MIN_REST and NO_REDEYE_IF_SET.
-- CLI `vb` handles rule utilities.
-- Tests reside in `fastapi_tests/` and drive CI.
+AI-powered PBS 2.0 bidding assistant for airline pilots.
 
-## Quickstart
-1. `pip install -e .[dev]`
-2. `ruff check .` && `ruff format --check .`
-3. `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q -c pytest.ini`
-4. `scripts/smoke.sh`
-5. `vb rules validate rule_packs/UAL/2025.08.yml`
+## Current Status
+- **Main branches**: `main` (stable), `staging` (integration)
+- **Work baselines**: `cursor/baseline` (primary), `codex/baseline` (parallel)
+- **Replit**: paused. Use Cursor + Line for primary dev.
 
+## Workflow (solo)
+1) Branch from `cursor/baseline` for features.
+2) Open PR → `staging`. CI must be green (ruff, pytest, bandit, Docker build).
+3) Periodically PR `staging` → `main` (protected).
+
+## CI
+- Lint/Format: `ruff check`, `ruff format --check`
+- Tests: `pytest -q`
+- Security: `bandit -r .`
+- Docker: GHCR tags `build-<branch>-<sha7>`
+
+Docs live in `docs/`:
+- ARCHITECTURE.md, DATA_CONTRACTS.md, UI_FLOWS.md
+- GIT_WORKFLOW.md, RULE_PACKS.md, LEGACY.md
+
+_Last updated: 2025-08-18_
