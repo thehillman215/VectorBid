@@ -1,0 +1,3 @@
+# Rule Packs
+
+Mapping preferences → CBA/FAR clauses…
