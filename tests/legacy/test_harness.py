@@ -1,8 +1,8 @@
-from datetime import datetime
-import sys
 import json
 import os
+import sys
 import tempfile
+from datetime import datetime
 
 #!/usr/bin/env python3
 """
