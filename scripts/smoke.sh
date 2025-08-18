@@ -1,22 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
-python - <<'PY'
-try:
-    import uvicorn  # noqa: F401
-except Exception:
-    import sys, subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "uvicorn>=0.29"])
-PY
-PORT="${PORT:-3000}"
 
-# ensure no stale server
-pkill -f "uvicorn.*app.main:app" 2>/dev/null || true
+PORT="${PORT:-8080}"
+UVICORN_CMD="uvicorn app.main:app --host 127.0.0.1 --port ${PORT} --log-level warning"
 
-python -m uvicorn app.main:app --port "$PORT" --log-level warning &
+# start API
+$UVICORN_CMD > uvicorn.log 2>&1 &
 PID=$!
-trap "kill $PID" EXIT
-sleep 3
 
-curl -fsS "http://localhost:$PORT/ping" >/dev/null
-curl -fsS "http://localhost:$PORT/health" >/dev/null
-echo "smoke OK on $PORT"
+# wait for health
+python - <<'PY'
+import time, urllib.request, sys, os
+port = int(os.getenv("PORT","8080"))
+for _ in range(60):
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/meta/health", timeout=1) as r:
+            if r.status == 200:
+                print("READY"); sys.exit(0)
+    except Exception:
+        time.sleep(1)
+sys.exit("Server did not start")
+PY
+
+# smoke
+curl -fsS "http://127.0.0.1:${PORT}/api/meta/health" | tee /dev/stderr
+
+# stop API
+kill -TERM "$PID" || true
+sleep 1
+pkill -f "uvicorn app.main:app" || true
