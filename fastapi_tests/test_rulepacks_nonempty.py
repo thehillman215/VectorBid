@@ -12,7 +12,7 @@ ROOT = Path(__file__).parent.parent
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from app.rules.engine import load_rule_pack
+from app.rules.engine import load_rule_pack  # noqa: E402
 
 
 def test_ual_2025_08_rule_pack_nonempty():

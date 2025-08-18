@@ -55,24 +55,26 @@ def get_all_schemas() -> dict[str, dict]:
     return {cls.__name__: cls.model_json_schema() for cls in MODELS}
 
 
-from app.api import router as api_router
+from app.api import router as api_router  # noqa: E402
 
 app.include_router(compat_validate_router)
 app.include_router(api_router)
 
 
 # Import and include UI routes
-from app.routes.ui import router as ui_router
+from app.routes.ui import router as ui_router  # noqa: E402
 
 app.include_router(ui_router, prefix="", tags=["UI"])
 print("✅ UI routes registered at /")
 
 # UI Routes (opt-in only)
-import os as _os
+import os as _os  # noqa: E402
 
 if _os.getenv("ENABLE_UI") == "1":
     try:
-        from app.routes.ui import router as ui_router  # heavy: uses Form()
+        from app.routes.ui import (
+            router as ui_router,  # noqa: E402  # heavy: uses Form()
+        )
 
         app.include_router(ui_router)
         print("✅ UI routes added")
@@ -80,6 +82,6 @@ if _os.getenv("ENABLE_UI") == "1":
         print(f"⚠️ UI disabled: {e}")
 
 # --- meta routes ---
-from app.routes.meta import router as meta_router
+from app.routes.meta import router as meta_router  # noqa: E402
 
 app.include_router(meta_router)

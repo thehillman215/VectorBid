@@ -2,9 +2,9 @@ from __future__ import annotations
 
 """Utility helpers for managing bid packet files and metadata."""
 
-import json
-from datetime import datetime
-from pathlib import Path
+import json  # noqa: E402
+from datetime import datetime  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 # Directories for storing bid packets and metadata
 BIDS_DIR = Path("bids")

@@ -5,10 +5,8 @@ Handles upload, storage, and parsing of airline bid packets and contracts
 
 import hashlib
 import json
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 
 class BidPacketManager:
@@ -245,84 +243,10 @@ class BidPacketManager:
         # - Equipment qualifications
         pass
 
-    def upload_bid_packet(self, file, month_tag: str, airline: str) -> dict[str, Any]:
-        """Upload a bid packet file"""
-        try:
-            # Create filename
-            filename = f"{airline}_{month_tag}.pdf"
-            file_path = os.path.join(self.bid_storage_path, filename)
-
-            # Save the file
-            file.save(file_path)
-
-            # Create metadata
-            metadata = {
-                "month_tag": month_tag,
-                "airline": airline,
-                "filename": filename,
-                "upload_date": datetime.now().isoformat(),
-                "file_size": os.path.getsize(file_path),
-            }
-
-            # Save metadata
-            metadata_file = os.path.join(
-                self.metadata_path, f"{month_tag}_{airline}.json"
-            )
-            with open(metadata_file, "w") as f:
-                json.dump(metadata, f)
-
-            return {
-                "success": True,
-                "message": f"Bid packet uploaded successfully: {filename}",
-                "filename": filename,
-            }
-
-        except Exception as e:
-            return {"success": False, "error": f"Upload failed: {str(e)}"}
-
-    def delete_bid_packet(self, month_tag: str, airline: str) -> dict[str, Any]:
-        """Delete a bid packet"""
-        try:
-            filename = f"{airline}_{month_tag}.pdf"
-            file_path = os.path.join(self.bid_storage_path, filename)
-            metadata_file = os.path.join(
-                self.metadata_path, f"{month_tag}_{airline}.json"
-            )
-
-            # Remove files if they exist
-            if os.path.exists(file_path):
-                os.remove(file_path)
-
-            if os.path.exists(metadata_file):
-                os.remove(metadata_file)
-
-            return {"success": True, "message": f"Bid packet deleted: {filename}"}
-
-        except Exception as e:
-            return {"success": False, "error": f"Delete failed: {str(e)}"}
-
-    def get_bid_packet_file(
-        self, month_tag: str, airline: str
-    ) -> tuple[bytes, str] | None:
-        """Get bid packet file data for download"""
-        try:
-            filename = f"{airline}_{month_tag}.pdf"
-            file_path = os.path.join(self.bid_storage_path, filename)
-
-            if os.path.exists(file_path):
-                with open(file_path, "rb") as f:
-                    return f.read(), filename
-
-            return None
-
-        except Exception as e:
-            print(f"Error retrieving file: {e}")
-            return None
-
     def _extract_month_tag(self, filename: str) -> str:
         """Extract month tag from filename"""
         # Try to find 6-digit year/month pattern
-        import re
+        import re  # noqa: E402
 
         match = re.search(r"(\d{6})", filename)
         if match:

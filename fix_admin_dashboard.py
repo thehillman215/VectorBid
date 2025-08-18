@@ -14,7 +14,7 @@ content = content.replace(old_airlines, new_airlines)
 
 # Now we need to add the calculations before the render_template_string call
 # Find the line "return render_template_string(dashboard_html,"
-import re
+import re  # noqa: E402
 
 # Add calculations before the return statement
 calculation_code = """

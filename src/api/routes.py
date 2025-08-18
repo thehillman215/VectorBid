@@ -14,7 +14,7 @@ def get_dashboard_stats():
 Enhanced routes with conflict resolution
 """
 
-from flask import (
+from flask import (  # noqa: E402
     Blueprint,
     jsonify,
     redirect,
@@ -26,19 +26,19 @@ from flask import (
 )
 
 # Local bid packet helpers
-from src.core.bid_packets import get_bid_packet_info, save_bid_packet
-from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers
-from src.lib.pbs_command_generator import generate_pbs_commands
-from src.lib.personas import PILOT_PERSONAS
-from src.lib.services.db import get_profile, save_profile
-from src.lib.subscription_manager import SubscriptionManager
+from src.core.bid_packets import get_bid_packet_info, save_bid_packet  # noqa: E402
+from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers  # noqa: E402
+from src.lib.pbs_command_generator import generate_pbs_commands  # noqa: E402
+from src.lib.personas import PILOT_PERSONAS  # noqa: E402
+from src.lib.services.db import get_profile, save_profile  # noqa: E402
+from src.lib.subscription_manager import SubscriptionManager  # noqa: E402
 
 try:
     from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
 except ImportError:
     generate_advanced_pbs_strategy = None
 
-from datetime import datetime
+from datetime import datetime  # noqa: E402
 
 # Fixed PBS generation functions
 
@@ -64,7 +64,7 @@ def index():
         return render_template(
             "index.html", subscription=subscription, user_id=user_id, profile=profile
         )
-    except:
+    except Exception:
         # Fallback to simple HTML if template not found
         return f"""
         <!DOCTYPE html>

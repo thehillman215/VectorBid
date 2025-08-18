@@ -7,10 +7,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-import pytest
+import pytest  # noqa: E402
 
 # Import the SQLAlchemy instance from the core extensions
-from main import app
+from main import app  # noqa: E402
 
 
 @pytest.fixture
