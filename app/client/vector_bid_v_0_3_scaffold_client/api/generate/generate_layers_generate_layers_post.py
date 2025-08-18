@@ -5,7 +5,9 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.generate_layers_generate_layers_post_payload import GenerateLayersGenerateLayersPostPayload
+from ...models.generate_layers_generate_layers_post_payload import (
+    GenerateLayersGenerateLayersPostPayload,
+)
 from ...models.generate_layers_generate_layers_post_response_generate_layers_generate_layers_post import (
     GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost,
 )
@@ -34,7 +36,12 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost, HTTPValidationError]]:
+) -> Optional[
+    Union[
+        GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost,
+        HTTPValidationError,
+    ]
+]:
     if response.status_code == 200:
         response_200 = GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost.from_dict(
             response.json()
@@ -53,7 +60,12 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost, HTTPValidationError]]:
+) -> Response[
+    Union[
+        GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost,
+        HTTPValidationError,
+    ]
+]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -66,7 +78,12 @@ def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: GenerateLayersGenerateLayersPostPayload,
-) -> Response[Union[GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost, HTTPValidationError]]:
+) -> Response[
+    Union[
+        GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost,
+        HTTPValidationError,
+    ]
+]:
     r"""Generate Layers
 
      Body:
@@ -100,7 +117,12 @@ def sync(
     *,
     client: Union[AuthenticatedClient, Client],
     body: GenerateLayersGenerateLayersPostPayload,
-) -> Optional[Union[GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost, HTTPValidationError]]:
+) -> Optional[
+    Union[
+        GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost,
+        HTTPValidationError,
+    ]
+]:
     r"""Generate Layers
 
      Body:
@@ -129,7 +151,12 @@ async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
     body: GenerateLayersGenerateLayersPostPayload,
-) -> Response[Union[GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost, HTTPValidationError]]:
+) -> Response[
+    Union[
+        GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost,
+        HTTPValidationError,
+    ]
+]:
     r"""Generate Layers
 
      Body:
@@ -161,7 +188,12 @@ async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
     body: GenerateLayersGenerateLayersPostPayload,
-) -> Optional[Union[GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost, HTTPValidationError]]:
+) -> Optional[
+    Union[
+        GenerateLayersGenerateLayersPostResponseGenerateLayersGenerateLayersPost,
+        HTTPValidationError,
+    ]
+]:
     r"""Generate Layers
 
      Body:

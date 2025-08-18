@@ -4,11 +4,12 @@
 # Add src to path
 import sys
 
-sys.path.insert(0, 'src')
+sys.path.insert(0, "src")
 
 # Import the function
 try:
     from api.pbs_fix import natural_language_to_pbs_filters
+
     print("✅ Imported from pbs_fix")
 except:
     print("❌ Could not import from pbs_fix")
@@ -50,7 +51,7 @@ for input_text, expected_min in tests:
 
 # Summary
 print("=" * 50)
-print(f"SCORE: {passed}/{total} passed ({passed/total*100:.0f}%)")
+print(f"SCORE: {passed}/{total} passed ({passed / total * 100:.0f}%)")
 
 if passed == total:
     print("🎉 PERFECT! NLP is working great!")

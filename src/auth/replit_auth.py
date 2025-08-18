@@ -107,10 +107,12 @@ def make_replit_blueprint():
         logout_user()
 
         end_session_endpoint = issuer_url + "/session/end"
-        encoded_params = urlencode({
-            "client_id": repl_id,
-            "post_logout_redirect_uri": request.url_root,
-        })
+        encoded_params = urlencode(
+            {
+                "client_id": repl_id,
+                "post_logout_redirect_uri": request.url_root,
+            }
+        )
         logout_url = f"{end_session_endpoint}?{encoded_params}"
 
         return redirect(logout_url)
@@ -148,15 +150,15 @@ def verify_jwt_token(token, issuer_url, client_id):
 
         # Get the header to find the key ID
         unverified_header = jwt.get_unverified_header(token)
-        kid = unverified_header.get('kid')
+        kid = unverified_header.get("kid")
 
         if not kid:
             raise ValueError("JWT token missing 'kid' in header")
 
         # Find the matching key
         key_data = None
-        for key in jwks_data.get('keys', []):
-            if key.get('kid') == kid:
+        for key in jwks_data.get("keys", []):
+            if key.get("kid") == kid:
                 key_data = key
                 break
 
@@ -165,6 +167,7 @@ def verify_jwt_token(token, issuer_url, client_id):
 
         # Convert JWKS key to PyJWT format
         from jwt.algorithms import RSAAlgorithm
+
         public_key = RSAAlgorithm.from_jwk(key_data)
 
         # Decode token with verification
@@ -178,8 +181,8 @@ def verify_jwt_token(token, issuer_url, client_id):
                 "verify_signature": True,
                 "verify_aud": True,
                 "verify_iss": True,
-                "verify_exp": True
-            }
+                "verify_exp": True,
+            },
         )
         return user_claims
     except jwt.InvalidTokenError as e:

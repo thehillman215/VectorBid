@@ -64,6 +64,8 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     K = int(payload.get("K", 50))
     topk = select_topk(bundle, K)
     return {"candidates": [c.model_dump() for c in topk]}
+
+
 @router.post("/strategy", tags=["Strategy"])
 def strategy(payload: dict[str, Any]) -> dict[str, Any]:
     """
@@ -110,9 +112,7 @@ def lint(payload: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/export",
-             tags=["Export"],
-             dependencies=[Depends(require_api_key)])
+@router.post("/export", tags=["Export"], dependencies=[Depends(require_api_key)])
 def export(payload: dict[str, Any]) -> dict[str, str]:
     """
     Protected when VECTORBID_API_KEY is set.

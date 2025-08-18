@@ -3,7 +3,6 @@ PBS Command Generation Diagnostic & Fix Script
 Run this to test and fix PBS generation issues
 """
 
-
 # ============================================
 # STEP 1: TEST CURRENT IMPLEMENTATION
 # ============================================
@@ -17,7 +16,7 @@ def test_current_pbs_generation():
         "Give me maximum days off with high credit trips",
         "I prefer short trips and no redeyes",
         "Commutable trips only, avoid international",
-        "Christmas off, prefer morning departures"
+        "Christmas off, prefer morning departures",
     ]
 
     print("=" * 60)
@@ -60,88 +59,95 @@ def _fallback_pbs_generation_fixed(preferences_text: str) -> list[str]:
     print(f"DEBUG: Processing text: '{text_lower}'")
 
     # DAYS OFF PATTERNS
-    if any(word in text_lower for word in ['weekend', 'saturday', 'sunday']):
+    if any(word in text_lower for word in ["weekend", "saturday", "sunday"]):
         commands.append("AVOID TRIPS WITH DEPARTURES ON SATURDAY")
         commands.append("AVOID TRIPS WITH DEPARTURES ON SUNDAY")
         print("DEBUG: Matched weekend pattern")
 
-    if 'maximum days off' in text_lower or 'max days off' in text_lower:
+    if "maximum days off" in text_lower or "max days off" in text_lower:
         commands.append("PREFER TRIPS WITH MINIMUM DAYS")
         commands.append("AWARD PAIRINGS IF DAYS_OFF >= 15")
         print("DEBUG: Matched max days off pattern")
 
-    if any(word in text_lower
-           for word in ['christmas', 'december 25', 'dec 25']):
+    if any(word in text_lower for word in ["christmas", "december 25", "dec 25"]):
         commands.append("AVOID TRIPS WITH DATES INCLUDING 25DEC")
         print("DEBUG: Matched Christmas pattern")
 
     # DEPARTURE TIME PATTERNS
-    if any(word in text_lower
-           for word in ['early departure', 'early morning', 'early start']):
+    if any(
+        word in text_lower
+        for word in ["early departure", "early morning", "early start"]
+    ):
         commands.append("AVOID TRIPS WITH DEPARTURE_TIME < 0600")
         print("DEBUG: Matched early departure pattern")
 
-    if 'no early' in text_lower:
+    if "no early" in text_lower:
         commands.append("PREFER TRIPS WITH DEPARTURE_TIME >= 0700")
         print("DEBUG: Matched no early pattern")
 
-    if any(word in text_lower
-           for word in ['morning departure', 'morning flight']):
-        commands.append(
-            "PREFER TRIPS WITH DEPARTURE_TIME BETWEEN 0600 AND 1200")
+    if any(word in text_lower for word in ["morning departure", "morning flight"]):
+        commands.append("PREFER TRIPS WITH DEPARTURE_TIME BETWEEN 0600 AND 1200")
         print("DEBUG: Matched morning departure pattern")
 
     # TRIP TYPE PATTERNS
-    if any(word in text_lower
-           for word in ['redeye', 'red eye', 'red-eye', 'overnight']):
-        if 'no' in text_lower or 'avoid' in text_lower:
+    if any(
+        word in text_lower for word in ["redeye", "red eye", "red-eye", "overnight"]
+    ):
+        if "no" in text_lower or "avoid" in text_lower:
             commands.append("AVOID TRIPS WITH RED_EYE_FLIGHTS")
         else:
             commands.append("PREFER TRIPS WITH RED_EYE_FLIGHTS")
         print("DEBUG: Matched redeye pattern")
 
-    if any(word in text_lower for word in ['commutable', 'commute']):
+    if any(word in text_lower for word in ["commutable", "commute"]):
         commands.append("PREFER TRIPS WITH COMMUTABLE")
         commands.append("SET COMMUTE_TIME TO 120 MINUTES")
         print("DEBUG: Matched commutable pattern")
 
-    if 'international' in text_lower:
-        if any(word in text_lower for word in ['no', 'avoid', 'not']):
+    if "international" in text_lower:
+        if any(word in text_lower for word in ["no", "avoid", "not"]):
             commands.append("AVOID TRIPS WITH INTERNATIONAL")
         else:
             commands.append("PREFER TRIPS WITH INTERNATIONAL")
         print("DEBUG: Matched international pattern")
 
     # TRIP LENGTH PATTERNS
-    if any(word in text_lower for word in
-           ['short trip', 'short pairing', '1 day', 'one day', 'day trip']):
+    if any(
+        word in text_lower
+        for word in ["short trip", "short pairing", "1 day", "one day", "day trip"]
+    ):
         commands.append("PREFER TRIPS WITH DAYS <= 2")
         print("DEBUG: Matched short trip pattern")
 
-    if any(word in text_lower
-           for word in ['long trip', 'long pairing', '4 day', 'four day']):
+    if any(
+        word in text_lower
+        for word in ["long trip", "long pairing", "4 day", "four day"]
+    ):
         commands.append("PREFER TRIPS WITH DAYS >= 4")
         print("DEBUG: Matched long trip pattern")
 
     # CREDIT/PAY PATTERNS
-    if any(word in text_lower
-           for word in ['high credit', 'high pay', 'maximum pay', 'max pay']):
+    if any(
+        word in text_lower
+        for word in ["high credit", "high pay", "maximum pay", "max pay"]
+    ):
         commands.append("PREFER TRIPS WITH CREDIT_TIME >= 20")
         commands.append("SORT BY CREDIT_TIME DESCENDING")
         print("DEBUG: Matched high credit pattern")
 
-    if 'high time' in text_lower or 'block hours' in text_lower:
+    if "high time" in text_lower or "block hours" in text_lower:
         commands.append("PREFER TRIPS WITH BLOCK_TIME >= 20")
         print("DEBUG: Matched high time pattern")
 
     # LAYOVER PATTERNS
-    if any(word in text_lower
-           for word in ['short layover', 'quick layover', 'minimum layover']):
+    if any(
+        word in text_lower
+        for word in ["short layover", "quick layover", "minimum layover"]
+    ):
         commands.append("PREFER TRIPS WITH LAYOVER_TIME <= 45")
         print("DEBUG: Matched short layover pattern")
 
-    if any(word in text_lower
-           for word in ['long layover', 'extended layover']):
+    if any(word in text_lower for word in ["long layover", "extended layover"]):
         commands.append("PREFER TRIPS WITH LAYOVER_TIME >= 120")
         print("DEBUG: Matched long layover pattern")
 
@@ -175,7 +181,7 @@ def test_fixed_pbs_generation():
         "Give me maximum days off with high credit trips",
         "I prefer short trips and no redeyes",
         "Commutable trips only, avoid international",
-        "Christmas off, prefer morning departures"
+        "Christmas off, prefer morning departures",
     ]
 
     print("\n" + "=" * 60)

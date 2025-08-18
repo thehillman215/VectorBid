@@ -5,12 +5,13 @@ Integration patch for llm_service.py to add enhanced international scoring.
 # Add this import at the top of your llm_service.py
 # from enhanced_international import enhanced_international_scoring
 
+
 def patch_fallback_ranking():
     """
     Instructions to modify your existing _fallback_ranking method in llm_service.py
     """
 
-    integration_code = '''
+    integration_code = """
     # Find your existing _fallback_ranking method and modify the calculate_score function
     # Add this after your existing scoring logic:
     
@@ -38,7 +39,7 @@ def patch_fallback_ranking():
         
         # Your existing return statement...
         return score, key_factors
-    '''
+    """
 
     print("🔧 Integration Instructions:")
     print("=" * 50)
@@ -50,6 +51,7 @@ def patch_fallback_ranking():
     print("4. The boost will be scaled down (/10) to fit your existing scoring range")
     print()
     print("📝 Full integration code saved above")
+
 
 if __name__ == "__main__":
     patch_fallback_ranking()

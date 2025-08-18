@@ -52,7 +52,7 @@ def write_artifact(artifact: ArtifactLike, base_dir: Path) -> Path:
     airline = _sanitize_airline(data.get("airline"))
     month = _sanitize_month(data.get("month"))
 
-    out_dir = (Path(base_dir).expanduser().resolve() / airline / month)
+    out_dir = Path(base_dir).expanduser().resolve() / airline / month
     out_dir.mkdir(parents=True, exist_ok=True)
 
     target = out_dir / f"{export_hash}.json"

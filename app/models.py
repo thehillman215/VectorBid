@@ -9,6 +9,7 @@ class HardConstraints(BaseModel):
     max_duty_hours_per_day: int | None = None
     legalities: list[str] = ["FAR117"]
 
+
 class SoftPrefs(BaseModel):
     pairing_length: dict[str, Any] | None = None
     layovers: dict[str, Any] | None = None
@@ -18,6 +19,7 @@ class SoftPrefs(BaseModel):
     weekend_priority: dict[str, Any] | None = None
     position_swap: dict[str, Any] | None = None
     commutable: dict[str, Any] | None = None
+
 
 class PreferenceSchema(BaseModel):
     pilot_id: str
@@ -31,6 +33,7 @@ class PreferenceSchema(BaseModel):
     confidence: float | None = None
     source: dict[str, Any] = {}
 
+
 class ContextSnapshot(BaseModel):
     ctx_id: str
     pilot_id: str
@@ -42,12 +45,14 @@ class ContextSnapshot(BaseModel):
     commuting_profile: dict[str, Any] = {}
     default_weights: dict[str, float] = {}
 
+
 class FeatureBundle(BaseModel):
     context: ContextSnapshot
     preference_schema: PreferenceSchema
     analytics_features: dict[str, Any]
     compliance_flags: dict[str, Any]
     pairing_features: dict[str, Any]
+
 
 class CandidateSchedule(BaseModel):
     candidate_id: str
@@ -57,21 +62,25 @@ class CandidateSchedule(BaseModel):
     pairings: list[str]
     rationale: list[str] = []
 
+
 class StrategyDirectives(BaseModel):
     weight_deltas: dict[str, float] = {}
     focus_hints: dict[str, list[str]] = {}
     layer_templates: list[dict[str, Any]] = []
     rationale: list[str] = []
 
+
 class Filter(BaseModel):
     type: str
     op: str
     values: list[Any]
 
+
 class Layer(BaseModel):
     n: int
     filters: list[Filter]
-    prefer: Literal["YES","NO"]
+    prefer: Literal["YES", "NO"]
+
 
 class BidLayerArtifact(BaseModel):
     airline: Literal["UAL"]

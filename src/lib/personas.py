@@ -13,8 +13,8 @@ PILOT_PERSONAS = {
             "PREFER TRIPS WITH DUTY_DAYS <= 3",
             "AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559",
             "PREFER MAX_DAYS_OFF",
-            "AVOID TRIPS STARTING BEFORE 0800"
-        ]
+            "AVOID TRIPS STARTING BEFORE 0800",
+        ],
     },
     "money_maker": {
         "name": "Money Maker",
@@ -25,8 +25,8 @@ PILOT_PERSONAS = {
             "PREFER TRIPS WITH DUTY_DAYS >= 4",
             "PREFER TRIPS WITH DESTINATION INTL",
             "PREFER TRIPS WITH MAX_CREDIT_HOURS",
-            "PREFER TRIPS WITH OVERTIME_ELIGIBLE = TRUE"
-        ]
+            "PREFER TRIPS WITH OVERTIME_ELIGIBLE = TRUE",
+        ],
     },
     "commuter_friendly": {
         "name": "Commuter Friendly",
@@ -37,8 +37,8 @@ PILOT_PERSONAS = {
             "PREFER TRIPS STARTING AFTER 1000",
             "PREFER TRIPS ENDING BEFORE 2000",
             "AVOID TRIPS WITH LAYOVER_TIME < 10:00",
-            "PREFER TRIPS WITH DUTY_DAYS <= 3"
-        ]
+            "PREFER TRIPS WITH DUTY_DAYS <= 3",
+        ],
     },
     "quality_of_life": {
         "name": "Quality of Life",
@@ -49,8 +49,8 @@ PILOT_PERSONAS = {
             "PREFER TRIPS IF DUTY_PERIOD AVOIDS SAT OR SUN",
             "PREFER TRIPS WITH DUTY_DAYS BETWEEN 2 AND 4",
             "AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559",
-            "PREFER TRIPS WITH LAYOVER_TIME > 2:00"
-        ]
+            "PREFER TRIPS WITH LAYOVER_TIME > 2:00",
+        ],
     },
     "reserve_avoider": {
         "name": "Reserve Avoider",
@@ -60,8 +60,8 @@ PILOT_PERSONAS = {
         "pbs_filters": [
             "PREFER ANY_LINE_OVER_RESERVE",
             "MINIMIZE_RESERVE_DAYS",
-            "ACCEPT_ALL_TRIP_TYPES"
-        ]
+            "ACCEPT_ALL_TRIP_TYPES",
+        ],
     },
     "adventure_seeker": {
         "name": "Adventure Seeker",
@@ -72,16 +72,18 @@ PILOT_PERSONAS = {
             "PREFER TRIPS WITH DESTINATION INTL",
             "PREFER TRIPS WITH LAYOVER_TIME > 24:00",
             "PREFER TRIPS WITH VARIED_DESTINATIONS",
-            "PREFER TRIPS WITH NEW_ROUTES"
-        ]
-    }
+            "PREFER TRIPS WITH NEW_ROUTES",
+        ],
+    },
 }
+
 
 def get_persona_preferences(persona_key):
     """Get preferences text for a specific persona"""
     if persona_key in PILOT_PERSONAS:
         return PILOT_PERSONAS[persona_key]["preferences"]
     return ""
+
 
 def get_persona_pbs_filters(persona_key):
     """Get PBS filters for a specific persona"""

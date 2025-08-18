@@ -1,4 +1,5 @@
 from src.lib.airport_presets import enhanced_international_scoring_with_persona
+
 """
 Enhanced AI-powered trip ranking service for VectorBid.
 Provides robust ranking with fallback strategies and improved prompt engineering.
@@ -17,7 +18,7 @@ class AITripRanker:
     """Enhanced AI-powered trip ranking service with robust error handling."""
 
     def __init__(self):
-        self.api_key = os.environ.get('OPENAI_API_KEY')
+        self.api_key = os.environ.get("OPENAI_API_KEY")
         self.client = self._initialize_client()
         self.model = "gpt-4o-mini"  # Cost-effective choice for production
         self.fallback_model = "gpt-3.5-turbo"  # Backup model
@@ -25,8 +26,7 @@ class AITripRanker:
     def _initialize_client(self) -> Optional[OpenAI]:
         """Initialize OpenAI client with error handling."""
         if not self.api_key:
-            logger.warning(
-                "OPENAI_API_KEY not set - AI ranking will use fallback")
+            logger.warning("OPENAI_API_KEY not set - AI ranking will use fallback")
             return None
 
         try:
@@ -36,10 +36,9 @@ class AITripRanker:
             logger.error(f"Failed to initialize OpenAI client: {e}")
             return None
 
-    def rank_trips(self,
-                   trips: List[Dict],
-                   preferences: str,
-                   top_n: int = 15) -> List[Dict]:
+    def rank_trips(
+        self, trips: List[Dict], preferences: str, top_n: int = 15
+    ) -> List[Dict]:
         """
         Rank trips based on pilot preferences.
 
@@ -68,8 +67,9 @@ class AITripRanker:
         else:
             return self._fallback_ranking(trips, preferences, top_n)
 
-    def _ai_ranking(self, trips: List[Dict], preferences: str,
-                    top_n: int) -> List[Dict]:
+    def _ai_ranking(
+        self, trips: List[Dict], preferences: str, top_n: int
+    ) -> List[Dict]:
         """Perform AI-powered trip ranking."""
         # Limit trips for token economy and processing speed
         trips_to_analyze = trips[:50] if len(trips) > 50 else trips
@@ -78,8 +78,7 @@ class AITripRanker:
         trip_summaries = self._prepare_trip_summaries(trips_to_analyze)
 
         # Create the ranking prompt
-        prompt = self._create_ranking_prompt(trip_summaries, preferences,
-                                             top_n)
+        prompt = self._create_ranking_prompt(trip_summaries, preferences, top_n)
 
         try:
             # Make API request with retry logic
@@ -95,10 +94,9 @@ class AITripRanker:
             logger.error(f"AI ranking request failed: {e}")
             raise
 
-    def _make_api_request(self,
-                          prompt: str,
-                          max_tokens: int = 1000,
-                          retries: int = 2) -> str:
+    def _make_api_request(
+        self, prompt: str, max_tokens: int = 1000, retries: int = 2
+    ) -> str:
         """Make API request with retry logic."""
         for attempt in range(retries + 1):
             try:
@@ -106,14 +104,12 @@ class AITripRanker:
                     model=self.model,
                     temperature=0.1,  # Low temperature for consistency
                     max_tokens=max_tokens,
-                    messages=[{
-                        "role": "system",
-                        "content": self._get_system_prompt()
-                    }, {
-                        "role": "user",
-                        "content": prompt
-                    }],
-                    response_format={"type": "json_object"})
+                    messages=[
+                        {"role": "system", "content": self._get_system_prompt()},
+                        {"role": "user", "content": prompt},
+                    ],
+                    response_format={"type": "json_object"},
+                )
 
                 content = response.choices[0].message.content
                 if not content:
@@ -175,11 +171,13 @@ Return ONLY a JSON object with this exact structure:
 
 Be specific and practical in your reasoning. Focus on the factors that matter most to pilots."""
 
-    def _create_ranking_prompt(self, trip_summaries: List[str],
-                               preferences: str, top_n: int) -> str:
+    def _create_ranking_prompt(
+        self, trip_summaries: List[str], preferences: str, top_n: int
+    ) -> str:
         """Create the user prompt for trip ranking."""
-        trips_text = "\n".join(f"{i+1}. {summary}"
-                               for i, summary in enumerate(trip_summaries))
+        trips_text = "\n".join(
+            f"{i + 1}. {summary}" for i, summary in enumerate(trip_summaries)
+        )
 
         return f"""Please analyze and rank these airline trips based on the pilot's preferences.
 
@@ -199,32 +197,32 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
 
         for trip in trips:
             # Calculate efficiency
-            efficiency = trip.get('credit_hours', 0) / max(
-                trip.get('days', 1), 1)
+            efficiency = trip.get("credit_hours", 0) / max(trip.get("days", 1), 1)
 
             summary_parts = [
                 f"Trip {trip.get('trip_id', 'Unknown')}:",
                 f"{trip.get('days', 0)}-day trip",
                 f"{trip.get('credit_hours', 0)} credit hours",
-                f"(efficiency: {efficiency:.1f} hrs/day)"
+                f"(efficiency: {efficiency:.1f} hrs/day)",
             ]
 
             # Add weekend information
-            if trip.get('includes_weekend'):
+            if trip.get("includes_weekend"):
                 summary_parts.append("includes weekend")
             else:
                 summary_parts.append("weekdays only")
 
             # Add routing if available
-            if trip.get('routing'):
+            if trip.get("routing"):
                 summary_parts.append(f"routing: {trip['routing']}")
 
             summaries.append(" • ".join(summary_parts))
 
         return summaries
 
-    def _parse_ai_response(self, response_content: str,
-                           original_trips: List[Dict]) -> List[Dict]:
+    def _parse_ai_response(
+        self, response_content: str, original_trips: List[Dict]
+    ) -> List[Dict]:
         """Parse and validate AI response."""
         try:
             data = json.loads(response_content)
@@ -233,14 +231,13 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
             raise ValueError("Invalid JSON response from AI")
 
         # Extract rankings from response
-        rankings = data.get('rankings', [])
+        rankings = data.get("rankings", [])
         if not isinstance(rankings, list):
             raise ValueError("AI response missing rankings array")
 
         # Create trip lookup for validation
         trip_lookup = {
-            trip.get('trip_id', trip.get('id', '')): trip
-            for trip in original_trips
+            trip.get("trip_id", trip.get("id", "")): trip for trip in original_trips
         }
 
         validated_results = []
@@ -249,23 +246,20 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
                 logger.warning(f"Skipping invalid ranking item {i}")
                 continue
 
-            trip_id = str(ranking.get('trip_id', ''))
+            trip_id = str(ranking.get("trip_id", ""))
             if trip_id not in trip_lookup:
-                logger.warning(
-                    f"Trip ID {trip_id} not found in original trips")
+                logger.warning(f"Trip ID {trip_id} not found in original trips")
                 continue
 
             # Build validated result
             result = {
-                'rank': ranking.get('rank', i + 1),
-                'trip_id': trip_id,
-                'score': min(100, max(0, ranking.get('score',
-                                                     50))),  # Clamp to 0-100
-                'reasoning': ranking.get('reasoning',
-                                         'Matches your preferences'),
-                'efficiency': ranking.get('efficiency', 0.0),
-                'key_factors': ranking.get('key_factors', []),
-                'trip_data': trip_lookup[trip_id]
+                "rank": ranking.get("rank", i + 1),
+                "trip_id": trip_id,
+                "score": min(100, max(0, ranking.get("score", 50))),  # Clamp to 0-100
+                "reasoning": ranking.get("reasoning", "Matches your preferences"),
+                "efficiency": ranking.get("efficiency", 0.0),
+                "key_factors": ranking.get("key_factors", []),
+                "trip_data": trip_lookup[trip_id],
             }
 
             validated_results.append(result)
@@ -274,14 +268,14 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
             raise ValueError("No valid rankings found in AI response")
 
         # Sort by rank to ensure proper ordering
-        validated_results.sort(key=lambda x: x['rank'])
+        validated_results.sort(key=lambda x: x["rank"])
 
-        logger.info(
-            f"Successfully parsed {len(validated_results)} AI rankings")
+        logger.info(f"Successfully parsed {len(validated_results)} AI rankings")
         return validated_results
 
-    def _fallback_ranking(self, trips: List[Dict], preferences: str,
-                          top_n: int) -> List[Dict]:
+    def _fallback_ranking(
+        self, trips: List[Dict], preferences: str, top_n: int
+    ) -> List[Dict]:
         """Provide intelligent fallback ranking when AI is unavailable."""
         logger.info("Using intelligent fallback ranking")
 
@@ -294,8 +288,8 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
             factors = []
 
             # Efficiency scoring (credit hours per day)
-            credit_hours = trip.get('credit_hours', 0)
-            days = trip.get('days', 1)
+            credit_hours = trip.get("credit_hours", 0)
+            days = trip.get("days", 1)
             efficiency = credit_hours / max(days, 1)
 
             if efficiency > 6.0:
@@ -306,32 +300,32 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
                 factors.append("good_efficiency")
 
             # Weekend preferences
-            includes_weekend = trip.get('includes_weekend', False)
-            if 'weekend' in prefs_lower:
-                if 'no weekend' in prefs_lower or 'weekends off' in prefs_lower:
+            includes_weekend = trip.get("includes_weekend", False)
+            if "weekend" in prefs_lower:
+                if "no weekend" in prefs_lower or "weekends off" in prefs_lower:
                     if not includes_weekend:
                         score += 15
                         factors.append("weekend_friendly")
                     else:
                         score -= 10
-                elif 'weekend' in prefs_lower and includes_weekend:
+                elif "weekend" in prefs_lower and includes_weekend:
                     score += 10
                     factors.append("weekend_included")
 
             # Trip length preferences
-            if 'short' in prefs_lower or 'quick' in prefs_lower:
+            if "short" in prefs_lower or "quick" in prefs_lower:
                 if days <= 2:
                     score += 15
                     factors.append("short_trip")
                 elif days >= 4:
                     score -= 5
-            elif 'long' in prefs_lower:
+            elif "long" in prefs_lower:
                 if days >= 4:
                     score += 10
                     factors.append("long_trip")
 
             # Credit hours preferences
-            if 'high credit' in prefs_lower or 'more hours' in prefs_lower:
+            if "high credit" in prefs_lower or "more hours" in prefs_lower:
                 if credit_hours >= 20:
                     score += 15
                     factors.append("high_credit")
@@ -346,45 +340,43 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
         for trip in trips:
             score, factors = calculate_score(trip)
 
-            scored_trips.append({
-                'rank':
-                0,  # Will be set after sorting
-                'trip_id':
-                trip.get('trip_id', trip.get('id', 'Unknown')),
-                'score':
-                round(score, 1),
-                'reasoning':
-                self._generate_fallback_reasoning(trip, factors, preferences),
-                'efficiency':
-                trip.get('credit_hours', 0) / max(trip.get('days', 1), 1),
-                'key_factors':
-                factors,
-                'trip_data':
-                trip
-            })
+            scored_trips.append(
+                {
+                    "rank": 0,  # Will be set after sorting
+                    "trip_id": trip.get("trip_id", trip.get("id", "Unknown")),
+                    "score": round(score, 1),
+                    "reasoning": self._generate_fallback_reasoning(
+                        trip, factors, preferences
+                    ),
+                    "efficiency": trip.get("credit_hours", 0)
+                    / max(trip.get("days", 1), 1),
+                    "key_factors": factors,
+                    "trip_data": trip,
+                }
+            )
 
         # Sort by score (descending)
-        scored_trips.sort(key=lambda x: x['score'], reverse=True)
+        scored_trips.sort(key=lambda x: x["score"], reverse=True)
 
         # Set ranks
         for i, trip in enumerate(scored_trips):
-            trip['rank'] = i + 1
+            trip["rank"] = i + 1
 
         return scored_trips[:top_n]
 
-    def _generate_fallback_reasoning(self, trip: Dict, factors: List[str],
-                                     preferences: str) -> str:
+    def _generate_fallback_reasoning(
+        self, trip: Dict, factors: List[str], preferences: str
+    ) -> str:
         """Generate reasoning for fallback rankings."""
         reasons = []
 
-        credit_hours = trip.get('credit_hours', 0)
-        days = trip.get('days', 1)
+        credit_hours = trip.get("credit_hours", 0)
+        days = trip.get("days", 1)
         efficiency = credit_hours / max(days, 1)
 
         # Efficiency reasoning
         if efficiency > 6.0:
-            reasons.append(
-                f"excellent pay efficiency ({efficiency:.1f} hrs/day)")
+            reasons.append(f"excellent pay efficiency ({efficiency:.1f} hrs/day)")
         elif efficiency > 4.0:
             reasons.append(f"good pay efficiency ({efficiency:.1f} hrs/day)")
 
@@ -396,7 +388,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
             "long_trip": "longer trip for higher credit",
             "high_credit": "high credit hours",
             "good_credit": "solid credit hours",
-            "high_efficiency": "very efficient credit/day ratio"
+            "high_efficiency": "very efficient credit/day ratio",
         }
 
         for factor in factors:
@@ -415,36 +407,32 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
         # Sort by efficiency (credit hours per day)
         ranked_trips = sorted(
             trips,
-            key=lambda t: t.get('credit_hours', 0) / max(t.get('days', 1), 1),
-            reverse=True)
+            key=lambda t: t.get("credit_hours", 0) / max(t.get("days", 1), 1),
+            reverse=True,
+        )
 
         results = []
         for i, trip in enumerate(ranked_trips[:top_n]):
-            efficiency = trip.get('credit_hours', 0) / max(
-                trip.get('days', 1), 1)
-            results.append({
-                'rank':
-                i + 1,
-                'trip_id':
-                trip.get('trip_id', trip.get('id', 'Unknown')),
-                'score':
-                max(0, 90 - i * 3),  # Declining scores
-                'reasoning':
-                f"Ranked by pay efficiency ({efficiency:.1f} credit hrs/day)",
-                'efficiency':
-                efficiency,
-                'key_factors': ['efficiency_based'],
-                'trip_data':
-                trip
-            })
+            efficiency = trip.get("credit_hours", 0) / max(trip.get("days", 1), 1)
+            results.append(
+                {
+                    "rank": i + 1,
+                    "trip_id": trip.get("trip_id", trip.get("id", "Unknown")),
+                    "score": max(0, 90 - i * 3),  # Declining scores
+                    "reasoning": f"Ranked by pay efficiency ({efficiency:.1f} credit hrs/day)",
+                    "efficiency": efficiency,
+                    "key_factors": ["efficiency_based"],
+                    "trip_data": trip,
+                }
+            )
 
         return results
 
 
 # Public interface functions
-def rank_trips_with_ai(trips: List[Dict],
-                       preferences: str,
-                       top_n: int = 15) -> List[Dict]:
+def rank_trips_with_ai(
+    trips: List[Dict], preferences: str, top_n: int = 15
+) -> List[Dict]:
     """
     Rank trips using AI with robust fallback handling.
 
@@ -465,14 +453,14 @@ def rank_trips_with_ai(trips: List[Dict],
 
 def is_ai_available() -> bool:
     """Check if AI ranking is available."""
-    return os.environ.get('OPENAI_API_KEY') is not None
+    return os.environ.get("OPENAI_API_KEY") is not None
 
 
 def get_ranking_capabilities() -> Dict[str, bool]:
     """Get available ranking capabilities."""
     return {
-        'ai_ranking': is_ai_available(),
-        'fallback_ranking': True,
-        'preference_analysis': True,
-        'efficiency_calculation': True
+        "ai_ranking": is_ai_available(),
+        "fallback_ranking": True,
+        "preference_analysis": True,
+        "efficiency_calculation": True,
     }

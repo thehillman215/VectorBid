@@ -15,22 +15,18 @@ DEFAULT_PROFILE = {
     "base": None,
     "seat": None,
     "seniority": None,
-
     # ✨ NEW: Enhanced seniority fields
     "hire_date": None,  # ISO date string
     "years_at_position": None,
     "seniority_percentile": None,
     "last_seniority_update": None,  # ISO datetime string
-
     # ✨ NEW: Enhanced persona fields
     "persona": None,
     "custom_preferences": None,
-
     # Profile completion tracking
     "onboard_complete": False,
     "profile_completed": False,  # Legacy compatibility
     "profile_completion_date": None,  # ISO datetime string
-
     # Future/monetization
     "subscription_tier": "free",
     "referral_code": None,
@@ -70,17 +66,17 @@ def save_profile(uid: str, data: Dict[str, Any]) -> None:
         if isinstance(value, (date, datetime)):
             # Convert date/datetime to ISO string for JSON storage
             profile[key] = value.isoformat()
-        elif key == 'fleet' and isinstance(value, list):
+        elif key == "fleet" and isinstance(value, list):
             # Ensure fleet is stored as list
             profile[key] = value
-        elif key == 'fleet' and isinstance(value, str):
+        elif key == "fleet" and isinstance(value, str):
             # Handle comma-separated fleet input
-            profile[key] = [f.strip() for f in value.split(',') if f.strip()]
+            profile[key] = [f.strip() for f in value.split(",") if f.strip()]
         else:
             profile[key] = value
 
     # Update timestamp
-    profile['last_updated'] = datetime.utcnow().isoformat()
+    profile["last_updated"] = datetime.utcnow().isoformat()
 
     db[PROFILE_KEY.format(uid=uid)] = profile
 
@@ -96,20 +92,17 @@ def get_seniority_analysis(uid: str) -> Optional[Dict[str, Any]]:
     """
     profile = get_profile(uid)
 
-    if not profile.get('seniority') or not profile.get('airline'):
+    if not profile.get("seniority") or not profile.get("airline"):
         return None
 
     return {
-        'seniority':
-        profile['seniority'],
-        'airline':
-        profile['airline'],
-        'percentile':
-        profile.get('seniority_percentile'),
-        'last_update':
-        profile.get('last_seniority_update'),
-        'category':
-        calculate_seniority_category(profile.get('seniority_percentile', 50))
+        "seniority": profile["seniority"],
+        "airline": profile["airline"],
+        "percentile": profile.get("seniority_percentile"),
+        "last_update": profile.get("last_seniority_update"),
+        "category": calculate_seniority_category(
+            profile.get("seniority_percentile", 50)
+        ),
     }
 
 
@@ -123,18 +116,18 @@ def calculate_seniority_category(percentile: Optional[float]) -> str:
         Human-readable seniority category
     """
     if not percentile:
-        return 'Unknown'
+        return "Unknown"
 
     if percentile >= 90:
-        return 'Very Senior'
+        return "Very Senior"
     elif percentile >= 75:
-        return 'Senior'
+        return "Senior"
     elif percentile >= 50:
-        return 'Mid-Seniority'
+        return "Mid-Seniority"
     elif percentile >= 25:
-        return 'Junior'
+        return "Junior"
     else:
-        return 'Very Junior'
+        return "Very Junior"
 
 
 def needs_seniority_update(uid: str) -> bool:
@@ -148,20 +141,20 @@ def needs_seniority_update(uid: str) -> bool:
     """
     profile = get_profile(uid)
 
-    if not profile.get('last_seniority_update'):
+    if not profile.get("last_seniority_update"):
         return True
 
     try:
-        last_update = datetime.fromisoformat(profile['last_seniority_update'])
+        last_update = datetime.fromisoformat(profile["last_seniority_update"])
         # Update if older than 30 days
         return (datetime.utcnow() - last_update).days > 30
     except (ValueError, TypeError):
         return True
 
 
-def update_seniority_analysis(uid: str,
-                              percentile: float,
-                              category: str = None) -> None:
+def update_seniority_analysis(
+    uid: str, percentile: float, category: str = None
+) -> None:
     """Update seniority analysis for user.
 
     Args:
@@ -173,11 +166,13 @@ def update_seniority_analysis(uid: str,
         category = calculate_seniority_category(percentile)
 
     save_profile(
-        uid, {
-            'seniority_percentile': percentile,
-            'seniority_category': category,
-            'last_seniority_update': datetime.utcnow()
-        })
+        uid,
+        {
+            "seniority_percentile": percentile,
+            "seniority_category": category,
+            "last_seniority_update": datetime.utcnow(),
+        },
+    )
 
 
 def get_all_profiles() -> Dict[str, Dict[str, Any]]:
@@ -189,7 +184,7 @@ def get_all_profiles() -> Dict[str, Dict[str, Any]]:
     profiles = {}
     for key in db.keys():
         if key.startswith("user:") and key.endswith(":profile"):
-            uid = key.split(':')[1]  # Extract UID from key
+            uid = key.split(":")[1]  # Extract UID from key
             profiles[uid] = db[key]
 
     return profiles
@@ -208,32 +203,31 @@ def validate_profile(profile: Dict[str, Any]) -> Dict[str, Any]:
     warnings = []
 
     # Required fields for complete profile
-    required_fields = ['airline', 'base', 'seat', 'seniority']
+    required_fields = ["airline", "base", "seat", "seniority"]
     for field in required_fields:
         if not profile.get(field):
             errors.append(f"Missing required field: {field}")
 
     # Validate seniority range
-    seniority = profile.get('seniority')
+    seniority = profile.get("seniority")
     if seniority and (seniority < 1 or seniority > 20000):
         warnings.append("Seniority number seems unusual (should be 1-20000)")
 
     # Validate seat position
-    seat = profile.get('seat')
-    if seat and seat not in ['CA', 'FO']:
+    seat = profile.get("seat")
+    if seat and seat not in ["CA", "FO"]:
         errors.append("Seat must be 'CA' (Captain) or 'FO' (First Officer)")
 
     # Validate fleet
-    fleet = profile.get('fleet', [])
+    fleet = profile.get("fleet", [])
     if fleet and not isinstance(fleet, list):
         warnings.append("Fleet should be a list of aircraft types")
 
     return {
-        'valid': len(errors) == 0,
-        'complete': len(errors) == 0
-        and profile.get('onboard_complete', False),
-        'errors': errors,
-        'warnings': warnings
+        "valid": len(errors) == 0,
+        "complete": len(errors) == 0 and profile.get("onboard_complete", False),
+        "errors": errors,
+        "warnings": warnings,
     }
 
 
@@ -247,8 +241,7 @@ def migrate_existing_profiles():
 
     # Get all profile keys
     profile_keys = [
-        key for key in db.keys()
-        if key.startswith("user:") and key.endswith(":profile")
+        key for key in db.keys() if key.startswith("user:") and key.endswith(":profile")
     ]
 
     migrated = 0
@@ -266,22 +259,21 @@ def migrate_existing_profiles():
             # Handle legacy data transformations
             if updated:
                 # Ensure fleet is a list
-                if isinstance(profile.get('fleet'), str):
-                    profile['fleet'] = [
-                        f.strip() for f in profile['fleet'].split(',')
-                        if f.strip()
+                if isinstance(profile.get("fleet"), str):
+                    profile["fleet"] = [
+                        f.strip() for f in profile["fleet"].split(",") if f.strip()
                     ]
 
                 # Add migration timestamp
-                profile['migrated_at'] = datetime.utcnow().isoformat()
+                profile["migrated_at"] = datetime.utcnow().isoformat()
 
                 db[key] = profile
                 migrated += 1
 
-                uid = key.split(':')[1]
+                uid = key.split(":")[1]
                 print(f"✅ Migrated profile for user: {uid}")
             else:
-                uid = key.split(':')[1]
+                uid = key.split(":")[1]
                 print(f"⏭️  Profile already up-to-date for user: {uid}")
 
         except Exception as e:
@@ -291,7 +283,7 @@ def migrate_existing_profiles():
     return migrated
 
 
-def export_profiles(filename: str = 'profile_backup.json') -> int:
+def export_profiles(filename: str = "profile_backup.json") -> int:
     """Export all profiles to JSON file for backup.
 
     Args:
@@ -302,14 +294,14 @@ def export_profiles(filename: str = 'profile_backup.json') -> int:
     """
     profiles = get_all_profiles()
 
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         json.dump(profiles, f, indent=2, default=str)
 
     print(f"📁 Exported {len(profiles)} profiles to {filename}")
     return len(profiles)
 
 
-def import_profiles(filename: str = 'profile_backup.json') -> int:
+def import_profiles(filename: str = "profile_backup.json") -> int:
     """Import profiles from JSON backup file.
 
     Args:
@@ -319,7 +311,7 @@ def import_profiles(filename: str = 'profile_backup.json') -> int:
         Number of profiles imported
     """
     try:
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             profiles = json.load(f)
 
         imported = 0

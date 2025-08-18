@@ -1,7 +1,7 @@
 import os
 
 # Create enhanced UI route with personas and sliders
-ui_route = '''from fastapi import APIRouter, Request, Form
+ui_route = """from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
@@ -136,7 +136,7 @@ async def run_pipeline(
         "request": request,
         "results": results
     })
-'''
+"""
 
 with open("app/routes/ui.py", "w") as f:
     f.write(ui_route)

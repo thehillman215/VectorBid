@@ -8,11 +8,11 @@ def add_final_patterns():
     """Add the final 3 patterns that are missing"""
 
     # Read the current file
-    with open('src/api/pbs_fix.py') as f:
+    with open("src/api/pbs_fix.py") as f:
         content = f.read()
 
     # Check if patterns already exist
-    if 'MAXIMIZE MONTHLY_CREDIT' in content:
+    if "MAXIMIZE MONTHLY_CREDIT" in content:
         print("⚠️  Patterns already added!")
         return False
 
@@ -32,7 +32,7 @@ def add_final_patterns():
         return False
 
     # The patterns to add
-    new_patterns = '''
+    new_patterns = """
     # ==========================================
     # FINAL 100% PATTERNS
     # ==========================================
@@ -59,10 +59,10 @@ def add_final_patterns():
             filters.append("PREFER TRIPS WITH DUTY_DAYS = 1")
             filters.append("MAXIMIZE CREDIT_PER_DAY")
 
-    '''
+    """
 
     # Find the position and insert AFTER the marker section
-    lines = content.split('\n')
+    lines = content.split("\n")
     new_lines = []
     inserted = False
 
@@ -75,27 +75,31 @@ def add_final_patterns():
             indent_level = len(line) - len(line.lstrip())
             j = i + 1
             while j < len(lines) and (
-                    lines[j].strip() == '' or
-                (lines[j].strip() != ''
-                 and len(lines[j]) - len(lines[j].lstrip()) > indent_level)):
+                lines[j].strip() == ""
+                or (
+                    lines[j].strip() != ""
+                    and len(lines[j]) - len(lines[j].lstrip()) > indent_level
+                )
+            ):
                 j += 1
 
             # Now we're at the end of the if block, insert here
             if j < len(lines):
                 # Insert the new patterns
-                for pattern_line in new_patterns.split('\n'):
+                for pattern_line in new_patterns.split("\n"):
                     new_lines.append(pattern_line)
                 inserted = True
 
     if not inserted:
         # Fallback: just add before "Remove duplicates"
         final_content = content.replace(
-            "# Remove duplicates", new_patterns + "\n    # Remove duplicates")
+            "# Remove duplicates", new_patterns + "\n    # Remove duplicates"
+        )
     else:
-        final_content = '\n'.join(new_lines)
+        final_content = "\n".join(new_lines)
 
     # Write back
-    with open('src/api/pbs_fix.py', 'w') as f:
+    with open("src/api/pbs_fix.py", "w") as f:
         f.write(final_content)
 
     print("✅ Added final patterns to pbs_fix.py")
@@ -105,11 +109,12 @@ def add_final_patterns():
 def test_final_patterns():
     """Test that the new patterns work"""
     import sys
-    sys.path.insert(0, 'src')
+
+    sys.path.insert(0, "src")
 
     # Force reload
-    if 'api.pbs_fix' in sys.modules:
-        del sys.modules['api.pbs_fix']
+    if "api.pbs_fix" in sys.modules:
+        del sys.modules["api.pbs_fix"]
 
     from api.pbs_fix import natural_language_to_pbs_filters
 
