@@ -77,8 +77,7 @@ def add_final_patterns():
             while j < len(lines) and (
                 lines[j].strip() == ""
                 or (
-                    lines[j].strip() != ""
-                    and len(lines[j]) - len(lines[j].lstrip()) > indent_level
+                    lines[j].strip() != "" and len(lines[j]) - len(lines[j].lstrip()) > indent_level
                 )
             ):
                 j += 1
@@ -132,9 +131,7 @@ def test_final_patterns():
         passed = len(result) >= expected_min
 
         status = "✅" if passed else "❌"
-        print(
-            f"{status} {description}: {len(result)} commands (expected {expected_min}+)"
-        )
+        print(f"{status} {description}: {len(result)} commands (expected {expected_min}+)")
 
         if not passed:
             print(f"   Input: '{input_text}'")

@@ -101,9 +101,7 @@ def get_seniority_analysis(uid: str) -> dict[str, Any] | None:
         "airline": profile["airline"],
         "percentile": profile.get("seniority_percentile"),
         "last_update": profile.get("last_seniority_update"),
-        "category": calculate_seniority_category(
-            profile.get("seniority_percentile", 50)
-        ),
+        "category": calculate_seniority_category(profile.get("seniority_percentile", 50)),
     }
 
 
@@ -153,9 +151,7 @@ def needs_seniority_update(uid: str) -> bool:
         return True
 
 
-def update_seniority_analysis(
-    uid: str, percentile: float, category: str = None
-) -> None:
+def update_seniority_analysis(uid: str, percentile: float, category: str = None) -> None:
     """Update seniority analysis for user.
 
     Args:
@@ -261,9 +257,7 @@ def migrate_existing_profiles():
             if updated:
                 # Ensure fleet is a list
                 if isinstance(profile.get("fleet"), str):
-                    profile["fleet"] = [
-                        f.strip() for f in profile["fleet"].split(",") if f.strip()
-                    ]
+                    profile["fleet"] = [f.strip() for f in profile["fleet"].split(",") if f.strip()]
 
                 # Add migration timestamp
                 profile["migrated_at"] = datetime.utcnow().isoformat()

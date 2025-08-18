@@ -5,9 +5,7 @@ from app.models import CandidateSchedule, FeatureBundle, StrategyDirectives
 MAX_DELTA = 0.15
 
 
-def propose_strategy(
-    bundle: FeatureBundle, topk: list[CandidateSchedule]
-) -> StrategyDirectives:
+def propose_strategy(bundle: FeatureBundle, topk: list[CandidateSchedule]) -> StrategyDirectives:
     """
     Heuristic, bounded strategy:
     - If top candidate benefits from layover prefs and there exists at least one candidate
@@ -28,9 +26,5 @@ def propose_strategy(
         weight_deltas={"layovers": delta} if delta else {},
         focus_hints={},
         layer_templates=[],
-        rationale=(
-            [f"nudge layovers +{delta:.2f}"]
-            if delta
-            else ["no-op; bounded strategy gate"]
-        ),
+        rationale=([f"nudge layovers +{delta:.2f}"] if delta else ["no-op; bounded strategy gate"]),
     )

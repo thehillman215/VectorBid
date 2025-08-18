@@ -83,9 +83,7 @@ def enhanced_international_scoring(trip, preferences_lower):
         # General international preference
         if "international" in preferences_lower:
             score_boost += total_boost
-            reasoning_parts.append(
-                f"international flying to {', '.join(found_destinations)}"
-            )
+            reasoning_parts.append(f"international flying to {', '.join(found_destinations)}")
 
         # Specific regional preferences
         if "european" in preferences_lower or "europe" in preferences_lower:
@@ -155,9 +153,7 @@ def test_enhanced_scoring():
 
         results = []
         for trip in test_trips:
-            boost, factors, reasoning = enhanced_international_scoring(
-                trip, prefs.lower()
-            )
+            boost, factors, reasoning = enhanced_international_scoring(trip, prefs.lower())
             results.append((trip["trip_id"], trip["routing"], boost, reasoning))
 
         # Sort by boost (descending)

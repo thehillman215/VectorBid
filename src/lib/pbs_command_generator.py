@@ -256,18 +256,14 @@ class LLMGenerator:
         try:
             from openai import OpenAI
 
-            self.client = OpenAI(
-                api_key=Config.OPENAI_API_KEY, timeout=Config.OPENAI_TIMEOUT
-            )
+            self.client = OpenAI(api_key=Config.OPENAI_API_KEY, timeout=Config.OPENAI_TIMEOUT)
             logger.info("OpenAI client initialized successfully")
         except ImportError:
             logger.warning("OpenAI library not installed. Run: pip install openai")
         except Exception as e:
             logger.error(f"Failed to initialize OpenAI client: {e}")
 
-    def generate(
-        self, preferences: str, profile: PilotProfile
-    ) -> list[PBSCommand] | None:
+    def generate(self, preferences: str, profile: PilotProfile) -> list[PBSCommand] | None:
         """Generate PBS commands using LLM"""
 
         if not self.client:
@@ -657,9 +653,7 @@ class PBSCommandGenerator:
         self.cache = CommandCache(Config.MAX_CACHE_SIZE, Config.CACHE_TTL_SECONDS)
         logger.info("PBS Command Generator initialized")
 
-    def generate(
-        self, preferences_text: str, pilot_profile: dict | None = None
-    ) -> dict:
+    def generate(self, preferences_text: str, pilot_profile: dict | None = None) -> dict:
         """
         Generate PBS commands from preferences
 
@@ -768,9 +762,7 @@ class PBSCommandGenerator:
         """Calculate generation statistics"""
 
         categories = {cmd.category for cmd in commands}
-        avg_confidence = (
-            sum(cmd.confidence for cmd in commands) / len(commands) if commands else 0
-        )
+        avg_confidence = sum(cmd.confidence for cmd in commands) / len(commands) if commands else 0
 
         # Quality score calculation
         base_score = 70 if method == "llm" else 50
@@ -866,9 +858,7 @@ class PBSCommandGenerator:
 _generator_instance: PBSCommandGenerator | None = None
 
 
-def generate_pbs_commands(
-    preferences_text: str, pilot_profile: dict | None = None
-) -> dict:
+def generate_pbs_commands(preferences_text: str, pilot_profile: dict | None = None) -> dict:
     """
     Generate PBS commands from natural language preferences
 

@@ -153,11 +153,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
         filters.append("MAXIMIZE MONTHLY_CREDIT")
 
     # Slam-clicker lifestyle (pilot who goes straight to hotel)
-    if (
-        "slam-click" in text_lower
-        or "slamclick" in text_lower
-        or "slam click" in text_lower
-    ):
+    if "slam-click" in text_lower or "slamclick" in text_lower or "slam click" in text_lower:
         if "PREFER LAYOVERS >= 14 HOURS" not in filters:
             filters.append("PREFER LAYOVERS >= 14 HOURS")
         if "PREFER TRIPS WITH QUALITY_HOTELS" not in filters:
@@ -347,11 +343,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
         filters.append("AVOID DEADHEAD_SEGMENTS")
 
     # CDO/Standup
-    if (
-        "cdo" in text_lower
-        or "continuous duty" in text_lower
-        or "standup" in text_lower
-    ):
+    if "cdo" in text_lower or "continuous duty" in text_lower or "standup" in text_lower:
         filters.append("AVOID CONTINUOUS_DUTY_OVERNIGHTS")
 
     # Hub turns
@@ -370,9 +362,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
     logger.info(f"Generated {len(unique_filters)} PBS commands")
 
     # Return filters or default if none found
-    return (
-        unique_filters if unique_filters else ["PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE"]
-    )
+    return unique_filters if unique_filters else ["PREFER TRIPS WITH GOOD_QUALITY_OF_LIFE"]
 
 
 # Test function to verify it's working

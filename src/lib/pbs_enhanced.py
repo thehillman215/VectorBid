@@ -15,9 +15,7 @@ class ConflictResolution:
     recommendation: str
 
 
-def generate_advanced_pbs_strategy(
-    preferences_text: str, pilot_profile: dict = None
-) -> dict:
+def generate_advanced_pbs_strategy(preferences_text: str, pilot_profile: dict = None) -> dict:
     """Generate PBS strategy with conflict detection"""
 
     conflicts = []
@@ -27,12 +25,9 @@ def generate_advanced_pbs_strategy(
     conflict_pairs = []
 
     # Weekend conflict check
-    wants_weekends_off = any(
-        phrase in text_lower for phrase in ["weekends off", "no weekends"]
-    )
+    wants_weekends_off = any(phrase in text_lower for phrase in ["weekends off", "no weekends"])
     wants_weekend_work = any(
-        phrase in text_lower
-        for phrase in ["prefer weekends", "weekend flying", "weekend pay"]
+        phrase in text_lower for phrase in ["prefer weekends", "weekend flying", "weekend pay"]
     )
 
     if wants_weekends_off and wants_weekend_work:

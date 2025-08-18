@@ -6,9 +6,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
-DATA = json.loads(
-    (pathlib.Path(__file__).parent / "testdata" / "pairings_small.json").read_text()
-)
+DATA = json.loads((pathlib.Path(__file__).parent / "testdata" / "pairings_small.json").read_text())
 
 
 def _bundle(pref_overrides=None):
@@ -37,9 +35,7 @@ def _bundle(pref_overrides=None):
     return {
         "context": ctx,
         "preference_schema": pref,
-        "analytics": {
-            "base_stats": {"SAN": {"award_rate": 0.65}, "SJU": {"award_rate": 0.55}}
-        },
+        "analytics": {"base_stats": {"SAN": {"award_rate": 0.65}, "SJU": {"award_rate": 0.55}}},
         "precheck": {},
         "pairings": DATA,
     }
@@ -78,9 +74,7 @@ def test_validate_and_optimize_generate_lint_and_hash():
     assert topk and topk[0]["candidate_id"] == "P1"  # SAN preferred
 
     # strategy
-    r = client.post(
-        "/strategy", json={"feature_bundle": fb["feature_bundle"], "candidates": topk}
-    )
+    r = client.post("/strategy", json={"feature_bundle": fb["feature_bundle"], "candidates": topk})
     assert r.status_code == 200
     directives = r.json()["directives"]
     # bounded delta or no-op

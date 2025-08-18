@@ -163,9 +163,7 @@ async def parse_preferences(data: dict[str, Any]):
         },
         "soft_preferences": {
             "morning_departures": 0.8 if "morning" in preferences_text.lower() else 0.3,
-            "domestic_preferred": 0.7
-            if "domestic" in preferences_text.lower()
-            else 0.4,
+            "domestic_preferred": 0.7 if "domestic" in preferences_text.lower() else 0.4,
             "weekend_priority": 0.9 if "weekend" in preferences_text.lower() else 0.2,
         },
         "confidence": 0.85,
@@ -206,9 +204,7 @@ async def validate_constraints(preferences: PreferenceSchema):
 
     credit_weight = getattr(soft_prefs, "credit_weight", 0.5)
     if credit_weight > 1.0:
-        warnings.append(
-            "Credit weight is very high - may conflict with other preferences"
-        )
+        warnings.append("Credit weight is very high - may conflict with other preferences")
 
     return {
         "valid": len(violations) == 0,

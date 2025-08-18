@@ -167,8 +167,6 @@ def test_upload_bid_get_method_not_allowed(client):
     """Test GET request to upload endpoint returns 405."""
     admin_token = os.environ.get("ADMIN_BEARER_TOKEN", "test-token")
 
-    response = client.get(
-        "/admin/upload-bid", headers={"Authorization": f"Bearer {admin_token}"}
-    )
+    response = client.get("/admin/upload-bid", headers={"Authorization": f"Bearer {admin_token}"})
 
     assert response.status_code == 405

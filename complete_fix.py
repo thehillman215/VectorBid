@@ -105,9 +105,7 @@ def add_missing_patterns():
     """
 
     # Insert the new patterns
-    content = (
-        content[:insertion_point] + new_patterns + "\n    " + content[insertion_point:]
-    )
+    content = content[:insertion_point] + new_patterns + "\n    " + content[insertion_point:]
 
     # Write back
     with open("src/api/pbs_fix.py", "w") as f:

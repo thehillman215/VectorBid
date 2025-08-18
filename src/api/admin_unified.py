@@ -122,9 +122,7 @@ def check_rate_limit(token: str) -> bool:
 
 
 def contracts_dir() -> str:
-    project_root = os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    )
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return os.path.join(project_root, "contracts")
 
 
@@ -140,9 +138,7 @@ def get_contracts() -> list[dict]:
                     {
                         "filename": fname,
                         "size_mb": round(stat.st_size / 1024 / 1024, 2),
-                        "upload_date": datetime.utcfromtimestamp(
-                            stat.st_mtime
-                        ).isoformat(),
+                        "upload_date": datetime.utcfromtimestamp(stat.st_mtime).isoformat(),
                     }
                 )
     return items
@@ -152,9 +148,7 @@ def get_valid_tokens() -> set[str]:
     tokens = {current_app.config.get("ADMIN_BEARER_TOKEN", AdminConfig.BEARER_TOKEN)}
     env_token = os.environ.get("ADMIN_BEARER_TOKEN", "test-token")
     tokens.add(env_token)
-    extra = current_app.config.get("ADMIN_BEARER_TOKENS") or os.environ.get(
-        "ADMIN_BEARER_TOKENS"
-    )
+    extra = current_app.config.get("ADMIN_BEARER_TOKENS") or os.environ.get("ADMIN_BEARER_TOKENS")
     if extra:
         tokens.update(t.strip() for t in extra.split(",") if t.strip())
     return tokens
@@ -172,9 +166,7 @@ def login():
             session["admin_login_time"] = datetime.utcnow().isoformat()
             log_action("login", admin_id=token)
             if request.is_json:
-                return jsonify(
-                    {"success": True, "redirect": url_for("admin.dashboard")}
-                )
+                return jsonify({"success": True, "redirect": url_for("admin.dashboard")})
             return redirect(url_for("admin.dashboard"))
         error = "Invalid token"
         if request.is_json:
@@ -247,9 +239,7 @@ def api_update_user(user_id: str):
 @admin_bp.route("/logs")
 @require_bearer_token
 def view_logs():
-    logs = (
-        AdminActionLog.query.order_by(AdminActionLog.timestamp.desc()).limit(100).all()
-    )
+    logs = AdminActionLog.query.order_by(AdminActionLog.timestamp.desc()).limit(100).all()
     return render_template("admin/logs.html", logs=logs)
 
 

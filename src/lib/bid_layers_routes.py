@@ -128,11 +128,7 @@ def bid_layers_home():
         "active_layers": summary["active_layers"],
         "trips_analyzed": len(evaluated_trips),
         "highly_recommended": len(
-            [
-                t
-                for t in evaluated_trips
-                if t["bid_recommendation"] == "HIGHLY_RECOMMENDED"
-            ]
+            [t for t in evaluated_trips if t["bid_recommendation"] == "HIGHLY_RECOMMENDED"]
         ),
         "pbs_ready": summary["active_layers"] > 0,
     }
@@ -291,21 +287,13 @@ def analyze_trips():
         stats = {
             "total_trips": len(evaluated_trips),
             "highly_recommended": len(
-                [
-                    t
-                    for t in evaluated_trips
-                    if t["bid_recommendation"] == "HIGHLY_RECOMMENDED"
-                ]
+                [t for t in evaluated_trips if t["bid_recommendation"] == "HIGHLY_RECOMMENDED"]
             ),
             "recommended": len(
                 [t for t in evaluated_trips if t["bid_recommendation"] == "RECOMMENDED"]
             ),
-            "consider": len(
-                [t for t in evaluated_trips if t["bid_recommendation"] == "CONSIDER"]
-            ),
-            "avoid": len(
-                [t for t in evaluated_trips if t["bid_recommendation"] == "AVOID"]
-            ),
+            "consider": len([t for t in evaluated_trips if t["bid_recommendation"] == "CONSIDER"]),
+            "avoid": len([t for t in evaluated_trips if t["bid_recommendation"] == "AVOID"]),
         }
 
         return jsonify(
@@ -330,9 +318,7 @@ def format_recommendation(recommendation):
         "CONSIDER": {"text": "Consider", "class": "bg-warning"},
         "AVOID": {"text": "Avoid", "class": "bg-danger"},
     }
-    return formats.get(
-        recommendation, {"text": recommendation, "class": "bg-secondary"}
-    )
+    return formats.get(recommendation, {"text": recommendation, "class": "bg-secondary"})
 
 
 def format_score(score):

@@ -15,9 +15,7 @@ if "smart_bid.html" not in content:
     print("⚠️ smart_bid.html not found in routes, fixing...")
     # Find the index function and fix it
 
-    pattern = (
-        r'(def index.*?)(return templates\.TemplateResponse\(["\'])\w+\.html(["\'])'
-    )
+    pattern = r'(def index.*?)(return templates\.TemplateResponse\(["\'])\w+\.html(["\'])'
 
     def replace_template(match):
         if "return RedirectResponse" in match.group(0):
@@ -30,13 +28,8 @@ if "smart_bid.html" not in content:
         if "def index" in line:
             # Look ahead for the return statement
             for j in range(i, min(i + 20, len(lines))):
-                if (
-                    "return templates.TemplateResponse" in lines[j]
-                    and "onboarding" not in lines[j]
-                ):
-                    lines[j] = (
-                        '    return templates.TemplateResponse("smart_bid.html", {'
-                    )
+                if "return templates.TemplateResponse" in lines[j] and "onboarding" not in lines[j]:
+                    lines[j] = '    return templates.TemplateResponse("smart_bid.html", {'
                     print(f"✅ Fixed line {j}: {lines[j]}")
                     break
             break

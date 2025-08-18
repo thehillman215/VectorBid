@@ -34,9 +34,7 @@ class AITripRanker:
             logger.error(f"Failed to initialize OpenAI client: {e}")
             return None
 
-    def rank_trips(
-        self, trips: list[dict], preferences: str, top_n: int = 15
-    ) -> list[dict]:
+    def rank_trips(self, trips: list[dict], preferences: str, top_n: int = 15) -> list[dict]:
         """
         Rank trips based on pilot preferences.
 
@@ -65,9 +63,7 @@ class AITripRanker:
         else:
             return self._fallback_ranking(trips, preferences, top_n)
 
-    def _ai_ranking(
-        self, trips: list[dict], preferences: str, top_n: int
-    ) -> list[dict]:
+    def _ai_ranking(self, trips: list[dict], preferences: str, top_n: int) -> list[dict]:
         """Perform AI-powered trip ranking."""
         # Limit trips for token economy and processing speed
         trips_to_analyze = trips[:50] if len(trips) > 50 else trips
@@ -92,9 +88,7 @@ class AITripRanker:
             logger.error(f"AI ranking request failed: {e}")
             raise
 
-    def _make_api_request(
-        self, prompt: str, max_tokens: int = 1000, retries: int = 2
-    ) -> str:
+    def _make_api_request(self, prompt: str, max_tokens: int = 1000, retries: int = 2) -> str:
         """Make API request with retry logic."""
         for attempt in range(retries + 1):
             try:
@@ -117,9 +111,7 @@ class AITripRanker:
 
             except OpenAIError as e:
                 if attempt < retries:
-                    logger.warning(
-                        f"API request failed (attempt {attempt + 1}), retrying: {e}"
-                    )
+                    logger.warning(f"API request failed (attempt {attempt + 1}), retrying: {e}")
                     continue
                 else:
                     raise
@@ -173,9 +165,7 @@ Be specific and practical in your reasoning. Focus on the factors that matter mo
         self, trip_summaries: list[str], preferences: str, top_n: int
     ) -> str:
         """Create the user prompt for trip ranking."""
-        trips_text = "\n".join(
-            f"{i + 1}. {summary}" for i, summary in enumerate(trip_summaries)
-        )
+        trips_text = "\n".join(f"{i + 1}. {summary}" for i, summary in enumerate(trip_summaries))
 
         return f"""Please analyze and rank these airline trips based on the pilot's preferences.
 
@@ -218,9 +208,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
 
         return summaries
 
-    def _parse_ai_response(
-        self, response_content: str, original_trips: list[dict]
-    ) -> list[dict]:
+    def _parse_ai_response(self, response_content: str, original_trips: list[dict]) -> list[dict]:
         """Parse and validate AI response."""
         try:
             data = json.loads(response_content)
@@ -234,9 +222,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
             raise ValueError("AI response missing rankings array")
 
         # Create trip lookup for validation
-        trip_lookup = {
-            trip.get("trip_id", trip.get("id", "")): trip for trip in original_trips
-        }
+        trip_lookup = {trip.get("trip_id", trip.get("id", "")): trip for trip in original_trips}
 
         validated_results = []
         for i, ranking in enumerate(rankings):
@@ -271,9 +257,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
         logger.info(f"Successfully parsed {len(validated_results)} AI rankings")
         return validated_results
 
-    def _fallback_ranking(
-        self, trips: list[dict], preferences: str, top_n: int
-    ) -> list[dict]:
+    def _fallback_ranking(self, trips: list[dict], preferences: str, top_n: int) -> list[dict]:
         """Provide intelligent fallback ranking when AI is unavailable."""
         logger.info("Using intelligent fallback ranking")
 
@@ -343,11 +327,8 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
                     "rank": 0,  # Will be set after sorting
                     "trip_id": trip.get("trip_id", trip.get("id", "Unknown")),
                     "score": round(score, 1),
-                    "reasoning": self._generate_fallback_reasoning(
-                        trip, factors, preferences
-                    ),
-                    "efficiency": trip.get("credit_hours", 0)
-                    / max(trip.get("days", 1), 1),
+                    "reasoning": self._generate_fallback_reasoning(trip, factors, preferences),
+                    "efficiency": trip.get("credit_hours", 0) / max(trip.get("days", 1), 1),
                     "key_factors": factors,
                     "trip_data": trip,
                 }
@@ -362,9 +343,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
 
         return scored_trips[:top_n]
 
-    def _generate_fallback_reasoning(
-        self, trip: dict, factors: list[str], preferences: str
-    ) -> str:
+    def _generate_fallback_reasoning(self, trip: dict, factors: list[str], preferences: str) -> str:
         """Generate reasoning for fallback rankings."""
         reasons = []
 
@@ -428,9 +407,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
 
 
 # Public interface functions
-def rank_trips_with_ai(
-    trips: list[dict], preferences: str, top_n: int = 15
-) -> list[dict]:
+def rank_trips_with_ai(trips: list[dict], preferences: str, top_n: int = 15) -> list[dict]:
     """
     Rank trips using AI with robust fallback handling.
 

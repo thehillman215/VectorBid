@@ -33,7 +33,10 @@ class IngestionService:
                 return IngestionResponse(
                     success=False,
                     summary={},
-                    error=f"Unsupported file format: {file_ext}. Supported: {list(self.supported_formats.keys())}",
+                    error=(
+                        f"Unsupported file format: {file_ext}. "
+                        f"Supported: {list(self.supported_formats.keys())}"
+                    ),
                 )
 
             # Parse the file
@@ -90,14 +93,10 @@ class IngestionService:
             has_trips = "trip_id" in header
 
             # Also check if the file contains both types of data (even with separate headers)
-            contains_pairing_data = any(
-                "pairing_id" in line.lower() for line in lines[:5]
-            )
+            contains_pairing_data = any("pairing_id" in line.lower() for line in lines[:5])
             contains_trip_data = any("trip_id" in line.lower() for line in lines[:5])
 
-            if (has_pairings and has_trips) or (
-                contains_pairing_data and contains_trip_data
-            ):
+            if (has_pairings and has_trips) or (contains_pairing_data and contains_trip_data):
                 # This is a combined file - we need to parse it manually
                 return self._parse_combined_csv(file_content, filename)
             elif has_pairings:
@@ -161,7 +160,8 @@ class IngestionService:
 
                 parts = line.split(",")
                 if len(parts) >= 5:
-                    # Check if this looks like a trip line (has trip_id, pairing_id, day, origin, destination)
+                    # Check if this looks like a trip line (has trip_id, pairing_id, 
+                    # day, origin, destination)
                     if parts[0] and parts[1] and parts[2] and parts[3] and parts[4]:
                         trip_id = parts[0]
                         pairing_id = parts[1]
@@ -215,15 +215,9 @@ class IngestionService:
         # For now, return mock data
         return self._create_mock_trips()
 
-    def _create_summary(
-        self, parsed_data: Any, request: IngestionRequest
-    ) -> dict[str, Any]:
+    def _create_summary(self, parsed_data: Any, request: IngestionRequest) -> dict[str, Any]:
         """Create a summary from parsed data."""
-        if (
-            isinstance(parsed_data, list)
-            and parsed_data
-            and isinstance(parsed_data[0], Pairing)
-        ):
+        if isinstance(parsed_data, list) and parsed_data and isinstance(parsed_data[0], Pairing):
             # PBS parser format
             pairings = parsed_data
             trips = []
@@ -237,11 +231,7 @@ class IngestionService:
                 "date_span": f"{request.month}",
                 "credit_total": self._estimate_credit_total(trips),
                 "bases": list(
-                    {
-                        p.pairing_id.split("-")[0]
-                        for p in pairings
-                        if "-" in p.pairing_id
-                    }
+                    {p.pairing_id.split("-")[0] for p in pairings if "-" in p.pairing_id}
                 ),
                 "fleet": request.fleet,
                 "format": "pbs_parser",

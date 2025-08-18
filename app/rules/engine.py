@@ -75,9 +75,7 @@ def load_rule_pack(path: str, force_reload: bool = False) -> dict[str, Any]:
         return DEFAULT_RULES
 
 
-def validate_feasibility(
-    bundle: FeatureBundle, rules: dict[str, Any]
-) -> dict[str, Any]:
+def validate_feasibility(bundle: FeatureBundle, rules: dict[str, Any]) -> dict[str, Any]:
     """Very small feasibility check used by tests.
 
     Flags pairings that are red-eyes when the preference disallows them or

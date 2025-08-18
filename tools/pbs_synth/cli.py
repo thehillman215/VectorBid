@@ -24,9 +24,7 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     month = _parse_month(args.month)
-    pairings = generate_pairings(
-        month=month, base=args.base, fleet=args.fleet, seed=args.seed
-    )
+    pairings = generate_pairings(month=month, base=args.base, fleet=args.fleet, seed=args.seed)
     write_csv(pairings, args.out)
     write_jsonl(pairings, args.out)
 

@@ -1,6 +1,4 @@
-def generate_pbs_compliant_bid_layers(
-    preferences_text, pilot_profile=None, trip_data=None
-):
+def generate_pbs_compliant_bid_layers(preferences_text, pilot_profile=None, trip_data=None):
     """Generate complete 20-layer PBS bidding strategy compliant with PBS 2.0 systems."""
     prefs = parse_pilot_preferences(preferences_text, pilot_profile)
     bid_layers = []
@@ -45,8 +43,7 @@ def parse_pilot_preferences(preferences_text, pilot_profile=None):
         for phrase in ["weekends off", "weekend off", "no weekends", "avoid weekends"]
     )
     prefs["no_early_am"] = any(
-        phrase in text_lower
-        for phrase in ["no early", "avoid early", "late start", "no morning"]
+        phrase in text_lower for phrase in ["no early", "avoid early", "late start", "no morning"]
     )
     prefs["no_redeyes"] = any(
         phrase in text_lower
@@ -57,21 +54,17 @@ def parse_pilot_preferences(preferences_text, pilot_profile=None):
         for phrase in ["maximum days off", "max days off", "most days off", "days off"]
     )
     prefs["home_every_night"] = any(
-        phrase in text_lower
-        for phrase in ["home every night", "home daily", "no overnights"]
+        phrase in text_lower for phrase in ["home every night", "home daily", "no overnights"]
     )
     prefs["commuter_friendly"] = any(
-        phrase in text_lower
-        for phrase in ["commuter", "commute", "easy commute", "commutable"]
+        phrase in text_lower for phrase in ["commuter", "commute", "easy commute", "commutable"]
     )
     prefs["high_credit"] = any(
         phrase in text_lower
         for phrase in ["high credit", "maximum credit", "max credit", "credit hours"]
     )
     prefs["international_ok"] = (
-        "international" in text_lower
-        and "avoid" not in text_lower
-        and "no" not in text_lower
+        "international" in text_lower and "avoid" not in text_lower and "no" not in text_lower
     )
 
     return prefs

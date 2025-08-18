@@ -250,9 +250,7 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
             session["enhanced_pbs_data"] = result["session_data"]
             return result["commands"]
         else:
-            logger.error(
-                f"Enhanced PBS generation failed: {result.get('error', 'Unknown error')}"
-            )
+            logger.error(f"Enhanced PBS generation failed: {result.get('error', 'Unknown error')}")
             return _fallback_pbs_generation(preferences_text)
 
     except ImportError:

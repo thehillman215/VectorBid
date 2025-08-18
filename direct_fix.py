@@ -15,11 +15,7 @@ for i, line in enumerate(lines):
         continue
 
     # Fix the specific dates section
-    if (
-        i >= 160
-        and i <= 180
-        and "for desc, input_text, min_cmd, must_have in test_cases:" in line
-    ):
+    if i >= 160 and i <= 180 and "for desc, input_text, min_cmd, must_have in test_cases:" in line:
         # Replace with a working loop
         new_lines.append("    for test in test_cases:\n")
         new_lines.append("        if len(test) == 4:\n")

@@ -80,9 +80,7 @@ class BidPacketManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def upload_pilot_contract(
-        self, file_obj, airline: str, version: str | None = None
-    ) -> dict:
+    def upload_pilot_contract(self, file_obj, airline: str, version: str | None = None) -> dict:
         """
         Upload and store a pilot contract
 

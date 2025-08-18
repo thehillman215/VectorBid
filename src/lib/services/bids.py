@@ -238,9 +238,7 @@ def get_admin_stats() -> dict:
 
         # Calculate stats
         total_packages = len(packages)
-        active_packages = len(
-            [p for p in packages if p.get("month_tag", "") >= current_month]
-        )
+        active_packages = len([p for p in packages if p.get("month_tag", "") >= current_month])
         total_trips = sum(p.get("trip_count", 0) for p in packages)
 
         # File size stats
@@ -251,8 +249,7 @@ def get_admin_stats() -> dict:
         recent_packages = [
             p
             for p in packages
-            if datetime.fromisoformat(p.get("created_at", "1970-01-01")).timestamp()
-            > cutoff_date
+            if datetime.fromisoformat(p.get("created_at", "1970-01-01")).timestamp() > cutoff_date
         ]
 
         return {

@@ -94,9 +94,7 @@ def convert_preferences_to_string(profile):
         return custom
 
     # Fallback
-    return (
-        "Standard pilot preferences - maximize schedule efficiency and quality of life."
-    )
+    return "Standard pilot preferences - maximize schedule efficiency and quality of life."
 
 
 def get_preference_summary(profile):

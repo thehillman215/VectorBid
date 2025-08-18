@@ -34,9 +34,7 @@ class BidPacket(db.Model):
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
-        db.UniqueConstraint(
-            "month_tag", "airline", name="uix_bid_packets_month_tag_airline"
-        ),
+        db.UniqueConstraint("month_tag", "airline", name="uix_bid_packets_month_tag_airline"),
     )
 
 

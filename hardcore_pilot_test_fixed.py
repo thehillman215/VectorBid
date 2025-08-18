@@ -356,21 +356,13 @@ print(f"\nTotal Score: {passed_tests}/{total_tests} tests passed ({percentage:.1
 
 # Grade the results
 if percentage >= 90:
-    print(
-        f"{GREEN}{BOLD}🏆 OUTSTANDING!{RESET} This NLP engine is production-ready for pilots!"
-    )
+    print(f"{GREEN}{BOLD}🏆 OUTSTANDING!{RESET} This NLP engine is production-ready for pilots!")
 elif percentage >= 80:
-    print(
-        f"{GREEN}{BOLD}✅ EXCELLENT!{RESET} The NLP handles most real-world cases well."
-    )
+    print(f"{GREEN}{BOLD}✅ EXCELLENT!{RESET} The NLP handles most real-world cases well.")
 elif percentage >= 70:
-    print(
-        f"{YELLOW}{BOLD}👍 GOOD!{RESET} Solid foundation but could use some refinement."
-    )
+    print(f"{YELLOW}{BOLD}👍 GOOD!{RESET} Solid foundation but could use some refinement.")
 elif percentage >= 60:
-    print(
-        f"{YELLOW}{BOLD}⚠️  ACCEPTABLE{RESET} but needs improvement for production use."
-    )
+    print(f"{YELLOW}{BOLD}⚠️  ACCEPTABLE{RESET} but needs improvement for production use.")
 else:
     print(f"{RED}{BOLD}❌ NEEDS WORK{RESET} - Critical patterns are being missed.")
 

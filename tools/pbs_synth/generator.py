@@ -35,9 +35,7 @@ def generate_pairings(
                 )
             )
         pairings.append(
-            Pairing(
-                pairing_id=pairing_id, base=base, fleet=fleet, month=month, trips=trips
-            )
+            Pairing(pairing_id=pairing_id, base=base, fleet=fleet, month=month, trips=trips)
         )
     return pairings
 

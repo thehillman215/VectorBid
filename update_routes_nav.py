@@ -47,11 +47,7 @@ for i, line in enumerate(lines):
     elif in_index and "def " in lines[i + 1] if i + 1 < len(lines) else False:
         # Find the end of this function
         for j in range(i + 2, len(lines)):
-            if (
-                lines[j]
-                and not lines[j].startswith(" ")
-                and not lines[j].startswith("\t")
-            ):
+            if lines[j] and not lines[j].startswith(" ") and not lines[j].startswith("\t"):
                 # Replace this section
                 lines = lines[:start_line] + nav_route.split("\n") + lines[j:]
                 break

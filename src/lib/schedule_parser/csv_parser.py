@@ -15,9 +15,7 @@ def parse_csv(blob: bytes) -> list[dict]:
                 row,
                 ["TripID", "Trip", "ID", "trip_id", "trip", "id", "Trip ID", "Pairing"],
             )
-            days = _get_field(
-                row, ["Days", "days", "Duration", "duration", "Length", "Trip Days"]
-            )
+            days = _get_field(row, ["Days", "days", "Duration", "duration", "Length", "Trip Days"])
             credit = _get_field(
                 row,
                 ["Credit", "credit", "Hours", "hours", "Credit Hours", "Flight Hours"],

@@ -13,9 +13,7 @@ def create_app():
     """Create and configure Flask app with correct paths"""
 
     # Get the project root directory
-    project_root = os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    )
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
     # Set correct template and static folders
     template_folder = os.path.join(project_root, "src", "ui", "templates")
@@ -24,12 +22,8 @@ def create_app():
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
 
     # Configuration
-    app.config["SECRET_KEY"] = os.environ.get(
-        "SECRET_KEY", "dev-secret-key-change-in-production"
-    )
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "DATABASE_URL", "sqlite:///vectorbid.db"
-    )
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///vectorbid.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max file size
 
@@ -75,9 +69,7 @@ def create_app():
             "template_exists": (
                 os.path.exists(app.template_folder) if app.template_folder else False
             ),
-            "static_exists": (
-                os.path.exists(app.static_folder) if app.static_folder else False
-            ),
+            "static_exists": (os.path.exists(app.static_folder) if app.static_folder else False),
         }
 
     # Register Flask API endpoints

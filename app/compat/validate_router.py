@@ -80,9 +80,7 @@ def compat_validate(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
     violations: list[dict[str, Any]]
     try:
         try:
-            violations = list(
-                validate_feasibility(pairings, DEFAULT_RULES, context) or []
-            )  # type: ignore[arg-type]
+            violations = list(validate_feasibility(pairings, DEFAULT_RULES, context) or [])  # type: ignore[arg-type]
         except TypeError:
             try:
                 violations = list(validate_feasibility(pairings, DEFAULT_RULES) or [])

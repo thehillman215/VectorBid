@@ -50,15 +50,11 @@ def natural_language_to_pbs_filters(preferences_text, trip_data=None):
 
     # Trip length preferences
     if any(
-        phrase in text_lower
-        for phrase in ["short trip", "day trip", "1 day", "one day", "short"]
+        phrase in text_lower for phrase in ["short trip", "day trip", "1 day", "one day", "short"]
     ):
         filters.append("PREFER TRIPS WITH DUTY_DAYS <= 2")
         logger.info("Added short trip filter")
-    elif any(
-        phrase in text_lower
-        for phrase in ["long trip", "4 day", "four day", "week long"]
-    ):
+    elif any(phrase in text_lower for phrase in ["long trip", "4 day", "four day", "week long"]):
         filters.append("PREFER TRIPS WITH DUTY_DAYS >= 4")
         logger.info("Added long trip filter")
 

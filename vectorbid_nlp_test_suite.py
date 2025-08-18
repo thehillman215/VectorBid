@@ -368,9 +368,7 @@ def run_full_test_suite(llm_function=None) -> dict:
     # Calculate averages
     results["average_score"] = results["total_score"] / results["total_tests"]
     for category in results["categories"]:
-        cat_scores = [
-            r["score"] for r in results["detailed_results"] if r["category"] == category
-        ]
+        cat_scores = [r["score"] for r in results["detailed_results"] if r["category"] == category]
         results["categories"][category]["avg_score"] = sum(cat_scores) / len(cat_scores)
 
     # Generate summary report

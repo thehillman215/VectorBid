@@ -111,9 +111,7 @@ def validate_bid_package(month_tag):
 
                 # Add validation warnings/info
                 if not parsed_trips:
-                    validation_result["warnings"].append(
-                        "No trips found in bid package"
-                    )
+                    validation_result["warnings"].append("No trips found in bid package")
                 elif len(parsed_trips) < 10:
                     validation_result["warnings"].append(
                         f"Only {len(parsed_trips)} trips found - this seems low for a monthly bid package"

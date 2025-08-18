@@ -237,11 +237,7 @@ class Enhanced50LayerSystem:
     def delete_layer(self, layer_number: int) -> bool:
         """Delete a layer and renumber subsequent layers"""
         layer_index = next(
-            (
-                i
-                for i, layer in enumerate(self.layers)
-                if layer.layer_number == layer_number
-            ),
+            (i for i, layer in enumerate(self.layers) if layer.layer_number == layer_number),
             None,
         )
 
@@ -282,9 +278,7 @@ class Enhanced50LayerSystem:
 
     def get_layer(self, layer_number: int) -> BidLayer | None:
         """Get a specific layer by number"""
-        return next(
-            (layer for layer in self.layers if layer.layer_number == layer_number), None
-        )
+        return next((layer for layer in self.layers if layer.layer_number == layer_number), None)
 
     def get_active_layers(self) -> list[BidLayer]:
         """Get only active layers"""
@@ -333,9 +327,7 @@ class Enhanced50LayerSystem:
         priority_counts = {}
         for layer in active_layers:
             for cmd in layer.commands:
-                priority_counts[cmd.priority.name] = (
-                    priority_counts.get(cmd.priority.name, 0) + 1
-                )
+                priority_counts[cmd.priority.name] = priority_counts.get(cmd.priority.name, 0) + 1
 
         for priority, count in priority_counts.items():
             output_lines.append(f"  {priority}: {count} commands")
@@ -427,9 +419,7 @@ class Enhanced50LayerSystem:
             "command_types": command_types,
             "priority_distribution": priorities,
             "layers_by_priority": {
-                priority.name: len(
-                    [layer for layer in active_layers if layer.priority == priority]
-                )
+                priority.name: len([layer for layer in active_layers if layer.priority == priority])
                 for priority in Priority
             },
         }
@@ -473,9 +463,7 @@ class Enhanced50LayerSystem:
                     )
 
         # Check for too many critical constraints
-        critical_layers = [
-            layer for layer in active_layers if layer.priority == Priority.CRITICAL
-        ]
+        critical_layers = [layer for layer in active_layers if layer.priority == Priority.CRITICAL]
         if len(critical_layers) > 5:
             issues.append(
                 f"Too many critical constraints ({len(critical_layers)}). "

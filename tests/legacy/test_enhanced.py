@@ -65,9 +65,7 @@ UA789  2DAY  DEN-PHX-DEN     12:00   25FEB-26FEB
                     "dates": dates,
                 }
                 trips.append(trip)
-                print(
-                    f"  Line {line_num}: ✅ {trip_id} - {days}d, {credit}h, {routing}"
-                )
+                print(f"  Line {line_num}: ✅ {trip_id} - {days}d, {credit}h, {routing}")
                 break
         else:
             if any(c.isdigit() for c in line):

@@ -140,7 +140,9 @@ class BidLayer:
             )
             score = total_weight * (self.priority / 10.0)
 
-        layer_explanation = f"Layer {self.layer_number} ({self.name}): {'MATCHES' if layer_matches else 'NO MATCH'}"
+        layer_explanation = (
+            f"Layer {self.layer_number} ({self.name}): {'MATCHES' if layer_matches else 'NO MATCH'}"
+        )
         explanations.insert(0, layer_explanation)
 
         return layer_matches, explanations, score
@@ -161,9 +163,7 @@ class BidLayersSystem:
         return True
 
     def remove_layer(self, layer_number: int) -> bool:
-        self.layers = [
-            layer for layer in self.layers if layer.layer_number != layer_number
-        ]
+        self.layers = [layer for layer in self.layers if layer.layer_number != layer_number]
         for i, layer in enumerate(self.layers):
             layer.layer_number = i + 1
         return True
@@ -226,13 +226,9 @@ class BidLayersSystem:
         pbs_groups = []
 
         highly_recommended = [
-            t
-            for t in evaluated_trips
-            if t["bid_recommendation"] == "HIGHLY_RECOMMENDED"
+            t for t in evaluated_trips if t["bid_recommendation"] == "HIGHLY_RECOMMENDED"
         ]
-        recommended = [
-            t for t in evaluated_trips if t["bid_recommendation"] == "RECOMMENDED"
-        ]
+        recommended = [t for t in evaluated_trips if t["bid_recommendation"] == "RECOMMENDED"]
 
         group_num = 1
 
@@ -285,9 +281,7 @@ class BidLayersSystem:
         elif filter_obj.filter_type == FilterType.AVOID:
             if filter_obj.criteria == FilterCriteria.RED_EYE:
                 return "AVOID Pairings IF RedEye=True"
-            elif (
-                filter_obj.criteria == FilterCriteria.WEEKENDS_OFF and filter_obj.value
-            ):
+            elif filter_obj.criteria == FilterCriteria.WEEKENDS_OFF and filter_obj.value:
                 return "AVOID Pairings IF Weekend=True"
         return f"# {filter_obj.description}"
 
@@ -363,9 +357,7 @@ def create_layover_preference_layer(cities: list[str], priority: int = 7) -> Bid
     )
 
 
-def create_trip_length_layer(
-    min_days: int, max_days: int, priority: int = 5
-) -> BidLayer:
+def create_trip_length_layer(min_days: int, max_days: int, priority: int = 5) -> BidLayer:
     min_filter = BidFilter(
         criteria=FilterCriteria.TRIP_LENGTH,
         filter_type=FilterType.REQUIRE,

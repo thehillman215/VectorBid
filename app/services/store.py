@@ -42,7 +42,9 @@ class BidPackageStore:
         """Store a bid package and return the ID."""
         # Generate hash and ID
         file_hash = hashlib.sha256(file_content).hexdigest()
-        package_id = f"{bid_package.pilot_id}_{bid_package.airline}_{bid_package.month}_{file_hash[:8]}"
+        package_id = (
+            f"{bid_package.pilot_id}_{bid_package.airline}_{bid_package.month}_{file_hash[:8]}"
+        )
 
         # Store file
         file_path = self.storage_dir / f"{package_id}.bin"

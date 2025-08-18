@@ -117,25 +117,15 @@ def enhanced_international_scoring_with_persona(
 
         # Add reasoning based on persona
         if pilot_persona == "credit_hunter":
-            reasoning_parts.append(
-                f"Premium high-credit routes to {', '.join(found_destinations)}"
-            )
+            reasoning_parts.append(f"Premium high-credit routes to {', '.join(found_destinations)}")
         elif pilot_persona == "family_friendly":
-            reasoning_parts.append(
-                f"Family-friendly time zones to {', '.join(found_destinations)}"
-            )
+            reasoning_parts.append(f"Family-friendly time zones to {', '.join(found_destinations)}")
         elif pilot_persona == "adventure_seeker":
-            reasoning_parts.append(
-                f"Exciting destinations to {', '.join(found_destinations)}"
-            )
+            reasoning_parts.append(f"Exciting destinations to {', '.join(found_destinations)}")
         elif pilot_persona == "commuter":
-            reasoning_parts.append(
-                f"Commuter-friendly routes to {', '.join(found_destinations)}"
-            )
+            reasoning_parts.append(f"Commuter-friendly routes to {', '.join(found_destinations)}")
         else:
-            reasoning_parts.append(
-                f"International routes to {', '.join(found_destinations)}"
-            )
+            reasoning_parts.append(f"International routes to {', '.join(found_destinations)}")
 
     return score_boost, key_factors, reasoning_parts
 
@@ -170,9 +160,7 @@ def test_persona_scoring():
         results.sort(key=lambda x: x[2], reverse=True)
 
         for trip_id, _routing, boost, reasoning in results:
-            reasoning_str = (
-                "; ".join(reasoning) if reasoning else "no international preference"
-            )
+            reasoning_str = "; ".join(reasoning) if reasoning else "no international preference"
             print(f"  {trip_id} (+{boost:2d}): {reasoning_str}")
 
 

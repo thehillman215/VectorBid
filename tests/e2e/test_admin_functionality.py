@@ -72,9 +72,7 @@ class TestAdminFunctionality:
         # Make multiple rapid requests
         responses = []
         for _ in range(5):
-            response = page.request.post(
-                f"{base_url}/admin/upload-bid", headers=headers
-            )
+            response = page.request.post(f"{base_url}/admin/upload-bid", headers=headers)
             responses.append(response.status)
 
         # All should be unauthorized, but no rate limiting errors expected in dev

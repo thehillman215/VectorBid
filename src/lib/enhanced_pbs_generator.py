@@ -358,9 +358,7 @@ class EnhancedPBSGenerator:
                             command_type=CommandType.AVOID,
                             subject="TRIPS",
                             condition=(
-                                "IF AIRCRAFT IN"
-                                if isinstance(types, list)
-                                else "IF AIRCRAFT ="
+                                "IF AIRCRAFT IN" if isinstance(types, list) else "IF AIRCRAFT ="
                             ),
                             value=value,
                             priority=Priority.MEDIUM,
@@ -374,9 +372,7 @@ class EnhancedPBSGenerator:
                             command_type=CommandType.PREFER,
                             subject="TRIPS",
                             condition=(
-                                "IF AIRCRAFT IN"
-                                if isinstance(types, list)
-                                else "IF AIRCRAFT ="
+                                "IF AIRCRAFT IN" if isinstance(types, list) else "IF AIRCRAFT ="
                             ),
                             value=value,
                             priority=Priority.LOW,

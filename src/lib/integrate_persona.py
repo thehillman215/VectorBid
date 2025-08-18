@@ -8,23 +8,16 @@ def detect_pilot_persona_from_preferences(preferences):
     prefs_lower = preferences.lower()
 
     # Check for explicit persona keywords
-    if any(
-        word in prefs_lower for word in ["credit", "hours", "pay", "maximize", "money"]
-    ):
+    if any(word in prefs_lower for word in ["credit", "hours", "pay", "maximize", "money"]):
         return "credit_hunter"
-    elif any(
-        word in prefs_lower
-        for word in ["family", "home", "balance", "weekend", "time off"]
-    ):
+    elif any(word in prefs_lower for word in ["family", "home", "balance", "weekend", "time off"]):
         return "family_friendly"
     elif any(
-        word in prefs_lower
-        for word in ["adventure", "variety", "interesting", "exotic", "new"]
+        word in prefs_lower for word in ["adventure", "variety", "interesting", "exotic", "new"]
     ):
         return "adventure_seeker"
     elif any(
-        word in prefs_lower
-        for word in ["commute", "commuter", "short", "quick", "efficient"]
+        word in prefs_lower for word in ["commute", "commuter", "short", "quick", "efficient"]
     ):
         return "commuter"
     else:

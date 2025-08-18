@@ -205,9 +205,7 @@ class PreferencesManager:
             },
             "current_preferences": {
                 "persona": profile.get("persona"),
-                "style": PILOT_PERSONAS.get(profile.get("persona") or "", {}).get(
-                    "name", "Custom"
-                ),
+                "style": PILOT_PERSONAS.get(profile.get("persona") or "", {}).get("name", "Custom"),
                 "custom_notes": profile.get("custom_preferences"),
             },
             "optimization_score": self._calculate_optimization_score(profile),
@@ -254,14 +252,10 @@ class PreferencesManager:
         suggestions = []
 
         if not profile.get("persona") and not profile.get("custom_preferences"):
-            suggestions.append(
-                "Complete your preference profile for better PBS commands"
-            )
+            suggestions.append("Complete your preference profile for better PBS commands")
 
         if not profile.get("seniority"):
-            suggestions.append(
-                "Add your seniority information for more accurate predictions"
-            )
+            suggestions.append("Add your seniority information for more accurate predictions")
 
         if not profile.get("fleet"):
             suggestions.append("Specify your aircraft preferences for targeted trips")
@@ -305,18 +299,13 @@ class PreferencesManager:
         preference_fields = ["persona", "custom_preferences"]
 
         required_complete = sum(1 for field in required_fields if profile.get(field))
-        preference_complete = sum(
-            1 for field in preference_fields if profile.get(field)
-        )
+        preference_complete = sum(1 for field in preference_fields if profile.get(field))
 
         return {
             "required": f"{required_complete}/{len(required_fields)}",
             "preferences": f"{min(preference_complete, 1)}/1",
             "overall_percentage": int(
-                (
-                    (required_complete + min(preference_complete, 1))
-                    / (len(required_fields) + 1)
-                )
+                ((required_complete + min(preference_complete, 1)) / (len(required_fields) + 1))
                 * 100
             ),
         }

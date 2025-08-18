@@ -26,6 +26,4 @@ async def run_pipeline(request: Request, preferences: str = Form(...)):
         "  IF LAYOVER CITY = 'SAN'",
     ]
     results = {"pbs_layers": pbs_layers}
-    return templates.TemplateResponse(
-        "results.html", {"request": request, "results": results}
-    )
+    return templates.TemplateResponse("results.html", {"request": request, "results": results})

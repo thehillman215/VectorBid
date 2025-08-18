@@ -68,15 +68,11 @@ def test_export_requires_api_key_when_enabled(tmp_path, monkeypatch):
     assert r.status_code == 401
 
     # With wrong key -> 401
-    r = client.post(
-        "/export", headers={"x-api-key": "nope"}, json={"artifact": artifact}
-    )
+    r = client.post("/export", headers={"x-api-key": "nope"}, json={"artifact": artifact})
     assert r.status_code == 401
 
     # With correct header key -> 200 and path exists
-    r = client.post(
-        "/export", headers={"x-api-key": "secret"}, json={"artifact": artifact}
-    )
+    r = client.post("/export", headers={"x-api-key": "secret"}, json={"artifact": artifact})
     assert r.status_code == 200
     out = r.json()
     assert "export_path" in out

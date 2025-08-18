@@ -135,9 +135,7 @@ def main():
         for endpoint in endpoints:
             security_indicator = "🔒" if endpoint["security"] else "🔓"
             tags_str = f" [{', '.join(endpoint['tags'])}]" if endpoint["tags"] else ""
-            print(
-                f"  {security_indicator} {endpoint['method']} {endpoint['path']}{tags_str}"
-            )
+            print(f"  {security_indicator} {endpoint['method']} {endpoint['path']}{tags_str}")
             print(f"     {endpoint['summary']}")
 
     # Analyze schemas
@@ -149,9 +147,7 @@ def main():
     else:
         for schema in schemas:
             print(f"  📄 {schema['name']} ({schema['type']})")
-            print(
-                f"     Properties: {schema['properties']}, Required: {schema['required']}"
-            )
+            print(f"     Properties: {schema['properties']}, Required: {schema['required']}")
 
     # Security schemes
     print("\n🔐 Security Schemes:")

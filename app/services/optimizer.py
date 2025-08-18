@@ -97,20 +97,13 @@ def _get_seniority_adjustment(bundle: FeatureBundle) -> float:
     return 0.9 + 0.2 * seniority
 
 
-def _score_days_off(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_days_off(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score whether pairing avoids requested days off."""
 
     req = set(
-        _to_dict(
-            _get(_get(bundle.preference_schema, "hard_constraints", {}), "days_off", [])
-        )
-        or []
+        _to_dict(_get(_get(bundle.preference_schema, "hard_constraints", {}), "days_off", [])) or []
     )
-    pairing_days = set(
-        _get(pairing, "dates", []) or _get(pairing, "duty_days", []) or []
-    )
+    pairing_days = set(_get(pairing, "dates", []) or _get(pairing, "duty_days", []) or [])
     if not req or not pairing_days:
         base = 0.0
     else:
@@ -121,9 +114,7 @@ def _score_days_off(
 def _score_block_hours(pairing: Any, weights: dict[str, float]) -> float:
     """Favor higher block or credit hours."""
 
-    block = float(
-        _get(pairing, "block_hours", _get(pairing, "credit_hours", 0.0)) or 0.0
-    )
+    block = float(_get(pairing, "block_hours", _get(pairing, "credit_hours", 0.0)) or 0.0)
     base = min(block, 100.0) / 100.0
     return weights.get("block_hours", 0.0) * base
 
@@ -142,16 +133,12 @@ def _score_duty_hours(pairing: Any, weights: dict[str, float]) -> float:
 def _score_layover_quality(pairing: Any, weights: dict[str, float]) -> float:
     """Use rest hours as a proxy for layover quality."""
 
-    rest = float(
-        _get(pairing, "rest_hours", _get(pairing, "layover_rest_hours", 0.0)) or 0.0
-    )
+    rest = float(_get(pairing, "rest_hours", _get(pairing, "layover_rest_hours", 0.0)) or 0.0)
     base = min(rest, 24.0) / 24.0
     return weights.get("layover_quality", 0.0) * base
 
 
-def _score_report_time(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_report_time(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score later report times higher."""
 
     time_str = _get(pairing, "report_time", "") or ""
@@ -175,9 +162,7 @@ def _score_commutability(pairing: Any, weights: dict[str, float]) -> float:
     return weights.get("commutability", 0.0) * base
 
 
-def _score_trip_length(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_trip_length(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score against preferred trip lengths."""
 
     prefs_d = _to_dict(_get(bundle.preference_schema, "soft_prefs", {}))
@@ -204,9 +189,7 @@ def _score_trip_length(
     return weights.get("trip_length", 0.0) * pref_w * base
 
 
-def _score_equipment(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_equipment(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score if the pairing's equipment matches pilot preferences."""
 
     desired = set(_get(bundle.preference_schema, "equip", []) or [])

@@ -22,18 +22,14 @@ def _canonical_sha256(obj) -> str:
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
-def candidates_to_layers(
-    topk: list[CandidateSchedule], bundle: FeatureBundle
-) -> BidLayerArtifact:
+def candidates_to_layers(topk: list[CandidateSchedule], bundle: FeatureBundle) -> BidLayerArtifact:
     # Build simple 1:1 layers from the ranked candidates
     layers = []
     for i, c in enumerate(topk, start=1):
         layers.append(
             {
                 "n": i,
-                "filters": [
-                    {"type": "PairingId", "op": "IN", "values": [c.candidate_id]}
-                ],
+                "filters": [{"type": "PairingId", "op": "IN", "values": [c.candidate_id]}],
                 "prefer": "YES",
             }
         )

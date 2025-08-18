@@ -63,9 +63,7 @@ class VectorBidPBSService:
 
             # Generate comprehensive outputs
             pbs_output = bid_system.generate_final_pbs_output(include_explanations=True)
-            simple_pbs_output = bid_system.generate_final_pbs_output(
-                include_explanations=False
-            )
+            simple_pbs_output = bid_system.generate_final_pbs_output(include_explanations=False)
 
             # Extract simple commands for backward compatibility
             simple_commands = []
@@ -495,9 +493,7 @@ def register_enhanced_pbs_routes(app):
             return jsonify({"error": "Not logged in"}), 401
 
         if "enhanced_pbs_data" in session:
-            return jsonify(
-                {"success": True, "layers": session["enhanced_pbs_data"]["layers"]}
-            )
+            return jsonify({"success": True, "layers": session["enhanced_pbs_data"]["layers"]})
         else:
             return jsonify({"success": True, "layers": []})
 
@@ -526,9 +522,7 @@ def register_enhanced_pbs_routes(app):
         if "enhanced_pbs_data" in session:
             layers = session["enhanced_pbs_data"]["layers"]
 
-        return render_template(
-            "enhanced_bid_layers.html", layers=layers, user_id=user_id
-        )
+        return render_template("enhanced_bid_layers.html", layers=layers, user_id=user_id)
 
 
 # Integration instructions for VectorBid

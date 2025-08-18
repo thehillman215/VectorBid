@@ -134,9 +134,7 @@ def main():
     # Summary
     print("\n" + "=" * 50)
     total_checks = len(standard_libs) + len(third_party) + len(custom_files) + 2
-    total_success = (
-        std_success + third_success + custom_success + 2
-    )  # +2 for basic tests
+    total_success = std_success + third_success + custom_success + 2  # +2 for basic tests
 
     print(f"📋 Overall System Health: {total_success}/{total_checks}")
 

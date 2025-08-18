@@ -103,12 +103,9 @@ def parse_united_content(text_content: str, filename: str = "") -> list[dict]:
 
         # Skip header lines
         if any(
-            header in line.upper()
-            for header in ["TRIP", "PAIRING", "CREDIT", "ROUTING", "DAYS"]
+            header in line.upper() for header in ["TRIP", "PAIRING", "CREDIT", "ROUTING", "DAYS"]
         ):
-            if not any(
-                char.isdigit() for char in line
-            ):  # Headers usually don't have numbers
+            if not any(char.isdigit() for char in line):  # Headers usually don't have numbers
                 continue
 
         # Try each pattern in order of confidence
@@ -164,11 +161,7 @@ def _extract_united_trip(
         credit_hours = 0.0
         if "credit" in groups and groups["credit"]:
             credit_str = (
-                groups["credit"]
-                .replace(":", ".")
-                .replace("H", "")
-                .replace("CR", "")
-                .strip()
+                groups["credit"].replace(":", ".").replace("H", "").replace("CR", "").strip()
             )
             try:
                 credit_hours = float(credit_str)
@@ -249,9 +242,7 @@ def _detect_united_weekend(line: str, dates: str = "", routing: str = "") -> boo
     if dates:
         # This is a simplified check - you could enhance with actual date parsing
         # For now, assume if the trip is 3+ days and spans Friday-Sunday pattern
-        if len(dates) > 10 and any(
-            day in dates.upper() for day in ["FRI", "SAT", "SUN"]
-        ):
+        if len(dates) > 10 and any(day in dates.upper() for day in ["FRI", "SAT", "SUN"]):
             return True
 
     return False

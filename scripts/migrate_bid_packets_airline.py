@@ -19,9 +19,7 @@ def migrate() -> None:
         BidPacket.__table__.drop(db.engine, checkfirst=True)
         # Create table with updated schema
         BidPacket.__table__.create(db.engine, checkfirst=True)
-        print(
-            "bid_packets table recreated with airline column and composite uniqueness"
-        )
+        print("bid_packets table recreated with airline column and composite uniqueness")
 
 
 if __name__ == "__main__":  # pragma: no cover - script entry point

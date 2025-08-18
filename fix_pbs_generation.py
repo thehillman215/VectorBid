@@ -74,10 +74,7 @@ def _fallback_pbs_generation_fixed(preferences_text: str) -> list[str]:
         print("DEBUG: Matched Christmas pattern")
 
     # DEPARTURE TIME PATTERNS
-    if any(
-        word in text_lower
-        for word in ["early departure", "early morning", "early start"]
-    ):
+    if any(word in text_lower for word in ["early departure", "early morning", "early start"]):
         commands.append("AVOID TRIPS WITH DEPARTURE_TIME < 0600")
         print("DEBUG: Matched early departure pattern")
 
@@ -90,9 +87,7 @@ def _fallback_pbs_generation_fixed(preferences_text: str) -> list[str]:
         print("DEBUG: Matched morning departure pattern")
 
     # TRIP TYPE PATTERNS
-    if any(
-        word in text_lower for word in ["redeye", "red eye", "red-eye", "overnight"]
-    ):
+    if any(word in text_lower for word in ["redeye", "red eye", "red-eye", "overnight"]):
         if "no" in text_lower or "avoid" in text_lower:
             commands.append("AVOID TRIPS WITH RED_EYE_FLIGHTS")
         else:
@@ -119,18 +114,12 @@ def _fallback_pbs_generation_fixed(preferences_text: str) -> list[str]:
         commands.append("PREFER TRIPS WITH DAYS <= 2")
         print("DEBUG: Matched short trip pattern")
 
-    if any(
-        word in text_lower
-        for word in ["long trip", "long pairing", "4 day", "four day"]
-    ):
+    if any(word in text_lower for word in ["long trip", "long pairing", "4 day", "four day"]):
         commands.append("PREFER TRIPS WITH DAYS >= 4")
         print("DEBUG: Matched long trip pattern")
 
     # CREDIT/PAY PATTERNS
-    if any(
-        word in text_lower
-        for word in ["high credit", "high pay", "maximum pay", "max pay"]
-    ):
+    if any(word in text_lower for word in ["high credit", "high pay", "maximum pay", "max pay"]):
         commands.append("PREFER TRIPS WITH CREDIT_TIME >= 20")
         commands.append("SORT BY CREDIT_TIME DESCENDING")
         print("DEBUG: Matched high credit pattern")
@@ -140,10 +129,7 @@ def _fallback_pbs_generation_fixed(preferences_text: str) -> list[str]:
         print("DEBUG: Matched high time pattern")
 
     # LAYOVER PATTERNS
-    if any(
-        word in text_lower
-        for word in ["short layover", "quick layover", "minimum layover"]
-    ):
+    if any(word in text_lower for word in ["short layover", "quick layover", "minimum layover"]):
         commands.append("PREFER TRIPS WITH LAYOVER_TIME <= 45")
         print("DEBUG: Matched short layover pattern")
 

@@ -322,9 +322,7 @@ def onboarding_submit():
             "base": request.form.get("base", ""),
             "seat": request.form.get("seat", ""),
             "fleet": (
-                request.form.get("fleet", "").split(",")
-                if request.form.get("fleet")
-                else []
+                request.form.get("fleet", "").split(",") if request.form.get("fleet") else []
             ),
             "seniority": int(request.form.get("seniority", 5000)),
             "onboarded": True,
@@ -410,9 +408,7 @@ def personas():
 </body>
 </html>
     """
-    return render_template_string(
-        personas_html, personas=PILOT_PERSONAS, profile=profile
-    )
+    return render_template_string(personas_html, personas=PILOT_PERSONAS, profile=profile)
 
 
 @bp.route("/bid-layers/generate", methods=["POST"])
@@ -599,9 +595,7 @@ def user_profile():
     user_id = session.get("user_id", "demo_pilot")
     profile = get_profile(user_id)
 
-    return render_template(
-        "user_profile.html", profile=profile, personas=PILOT_PERSONAS
-    )
+    return render_template("user_profile.html", profile=profile, personas=PILOT_PERSONAS)
 
 
 @bp.route("/dashboard")
@@ -621,9 +615,7 @@ def enhanced_dashboard():
 
     # Add persona name to profile for display
     if profile.get("persona"):
-        profile["persona_name"] = PILOT_PERSONAS.get(profile["persona"], {}).get(
-            "name", "Custom"
-        )
+        profile["persona_name"] = PILOT_PERSONAS.get(profile["persona"], {}).get("name", "Custom")
 
     return render_template(
         "enhanced_dashboard.html",
@@ -702,9 +694,7 @@ def api_save_advanced_preferences():
         success = preferences_manager.update_preferences(user_id, data)
 
         if success:
-            return jsonify(
-                {"success": True, "message": "Preferences saved successfully"}
-            )
+            return jsonify({"success": True, "message": "Preferences saved successfully"})
         else:
             return (
                 jsonify({"success": False, "message": "Error saving preferences"}),

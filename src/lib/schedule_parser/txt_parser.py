@@ -37,9 +37,7 @@ _PATTERNS = [
     # Simple format: "105 3-Day Credit: 15.30"
     {
         "name": "simple_format",
-        "pattern": re.compile(
-            r"^(?P<trip_id>\d{3,4})\s+(?P<days>\d)-Day.*?(?P<credit>\d+\.\d{2})"
-        ),
+        "pattern": re.compile(r"^(?P<trip_id>\d{3,4})\s+(?P<days>\d)-Day.*?(?P<credit>\d+\.\d{2})"),
         "confidence": 0.7,
     },
 ]
