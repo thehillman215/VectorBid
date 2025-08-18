@@ -1,6 +1,6 @@
 # Overview
 
-**📅 Last Updated**: August 15, 2025 - Major UX improvements: Enhanced dashboard, advanced preferences, intelligent user profiles
+**📅 Last Updated**: August 18, 2025 - FastAPI Integration: Modern API endpoints with Flask compatibility for WSGI deployment
 
 VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system now features a comprehensive, intelligent user experience with enhanced profile management, advanced preferences system with learning capabilities, smart dashboard with personalization, and a bid layer personas system offering 6 pre-built pilot flying styles (Family First, Money Maker, Commuter Friendly, Quality of Life, Reserve Avoider, Adventure Seeker). The project includes secure admin functionality for bid package management, one-click PBS command generation, and now provides professional-grade pilot operations interface with continuous preference optimization. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
 
@@ -21,10 +21,11 @@ Preferred communication style: Simple, everyday language.
 - **bids/**: Secure bid package storage with metadata
 
 ## Backend Architecture
-- **Framework**: Flask web framework with Python
+- **Framework**: Flask web framework with FastAPI-style API endpoints for modern functionality
+- **API Design**: RESTful API endpoints with JSON request/response handling, maintaining WSGI compatibility
 - **Database**: PostgreSQL via SQLAlchemy ORM (for core data) and Replit DB (for user profiles)
 - **Authentication**: Replit Auth integration with OAuth support
-- **AI Integration**: OpenAI GPT-4o for intelligent trip ranking
+- **AI Integration**: OpenAI GPT-4o for intelligent trip ranking and PBS command generation
 - **File Processing**: Multi-format schedule parsing (PDF via PyMuPDF, CSV, TXT)
 - **Admin Features**: Complete administrative system with Bearer token authentication for uploading monthly bid packet PDFs, one-click validation preview with trip parsing, file storage management, and real-time upload status feedback.
 
@@ -43,6 +44,7 @@ Preferred communication style: Simple, everyday language.
 ## Key Architectural Decisions
 - **Database Design**: Uses PostgreSQL for robust, complex data and Replit DB for simplified user profile management.
 - **Authentication Strategy**: Leverages Replit Auth for secure user authentication and session management.
+- **API Architecture**: Hybrid Flask/FastAPI design providing modern REST API endpoints with FastAPI-style patterns while maintaining WSGI compatibility for deployment.
 - **AI Integration Approach**: Utilizes OpenAI GPT-4o for natural language processing and intelligent trip analysis, enabling flexible preference input and human-like reasoning.
 - **Enhanced File Processing**: Implements a multi-layered parsing system with block detection and pattern matching for complex airline bid packages (e.g., United Airlines format), including deferred PyMuPDF import for robustness.
 - **Complete Pilot Workflow**: Features a comprehensive 3-step workflow: (1) Profile onboarding collecting airline, base, position, fleet, and seniority data, (2) Persona selection from 6 pre-built flying styles, and (3) Full 20-layer PBS bid strategy generation with expandable accordion interface showing strategy, probability, and PBS filters for each layer.
