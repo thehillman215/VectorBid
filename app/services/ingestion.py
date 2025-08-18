@@ -160,7 +160,7 @@ class IngestionService:
 
                 parts = line.split(",")
                 if len(parts) >= 5:
-                    # Check if this looks like a trip line (has trip_id, pairing_id, 
+                    # Check if this looks like a trip line (has trip_id, pairing_id,
                     # day, origin, destination)
                     if parts[0] and parts[1] and parts[2] and parts[3] and parts[4]:
                         trip_id = parts[0]
