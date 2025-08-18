@@ -202,7 +202,7 @@ class CommandCache:
         """Generate cache key from inputs"""
         profile_str = json.dumps(profile.__dict__, sort_keys=True)
         combined = f"{preferences}:{profile_str}"
-        return hashlib.md5(combined.encode()).hexdigest()
+        return hashlib.sha256(combined.encode()).hexdigest()
 
     def get(self, preferences: str, profile: PilotProfile) -> GenerationResult | None:
         """Retrieve from cache if valid"""

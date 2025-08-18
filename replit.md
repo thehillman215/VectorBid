@@ -1,6 +1,6 @@
 # Overview
 
-**📅 Last Updated**: August 18, 2025 - CI GREEN: Complete lint resolution, rule pack validation, and Flask API compatibility
+**📅 Last Updated**: August 18, 2025 - FastAPI SPA Implementation: Complete modern frontend + backend with MVP blueprint compliance
 
 VectorBid is a Flask-based web application designed to help airline pilots analyze and rank trip bids. It allows pilots to upload schedule files, input natural language preferences, and receive AI-powered trip rankings utilizing OpenAI's GPT-4o model. The system now features a comprehensive, intelligent user experience with enhanced profile management, advanced preferences system with learning capabilities, smart dashboard with personalization, and a bid layer personas system offering 6 pre-built pilot flying styles (Family First, Money Maker, Commuter Friendly, Quality of Life, Reserve Avoider, Adventure Seeker). The project includes secure admin functionality for bid package management, one-click PBS command generation, and now provides professional-grade pilot operations interface with continuous preference optimization. The project aims to provide pilots with an intelligent tool for optimizing their monthly bid selections based on personal preferences, streamlining a complex and critical aspect of their profession.
 
@@ -21,18 +21,20 @@ Preferred communication style: Simple, everyday language.
 - **bids/**: Secure bid package storage with metadata
 
 ## Backend Architecture
-- **Framework**: Flask web framework with Python
+- **Framework**: Flask web framework with Python + FastAPI SPA implementation for modern API endpoints
+- **SPA API**: Complete FastAPI backend with persona selection, preference parsing, optimization, and PBS layer generation
 - **Database**: PostgreSQL via SQLAlchemy ORM (for core data) and Replit DB (for user profiles)
 - **Authentication**: Replit Auth integration with OAuth support
-- **AI Integration**: OpenAI GPT-4o for intelligent trip ranking
+- **AI Integration**: OpenAI GPT-4o for intelligent trip ranking and preference parsing
 - **File Processing**: Multi-format schedule parsing (PDF via PyMuPDF, CSV, TXT)
 - **Admin Features**: Complete administrative system with Bearer token authentication for uploading monthly bid packet PDFs, one-click validation preview with trip parsing, file storage management, and real-time upload status feedback.
 
 ## Frontend Architecture
-- **Template Engine**: Jinja2 templates
-- **Styling**: Bootstrap with dark theme, Font Awesome for icons
-- **Responsive Design**: Mobile-first approach
-- **Interactive Elements**: HTMX for dynamic content loading in the user onboarding wizard
+- **Template Engine**: Jinja2 templates (legacy) + Modern SPA implementation
+- **SPA Design**: Tailwind CSS with clean forms, results tables, and responsive mobile-first layout
+- **Modern SPA**: Complete single-page application with persona picker, preference input, weight sliders, hard constraints, and results visualization
+- **Interactive Elements**: HTMX for dynamic content loading in the user onboarding wizard + vanilla JavaScript for SPA interactions
+- **API Integration**: Real-time preference parsing, live preview, schedule optimization, and PBS layer generation
 - **Drag-and-Drop Interface**: Native HTML5 drag-and-drop API with visual feedback, real-time rank updates, and smooth animations for trip preference reordering.
 
 ## Data Storage

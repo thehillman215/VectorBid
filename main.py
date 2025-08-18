@@ -14,7 +14,7 @@ def find_free_port(start_port=5000, max_attempts=10):
         try:
             # Test if port is available
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.bind(("0.0.0.0", port))
+                s.bind(("127.0.0.1", port))
                 print(f"✅ Found available port: {port}")
                 return port
         except OSError:
@@ -35,4 +35,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", available_port))
 
     print(f"🚀 Starting VectorBid on port {port}")
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="127.0.0.1", port=port, debug=True)

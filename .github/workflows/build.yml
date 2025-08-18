@@ -1,0 +1,51 @@
+name: Build and Push
+on:
+  push:
+    branches: [staging, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: read, packages: write }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute Docker tags
+        run: |
+          SHA7="${GITHUB_SHA::7}"
+          if [[ "$GITHUB_REF" == refs/pull/* ]]; then
+            PR="$(echo "$GITHUB_REF" | cut -d/ -f3)"
+            BASE="pr-${PR}"
+          else
+            REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-ci}}"
+            REF="${REF//\//-}"
+            REF="$(echo "$REF" | sed 's/[^A-Za-z0-9_.-]/-/g')"
+            BASE="${REF:-ci}"
+          fi
+          TAG1="build-${BASE}"
+          TAG2="build-${BASE}-${SHA7}"
+          TAG1="$(echo "$TAG1" | tr '[:upper:]' '[:lower:]' | sed 's/^-*//' | cut -c1-128)"
+          TAG2="$(echo "$TAG2" | tr '[:upper:]' '[:lower:]' | sed 's/^-*//' | cut -c1-128)"
+          echo "TAG1=${TAG1}" >> "$GITHUB_ENV"
+          echo "TAG2=${TAG2}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/vectorbid:${{ env.TAG1 }}
+            ghcr.io/${{ github.repository_owner }}/vectorbid:${{ env.TAG2 }}

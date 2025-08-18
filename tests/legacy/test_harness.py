@@ -1,12 +1,15 @@
+import json
+import os
+import sys
+import tempfile
+from datetime import datetime
+
 #!/usr/bin/env python3
 """
 VectorBid Quick Test Harness - United Airlines Focus
 Run this locally or in Replit console for instant feedback without web server.
 """
 
-import json
-import sys
-from datetime import datetime
 
 # Sample United Airlines trip data for testing
 SAMPLE_UNITED_TRIPS = [
@@ -367,7 +370,8 @@ if __name__ == "__main__":
 
         # Save results for inspection
         try:
-            with open("/tmp/united_test_results.json", "w") as f:
+            tmp_path = os.path.join(tempfile.gettempdir(), "united_test_results.json")
+            with open(tmp_path, "w") as f:
                 json.dump(results, f, indent=2, default=str)
             print("\n💾 Results saved to /tmp/united_test_results.json")
         except Exception:
