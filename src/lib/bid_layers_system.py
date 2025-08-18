@@ -1,12 +1,9 @@
 # bid_layers_system.py
 # Enhanced Bid Layers System for VectorBid - Copy this entire file
 
-from typing import List, Dict, Any, Optional, Union, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-import re
-from datetime import datetime, time, date
-import json
+from typing import Any
 
 
 class FilterType(Enum):
@@ -55,13 +52,13 @@ class BidFilter:
     weight: float = 1.0
     description: str = ""
 
-    def matches_trip(self, trip: Dict[str, Any]) -> Tuple[bool, str]:
+    def matches_trip(self, trip: dict[str, Any]) -> tuple[bool, str]:
         trip_value = self._extract_trip_value(trip)
         matches = self._evaluate_condition(trip_value)
         explanation = self._generate_explanation(trip_value, matches)
         return matches, explanation
 
-    def _extract_trip_value(self, trip: Dict[str, Any]) -> Any:
+    def _extract_trip_value(self, trip: dict[str, Any]) -> Any:
         if self.criteria == FilterCriteria.TRIP_LENGTH:
             return trip.get("days", 0)
         elif self.criteria == FilterCriteria.CREDIT_HOURS:
@@ -109,13 +106,13 @@ class BidLayer:
 
     layer_number: int
     name: str
-    filters: List[BidFilter] = field(default_factory=list)
+    filters: list[BidFilter] = field(default_factory=list)
     logic_operator: str = "AND"
     priority: int = 1
     description: str = ""
     is_active: bool = True
 
-    def evaluate_trip(self, trip: Dict[str, Any]) -> Tuple[bool, List[str], float]:
+    def evaluate_trip(self, trip: dict[str, Any]) -> tuple[bool, list[str], float]:
         if not self.is_active or not self.filters:
             return False, ["Layer is inactive or has no filters"], 0.0
 
@@ -153,7 +150,7 @@ class BidLayer:
 class BidLayersSystem:
     """Complete bid layers system supporting up to 50 layers"""
 
-    layers: List[BidLayer] = field(default_factory=list)
+    layers: list[BidLayer] = field(default_factory=list)
     max_layers: int = 50
 
     def add_layer(self, layer: BidLayer) -> bool:
@@ -171,7 +168,7 @@ class BidLayersSystem:
             layer.layer_number = i + 1
         return True
 
-    def evaluate_all_trips(self, trips: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def evaluate_all_trips(self, trips: list[dict[str, Any]]) -> list[dict[str, Any]]:
         evaluated_trips = []
 
         for trip in trips:
@@ -225,7 +222,7 @@ class BidLayersSystem:
         evaluated_trips.sort(key=lambda x: x["total_score"], reverse=True)
         return evaluated_trips
 
-    def generate_pbs_output(self, evaluated_trips: List[Dict[str, Any]]) -> str:
+    def generate_pbs_output(self, evaluated_trips: list[dict[str, Any]]) -> str:
         pbs_groups = []
 
         highly_recommended = [
@@ -294,10 +291,10 @@ class BidLayersSystem:
                 return "AVOID Pairings IF Weekend=True"
         return f"# {filter_obj.description}"
 
-    def get_layer_summary(self) -> Dict[str, Any]:
+    def get_layer_summary(self) -> dict[str, Any]:
         return {
             "total_layers": len(self.layers),
-            "active_layers": len([l for l in self.layers if l.is_active]),
+            "active_layers": len([layer for layer in self.layers if layer.is_active]),
             "max_layers": self.max_layers,
             "layers_detail": [
                 {
@@ -343,7 +340,7 @@ def create_weekends_off_layer(priority: int = 10) -> BidLayer:
     )
 
 
-def create_layover_preference_layer(cities: List[str], priority: int = 7) -> BidLayer:
+def create_layover_preference_layer(cities: list[str], priority: int = 7) -> BidLayer:
     filters = []
     for city in cities:
         filter_obj = BidFilter(

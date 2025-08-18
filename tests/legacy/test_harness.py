@@ -370,5 +370,5 @@ if __name__ == "__main__":
             with open("/tmp/united_test_results.json", "w") as f:
                 json.dump(results, f, indent=2, default=str)
             print("\n💾 Results saved to /tmp/united_test_results.json")
-        except:
+        except Exception:
             print("\n💾 Could not save results file")

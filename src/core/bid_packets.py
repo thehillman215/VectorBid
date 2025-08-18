@@ -5,18 +5,17 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 # Directories for storing bid packets and metadata
 BIDS_DIR = Path("bids")
 METADATA_DIR = BIDS_DIR / "metadata"
 
 
-def get_bid_packet_info(month_tag: str) -> Optional[dict]:
+def get_bid_packet_info(month_tag: str) -> dict | None:
     """Return metadata for the given month tag if it exists."""
     meta_file = METADATA_DIR / f"{month_tag}.json"
     if meta_file.exists():
-        with open(meta_file, "r", encoding="utf-8") as f:
+        with open(meta_file, encoding="utf-8") as f:
             return json.load(f)
     return None
 

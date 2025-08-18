@@ -1,31 +1,27 @@
 # bid_layers_routes.py
 # Flask routes for Enhanced Bid Layers - Copy this entire file
 
+import logging
+from typing import Any
+
 from flask import (
     Blueprint,
+    jsonify,
     render_template,
     request,
-    jsonify,
     session,
-    flash,
-    redirect,
-    url_for,
 )
 from werkzeug.exceptions import BadRequest
-import json
-import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 
 from src.lib.bid_layers_system import (
-    BidLayersSystem,
-    BidLayer,
     BidFilter,
-    FilterType,
+    BidLayer,
+    BidLayersSystem,
     FilterCriteria,
-    create_weekends_off_layer,
+    FilterType,
     create_layover_preference_layer,
     create_trip_length_layer,
+    create_weekends_off_layer,
 )
 
 # Create blueprint
@@ -54,7 +50,7 @@ def get_user_bid_system(user_id: str) -> BidLayersSystem:
     return user_bid_systems[user_id]
 
 
-def get_sample_trips() -> List[Dict[str, Any]]:
+def get_sample_trips() -> list[dict[str, Any]]:
     """Sample trips for testing"""
     return [
         {
@@ -199,7 +195,7 @@ def create_layer():
                 )
                 filters.append(bid_filter)
             except ValueError as e:
-                raise BadRequest(f"Invalid filter data: {e}")
+                raise BadRequest(f"Invalid filter data: {e}") from e
 
         layer = BidLayer(
             layer_number=0,
@@ -225,7 +221,7 @@ def create_layer():
 
     except BadRequest as e:
         return jsonify({"success": False, "error": str(e)}), 400
-    except Exception as e:
+    except Exception:
         logging.exception("Error creating layer")
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
@@ -243,7 +239,7 @@ def delete_layer(layer_number: int):
 
         return jsonify({"success": True, "message": "Layer deleted successfully"})
 
-    except Exception as e:
+    except Exception:
         logging.exception("Error deleting layer")
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
@@ -274,7 +270,7 @@ def toggle_layer(layer_number: int):
             }
         )
 
-    except Exception as e:
+    except Exception:
         logging.exception("Error toggling layer")
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
@@ -321,7 +317,7 @@ def analyze_trips():
             }
         )
 
-    except Exception as e:
+    except Exception:
         logging.exception("Error analyzing trips")
         return jsonify({"success": False, "error": "Internal server error"}), 500
 

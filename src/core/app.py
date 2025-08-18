@@ -5,6 +5,7 @@ Flask application factory for VectorBid - FIXED VERSION
 import os
 
 from flask import Flask
+
 from src.core.extensions import db
 
 

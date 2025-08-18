@@ -1,4 +1,4 @@
-import re, io
+import re
 
 # Enhanced patterns for United Airlines 737 bid packets
 _UNITED_PATTERNS = [
@@ -41,7 +41,7 @@ def parse_pdf(blob: bytes) -> list[dict]:
     try:
         import fitz  # PyMuPDF imported only when needed
     except ImportError:
-        raise RuntimeError("PyMuPDF not available - PDF parsing disabled")
+        raise RuntimeError("PyMuPDF not available - PDF parsing disabled") from None
 
     trips: list[dict] = []
 
@@ -158,8 +158,7 @@ def _extract_united_routing(context: str) -> str:
     # Look for patterns like "IAH ORD 0630 0912" or "IAH LAS 0730 0900"
 
     # Common United hubs and airports
-    airports = set(
-        [
+    airports = {
             "IAH",
             "DEN",
             "EWR",
@@ -176,8 +175,7 @@ def _extract_united_routing(context: str) -> str:
             "PHX",
             "SEA",
             "BOS",
-        ]
-    )
+        }
 
     # Find airport code patterns
     airport_pattern = re.compile(r"\b([A-Z]{3})\b")
@@ -253,7 +251,7 @@ def _detect_united_weekend(context: str) -> bool:
     # Numbers in SA or SU columns indicate weekend flying
 
     # Look for patterns like "22|23 24 25 26 27|28" where 22,28 would be weekend
-    weekend_pattern = re.compile(r"(\d{1,2})\|.*?\|(\d{1,2})")
+    re.compile(r"(\d{1,2})\|.*?\|(\d{1,2})")
 
     # Also check for explicit weekend indicators
     weekend_indicators = ["saturday", "sunday", "sat", "sun", "weekend"]

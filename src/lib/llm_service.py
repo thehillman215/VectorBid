@@ -1,14 +1,12 @@
-from src.lib.airport_presets import enhanced_international_scoring_with_persona
-
 """
 Enhanced AI-powered trip ranking service for VectorBid.
 Provides robust ranking with fallback strategies and improved prompt engineering.
 """
 
-import os
 import json
 import logging
-from typing import List, Dict, Optional, Tuple
+import os
+
 from openai import OpenAI, OpenAIError
 
 logger = logging.getLogger(__name__)
@@ -23,7 +21,7 @@ class AITripRanker:
         self.model = "gpt-4o-mini"  # Cost-effective choice for production
         self.fallback_model = "gpt-3.5-turbo"  # Backup model
 
-    def _initialize_client(self) -> Optional[OpenAI]:
+    def _initialize_client(self) -> OpenAI | None:
         """Initialize OpenAI client with error handling."""
         if not self.api_key:
             logger.warning("OPENAI_API_KEY not set - AI ranking will use fallback")
@@ -37,8 +35,8 @@ class AITripRanker:
             return None
 
     def rank_trips(
-        self, trips: List[Dict], preferences: str, top_n: int = 15
-    ) -> List[Dict]:
+        self, trips: list[dict], preferences: str, top_n: int = 15
+    ) -> list[dict]:
         """
         Rank trips based on pilot preferences.
 
@@ -68,8 +66,8 @@ class AITripRanker:
             return self._fallback_ranking(trips, preferences, top_n)
 
     def _ai_ranking(
-        self, trips: List[Dict], preferences: str, top_n: int
-    ) -> List[Dict]:
+        self, trips: list[dict], preferences: str, top_n: int
+    ) -> list[dict]:
         """Perform AI-powered trip ranking."""
         # Limit trips for token economy and processing speed
         trips_to_analyze = trips[:50] if len(trips) > 50 else trips
@@ -140,7 +138,7 @@ class AITripRanker:
 
 Your expertise includes:
 - Understanding pilot scheduling and work-life balance needs
-- Knowledge of airline operations, layovers, and trip structures  
+- Knowledge of airline operations, layovers, and trip structures
 - Awareness of factors like commuting, rest requirements, and family time
 - Recognition of career stage differences (junior vs senior pilots)
 
@@ -172,7 +170,7 @@ Return ONLY a JSON object with this exact structure:
 Be specific and practical in your reasoning. Focus on the factors that matter most to pilots."""
 
     def _create_ranking_prompt(
-        self, trip_summaries: List[str], preferences: str, top_n: int
+        self, trip_summaries: list[str], preferences: str, top_n: int
     ) -> str:
         """Create the user prompt for trip ranking."""
         trips_text = "\n".join(
@@ -191,7 +189,7 @@ Please rank the top {top_n} trips that best match these preferences. Consider al
 
 For each trip, calculate an efficiency score (credit_hours / days) and consider how well it matches the stated preferences."""
 
-    def _prepare_trip_summaries(self, trips: List[Dict]) -> List[str]:
+    def _prepare_trip_summaries(self, trips: list[dict]) -> list[str]:
         """Create concise but informative summaries of trips for AI processing."""
         summaries = []
 
@@ -221,14 +219,14 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
         return summaries
 
     def _parse_ai_response(
-        self, response_content: str, original_trips: List[Dict]
-    ) -> List[Dict]:
+        self, response_content: str, original_trips: list[dict]
+    ) -> list[dict]:
         """Parse and validate AI response."""
         try:
             data = json.loads(response_content)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse AI response as JSON: {e}")
-            raise ValueError("Invalid JSON response from AI")
+            raise ValueError("Invalid JSON response from AI") from e
 
         # Extract rankings from response
         rankings = data.get("rankings", [])
@@ -274,15 +272,15 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
         return validated_results
 
     def _fallback_ranking(
-        self, trips: List[Dict], preferences: str, top_n: int
-    ) -> List[Dict]:
+        self, trips: list[dict], preferences: str, top_n: int
+    ) -> list[dict]:
         """Provide intelligent fallback ranking when AI is unavailable."""
         logger.info("Using intelligent fallback ranking")
 
         # Analyze preferences for key terms
         prefs_lower = preferences.lower()
 
-        def calculate_score(trip: Dict) -> Tuple[float, List[str]]:
+        def calculate_score(trip: dict) -> tuple[float, list[str]]:
             """Calculate heuristic score based on preferences."""
             score = 50.0  # Base score
             factors = []
@@ -365,7 +363,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
         return scored_trips[:top_n]
 
     def _generate_fallback_reasoning(
-        self, trip: Dict, factors: List[str], preferences: str
+        self, trip: dict, factors: list[str], preferences: str
     ) -> str:
         """Generate reasoning for fallback rankings."""
         reasons = []
@@ -400,7 +398,7 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
 
         return f"Good match: {', '.join(reasons[:3])}"  # Limit to top 3 reasons
 
-    def _default_ranking(self, trips: List[Dict], top_n: int) -> List[Dict]:
+    def _default_ranking(self, trips: list[dict], top_n: int) -> list[dict]:
         """Provide basic ranking when no preferences given."""
         logger.info("Using default ranking (by efficiency)")
 
@@ -431,8 +429,8 @@ For each trip, calculate an efficiency score (credit_hours / days) and consider 
 
 # Public interface functions
 def rank_trips_with_ai(
-    trips: List[Dict], preferences: str, top_n: int = 15
-) -> List[Dict]:
+    trips: list[dict], preferences: str, top_n: int = 15
+) -> list[dict]:
     """
     Rank trips using AI with robust fallback handling.
 
@@ -456,7 +454,7 @@ def is_ai_available() -> bool:
     return os.environ.get("OPENAI_API_KEY") is not None
 
 
-def get_ranking_capabilities() -> Dict[str, bool]:
+def get_ranking_capabilities() -> dict[str, bool]:
     """Get available ranking capabilities."""
     return {
         "ai_ranking": is_ai_available(),

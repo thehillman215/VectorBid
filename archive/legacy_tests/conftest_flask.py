@@ -1,6 +1,5 @@
 """Pytest configuration and fixtures for VectorBid tests."""
 
-import os
 import sys
 from pathlib import Path
 

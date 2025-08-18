@@ -25,14 +25,13 @@ from flask import (
     url_for,
 )
 
+# Local bid packet helpers
+from src.core.bid_packets import get_bid_packet_info, save_bid_packet
 from src.lib.pbs_20_layer_system import generate_pbs_compliant_bid_layers
 from src.lib.pbs_command_generator import generate_pbs_commands
 from src.lib.personas import PILOT_PERSONAS
 from src.lib.services.db import get_profile, save_profile
 from src.lib.subscription_manager import SubscriptionManager
-
-# Local bid packet helpers
-from src.core.bid_packets import get_bid_packet_info, save_bid_packet
 
 try:
     from src.lib.pbs_enhanced import generate_advanced_pbs_strategy
@@ -95,7 +94,7 @@ def index():
                                 <form action="/process" method="post">
                                     <div class="mb-3">
                                         <label class="form-label">Enter your preferences:</label>
-                                        <textarea name="preferences" class="form-control" rows="4" 
+                                        <textarea name="preferences" class="form-control" rows="4"
                                             placeholder="I want weekends off and prefer short trips..."></textarea>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Generate PBS Commands</button>
@@ -528,14 +527,14 @@ def generate_bid_layers():
 
     <!-- Bootstrap JavaScript (must be loaded after DOM elements) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         function copyCommands() {
             const commands = document.querySelector('pre').textContent;
             navigator.clipboard.writeText(commands);
             alert('Commands copied to clipboard!');
         }
-        
+
         // Initialize Bootstrap components after DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing Bootstrap accordion...');

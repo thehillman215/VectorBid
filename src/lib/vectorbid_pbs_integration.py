@@ -4,28 +4,26 @@ Integration layer for VectorBid to use Enhanced PBS Generation
 This replaces the simple natural_language_to_pbs_filters with comprehensive system
 """
 
-from typing import List, Dict, Any, Optional
-from flask import (
-    session,
-    request,
-    jsonify,
-    make_response,
-    flash,
-    redirect,
-    url_for,
-    render_template,
-)
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any
+
+from enhanced_bid_layers_system import Enhanced50LayerSystem
 
 # Import our enhanced systems
 from enhanced_pbs_generator import (
     EnhancedPBSGenerator,
-    PBSCommand,
-    CommandType,
-    Priority,
 )
-from enhanced_bid_layers_system import Enhanced50LayerSystem
+from flask import (
+    flash,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +40,8 @@ class VectorBidPBSService:
         self,
         preferences: str,
         user_id: str = None,
-        pilot_profile: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
+        pilot_profile: dict[str, Any] = None,
+    ) -> dict[str, Any]:
         """
         Main entry point for processing pilot preferences
         Replaces the old natural_language_to_pbs_filters function
@@ -131,7 +129,7 @@ class VectorBidPBSService:
                 "pbs_output": f"Error generating PBS commands: {str(e)}",
             }
 
-    def get_pilot_profile_from_session(self) -> Dict[str, Any]:
+    def get_pilot_profile_from_session(self) -> dict[str, Any]:
         """Extract pilot profile from current session/user data"""
         # This would integrate with your existing user profile system
         profile = {}
@@ -174,8 +172,8 @@ VectorBid is not responsible for bid results.
 
 
 def enhanced_natural_language_to_pbs_filters(
-    preferences_text: str, trip_data: Optional[List[Dict]] = None
-) -> List[str]:
+    preferences_text: str, trip_data: list[dict] | None = None
+) -> list[str]:
     """
     Enhanced replacement for the original natural_language_to_pbs_filters function
     Maintains backward compatibility while providing enhanced functionality
@@ -379,7 +377,7 @@ Active Layers: 3 of 3
 LAYER  1: Critical Constraints
   PREFER LINE OVER RESERVE
 
-LAYER  2: Weekend Strategy  
+LAYER  2: Weekend Strategy
   AVOID TRIPS IF DUTY_PERIOD OVERLAPS WEEKEND
 
 LAYER  3: Timing Preferences
@@ -421,7 +419,7 @@ USAGE INSTRUCTIONS:
     return sample
 
 
-def _get_sample_layers() -> List[Dict[str, Any]]:
+def _get_sample_layers() -> list[dict[str, Any]]:
     """Generate sample layer data for demo"""
     return [
         {
@@ -573,7 +571,7 @@ if __name__ == "__main__":
     service = VectorBidPBSService()
 
     test_preferences = """
-    I'm a commuter from Denver flying 737s out of IAH. 
+    I'm a commuter from Denver flying 737s out of IAH.
     I need weekends off, no early departures, and I want to avoid reserve.
     I prefer short trips and need to be home for my anniversary on the 15th.
     """

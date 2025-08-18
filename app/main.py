@@ -1,11 +1,10 @@
-from app.compat.validate_router import router as compat_validate_router
-
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
 
+from app.compat.validate_router import router as compat_validate_router
 from app.models import (
     BidLayerArtifact,
     CandidateSchedule,

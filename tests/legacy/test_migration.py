@@ -17,7 +17,6 @@ def test_enhanced_profiles():
             calculate_seniority_category,
             get_profile,
             get_seniority_analysis,
-            needs_seniority_update,
             save_profile,
             update_seniority_analysis,
             validate_profile,

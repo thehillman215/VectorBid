@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from app.rules.engine import load_rule_pack, DEFAULT_RULES
+from app.rules.engine import DEFAULT_RULES, load_rule_pack
 
 
 def test_load_rule_pack_merge_success(tmp_path):

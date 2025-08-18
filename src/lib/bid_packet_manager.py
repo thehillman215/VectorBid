@@ -3,12 +3,12 @@ Bid Packet and Contract Management System
 Handles upload, storage, and parsing of airline bid packets and contracts
 """
 
-import os
+import hashlib
 import json
+import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional, List
-import hashlib
+from typing import Any
 
 
 class BidPacketManager:
@@ -23,7 +23,7 @@ class BidPacketManager:
         for dir_path in [self.storage_dir, self.contracts_dir, self.metadata_dir]:
             dir_path.mkdir(parents=True, exist_ok=True)
 
-    def upload_bid_packet(self, file_obj, month_tag: str, airline: str) -> Dict:
+    def upload_bid_packet(self, file_obj, month_tag: str, airline: str) -> dict:
         """
         Upload and store a bid packet
 
@@ -84,7 +84,7 @@ class BidPacketManager:
 
     def upload_pilot_contract(
         self, file_obj, airline: str, version: str = None
-    ) -> Dict:
+    ) -> dict:
         """
         Upload and store a pilot contract
 
@@ -133,7 +133,7 @@ class BidPacketManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def get_available_bid_packets(self, airline: str = None) -> List[Dict]:
+    def get_available_bid_packets(self, airline: str = None) -> list[dict]:
         """Get list of available bid packets"""
         packets = []
 
@@ -142,7 +142,7 @@ class BidPacketManager:
             if metadata_file.name.startswith("contract_"):
                 continue
 
-            with open(metadata_file, "r") as f:
+            with open(metadata_file) as f:
                 metadata = json.load(f)
 
             if airline and metadata.get("airline") != airline:
@@ -155,17 +155,17 @@ class BidPacketManager:
 
         return packets
 
-    def get_bid_packet_for_month(self, month_tag: str, airline: str) -> Optional[Dict]:
+    def get_bid_packet_for_month(self, month_tag: str, airline: str) -> dict | None:
         """Get specific bid packet for a month"""
         metadata_file = self.metadata_dir / f"{month_tag}_{airline}.json"
 
         if metadata_file.exists():
-            with open(metadata_file, "r") as f:
+            with open(metadata_file) as f:
                 return json.load(f)
 
         return None
 
-    def parse_bid_packet(self, file_path: Path, metadata: Dict) -> Dict:
+    def parse_bid_packet(self, file_path: Path, metadata: dict) -> dict:
         """
         Parse bid packet to extract trips
         This is a placeholder - implement actual parsing logic
@@ -228,13 +228,13 @@ class BidPacketManager:
                 sha256_hash.update(byte_block)
         return sha256_hash.hexdigest()
 
-    def _queue_for_parsing(self, file_path: Path, metadata: Dict):
+    def _queue_for_parsing(self, file_path: Path, metadata: dict):
         """Queue bid packet for parsing"""
         # TODO: Implement async parsing queue
         # For now, parse immediately
         self.parse_bid_packet(file_path, metadata)
 
-    def _extract_contract_rules(self, file_path: Path, metadata: Dict):
+    def _extract_contract_rules(self, file_path: Path, metadata: dict):
         """Extract rules from pilot contract"""
         # TODO: Implement contract parsing and rule extraction
         # This would extract things like:
@@ -245,71 +245,7 @@ class BidPacketManager:
         # - Equipment qualifications
         pass
 
-
-"""
-Fallback BidPacketManager for admin dashboard functionality
-"""
-
-import os
-import json
-from datetime import datetime
-from typing import List, Dict, Optional, Tuple, Any
-
-
-class BidPacketManager:
-    """Manages bid packet storage and retrieval"""
-
-    def __init__(self):
-        self.bid_storage_path = "bids"
-        self.metadata_path = os.path.join(self.bid_storage_path, "metadata")
-
-        # Ensure directories exist
-        os.makedirs(self.bid_storage_path, exist_ok=True)
-        os.makedirs(self.metadata_path, exist_ok=True)
-
-    def get_available_bid_packets(self) -> List[Dict[str, Any]]:
-        """Get list of available bid packets"""
-        packets = []
-
-        try:
-            # Check for PDF files in bids directory
-            if os.path.exists(self.bid_storage_path):
-                for filename in os.listdir(self.bid_storage_path):
-                    if filename.endswith(".pdf"):
-                        file_path = os.path.join(self.bid_storage_path, filename)
-                        file_size = os.path.getsize(file_path)
-
-                        # Try to extract month tag from filename
-                        month_tag = self._extract_month_tag(filename)
-
-                        packet = {
-                            "filename": filename,
-                            "month_tag": month_tag,
-                            "airline": self._extract_airline(filename),
-                            "year": (
-                                int(month_tag[:4])
-                                if len(month_tag) >= 4
-                                else datetime.now().year
-                            ),
-                            "month": (
-                                int(month_tag[4:6])
-                                if len(month_tag) >= 6
-                                else datetime.now().month
-                            ),
-                            "size_mb": round(file_size / (1024 * 1024), 2),
-                            "upload_date": datetime.fromtimestamp(
-                                os.path.getctime(file_path)
-                            ).isoformat(),
-                        }
-                        packets.append(packet)
-
-            return sorted(packets, key=lambda x: x.get("upload_date", ""), reverse=True)
-
-        except Exception as e:
-            print(f"Error loading bid packets: {e}")
-            return []
-
-    def upload_bid_packet(self, file, month_tag: str, airline: str) -> Dict[str, Any]:
+    def upload_bid_packet(self, file, month_tag: str, airline: str) -> dict[str, Any]:
         """Upload a bid packet file"""
         try:
             # Create filename
@@ -344,7 +280,7 @@ class BidPacketManager:
         except Exception as e:
             return {"success": False, "error": f"Upload failed: {str(e)}"}
 
-    def delete_bid_packet(self, month_tag: str, airline: str) -> Dict[str, Any]:
+    def delete_bid_packet(self, month_tag: str, airline: str) -> dict[str, Any]:
         """Delete a bid packet"""
         try:
             filename = f"{airline}_{month_tag}.pdf"
@@ -367,7 +303,7 @@ class BidPacketManager:
 
     def get_bid_packet_file(
         self, month_tag: str, airline: str
-    ) -> Optional[Tuple[bytes, str]]:
+    ) -> tuple[bytes, str] | None:
         """Get bid packet file data for download"""
         try:
             filename = f"{airline}_{month_tag}.pdf"

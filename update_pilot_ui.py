@@ -1,5 +1,3 @@
-import os
-
 # Create updated UI with separated workflows
 ui_route = '''from fastapi import APIRouter, Request, Form, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -17,7 +15,7 @@ PERSONAS = {
         "priorities": {"time_home": 10, "pay": 5, "easy_trips": 7}
     },
     "family": {
-        "name": "👨‍👩‍👧‍👦 Family First", 
+        "name": "👨‍👩‍👧‍👦 Family First",
         "defaults": "Weekends off, no holidays, predictable schedule",
         "priorities": {"time_home": 10, "weekends": 10, "pay": 3}
     },
@@ -46,7 +44,7 @@ def get_pilot_profile(pilot_id: Optional[str]) -> dict:
             "pilot_id": pilot_id,
             "name": "Captain Smith",
             "airline": "UAL",
-            "base": "EWR", 
+            "base": "EWR",
             "seat": "CPT",
             "equipment": "737",
             "seniority": "1234",
@@ -58,11 +56,11 @@ def get_pilot_profile(pilot_id: Optional[str]) -> dict:
 async def index(request: Request, pilot_id: Optional[str] = Cookie(None)):
     """Main page - check if pilot has profile"""
     profile = get_pilot_profile(pilot_id)
-    
+
     if not profile:
         # First time - redirect to onboarding
         return RedirectResponse(url="/onboarding", status_code=302)
-    
+
     # Has profile - show monthly bid workflow
     return templates.TemplateResponse("monthly_bid.html", {
         "request": request,
@@ -93,7 +91,7 @@ async def save_profile(
     response.set_cookie(key="pilot_id", value="pilot123")
     return response
 
-@router.get("/profile", response_class=HTMLResponse) 
+@router.get("/profile", response_class=HTMLResponse)
 async def profile_settings(request: Request, pilot_id: Optional[str] = Cookie(None)):
     """Edit pilot profile settings"""
     profile = get_pilot_profile(pilot_id)
@@ -115,23 +113,23 @@ async def generate_pbs(
 ):
     """Generate PBS commands for monthly bid"""
     profile = get_pilot_profile(pilot_id)
-    
+
     # Generate PBS based on profile + persona + preferences
     pbs_layers = []
-    
+
     # High priority items
     if priority_weekends >= 8:
         pbs_layers.extend([
             "AVOID PAIRINGS",
             "  IF DOW CONTAINS SA,SU"
         ])
-    
+
     if priority_time_home >= 8:
         pbs_layers.extend([
             "PREFER PAIRINGS",
             "  IF TAFB < 48:00"
         ])
-    
+
     # Parse custom preferences
     pref_lower = preferences.lower()
     if "red-eye" in pref_lower or "redeye" in pref_lower:
@@ -139,27 +137,27 @@ async def generate_pbs(
             "AVOID PAIRINGS",
             "  IF REPORT < 0600"
         ])
-    
+
     if "christmas" in pref_lower or "holiday" in pref_lower:
         pbs_layers.extend([
             "AVOID PAIRINGS",
             "  IF DATE IN (24DEC, 25DEC, 26DEC)"
         ])
-    
+
     # Default
     pbs_layers.extend([
         "",
         "AWARD PAIRINGS",
         "  IN SENIORITY ORDER"
     ])
-    
+
     results = {
         "pbs_layers": pbs_layers,
         "profile": profile,
         "persona": PERSONAS.get(persona, {}),
         "month": "January 2025"
     }
-    
+
     return templates.TemplateResponse("pbs_results.html", {
         "request": request,
         "results": results
