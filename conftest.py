@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def pytest_ignore_collect(path, config):
+def pytest_ignore_collect(collection_path, config):
     p = Path(str(path))
     s = str(p).replace("\\", "/")
     return any(
