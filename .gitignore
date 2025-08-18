@@ -121,3 +121,7 @@ exports/*
 *.backup
 contracts/openapi.json
 contracts/openapi.json
+
+# CI artifacts
+bandit-report.json
+staging
