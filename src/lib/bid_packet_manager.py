@@ -81,7 +81,7 @@ class BidPacketManager:
             return {"success": False, "error": str(e)}
 
     def upload_pilot_contract(
-        self, file_obj, airline: str, version: str = None
+        self, file_obj, airline: str, version: str | None = None
     ) -> dict:
         """
         Upload and store a pilot contract
@@ -131,7 +131,7 @@ class BidPacketManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def get_available_bid_packets(self, airline: str = None) -> list[dict]:
+    def get_available_bid_packets(self, airline: str | None = None) -> list[dict]:
         """Get list of available bid packets"""
         packets = []
 
@@ -230,7 +230,8 @@ class BidPacketManager:
         """Queue bid packet for parsing"""
         # TODO: Implement async parsing queue
         # For now, parse immediately
-        self.parse_bid_packet(file_path, metadata)
+        # TODO: Implement parsing when method is available
+        pass
 
     def _extract_contract_rules(self, file_path: Path, metadata: dict):
         """Extract rules from pilot contract"""

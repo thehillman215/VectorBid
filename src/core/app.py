@@ -80,6 +80,15 @@ def create_app():
             ),
         }
 
+    # Register Flask API endpoints
+    try:
+        from src.api.flask_api_adapter import api_v1
+
+        app.register_blueprint(api_v1)
+        print("✅ Flask API v1 endpoints registered!")
+    except ImportError as e:
+        print(f"⚠️ Flask API adapter not available: {e}")
+
     # Add a test route to verify the app is working
     @app.route("/test")
     def test_route():
