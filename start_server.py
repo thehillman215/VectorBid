@@ -14,7 +14,7 @@ def find_free_port(start_port=5000, max_attempts=10):
     for port in range(start_port, start_port + max_attempts):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.bind(("0.0.0.0", port))
+                s.bind(("127.0.0.1", port))
                 print(f"✅ Found available port: {port}")
                 return port
         except OSError:
