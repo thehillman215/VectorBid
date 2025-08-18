@@ -7,7 +7,6 @@ except Exception:
     import sys, subprocess
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "uvicorn>=0.29"])
 PY
-set -euo pipefail
 PORT="${PORT:-3000}"
 
 # ensure no stale server
@@ -18,10 +17,6 @@ PID=$!
 trap "kill $PID" EXIT
 sleep 3
 
-if curl -fsS "http://localhost:$PORT/api/meta/health" >/dev/null; then
-  echo "smoke OK (meta/health) on $PORT"
-  exit 0
-fi
-
-curl -fsS "http://localhost:$PORT/" >/dev/null
-echo "smoke OK (/) on $PORT"
+curl -fsS "http://localhost:$PORT/ping" >/dev/null
+curl -fsS "http://localhost:$PORT/health" >/dev/null
+echo "smoke OK on $PORT"

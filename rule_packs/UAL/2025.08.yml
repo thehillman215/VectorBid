@@ -22,7 +22,7 @@ union:
       check: pairing.redeye == false
   soft:
     - id: PREFER_LAYOVER_CITY
-      weight: pref.soft_prefs.layovers.weight
+      weight: "pref.soft_prefs.layovers.weight"
       score: "city in pref.soft_prefs.layovers.prefer ? 1.0 : (city in pref.soft_prefs.layovers.avoid ? 0.0 : 0.5)"
 
 rules: []
