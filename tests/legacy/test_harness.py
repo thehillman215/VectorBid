@@ -7,9 +7,6 @@ VectorBid Quick Test Harness - United Airlines Focus
 Run this locally or in Replit console for instant feedback without web server.
 """
 
-import json
-import sys
-from datetime import datetime
 
 # Sample United Airlines trip data for testing
 SAMPLE_UNITED_TRIPS = [
