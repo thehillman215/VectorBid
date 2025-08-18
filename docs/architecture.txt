@@ -1,0 +1,133 @@
+# VectorBid — Consolidated Project Blueprint (MVP v0.3)
+
+Date: Aug 17, 2025  
+Scope: Memorialize current architecture, decisions, and working requirements to carry into the next project phase. This supersedes stale Flask-era notes and earlier ad-hoc docs.
+
+---
+
+## 0) TL;DR
+- **Backend**: FastAPI on Python 3.x. Flask artifacts considered legacy; remove or archive.
+- **Core philosophy**: Context-first, parallel analysis paths, data-fusion middle layer, LLM for strategy (not parsing only), and intelligent layering for PBS 2.x outputs.
+- **Contract-driven build**: Schema-first (Pydantic/JSON Schema), versioned rule packs (FAR/CBA), optimizer with explainability, bid linter, deterministic exports.
+- **United-first**; airline-agnostic via modular packs. No live airline portal integration in MVP.
+- **Constraints**: PBS live environment typically available days 1–5 each month → plan offline workflows.
+
+---
+
+## 1) Current State Snapshot
+- Branches unified back to one **main**.
+- Runtime: FastAPI app with modular routers for parse → validate → optimize → generate → lint → export.
+- UI flow: Persona → free-text preferences → sliders/weights → results table → layers view → export.
+- Artifacts: JSON contracts for preferences, candidates, and exportable bid layers; CSV/JSON exports; audit/telemetry.
+- Constraint: No PBS sandbox; rely on canned bid packages and golden tests.
+
+---
+
+## 2) Architecture Guardrails
+- Context-first enrichment.
+- Parallel processing of NLP, validation, analytics.
+- Data fusion stage before optimization.
+- LLM for strategy/interpretation only.
+- Intelligent layering with lint + auto-fix.
+
+---
+
+## 3) End-to-End Data Flow
+- **UI input → Preprocessor → NLP Parser → Merge & Validate → Optimizer → Candidates → Layer Generator → Linter → Export → UI/Artifacts.**
+- Diagrams in repo show flow and “Compile My Bid” sequence.
+
+---
+
+## 4) API Surface (proposed)
+- `POST /parse_preferences`
+- `POST /validate_constraints`
+- `POST /optimize`
+- `POST /generate_layers`
+- `POST /lint`
+- `GET /exports/:id`
+- `GET /explain/:candidate_id`
+
+---
+
+## 5) Schema-First Data Contracts
+- **PreferenceSchema v1** (pilot profile, hard/soft constraints, weights, source).
+- **CandidateSchedule** (ranked candidates, scores, rationale).
+- **BidLayerArtifact** (PBS 2.x filters, lint results, export hash).
+
+---
+
+## 6) Rule Packs
+- Versioned YAML encoding FAR + CBA rules.
+- Types: HARD, SOFT, DERIVED.
+- Explainability required (reason codes + text).
+
+---
+
+## 7) Optimizer & Layering
+- Feasible set from rules → weighted scoring → candidate generation.
+- Layer generator converts top candidates into PBS layers.
+- Linter auto-fixes contradictions/shadowing.
+
+---
+
+## 8) UI (MVP)
+- Persona picker with default weights.
+- Free-text box with live parse preview.
+- Sliders for weights.
+- Violations panel with fixes.
+- Results: Top-K with rationales.
+- Layers View: readable + raw PBS text.
+- What-if bar for re-ranking.
+
+---
+
+## 9) Storage, Observability, Security
+- Tables: pilots, preferences, rule_packs, bid_packages, candidates, exports, audit.
+- Observability: structured logs, metrics, traces.
+- Security: PII minimization, encryption, TLS, signed exports.
+
+---
+
+## 10) Test Strategy
+- Unit, property-based, golden, and E2E tests.
+- Acceptance criteria: deterministic, schema-valid, compliant exports.
+
+---
+
+## 11) Document Set to Keep/Add
+- **Keep**: ARCHITECTURE.md, API.md, DATA_CONTRACTS.md, RULE_PACKS.md, OPTIMIZER.md, UI_FLOWS.md, TESTING.md, SECURITY.md, OBSERVABILITY.md, GIT_WORKFLOW.md, ROADMAP.md, CHANGELOG.md.
+- **Add**: ADRs (0001–0004), LEXICON.md, DEVELOPER_QUICKSTART.md, OPS_RUNBOOK.md.
+- **Retire/Archive**: Flask notes, old diagrams, stale Google Docs.
+
+---
+
+## 12) Migration Checklist
+- Port from Flask → FastAPI.
+- Validate schema + rule packs.
+- Remove legacy artifacts.
+
+---
+
+## 13) Initial Backlog (MVP-0.3)
+- Define PreferenceSchema v1.
+- Build parse → validate → optimize flow.
+- Author UAL rule pack v2025.08.
+- Implement optimizer + linter.
+- UI persona + results flow.
+- Observability + tests.
+
+---
+
+## 14) Risks & Mitigations
+- **PBS access windows** → rely on canned fixtures.
+- **LLM ambiguity** → ask-backs, strict schema.
+- **Airline legality drift** → versioned packs + CI tests.
+- **Layer shadowing** → lint + auto-fix.
+
+---
+
+## 15) Next-Phase Kickoff
+- Create `/docs` tree; move this into ARCHITECTURE.md.
+- Add ADRs and Quickstart.
+- Wire CI to enforce schema + rule pack checks.
+- Cut MVP-0.3 milestone; start with Parse → Validate → Optimize vertical slice.
