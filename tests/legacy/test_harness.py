@@ -1,5 +1,6 @@
 import os
 import tempfile
+
 #!/usr/bin/env python3
 """
 VectorBid Quick Test Harness - United Airlines Focus
@@ -54,9 +55,12 @@ UA202  1DAY  DEN-ORD-DEN     06:45   10MAR-10MAR
 """
 
 SAMPLE_PREFERENCES = {
-    "work_life_balance": "I want weekends off and shorter trips for family time",
-    "credit_hunter": "Maximize credit hours and pay, longer international trips preferred",
-    "commuter_friendly": "Prefer trips that start/end at DEN with efficient scheduling",
+    "work_life_balance":
+    "I want weekends off and shorter trips for family time",
+    "credit_hunter":
+    "Maximize credit hours and pay, longer international trips preferred",
+    "commuter_friendly":
+    "Prefer trips that start/end at DEN with efficient scheduling",
 }
 
 
@@ -123,9 +127,8 @@ def parse_united_line(line: str) -> dict:
             dates = groups.get("dates", "")
             aircraft = groups.get("aircraft", "")
 
-            includes_weekend = any(
-                indicator in line.upper() for indicator in ["SAT", "SUN", "WEEKEND"]
-            )
+            includes_weekend = any(indicator in line.upper()
+                                   for indicator in ["SAT", "SUN", "WEEKEND"])
 
             return {
                 "trip_id": trip_id,
@@ -153,10 +156,8 @@ def test_full_united_parsing():
         line = line.strip()
         if not line or len(line) < 10:
             continue
-        if any(
-            header in line.upper()
-            for header in ["TRIP", "BASE", "EQUIPMENT", "UNITED AIRLINES"]
-        ):
+        if any(header in line.upper()
+               for header in ["TRIP", "BASE", "EQUIPMENT", "UNITED AIRLINES"]):
             continue
 
         trip = parse_united_line(line)
@@ -193,7 +194,9 @@ def test_ai_fallback_ranking():
 
     print(f"  Preferences: {preferences}")
     for i, trip in enumerate(ranked_trips):
-        print(f"  {i + 1}. {trip['trip_id']}: {trip['score']}/10 - {trip['reasoning']}")
+        print(
+            f"  {i + 1}. {trip['trip_id']}: {trip['score']}/10 - {trip['reasoning']}"
+        )
 
     return ranked_trips
 
@@ -227,7 +230,8 @@ def calculate_united_score(trip: dict, preferences: str) -> int:
 
     # Commuter preferences (DEN base)
     if "commuter" in preferences.lower() or "DEN" in preferences.lower():
-        if trip["routing"].startswith("DEN-") and trip["routing"].endswith("-DEN"):
+        if trip["routing"].startswith("DEN-") and trip["routing"].endswith(
+                "-DEN"):
             score += 2
 
     # International preference
@@ -284,11 +288,13 @@ def test_profile_matching():
 
 def build_united_preferences(profile: dict) -> str:
     """Build United-specific preferences from profile."""
-    base_prefs = SAMPLE_PREFERENCES.get(profile.get("persona", "work_life_balance"))
+    base_prefs = SAMPLE_PREFERENCES.get(
+        profile.get("persona", "work_life_balance"))
 
     additions = []
     if profile.get("base"):
-        additions.append(f"prefer trips departing/arriving at {profile['base']}")
+        additions.append(
+            f"prefer trips departing/arriving at {profile['base']}")
     if profile.get("fleet"):
         additions.append(f"comfortable with {profile['fleet']} aircraft")
     if profile.get("seniority", 0) > 1000:
@@ -310,13 +316,15 @@ def benchmark_united_performance():
     total_scores = 0
 
     for trip in large_trip_set:
-        score = calculate_united_score(trip, SAMPLE_PREFERENCES["work_life_balance"])
+        score = calculate_united_score(trip,
+                                       SAMPLE_PREFERENCES["work_life_balance"])
         total_scores += score
 
     end = datetime.now()
     duration = (end - start).total_seconds()
 
-    print(f"  ✅ Processed {len(large_trip_set)} United trips in {duration:.3f}s")
+    print(
+        f"  ✅ Processed {len(large_trip_set)} United trips in {duration:.3f}s")
     print(f"  Rate: {len(large_trip_set) / duration:.0f} trips/second")
     print(f"  Average score: {total_scores / len(large_trip_set):.1f}/10")
 
@@ -369,7 +377,8 @@ if __name__ == "__main__":
 
         # Save results for inspection
         try:
-            with tmp_path = os.path.join(tempfile.gettempdir(), "united_test_results.json")
+            tmp_path = os.path.join(tempfile.gettempdir(),
+                                    "united_test_results.json")
             with open(tmp_path, "w") as f:
                 json.dump(results, f, indent=2, default=str)
             print("\n💾 Results saved to /tmp/united_test_results.json")
