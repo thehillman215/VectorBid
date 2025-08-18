@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -89,3 +90,30 @@ class BidLayerArtifact(BaseModel):
     layers: list[Layer]
     lint: dict[str, list[str]]
     export_hash: str
+
+
+# New models for ingestion API
+class IngestionRequest(BaseModel):
+    airline: str
+    month: str
+    base: str
+    fleet: str
+    seat: str
+    pilot_id: str
+
+
+class IngestionResponse(BaseModel):
+    success: bool
+    summary: dict[str, Any]
+    message: str | None = None
+    error: str | None = None
+
+
+class BidPackage(BaseModel):
+    id: str | None = None
+    pilot_id: str
+    airline: str
+    month: str
+    meta: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=datetime.now)
+    hash: str | None = None

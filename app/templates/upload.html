@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Upload Bid Package</h2>
+        
+        <!-- Upload Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <form hx-post="/api/ingest" 
+                  hx-encoding="multipart/form-data" 
+                  hx-target="#upload-result"
+                  hx-swap="innerHTML"
+                  class="space-y-4">
+                
+                <!-- File Upload -->
+                <div>
+                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">
+                        Bid Package File
+                    </label>
+                    <input type="file" 
+                           id="file" 
+                           name="file" 
+                           accept=".pdf,.csv,.txt,.jsonl"
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                           required>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Supported formats: PDF, CSV, TXT, JSONL
+                    </p>
+                </div>
+                
+                <!-- Form Fields -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="airline" class="block text-sm font-medium text-gray-700 mb-2">
+                            Airline
+                        </label>
+                        <select id="airline" name="airline" required
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Airline</option>
+                            <option value="UAL">United Airlines (UAL)</option>
+                            <option value="DAL">Delta Air Lines (DAL)</option>
+                            <option value="AAL">American Airlines (AAL)</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="month" class="block text-sm font-medium text-gray-700 mb-2">
+                            Bid Month
+                        </label>
+                        <input type="month" id="month" name="month" required
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="base" class="block text-sm font-medium text-gray-700 mb-2">
+                            Base
+                        </label>
+                        <input type="text" id="base" name="base" placeholder="e.g., SFO" required
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="fleet" class="block text-sm font-medium text-gray-700 mb-2">
+                            Fleet
+                        </label>
+                        <input type="text" id="fleet" name="fleet" placeholder="e.g., 737" required
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="seat" class="block text-sm font-medium text-gray-700 mb-2">
+                            Seat
+                        </label>
+                        <select id="seat" name="seat" required
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Seat</option>
+                            <option value="FO">First Officer (FO)</option>
+                            <option value="CA">Captain (CA)</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="pilot_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Pilot ID
+                        </label>
+                        <input type="text" id="pilot_id" name="pilot_id" placeholder="e.g., pilot_001" required
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" 
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Upload & Parse
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Results Display -->
+        <div id="upload-result" class="min-h-[200px]">
+            <!-- Results will be loaded here via HTMX -->
+        </div>
+        
+        <!-- Help Section -->
+        <div class="bg-gray-50 rounded-lg p-6 mt-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">How to Use</h3>
+            <div class="space-y-3 text-sm text-gray-600">
+                <p>1. <strong>Select your bid package file</strong> - PDF, CSV, TXT, or JSONL formats are supported</p>
+                <p>2. <strong>Fill in the details</strong> - Airline, month, base, fleet, seat, and your pilot ID</p>
+                <p>3. <strong>Upload and parse</strong> - The system will analyze your file and return a summary</p>
+                <p>4. <strong>Review results</strong> - See trip count, credit hours, and other parsed information</p>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <h4 class="font-medium text-gray-900 mb-2">Supported File Formats:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li><strong>CSV:</strong> Pairings and trips in tabular format</li>
+                    <li><strong>JSONL:</strong> JSON Lines with pairing objects</li>
+                    <li><strong>PDF:</strong> United Airlines bid packages</li>
+                    <li><strong>TXT:</strong> Text files with trip information</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HTMX Loading Indicator -->
+<style>
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+}
+.htmx-request .htmx-indicator {
+    opacity: 1
+}
+.htmx-request.htmx-indicator {
+    opacity: 1
+}
+</style>
+
+<script>
+// Set default month to next month
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthString = nextMonth.toISOString().slice(0, 7);
+    document.getElementById('month').value = monthString;
+});
+</script>
+{% endblock %}

@@ -91,3 +91,9 @@ if _os.getenv("ENABLE_UI") == "1":
 from app.routes.meta import router as meta_router  # noqa: E402
 
 app.include_router(meta_router)
+
+# --- ingestion routes ---
+from app.routes.ingestion import router as ingestion_router  # noqa: E402
+
+app.include_router(ingestion_router)
+print("✅ Ingestion routes registered at /api/ingest")

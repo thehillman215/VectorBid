@@ -11,6 +11,12 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@router.get("/upload", response_class=HTMLResponse)
+async def upload_page(request: Request):
+    """Serve the bid package upload page."""
+    return templates.TemplateResponse("upload.html", {"request": request})
+
+
 @router.post("/run", response_class=HTMLResponse)
 async def run_pipeline(request: Request, preferences: str = Form(...)):
     pbs_layers = [
