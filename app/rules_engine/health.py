@@ -12,6 +12,7 @@ def pack_status(pack: RulePack) -> dict:
     return {
         "airline": pack.airline,
         "contract_period": pack.contract_period,
+        "month": pack.month,  # Backward compatibility
         "base": pack.base,
         "fleet": pack.fleet,
         "hard_rules": len(pack.hard_rules),

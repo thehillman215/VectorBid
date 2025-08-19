@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime, timedelta
+from typing import Optional
 
 import pytz
 from pydantic import BaseModel
@@ -23,7 +24,7 @@ class Leg(BaseModel):
     arrival_airport: str
     departure: datetime
     arrival: datetime
-    equipment: str | None = None
+    equipment: Optional[str] = None
 
 
 class Trip(BaseModel):
@@ -65,7 +66,7 @@ def _parse_text(text: str) -> list[Trip]:
     return trips
 
 
-def _parse_trip_block(block: str) -> Trip | None:
+def _parse_trip_block(block: str) -> Optional[Trip]:
     m = TRIP_BLOCK_RE.search(block)
     if not m:
         return None

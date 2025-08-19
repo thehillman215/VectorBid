@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import yaml  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field
@@ -20,7 +20,7 @@ class RuleHit(BaseModel):
     desc: str
     clause: str
     severity: str
-    trip_id: str | None = None
+    trip_id: Optional[str] = None
 
 
 class ValidationReport(BaseModel):

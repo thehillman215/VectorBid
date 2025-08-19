@@ -6,7 +6,7 @@ from typing import Any
 from app.db import Audit, SessionLocal
 
 
-def log_event(ctx_id: str, stage: str, payload: dict[str, Any] | None = None) -> None:
+def log_event(ctx_id: str, stage: str, payload: Optional[dict[str, Any]] = None) -> None:
     """Persist an audit event for a context."""
     if not ctx_id:
         return

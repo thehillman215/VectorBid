@@ -124,7 +124,8 @@ class TestRulePackLoading:
             - id: FAR117_MIN_REST
               desc: Rest >= 10h
               check: pairing.rest_hours >= 10
-        # Missing closing brace
+        # Actually invalid YAML - unclosed quote
+        description: "Unclosed quote
         """
 
         # This test will drive YAML validation implementation
