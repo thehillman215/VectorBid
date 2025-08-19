@@ -8,13 +8,13 @@ client = TestClient(app)
 def test_health_ok():
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"ok": True, "service": "web"}
+    assert r.json() == {"status": "ok"}
 
 
 def test_ping_ok():
     r = client.get("/ping")
     assert r.status_code == 200
-    assert r.json() == {"pong": True, "service": "web"}
+    assert r.json() == {"ping": "pong"}
 
 
 def test_schemas_present():

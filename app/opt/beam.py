@@ -5,12 +5,13 @@ import time
 from operator import itemgetter
 from typing import Any
 
-from app.models import CandidateSchedule, FeatureBundle
+from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 from app.rules.engine import DEFAULT_RULES, validate_feasibility
 from app.services.optimizer import (
     _generate_rationale,
     _get_scoring_weights,
     _get_seniority_adjustment,
+    _rule_hits_misses,
     _score_block_hours,
     _score_commutability,
     _score_days_off,
@@ -97,14 +98,19 @@ def search(
     winners = heapq.nlargest(k, items, key=itemgetter(0, 1))
     result: list[CandidateSchedule] = []
     for winner_score, _neg_i, pid, breakdown, pairing in winners:
+        hits, misses = _rule_hits_misses(bundle, pairing)
         result.append(
             CandidateSchedule(
                 candidate_id=pid,
                 score=winner_score,
-                hard_ok=True,
+                hard_ok=len(misses) == 0,
                 soft_breakdown=breakdown,
                 pairings=[pid],
-                rationale=_generate_rationale(pairing, breakdown),
+                rationale=CandidateRationale(
+                    hard_hits=hits,
+                    hard_misses=misses,
+                    notes=_generate_rationale(pairing, breakdown),
+                ),
             )
         )
     return result
