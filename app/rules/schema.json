@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "airline", "id", "rules"],
+  "properties": {
+    "version": {"type": "string"},
+    "airline": {"type": "string"},
+    "id": {"type": "string"},
+    "far117": {"$ref": "#/$defs/rule_group"},
+    "union": {"$ref": "#/$defs/rule_group"},
+    "rules": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/rule"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "rule_group": {
+      "type": "object",
+      "properties": {
+        "min_rest_hours": {"type": "number"},
+        "max_duty_hours_per_day": {"type": "number"},
+        "hard": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/rule"}
+        },
+        "soft": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/soft_rule"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string"},
+        "check": {"type": "string"},
+        "when": {"type": ["string", "boolean"]},
+        "desc": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "soft_rule": {
+      "type": "object",
+      "required": ["id", "score"],
+      "properties": {
+        "id": {"type": "string"},
+        "score": {"type": "string"},
+        "weight": {"type": ["number", "string"]},
+        "desc": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}
