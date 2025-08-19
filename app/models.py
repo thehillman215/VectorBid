@@ -54,13 +54,19 @@ class FeatureBundle(BaseModel):
     pairing_features: dict[str, Any]
 
 
+class CandidateRationale(BaseModel):
+    hard_hits: list[str] = Field(default_factory=list)
+    hard_misses: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class CandidateSchedule(BaseModel):
     candidate_id: str
     score: float
     hard_ok: bool
     soft_breakdown: dict[str, float]
     pairings: list[str]
-    rationale: list[str] = []
+    rationale: CandidateRationale = CandidateRationale()
 
 
 class StrategyDirectives(BaseModel):

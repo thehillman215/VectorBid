@@ -4,7 +4,7 @@ import heapq
 from operator import itemgetter
 from typing import Any
 
-from app.models import CandidateSchedule, FeatureBundle
+from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 
 
 def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
@@ -35,6 +35,32 @@ def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
         messages.append(f"{key} contributed {val:.2f}")
 
     return messages
+
+
+def _rule_hits_misses(
+    bundle: FeatureBundle, pairing: Any
+) -> tuple[list[str], list[str]]:
+    """Determine which hard rules are satisfied or violated."""
+
+    hits: list[str] = []
+    misses: list[str] = []
+
+    hard = _to_dict(_get(bundle.preference_schema, "hard_constraints", {}))
+    no_red = bool(hard.get("no_red_eyes"))
+
+    rest_hours = float(_get(pairing, "rest_hours", 999) or 999)
+    if rest_hours < 10:
+        misses.append("FAR117_MIN_REST")
+    else:
+        hits.append("FAR117_MIN_REST")
+
+    is_redeye = bool(_get(pairing, "redeye", False))
+    if no_red and is_redeye:
+        misses.append("NO_REDEYE_IF_SET")
+    else:
+        hits.append("NO_REDEYE_IF_SET")
+
+    return hits, misses
 
 
 def _to_dict(x: Any) -> dict[str, Any]:
@@ -273,14 +299,19 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
 
     result: list[CandidateSchedule] = []
     for winner_score, _neg_i, pid, breakdown, pairing in winners:
+        hits, misses = _rule_hits_misses(bundle, pairing)
         result.append(
             CandidateSchedule(
                 candidate_id=pid,
                 score=winner_score,
-                hard_ok=True,
+                hard_ok=len(misses) == 0,
                 soft_breakdown=breakdown,
                 pairings=[pid],
-                rationale=_generate_rationale(pairing, breakdown),
+                rationale=CandidateRationale(
+                    hard_hits=hits,
+                    hard_misses=misses,
+                    notes=_generate_rationale(pairing, breakdown),
+                ),
             )
         )
     return result

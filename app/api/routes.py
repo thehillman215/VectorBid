@@ -32,6 +32,7 @@ router = APIRouter(prefix="/api")
 
 RULE_PACK_PATH = "rule_packs/UAL/2025.08.yml"
 _RULES = load_rule_pack(RULE_PACK_PATH)
+CANDIDATE_STORE: dict[str, CandidateSchedule] = {}
 
 
 @router.post("/parse", tags=["Parse"])
@@ -159,7 +160,17 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     bundle = FeatureBundle(**payload["feature_bundle"])
     K = int(payload.get("K", 50))
     topk = select_topk(bundle, K)
+    for c in topk:
+        CANDIDATE_STORE[c.candidate_id] = c
     return {"candidates": [c.model_dump() for c in topk]}
+
+
+@router.get("/candidates/{candidate_id}", tags=["Candidates"])
+def get_candidate(candidate_id: str) -> dict[str, Any]:
+    cand = CANDIDATE_STORE.get(candidate_id)
+    if not cand:
+        raise HTTPException(status_code=404, detail="candidate not found")
+    return {"candidate": cand.model_dump()}
 
 
 @router.post("/strategy", tags=["Strategy"])
