@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -7,19 +7,19 @@ from pydantic import BaseModel, Field
 class HardConstraints(BaseModel):
     days_off: list[str] = Field(default_factory=list)
     no_red_eyes: bool = False
-    max_duty_hours_per_day: int | None = None
+    max_duty_hours_per_day: Optional[int] = None
     legalities: list[str] = ["FAR117"]
 
 
 class SoftPrefs(BaseModel):
-    pairing_length: dict[str, Any] | None = None
-    layovers: dict[str, Any] | None = None
-    report_time: dict[str, Any] | None = None
-    release_time: dict[str, Any] | None = None
-    credit: dict[str, Any] | None = None
-    weekend_priority: dict[str, Any] | None = None
-    position_swap: dict[str, Any] | None = None
-    commutable: dict[str, Any] | None = None
+    pairing_length: Optional[dict[str, Any]] = None
+    layovers: Optional[dict[str, Any]] = None
+    report_time: Optional[dict[str, Any]] = None
+    release_time: Optional[dict[str, Any]] = None
+    credit: Optional[dict[str, Any]] = None
+    weekend_priority: Optional[dict[str, Any]] = None
+    position_swap: Optional[dict[str, Any]] = None
+    commutable: Optional[dict[str, Any]] = None
 
 
 class PreferenceSchema(BaseModel):
@@ -31,7 +31,7 @@ class PreferenceSchema(BaseModel):
     hard_constraints: HardConstraints = HardConstraints()
     soft_prefs: SoftPrefs = SoftPrefs()
     weights_version: str = "2025-08-16"
-    confidence: float | None = None
+    confidence: Optional[float] = None
     source: dict[str, Any] = {}
 
 
@@ -94,7 +94,7 @@ class BidLayerArtifact(BaseModel):
     format: Literal["PBS2"]
     month: str
     layers: list[Layer]
-    lint: dict[str, list[str | dict[str, str]]]
+    lint: dict[str, list[Union[str, dict[str, str]]]]
     export_hash: str
 
 
@@ -111,18 +111,18 @@ class IngestionRequest(BaseModel):
 class IngestionResponse(BaseModel):
     success: bool
     summary: dict[str, Any]
-    message: str | None = None
-    error: str | None = None
+    message: Optional[str] = None
+    error: Optional[str] = None
 
 
 class BidPackage(BaseModel):
-    id: str | None = None
+    id: Optional[str] = None
     pilot_id: str
     airline: str
     month: str
     meta: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
-    hash: str | None = None
+    hash: Optional[str] = None
 
 
 class FAQItem(BaseModel):
@@ -131,4 +131,4 @@ class FAQItem(BaseModel):
     id: str
     question: str
     answer: str
-    rationale: str | None = None
+    rationale: Optional[str] = None

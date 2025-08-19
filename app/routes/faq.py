@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter
 
@@ -13,7 +14,7 @@ with FAQ_PATH.open("r", encoding="utf-8") as f:
 
 
 @router.get("/faq", response_model=list[FAQItem])
-def get_faq(query: str | None = None) -> list[FAQItem]:
+def get_faq(query: Optional[str] = None) -> list[FAQItem]:
     items = _FAQ_ITEMS
     if query:
         q = query.lower()
