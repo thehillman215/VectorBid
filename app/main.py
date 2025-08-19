@@ -7,7 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import router as api_router
+from fastapi import Depends
+
+from app.api.routes import (
+    export as api_export,
+    generate_layers as api_generate_layers,
+    lint as api_lint,
+    optimize as api_optimize,
+    router as api_router,
+    strategy as api_strategy,
+)
+from app.security.api_key import require_api_key
 from app.compat.validate_router import router as compat_validate_router
 from app.logging_utils import install_pii_filter
 from app.middleware import RequestIDMiddleware
@@ -87,6 +97,19 @@ app.include_router(faq_router, tags=["FAQ"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
+app.add_api_route("/optimize", api_optimize, methods=["POST"], tags=["compat"])
+app.add_api_route("/strategy", api_strategy, methods=["POST"], tags=["compat"])
+app.add_api_route(
+    "/generate_layers", api_generate_layers, methods=["POST"], tags=["compat"]
+)
+app.add_api_route("/lint", api_lint, methods=["POST"], tags=["compat"])
+app.add_api_route(
+    "/export",
+    api_export,
+    methods=["POST"],
+    tags=["compat"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 # Serve the SPA
