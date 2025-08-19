@@ -23,11 +23,61 @@ from app.security.api_key import require_api_key
 from app.services.optimizer import select_topk
 from app.strategy.engine import propose_strategy
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 RULE_PACK_PATH = "rule_packs/UAL/2025.08.yml"
 _RULES = load_rule_pack(RULE_PACK_PATH)
+
+
+@router.post("/parse", tags=["Parse"])
+def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Parse free-text preferences into structured format using NLP/LLM
+    
+    Body:
+      {
+        "preferences_text": "I want weekends off and no red-eyes",
+        "persona": "family_first",
+        "context": {...}
+      }
+    Returns: {"parsed_preferences": {...}, "confidence": 0.85}
+    """
+    try:
+        preferences_text = payload.get("preferences_text", "")
+        persona = payload.get("persona")
+        
+        # TODO: Implement actual NLP parsing logic
+        # For now, return mock parsed data
+        parsed = {
+            "hard_constraints": {
+                "no_weekends": "weekend" in preferences_text.lower(),
+                "no_redeyes": "red-eye" in preferences_text.lower() or "redeye" in preferences_text.lower(),
+                "max_duty_days": 4 if "short trip" in preferences_text.lower() else 6,
+            },
+            "soft_preferences": {
+                "morning_departures": 0.8 if "morning" in preferences_text.lower() else 0.3,
+                "domestic_preferred": 0.7 if "domestic" in preferences_text.lower() else 0.4,
+                "weekend_priority": 0.9 if "weekend" in preferences_text.lower() else 0.2,
+            },
+            "confidence": 0.85,
+            "parsed_items": [
+                {"text": "Weekends off", "confidence": 0.9, "category": "hard_constraint"},
+                {"text": "Morning departures preferred", "confidence": 0.8, "category": "soft_preference"},
+            ],
+        }
+        
+        return {
+            "original_text": preferences_text,
+            "parsed_preferences": parsed,
+            "persona_influence": persona,
+            "suggestions": [
+                "Consider specifying layover preferences",
+                "Add aircraft type preferences",
+            ],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/validate", tags=["Validate"])
