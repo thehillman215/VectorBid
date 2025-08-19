@@ -1,7 +1,6 @@
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router as api_router
 from app.compat.validate_router import router as compat_validate_router
+from app.logging_utils import install_pii_filter
 from app.models import (
     BidLayerArtifact,
     CandidateSchedule,
@@ -30,6 +30,8 @@ MODELS = [
     StrategyDirectives,
     BidLayerArtifact,
 ]
+
+install_pii_filter()
 
 
 def _export_model_schemas() -> None:
@@ -79,6 +81,7 @@ app.include_router(ui_router, tags=["UI"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
+
 
 # Serve the SPA
 @app.get("/")
