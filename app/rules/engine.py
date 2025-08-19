@@ -22,6 +22,22 @@ DEFAULT_RULES: dict[str, Any] = {
 }
 
 _RULE_CACHE: dict[str, dict[str, Any]] = {}
+_PAIRING_CACHE: dict[
+    tuple[str, str, str, str, str, str], tuple[tuple[str, ...], dict[str, Any]]
+] = {}
+
+
+def _cache_key(bundle: FeatureBundle) -> tuple[str, str, str, str, str, str]:
+    ctx = bundle.context
+    pairings = bundle.pairing_features.get("pairings", []) or []
+    month = ""
+    for p in pairings:
+        m = p.get("month")
+        if m:
+            month = str(m)
+            break
+    equip = ",".join(sorted(ctx.equip))
+    return (ctx.airline, month, ctx.base, equip, ctx.seat, ctx.pilot_id)
 
 
 def _merge_sections(data: dict[str, Any]) -> dict[str, Any]:
@@ -85,23 +101,33 @@ def validate_feasibility(
     ``feasible_pairings`` lists.
     """
 
-    violations: list[dict[str, Any]] = []
-    feasible: list[dict[str, Any]] = []
-
+    key = _cache_key(bundle)
     pref = bundle.preference_schema.model_dump()
     pairings = bundle.pairing_features.get("pairings", [])
     no_red = pref.get("hard_constraints", {}).get("no_red_eyes")
+    sig = tuple(sorted(p.get("id", "") for p in pairings))
 
-    for p in pairings:
-        pid = p.get("id")
-        hard_ok = True
-        if p.get("rest_hours", 999) < 10:
-            violations.append({"pairing_id": pid, "rule": "FAR117_MIN_REST"})
-            hard_ok = False
+    cached = _PAIRING_CACHE.get(key)
+    if cached and cached[0] == sig:
+        base = cached[1]
+    else:
+        base_violations: list[dict[str, Any]] = []
+        base_feasible: list[dict[str, Any]] = []
+        for p in pairings:
+            pid = p.get("id")
+            if p.get("rest_hours", 999) < 10:
+                base_violations.append({"pairing_id": pid, "rule": "FAR117_MIN_REST"})
+            else:
+                base_feasible.append(p)
+        base = {"violations": base_violations, "feasible_pairings": base_feasible}
+        _PAIRING_CACHE[key] = (sig, base)
+
+    violations: list[dict[str, Any]] = list(base["violations"])
+    feasible: list[dict[str, Any]] = []
+    for p in base["feasible_pairings"]:
         if no_red and p.get("redeye"):
-            violations.append({"pairing_id": pid, "rule": "NO_REDEYE_IF_SET"})
-            hard_ok = False
-        if hard_ok:
+            violations.append({"pairing_id": p.get("id"), "rule": "NO_REDEYE_IF_SET"})
+        else:
             feasible.append(p)
 
     return {"violations": violations, "feasible_pairings": feasible}
