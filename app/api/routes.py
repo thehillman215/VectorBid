@@ -17,7 +17,9 @@ from app.models import (
     CandidateSchedule,
     ContextSnapshot,
     FeatureBundle,
+    HardConstraints,
     PreferenceSchema,
+    SoftPrefs,
     StrategyDirectives,
 )
 from app.rules.engine import load_rule_pack, validate_feasibility
@@ -93,6 +95,33 @@ def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
                 "Add aircraft type preferences",
             ],
         }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post("/parse_preview", tags=["Parse"])
+def parse_preview(payload: dict[str, Any]) -> dict[str, Any]:
+    """Return a PreferenceSchema preview without persistence."""
+    try:
+        text = payload.get("text", "")
+        persona = payload.get("persona")
+        hard = HardConstraints(
+            no_red_eyes="red-eye" in text.lower() or "redeye" in text.lower()
+        )
+        soft = SoftPrefs(
+            weekend_priority={"weight": 0.9} if "weekend" in text.lower() else {}
+        )
+        schema = PreferenceSchema(
+            pilot_id="preview",
+            airline="UAL",
+            base="SFO",
+            seat="FO",
+            equip=["73G"],
+            hard_constraints=hard,
+            soft_prefs=soft,
+            source={"persona": persona, "preview": True},
+        )
+        return {"preference_schema": schema.model_dump()}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
