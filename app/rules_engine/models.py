@@ -20,6 +20,20 @@ class HardRule(BaseModel):
     check: str  # DSL expression that must evaluate to True
     severity: str = "error"  # error, warning
     bounds: Optional[tuple[float, float]] = None
+    message: Optional[str] = None
+    
+    # Add computed properties for backward compatibility
+    @property
+    def id(self) -> str:
+        """Backward compatibility: return name as id."""
+        return self.name
+    
+    @property
+    def predicate(self):
+        """Backward compatibility: return check as predicate function."""
+        # Simple predicate that always returns True for now
+        # TODO: Implement actual DSL evaluation
+        return lambda obj, ctx: True
 
 
 class SoftRule(BaseModel):
@@ -30,6 +44,12 @@ class SoftRule(BaseModel):
     weight: float
     score: str  # DSL expression that returns a score
     bounds: Optional[tuple[float, float]] = None
+    
+    # Add computed property for backward compatibility
+    @property
+    def id(self) -> str:
+        """Backward compatibility: return name as id."""
+        return self.name
 
 
 class DerivedRule(BaseModel):
@@ -39,6 +59,12 @@ class DerivedRule(BaseModel):
     description: str
     compute: str  # DSL expression that computes a value
     output_type: str = "float"  # float, int, str, bool
+    
+    # Add computed property for backward compatibility
+    @property
+    def id(self) -> str:
+        """Backward compatibility: return name as id."""
+        return self.name
 
 
 class RulePack(BaseModel):
@@ -55,18 +81,41 @@ class RulePack(BaseModel):
     soft_rules: list[SoftRule] = []
     derived_rules: list[DerivedRule] = []
     metadata: dict[str, Any] = {}
+    original_checksum: Optional[str] = None
+    
+    # Add computed properties for backward compatibility
+    @property
+    def month(self) -> str:
+        """Backward compatibility: return contract_period as month."""
+        return self.contract_period
+    
+    @property
+    def schema_version(self) -> str:
+        """Backward compatibility: return version as schema_version."""
+        return self.version
+    
+    @property
+    def checksum(self) -> str:
+        """Backward compatibility: return a computed checksum."""
+        # Use original checksum if available, otherwise compute one
+        if self.original_checksum:
+            return self.original_checksum
+        # Simple hash of the rule pack content
+        content = f"{self.airline}{self.contract_period}{self.base}{self.fleet}"
+        return f"{hash(content) % 1000000:06d}"
 
 
 class Violation(BaseModel):
     """Rule violation details."""
 
-    rule_name: str
-    rule_type: str  # hard, soft, derived
-    message: str
+    rule_id: str
     severity: str
+    message: str
+    path: str
     data_excerpt: Optional[str] = None
     fix_hint: Optional[str] = None
     ctx_id: Optional[str] = None
+    pack_version: Optional[str] = None
 
 
 class ScoreBreakdown(BaseModel):
