@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any, cast, Union
 
 from app.models import BidLayerArtifact
 
-ArtifactLike = BidLayerArtifact | dict[str, Any]
+ArtifactLike = Union[BidLayerArtifact, dict[str, Any]]
 LintMsg = dict[str, str]
 
 
