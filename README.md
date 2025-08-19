@@ -23,3 +23,9 @@ Docs live in `docs/`:
 - GIT_WORKFLOW.md, RULE_PACKS.md, LEGACY.md
 
 _Last updated: 2025-08-18_
+
+### FAQ
+
+- `GET /faq` serves static FAQ entries from `app/content/faq.en.json`.
+- Optional `?query=` filters results by question or answer text.
+- Frontend available at `/faq` with search and anchors.

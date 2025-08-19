@@ -89,3 +89,12 @@ class BidLayerArtifact(BaseModel):
     layers: list[Layer]
     lint: dict[str, list[str]]
     export_hash: str
+
+
+class FAQItem(BaseModel):
+    """FAQ entry served by `/faq`"""
+
+    id: str
+    question: str
+    answer: str
+    rationale: str | None = None
