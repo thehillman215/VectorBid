@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -31,10 +31,10 @@ _RULES = load_rule_pack(RULE_PACK_PATH)
 
 
 @router.post("/parse", tags=["Parse"])
-def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
+def parse_preferences(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Parse free-text preferences into structured format using NLP/LLM
-    
+
     Body:
       {
         "preferences_text": "I want weekends off and no red-eyes",
@@ -46,27 +46,42 @@ def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         preferences_text = payload.get("preferences_text", "")
         persona = payload.get("persona")
-        
+
         # TODO: Implement actual NLP parsing logic
         # For now, return mock parsed data
         parsed = {
             "hard_constraints": {
                 "no_weekends": "weekend" in preferences_text.lower(),
-                "no_redeyes": "red-eye" in preferences_text.lower() or "redeye" in preferences_text.lower(),
+                "no_redeyes": "red-eye" in preferences_text.lower()
+                or "redeye" in preferences_text.lower(),
                 "max_duty_days": 4 if "short trip" in preferences_text.lower() else 6,
             },
             "soft_preferences": {
-                "morning_departures": 0.8 if "morning" in preferences_text.lower() else 0.3,
-                "domestic_preferred": 0.7 if "domestic" in preferences_text.lower() else 0.4,
-                "weekend_priority": 0.9 if "weekend" in preferences_text.lower() else 0.2,
+                "morning_departures": 0.8
+                if "morning" in preferences_text.lower()
+                else 0.3,
+                "domestic_preferred": 0.7
+                if "domestic" in preferences_text.lower()
+                else 0.4,
+                "weekend_priority": 0.9
+                if "weekend" in preferences_text.lower()
+                else 0.2,
             },
             "confidence": 0.85,
             "parsed_items": [
-                {"text": "Weekends off", "confidence": 0.9, "category": "hard_constraint"},
-                {"text": "Morning departures preferred", "confidence": 0.8, "category": "soft_preference"},
+                {
+                    "text": "Weekends off",
+                    "confidence": 0.9,
+                    "category": "hard_constraint",
+                },
+                {
+                    "text": "Morning departures preferred",
+                    "confidence": 0.8,
+                    "category": "soft_preference",
+                },
             ],
         }
-        
+
         return {
             "original_text": preferences_text,
             "parsed_preferences": parsed,
@@ -81,7 +96,7 @@ def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/validate", tags=["Validate"])
-def validate(payload: dict[str, Any]) -> dict[str, Any]:
+def validate(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Body:
       {
@@ -109,7 +124,7 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/optimize", tags=["Optimize"])
-def optimize(payload: dict[str, Any]) -> dict[str, Any]:
+def optimize(payload: Dict[str, Any]) -> Dict[str, Any]:
     bundle = FeatureBundle(**payload["feature_bundle"])
     K = int(payload.get("K", 50))
     topk = select_topk(bundle, K)
@@ -117,7 +132,7 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/strategy", tags=["Strategy"])
-def strategy(payload: dict[str, Any]) -> dict[str, Any]:
+def strategy(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Body:
       {"feature_bundle": {...}, "candidates": [...]}
@@ -134,7 +149,7 @@ def strategy(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/generate_layers", tags=["Generate"])
-def generate_layers(payload: dict[str, Any]) -> dict[str, Any]:
+def generate_layers(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Body:
       {"feature_bundle": {...}, "candidates": [...]}
@@ -151,7 +166,7 @@ def generate_layers(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/lint", tags=["Generate"])
-def lint(payload: dict[str, Any]) -> dict[str, Any]:
+def lint(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Body: {"artifact": {...}}
     Returns: {"errors": [...], "warnings": [...]}
@@ -163,7 +178,7 @@ def lint(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/export", tags=["Export"], dependencies=[Depends(require_api_key)])
-def export(payload: dict[str, Any]) -> dict[str, str]:
+def export(payload: Dict[str, Any]) -> Dict[str, str]:
     """
     Protected when VECTORBID_API_KEY is set.
     Accepts: {"artifact": {...}}

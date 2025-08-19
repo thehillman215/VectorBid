@@ -1,24 +1,24 @@
-from typing import Any, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
 
 class HardConstraints(BaseModel):
-    days_off: list[str] = Field(default_factory=list)
+    days_off: List[str] = Field(default_factory=list)
     no_red_eyes: bool = False
-    max_duty_hours_per_day: int | None = None
-    legalities: list[str] = ["FAR117"]
+    max_duty_hours_per_day: Optional[int] = None
+    legalities: List[str] = ["FAR117"]
 
 
 class SoftPrefs(BaseModel):
-    pairing_length: dict[str, Any] | None = None
-    layovers: dict[str, Any] | None = None
-    report_time: dict[str, Any] | None = None
-    release_time: dict[str, Any] | None = None
-    credit: dict[str, Any] | None = None
-    weekend_priority: dict[str, Any] | None = None
-    position_swap: dict[str, Any] | None = None
-    commutable: dict[str, Any] | None = None
+    pairing_length: Optional[Dict[str, Any]] = None
+    layovers: Optional[Dict[str, Any]] = None
+    report_time: Optional[Dict[str, Any]] = None
+    release_time: Optional[Dict[str, Any]] = None
+    credit: Optional[Dict[str, Any]] = None
+    weekend_priority: Optional[Dict[str, Any]] = None
+    position_swap: Optional[Dict[str, Any]] = None
+    commutable: Optional[Dict[str, Any]] = None
 
 
 class PreferenceSchema(BaseModel):
@@ -26,12 +26,12 @@ class PreferenceSchema(BaseModel):
     airline: Literal["UAL"]
     base: str
     seat: Literal["FO", "CA"]
-    equip: list[str]
+    equip: List[str]
     hard_constraints: HardConstraints = HardConstraints()
     soft_prefs: SoftPrefs = SoftPrefs()
     weights_version: str = "2025-08-16"
-    confidence: float | None = None
-    source: dict[str, Any] = {}
+    confidence: Optional[float] = None
+    source: Dict[str, Any] = {}
 
 
 class ContextSnapshot(BaseModel):
@@ -40,34 +40,34 @@ class ContextSnapshot(BaseModel):
     airline: str
     base: str
     seat: str
-    equip: list[str]
+    equip: List[str]
     seniority_percentile: float
-    commuting_profile: dict[str, Any] = {}
-    default_weights: dict[str, float] = {}
+    commuting_profile: Dict[str, Any] = {}
+    default_weights: Dict[str, float] = {}
 
 
 class FeatureBundle(BaseModel):
     context: ContextSnapshot
     preference_schema: PreferenceSchema
-    analytics_features: dict[str, Any]
-    compliance_flags: dict[str, Any]
-    pairing_features: dict[str, Any]
+    analytics_features: Dict[str, Any]
+    compliance_flags: Dict[str, Any]
+    pairing_features: Dict[str, Any]
 
 
 class CandidateSchedule(BaseModel):
     candidate_id: str
     score: float
     hard_ok: bool
-    soft_breakdown: dict[str, float]
-    pairings: list[str]
-    rationale: list[str] = []
+    soft_breakdown: Dict[str, float]
+    pairings: List[str]
+    rationale: List[str] = []
 
 
 class StrategyDirectives(BaseModel):
-    weight_deltas: dict[str, float] = {}
-    focus_hints: dict[str, list[str]] = {}
-    layer_templates: list[dict[str, Any]] = []
-    rationale: list[str] = []
+    weight_deltas: Dict[str, float] = {}
+    focus_hints: Dict[str, List[str]] = {}
+    layer_templates: List[Dict[str, Any]] = []
+    rationale: List[str] = []
 
 
 class Filter(BaseModel):
@@ -78,7 +78,7 @@ class Filter(BaseModel):
 
 class Layer(BaseModel):
     n: int
-    filters: list[Filter]
+    filters: List[Filter]
     prefer: Literal["YES", "NO"]
 
 
@@ -86,6 +86,6 @@ class BidLayerArtifact(BaseModel):
     airline: Literal["UAL"]
     format: Literal["PBS2"]
     month: str
-    layers: list[Layer]
-    lint: dict[str, list[str]]
+    layers: List[Layer]
+    lint: Dict[str, List[str]]
     export_hash: str
