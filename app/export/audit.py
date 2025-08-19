@@ -38,7 +38,7 @@ def insert_record(export_id: str, ctx_id: str, path: Path, sha256: str) -> None:
         conn.close()
 
 
-def get_record(export_id: str) -> dict[str, Any] | None:
+def get_record(export_id: str) -> Optional[dict[str, Any]]:
     dbp = _db_path()
     if not dbp.exists():
         return None
