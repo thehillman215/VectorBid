@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from app.models import CandidateSchedule
 from app.rules.engine import load_rule_pack
 
 RULE_PACK_PATH = "rule_packs/UAL/2025.08.yml"
-_RULE_MAP: dict[str, dict[str, Any]] | None = None
+_RULE_MAP: Optional[dict[str, dict[str, Any]]] = None
 
 
 def _rules() -> dict[str, dict[str, Any]]:
