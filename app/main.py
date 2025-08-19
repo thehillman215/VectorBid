@@ -30,6 +30,7 @@ from app.models import (
     StrategyDirectives,
 )
 from app.routes.faq import router as faq_router
+from app.routes.ingestion import router as ingestion_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
 from app.routes.ui import router as ui_router
@@ -89,7 +90,8 @@ if static_path.exists():
     app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
 # Mount routers
-app.include_router(api_router, tags=["API"])
+app.include_router(api_router, prefix="/api", tags=["API"])
+app.include_router(ingestion_router, tags=["Ingestion"])
 app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
 app.include_router(ui_router, tags=["UI"])

@@ -5,6 +5,7 @@ import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from app.models import BidPackage
 
@@ -76,7 +77,7 @@ class BidPackageStore:
 
         return package_id
 
-    def get(self, package_id: str) -> BidPackage | None:
+    def get(self, package_id: str) -> Optional[BidPackage]:
         """Retrieve a bid package by ID."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()

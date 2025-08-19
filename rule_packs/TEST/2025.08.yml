@@ -1,0 +1,53 @@
+# Test Rule Pack for VectorBid Rules Engine
+# This is a minimal example to test the validation system
+
+airline: "TEST"
+version: "2025.08"
+base: "TEST"
+fleet: "TEST"
+effective_start: "2025-08-01"
+effective_end: "2025-08-31"
+schema_version: "v1"
+checksum: "test-checksum-123"
+
+# Hard constraints that must be satisfied
+hard:
+  - id: "MIN_REST_HOURS"
+    predicate: "rest_hours >= 10"
+    message: "Rest must be at least 10 hours"
+    severity: "ERROR"
+  
+  - id: "MAX_DUTY_HOURS"
+    predicate: "duty_hours <= 16"
+    message: "Duty hours cannot exceed 16"
+    severity: "ERROR"
+  
+  - id: "NO_REDEYE_IF_FLAGGED"
+    predicate: "not (no_redeye and is_redeye)"
+    message: "Redeye flights not allowed when no_redeye flag is set"
+    severity: "ERROR"
+
+# Soft preferences for scoring
+soft:
+  - id: "PREF_SHORT_TRIPS"
+    score: "if trip_length_days <= 4 then 1.0 else 0.6"
+    weight: 0.8
+    bounds: [0.0, 1.0]
+  
+  - id: "PREF_WEEKEND_OFF"
+    score: "if day_of_week in [5, 6] then 1.0 else 0.3"
+    weight: 0.9
+    bounds: [0.0, 1.0]
+
+# Derived/computed rules
+derived:
+  - id: "MAX_DUTY_BY_LEGS"
+    outputs: 
+      max_duty_hours: "float"
+    expr: "if legs_count <= 4 then 14 else 12"
+  
+  - id: "REST_REQUIREMENT"
+    outputs:
+      min_rest_hours: "float"
+    expr: "if duty_hours > 12 then 12 else 10"
+

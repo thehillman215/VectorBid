@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 
 from app.generate.layers import candidates_to_layers
 from app.generate.lint import lint_layers
@@ -28,7 +29,9 @@ from app.security.api_key import require_api_key
 from app.services.optimizer import retune_candidates, select_topk
 from app.strategy.engine import propose_strategy
 from app.audit import log_event
-from app.db import Audit, Export, SessionLocal
+from app.export.audit import get_record, insert_record
+from app.export.storage import write_artifact
+from app.db import Audit, SessionLocal
 
 router = APIRouter()
 
@@ -165,7 +168,9 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     topk = select_topk(bundle, K)
     report = validate_feasibility(bundle, _RULES)
     for cand in topk:
-        cand.rationale.extend(explain_legal(cand, report))
+        cand.rationale.notes.extend(explain_legal(cand, report))
+        # Store candidates for later retrieval
+        CANDIDATE_STORE[cand.candidate_id] = cand
     return {"candidates": [c.model_dump() for c in topk]}
 
 
@@ -233,50 +238,67 @@ def lint(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/export", tags=["Export"], dependencies=[Depends(require_api_key)])
-def export(payload: dict[str, Any]) -> str:
+def export(payload: dict[str, Any]) -> dict[str, str]:
     """Protected export endpoint.
 
-    Accepts: {"artifact": {...}}
-    Writes JSON to $EXPORT_DIR (or ./exports), signs it with HMAC SHA256,
-    and returns the filesystem path and signature.
+    Accepts: {"artifact": {...}, "ctx_id": "..."}
+    Persists artifact, computes SHA256 signature, writes .sig, inserts audit row,
+    and returns the id, path, and signature. Export succeeds even if DB insert fails.
     """
     try:
         art = payload.get("artifact", {})
-        export_hash = art.get("export_hash") or "no-hash"
+        ctx_id = payload.get("ctx_id", "unknown")
 
         export_dir = Path(os.environ.get("EXPORT_DIR", Path.cwd() / "exports"))
-        export_dir.mkdir(parents=True, exist_ok=True)
-        out_path = export_dir / f"{export_hash}.pbs2.json"
+        out_path = write_artifact(art, export_dir)
 
-        # Write artifact
-        with out_path.open("w", encoding="utf-8") as f:
-            json.dump(art, f, indent=2, ensure_ascii=False)
+        data = out_path.read_bytes()
+        signature = hashlib.sha256(data).hexdigest()
+        sig_path = out_path.with_suffix(out_path.suffix + ".sig")
+        sig_path.write_text(signature, encoding="utf-8")
 
-        # Add signature if key is configured
-        signature = None
-        key = os.environ.get("EXPORT_SIGNING_KEY")
-        if key:
-            data = out_path.read_bytes()
-            signature = hmac.new(key.encode(), data, hashlib.sha256).hexdigest()
-            (out_path.with_suffix(out_path.suffix + ".sig")).write_text(
-                signature, encoding="utf-8"
-            )
+        export_id = out_path.stem
+        try:
+            insert_record(export_id, ctx_id, out_path, signature)
+        except Exception as db_err:  # pragma: no cover - best effort
+            log_event(ctx_id, "export_db_error", {"error": str(db_err)})
 
-        # Audit the export
-        ctx_id = payload.get("ctx_id")
-        with SessionLocal() as db:
-            db.add(Export(ctx_id=ctx_id, path=str(out_path)))
-            db.commit()
+        log_event(
+            ctx_id,
+            "export_created",
+            {
+                "id": export_id,
+                "path": str(out_path),
+                "sha256": signature,
+            }
+        )
 
-        log_event(ctx_id or "", "export", {"path": str(out_path)})
-
-        # Return response with optional signature
-        response = {"export_path": str(out_path)}
-        if signature:
-            response["signature"] = signature
-        return response
-    except Exception as e:
+        return {"id": export_id, "path": str(out_path), "sha256": signature}
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.get("/exports/{export_id}", tags=["Export"])
+def get_export(export_id: str) -> dict[str, Any]:
+    """Get export record by ID."""
+    record = get_record(export_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="export not found")
+    return record
+
+
+@router.get("/exports/{export_id}/download", tags=["Export"])
+def download_export(export_id: str) -> FileResponse:
+    """Download export file by ID."""
+    record = get_record(export_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="export not found")
+    
+    file_path = Path(record["path"])
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="export file not found")
+    
+    return FileResponse(file_path, filename=f"{export_id}.json")
 
 
 @router.get("/audit/{ctx_id}", tags=["Audit"])

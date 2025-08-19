@@ -5,10 +5,11 @@ import os
 import re
 from pathlib import Path
 
+from typing import Union, Optional
 from app.generate.layers import _canonical_sha256  # consistent with generator
 from app.models import BidLayerArtifact
 
-ArtifactLike = BidLayerArtifact | dict
+ArtifactLike = Union[BidLayerArtifact, dict]
 
 _AIRLINE_RE = re.compile(r"^[A-Z0-9_-]{2,8}$")
 _MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
@@ -18,12 +19,12 @@ def _to_dict(a: ArtifactLike) -> dict:
     return a.model_dump() if isinstance(a, BidLayerArtifact) else dict(a)
 
 
-def _sanitize_airline(v: str | None) -> str:
+def _sanitize_airline(v: Optional[str]) -> str:
     v = (v or "UNK").upper().strip()
     return v if _AIRLINE_RE.fullmatch(v) else "UNK"
 
 
-def _sanitize_month(v: str | None) -> str:
+def _sanitize_month(v: Optional[str]) -> str:
     v = (v or "0000-00").strip()
     return v if _MONTH_RE.fullmatch(v) else "0000-00"
 
