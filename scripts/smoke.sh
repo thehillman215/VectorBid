@@ -7,12 +7,12 @@ APP="app.main:app"
 LOG="uvicorn.log"
 
 start_uvicorn() {
-  uvicorn "${APP}" --host "${HOST}" --port "${PORT}" --log-level warning > "${LOG}" 2>&1 &
+  python3.11 -m uvicorn "${APP}" --host "${HOST}" --port "${PORT}" --log-level warning > "${LOG}" 2>&1 &
   echo $! > uvicorn.pid
 }
 
 wait_ready() {
-  python - <<'PY'
+  python3.11 - <<'PY'
 import os, time, urllib.request, sys, json
 host="127.0.0.1"; port=int(os.getenv("PORT","8080"))
 url=f"http://{host}:{port}/api/meta/health"
