@@ -9,7 +9,7 @@ from flask import Flask
 from src.core.extensions import db
 
 
-def create_app():
+def create_app(config_name='development'):
     """Create and configure Flask app with correct paths"""
 
     # Get the project root directory
@@ -21,43 +21,57 @@ def create_app():
 
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
 
-    # Configuration
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///vectorbid.db")
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max file size
+    # Configuration based on environment
+    if config_name == 'testing':
+        app.config["TESTING"] = True
+        app.config["SECRET_KEY"] = "test-secret-key"
+        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+        app.config["WTF_CSRF_ENABLED"] = False
+    else:
+        app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
+        app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///vectorbid.db")
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+        app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max file size
 
     # Initialize extensions
     db.init_app(app)
-    with app.app_context():
-        # Import models to register tables
-        import src.core.models  # noqa: F401
+    
+    # Only create tables in non-testing mode
+    if config_name != 'testing':
+        with app.app_context():
+            # Import models to register tables
+            import src.core.models  # noqa: F401
+            db.create_all()
 
-        db.create_all()
-
-    # Debug: Print paths to verify they're correct
-    print(f"Template folder: {template_folder}")
-    print(f"Static folder: {static_folder}")
-    print(f"Template folder exists: {os.path.exists(template_folder)}")
-    print(f"Static folder exists: {os.path.exists(static_folder)}")
+    # Debug: Print paths to verify they're correct (only in non-testing mode)
+    if config_name != 'testing':
+        print(f"Template folder: {template_folder}")
+        print(f"Static folder: {static_folder}")
+        print(f"Template folder exists: {os.path.exists(template_folder)}")
+        print(f"Static folder exists: {os.path.exists(static_folder)}")
 
     # Register main routes blueprint
     try:
         from src.api.routes import bp as main_bp
 
         app.register_blueprint(main_bp)
-        print("✅ Main routes registered!")
+        if config_name != 'testing':
+            print("✅ Main routes registered!")
     except ImportError as e:
-        print(f"❌ Failed to register main routes: {e}")
+        if config_name != 'testing':
+            print(f"❌ Failed to register main routes: {e}")
 
     # Register admin portal - try only the fixed version
     try:
         from src.api.admin_unified import unified_admin
 
         app.register_blueprint(unified_admin)
-        print("✅ Unified admin system registered!")
+        if config_name != 'testing':
+            print("✅ Unified admin system registered!")
     except ImportError:
-        print("⚠️ Admin portal not available")
+        if config_name != 'testing':
+            print("⚠️ Admin portal not available")
 
     # Add a simple health check route for debugging
     @app.route("/health")
@@ -77,9 +91,11 @@ def create_app():
         from src.api.flask_api_adapter import api_v1
 
         app.register_blueprint(api_v1)
-        print("✅ Flask API v1 endpoints registered!")
+        if config_name != 'testing':
+            print("✅ Flask API v1 endpoints registered!")
     except ImportError as e:
-        print(f"⚠️ Flask API adapter not available: {e}")
+        if config_name != 'testing':
+            print(f"⚠️ Flask API adapter not available: {e}")
 
     # Add a test route to verify the app is working
     @app.route("/test")

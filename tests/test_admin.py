@@ -6,17 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from main import app
-
-
-@pytest.fixture
-def client():
-    """Create a test client for the Flask app."""
-    app.config["TESTING"] = True
-
-    with app.test_client() as client:
-        with app.app_context():
-            yield client
+# Remove duplicate fixtures - they're now in conftest.py
 
 
 @pytest.fixture
@@ -28,18 +18,17 @@ def dummy_pdf():
         return f.read()
 
 
-def test_upload_bid_happy_path(client, dummy_pdf):
+def test_upload_bid_happy_path(client, dummy_pdf, db_session):
     """Test successful bid upload with correct token."""
     from io import BytesIO
 
-    from extensions import db
-    from models import BidPacket
+    from src.core.models import BidPacket
 
     # Clean up any existing test data
     existing = BidPacket.query.filter_by(month_tag="202508").first()
     if existing:
-        db.session.delete(existing)
-        db.session.commit()
+        db_session.delete(existing)
+        db_session.commit()
 
     # Get admin token from environment
     admin_token = os.environ.get("ADMIN_BEARER_TOKEN", "test-token")
@@ -64,8 +53,8 @@ def test_upload_bid_happy_path(client, dummy_pdf):
     assert bid_packet.pdf_data == dummy_pdf
 
     # Clean up
-    db.session.delete(bid_packet)
-    db.session.commit()
+    db_session.delete(bid_packet)
+    db_session.commit()
 
 
 def test_upload_bid_bad_token(client, dummy_pdf):
@@ -75,7 +64,7 @@ def test_upload_bid_bad_token(client, dummy_pdf):
     response = client.post(
         "/admin/upload-bid",
         data={"month_tag": "202508", "file": (BytesIO(dummy_pdf), "test_bid.pdf")},
-        headers={"Authorization": "Bearer wrongtoken"},
+        headers={"Authorization": f"Bearer wrongtoken"},
     )
 
     assert response.status_code == 401
