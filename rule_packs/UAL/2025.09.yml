@@ -1,0 +1,29 @@
+version: '2025.09'
+airline: UAL
+id: UAL-2025-09
+rules:
+  - id: MIN_DAYS_OFF
+    desc: Minimum 8 days off per month
+    clause: UPA 5.a
+    severity: hard
+    evaluate: "context.get('days_off', 0) >= 8"
+  - id: MAX_DUTY_HOURS
+    desc: Duty time may not exceed max duty hours
+    clause: UPA 6.b
+    severity: hard
+    evaluate: "trip.get('duty_hours', 0) <= context.get('max_duty_hours', 12)"
+  - id: MAX_FLIGHT_TIME
+    desc: Flight time may not exceed max flight time
+    clause: UPA 6.c
+    severity: hard
+    evaluate: "trip.get('flight_time', 0) <= context.get('max_flight_time', 8)"
+  - id: MIN_REST_HOURS
+    desc: Rest period must be at least min rest hours
+    clause: UPA 7.a
+    severity: hard
+    evaluate: "trip.get('rest_hours', 0) >= context.get('min_rest_hours', 10)"
+  - id: MIN_BREAK_MINUTES
+    desc: Break must be at least 30 minutes
+    clause: UPA 7.b
+    severity: hard
+    evaluate: "trip.get('break_minutes', 0) >= 30"

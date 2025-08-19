@@ -155,8 +155,7 @@ def test_full_united_parsing():
         if not line or len(line) < 10:
             continue
         if any(
-            header in line.upper()
-            for header in ["TRIP", "BASE", "EQUIPMENT", "UNITED AIRLINES"]
+            header in line.upper() for header in ["TRIP", "BASE", "EQUIPMENT", "UNITED AIRLINES"]
         ):
             continue
 
@@ -166,9 +165,7 @@ def test_full_united_parsing():
 
     print(f"  Parsed {len(trips)} trips from sample bid packet:")
     for trip in trips:
-        print(
-            f"  • {trip['trip_id']}: {trip['days']}d, {trip['credit_hours']}h, {trip['routing']}"
-        )
+        print(f"  • {trip['trip_id']}: {trip['days']}d, {trip['credit_hours']}h, {trip['routing']}")
 
     return trips
 

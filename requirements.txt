@@ -14,10 +14,12 @@ MarkupSafe==3.0.2
 mdurl==0.1.2
 packaging==25.0
 pluggy==1.6.0
+pytz==2025.2
 pydantic==2.11.7
 pydantic_core==2.33.2
 Pygments==2.19.2
 pytest==8.4.1
+pytest-cov==6.0.0
 python-multipart==0.0.20
 PyYAML==6.0.2
 rich==14.1.0
@@ -29,3 +31,7 @@ typer==0.16.0
 typing-inspection==0.4.1
 typing_extensions==4.14.1
 uvicorn==0.35.0
+prometheus-client==0.21.0
+PyJWT==2.10.1
+SQLAlchemy==2.0.43
+alembic==1.16.4

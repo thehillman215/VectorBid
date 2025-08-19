@@ -12,11 +12,6 @@ def _repo_root() -> Path:
 
 def test_parse_validate_optimize_vslice():
     # Parse
-    sample_path = _repo_root() / "fastapi_tests" / "testdata" / "pairings_small.json"
-    parsed = parse_bid_packet(str(sample_path))
-    assert "pairings" in parsed and isinstance(parsed["pairings"], list)
-
-    # Build bundle
     ctx = ContextSnapshot(
         ctx_id="ctx-1",
         pilot_id="p-1",
@@ -28,6 +23,11 @@ def test_parse_validate_optimize_vslice():
         commuting_profile={},
         default_weights={},
     )
+    sample_path = _repo_root() / "fastapi_tests" / "testdata" / "pairings_small.json"
+    parsed = parse_bid_packet(str(sample_path), ctx_id=ctx.ctx_id)
+    assert "pairings" in parsed and isinstance(parsed["pairings"], list)
+
+    # Build bundle
     pref = PreferenceSchema(
         pilot_id="p-1",
         airline="UAL",
@@ -55,7 +55,9 @@ def test_parse_validate_optimize_vslice():
     violations = result["violations"]
     feasible = result["feasible_pairings"]
 
-    assert any(v.get("pairing_id") == "P3" and v.get("rule") == "FAR117_MIN_REST" for v in violations)
+    assert any(
+        v.get("pairing_id") == "P3" and v.get("rule") == "FAR117_MIN_REST" for v in violations
+    )
     feasible_ids = {p.get("id") for p in feasible}
     assert feasible_ids == {"P1", "P2"}
 
@@ -64,5 +66,3 @@ def test_parse_validate_optimize_vslice():
     assert len(topk) == 2
     top_ids = {c.candidate_id for c in topk}
     assert top_ids == {"P1", "P2"}
-
-

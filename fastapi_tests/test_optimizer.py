@@ -62,13 +62,13 @@ def test_select_topk_pref_weighting():
     assert topk[1].score == pytest.approx(0.65)
 
     # rationale should reflect top scoring factors
-    assert len(topk[0].rationale) >= 2
-    assert "layovers" in topk[0].rationale[0]
-    assert "award_rate" in topk[0].rationale[1]
+    assert len(topk[0].rationale.notes) >= 2
+    assert "layovers" in topk[0].rationale.notes[0]
+    assert "award_rate" in topk[0].rationale.notes[1]
 
-    assert len(topk[1].rationale) >= 2
-    assert "award_rate" in topk[1].rationale[0]
-    assert "layovers" in topk[1].rationale[1]
+    assert len(topk[1].rationale.notes) >= 2
+    assert "award_rate" in topk[1].rationale.notes[0]
+    assert "layovers" in topk[1].rationale.notes[1]
 
 
 def test_weight_and_seniority_adjustment():

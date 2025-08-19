@@ -1,15 +1,23 @@
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import router as api_router
+from app.api.routes import (
+    export as api_export,
+    generate_layers as api_generate_layers,
+    lint as api_lint,
+    optimize as api_optimize,
+    router as api_router,
+    strategy as api_strategy,
+)
 from app.compat.validate_router import router as compat_validate_router
+from app.logging_utils import install_pii_filter
+from app.middleware import RequestIDMiddleware
 from app.models import (
     BidLayerArtifact,
     CandidateSchedule,
@@ -18,9 +26,12 @@ from app.models import (
     PreferenceSchema,
     StrategyDirectives,
 )
+from app.routes.faq import router as faq_router
+from app.routes.ingestion import router as ingestion_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
 from app.routes.ui import router as ui_router
+from app.security.api_key import require_api_key
 
 MODELS = [
     PreferenceSchema,
@@ -30,6 +41,8 @@ MODELS = [
     StrategyDirectives,
     BidLayerArtifact,
 ]
+
+install_pii_filter()
 
 
 def _export_model_schemas() -> None:
@@ -66,19 +79,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Request ID middleware
+app.add_middleware(RequestIDMiddleware)
+
 # Mount static files
 static_path = Path(__file__).parent / "static"
 if static_path.exists():
     app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
 # Mount routers
-app.include_router(api_router, tags=["API"])
+app.include_router(api_router, prefix="/api", tags=["API"])
+app.include_router(ingestion_router, tags=["Ingestion"])
 app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
 app.include_router(ui_router, tags=["UI"])
+app.include_router(faq_router, tags=["FAQ"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
+app.add_api_route("/optimize", api_optimize, methods=["POST"], tags=["compat"])
+app.add_api_route("/strategy", api_strategy, methods=["POST"], tags=["compat"])
+app.add_api_route("/generate_layers", api_generate_layers, methods=["POST"], tags=["compat"])
+app.add_api_route("/lint", api_lint, methods=["POST"], tags=["compat"])
+app.add_api_route(
+    "/export",
+    api_export,
+    methods=["POST"],
+    tags=["compat"],
+    dependencies=[Depends(require_api_key)],
+)
+
 
 # Serve the SPA
 @app.get("/")
@@ -97,8 +127,7 @@ MOCK_PERSONAS = {
         "description": "Maximize time at home with family",
         "icon": "fas fa-home",
         "preferences": (
-            "I want weekends off and no early departures. "
-            "Prefer short trips of 1-3 days."
+            "I want weekends off and no early departures. Prefer short trips of 1-3 days."
         ),
         "weights": {"weekend_priority": 0.9, "trip_length": 0.8, "time_of_day": 0.7},
     },
@@ -123,18 +152,6 @@ MOCK_PERSONAS = {
 async def get_personas():
     """Get available pilot personas"""
     return {"personas": MOCK_PERSONAS}
-
-
-@app.get("/health", tags=["Meta"])
-def health() -> dict[str, str]:
-    """Main application health check"""
-    return {"status": "healthy", "service": "VectorBid FastAPI", "version": "1.0.0"}
-
-
-@app.get("/ping", tags=["Meta"])
-def ping() -> dict[str, str]:
-    """Simple liveness check."""
-    return {"ping": "pong"}
 
 
 @app.get("/schemas", tags=["Meta"])

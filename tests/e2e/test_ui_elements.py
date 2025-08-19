@@ -181,17 +181,13 @@ class TestUIElements:
 
             # They should be different elements (if multiple focusable elements exist)
             if page.locator("input, select, button, a").count() > 1:
-                first_id = first_element.get_attribute(
-                    "id"
-                ) or first_element.get_attribute("name")
-                second_id = second_element.get_attribute(
-                    "id"
-                ) or second_element.get_attribute("name")
+                first_id = first_element.get_attribute("id") or first_element.get_attribute("name")
+                second_id = second_element.get_attribute("id") or second_element.get_attribute(
+                    "name"
+                )
 
                 if first_id and second_id:
-                    assert first_id != second_id, (
-                        "Focus should move between different elements"
-                    )
+                    assert first_id != second_id, "Focus should move between different elements"
 
     def test_skip_links(self, page: Page, base_url: str):
         """Test skip links for accessibility."""
@@ -199,9 +195,7 @@ class TestUIElements:
         page.goto(base_url)
 
         # Look for skip links (optional but good for accessibility)
-        skip_links = page.locator(
-            "a[href='#main'], a[href='#content'], a:has-text('Skip')"
-        )
+        skip_links = page.locator("a[href='#main'], a[href='#content'], a:has-text('Skip')")
 
         # If skip links exist, they should be functional
         for i in range(skip_links.count()):

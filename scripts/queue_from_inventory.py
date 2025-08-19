@@ -97,9 +97,7 @@ with inv.open() as f:
                 "flags_needed": "admin_portal" if "admin" in b.lower() else "",
                 "notes": "; ".join(notes),
                 "decision": dec,
-                "target_window": (
-                    "Day 1" if risk == "low" and conflicts == "no" else "Day 2"
-                ),
+                "target_window": ("Day 1" if risk == "low" and conflicts == "no" else "Day 2"),
             }
         )
 

@@ -1,14 +1,17 @@
-.PHONY: dev.setup gen.synth test test.all
+.PHONY: dev.setup lint test smoke.api run.api
+PY=python3
+VENV=.venv
 
 dev.setup:
-	pip install -e .[dev]
-	pre-commit install
+	$(PY) -m venv $(VENV) && . $(VENV)/bin/activate && pip -q install -r requirements.txt
 
-gen.synth:
-	python -m tools.pbs_synth.cli --month $(MONTH) --base $(BASE) --fleet $(FLEET) --seed $(SEED) --out data/synth/$(MONTH)/
+lint:
+	. $(VENV)/bin/activate && ruff check . && mypy app || true
 
 test:
-	pytest -q fastapi_tests
+	. $(VENV)/bin/activate && PYTHONPATH=. PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 
-test.all:
-	pytest -q
+smoke.api:
+	. $(VENV)/bin/activate && uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+
+run.api: smoke.api

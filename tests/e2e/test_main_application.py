@@ -28,9 +28,7 @@ class TestMainApplication:
 
         # Should see main dashboard elements
         expect(page.locator("h1, h2")).to_contain_text("VectorBid")
-        expect(
-            page.locator("text=AI-powered pilot schedule bidding assistant")
-        ).to_be_visible()
+        expect(page.locator("text=AI-powered pilot schedule bidding assistant")).to_be_visible()
 
         # Should see navigation elements
         expect(page.locator("nav, .navbar")).to_be_visible()
@@ -78,9 +76,7 @@ class TestMainApplication:
         page.goto(base_url)
 
         # Test how-to link if present
-        how_to_links = page.locator(
-            'a[href="/how-to"], a:has-text("How to"), a:has-text("Guide")'
-        )
+        how_to_links = page.locator('a[href="/how-to"], a:has-text("How to"), a:has-text("Guide")')
         if how_to_links.count() > 0:
             how_to_links.first.click()
             expect(page).to_have_url(f"{base_url}/how-to")
@@ -139,9 +135,7 @@ class TestMainApplication:
             violations = get_violations(results)
 
             # Check for critical violations
-            critical_violations = [
-                v for v in violations if v["impact"] in ["critical", "serious"]
-            ]
+            critical_violations = [v for v in violations if v["impact"] in ["critical", "serious"]]
 
             assert len(critical_violations) == 0, (
                 f"Page {url} has {len(critical_violations)} critical accessibility violations: {critical_violations}"

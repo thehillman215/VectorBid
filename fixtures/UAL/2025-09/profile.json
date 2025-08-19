@@ -1,0 +1,11 @@
+{
+  "name": "Demo Pilot",
+  "email": "demo.pilot@example.com",
+  "airline": "United Airlines",
+  "fleet": ["73N"],
+  "base": "EWR",
+  "seat": "Captain",
+  "seniority": "50%",
+  "onboard_complete": true,
+  "profile_completed": true
+}
