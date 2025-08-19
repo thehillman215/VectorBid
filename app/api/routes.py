@@ -19,6 +19,7 @@ from app.models import (
     StrategyDirectives,
 )
 from app.rules.engine import load_rule_pack, validate_feasibility
+from app.explain.legal import explain as explain_legal
 from app.security.api_key import require_api_key
 from app.services.optimizer import select_topk
 from app.strategy.engine import propose_strategy
@@ -113,6 +114,9 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     bundle = FeatureBundle(**payload["feature_bundle"])
     K = int(payload.get("K", 50))
     topk = select_topk(bundle, K)
+    report = validate_feasibility(bundle, _RULES)
+    for cand in topk:
+        cand.rationale.extend(explain_legal(cand, report))
     return {"candidates": [c.model_dump() for c in topk]}
 
 

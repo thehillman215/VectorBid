@@ -27,6 +27,7 @@ class HardRule(BaseModel):
     desc: str | None = None
     when: str | None = None
     check: str | None = None
+    clause: str | None = None
 
 
 class SoftRule(BaseModel):
@@ -36,6 +37,7 @@ class SoftRule(BaseModel):
     weight: float | str | None = None
     score: str | None = None
     desc: str | None = None
+    clause: str | None = None
 
 
 class RulePack(BaseModel):
