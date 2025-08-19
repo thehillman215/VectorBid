@@ -25,7 +25,7 @@ from app.models import (
 from app.rules.engine import load_rule_pack, validate_feasibility
 from app.explain.legal import explain as explain_legal
 from app.security.api_key import require_api_key
-from app.services.optimizer import select_topk
+from app.services.optimizer import retune_candidates, select_topk
 from app.strategy.engine import propose_strategy
 
 router = APIRouter(prefix="/api")
@@ -173,6 +173,15 @@ def get_candidate(candidate_id: str) -> dict[str, Any]:
     if not cand:
         raise HTTPException(status_code=404, detail="candidate not found")
     return {"candidate": cand.model_dump()}
+
+
+@router.post("/optimize/retune", tags=["Optimize"])
+def retune(payload: dict[str, Any]) -> dict[str, Any]:
+    _candidate_id = payload.get("candidate_id")  # for API symmetry; unused
+    candidates = [CandidateSchedule(**c) for c in payload.get("candidates", [])]
+    weight_deltas = payload.get("weight_deltas", {})
+    adjusted = retune_candidates(candidates, weight_deltas)
+    return {"candidates": [c.model_dump() for c in adjusted]}
 
 
 @router.post("/strategy", tags=["Strategy"])

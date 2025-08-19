@@ -298,3 +298,50 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
             )
         )
     return result
+
+
+def retune_candidates(
+    candidates: list[CandidateSchedule], weight_deltas: dict[str, float]
+) -> list[CandidateSchedule]:
+    """Re-score already feasible candidates with lightweight weight tweaks.
+
+    Parameters
+    ----------
+    candidates:
+        List of pre-computed feasible candidates, typically output from
+        :func:`select_topk`. Each candidate must contain a ``soft_breakdown``
+        with the contribution of every scoring factor.
+    weight_deltas:
+        Mapping of factor name to a *relative* weight adjustment. The new
+        contribution for factor ``k`` becomes ``breakdown[k] * (1 + delta)``.
+
+    Returns
+    -------
+    list[CandidateSchedule]
+        Candidates with updated ``score`` and ``soft_breakdown`` fields,
+        sorted in descending score order. No feasibility checks or parsing is
+        performed; this function is purely a stateless reweighting step and
+        runs in O(N·F) where ``F`` is the number of scoring factors. With 50
+        candidates it completes well under 150 ms on commodity hardware.
+    """
+
+    adjusted: list[CandidateSchedule] = []
+    for cand in candidates:
+        new_breakdown: dict[str, float] = {}
+        for key, val in cand.soft_breakdown.items():
+            factor = 1.0 + float(weight_deltas.get(key, 0.0))
+            new_breakdown[key] = val * factor
+
+        new_score = sum(new_breakdown.values())
+        adjusted.append(
+            cand.model_copy(
+                update={
+                    "score": new_score,
+                    "soft_breakdown": new_breakdown,
+                    "rationale": _generate_rationale(None, new_breakdown),
+                }
+            )
+        )
+
+    adjusted.sort(key=lambda c: c.score, reverse=True)
+    return adjusted
