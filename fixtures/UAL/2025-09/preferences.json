@@ -1,0 +1,6 @@
+{
+  "custom_preferences": "Prefer West Coast layovers and weekends off",
+  "time_preferences": {"avoid_early_departures": true},
+  "route_preferences": ["LAX", "SFO", "SEA"],
+  "credit_preferences": {"min": 15, "max": 25}
+}
