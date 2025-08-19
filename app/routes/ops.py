@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.generate.layers import candidates_to_layers
 from app.generate.lint import lint_layers
 from app.models import CandidateSchedule, FeatureBundle, StrategyDirectives
-from app.security.api_key import require_api_key
+from app.security.auth import require_auth
 from app.services.optimizer import select_topk
 from app.strategy.engine import propose_strategy
 
@@ -57,7 +57,7 @@ def lint(payload: dict[str, Any]) -> dict[str, Any]:
     return lint_layers(payload["artifact"])
 
 
-@router.post("/export", dependencies=[Depends(require_api_key)])
+@router.post("/export", dependencies=[Depends(require_auth)])
 def export(payload: dict[str, Any]) -> dict[str, str]:
     try:
         art = payload.get("artifact", {})

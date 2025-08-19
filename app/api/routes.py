@@ -23,7 +23,7 @@ from app.models import (
     StrategyDirectives,
 )
 from app.rules.engine import load_rule_pack, validate_feasibility
-from app.security.jwt import require_jwt
+from app.security.auth import require_auth
 from app.services.optimizer import select_topk
 from app.strategy.engine import propose_strategy
 
@@ -208,7 +208,7 @@ def lint(payload: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/export", tags=["Export"], dependencies=[Depends(require_jwt)])
+@router.post("/export", tags=["Export"], dependencies=[Depends(require_auth)])
 def export(payload: dict[str, Any]) -> dict[str, str]:
     """Protected export endpoint.
 
