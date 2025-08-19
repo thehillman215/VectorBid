@@ -9,6 +9,8 @@ from pydantic import ValidationError
 
 from app.models import FeatureBundle
 from app.rules.models import RulePack
+from app.audit import log_event
+from app.db import Preference, Pilot, RulePack as RulePackModel, SessionLocal
 
 DEFAULT_RULES: dict[str, Any] = {
     "hard": [
@@ -103,5 +105,27 @@ def validate_feasibility(
             hard_ok = False
         if hard_ok:
             feasible.append(p)
+
+    ctx = bundle.context
+    with SessionLocal() as db:
+        db.merge(Pilot(pilot_id=ctx.pilot_id))
+        db.add(
+            Preference(
+                ctx_id=ctx.ctx_id,
+                pilot_id=ctx.pilot_id,
+                data=bundle.preference_schema.model_dump(),
+            )
+        )
+        db.add(
+            RulePackModel(
+                ctx_id=ctx.ctx_id,
+                airline=ctx.airline,
+                version="",  # version unknown
+                data=rules,
+            )
+        )
+        db.commit()
+
+    log_event(ctx.ctx_id, "validate", {"violations": len(violations)})
 
     return {"violations": violations, "feasible_pairings": feasible}

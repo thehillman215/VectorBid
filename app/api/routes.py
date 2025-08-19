@@ -22,8 +22,10 @@ from app.rules.engine import load_rule_pack, validate_feasibility
 from app.security.api_key import require_api_key
 from app.services.optimizer import select_topk
 from app.strategy.engine import propose_strategy
+from app.audit import log_event
+from app.db import Audit, Export, SessionLocal
 
-router = APIRouter(prefix="/api")
+router = APIRouter()
 
 
 RULE_PACK_PATH = "rule_packs/UAL/2025.08.yml"
@@ -180,6 +182,34 @@ def export(payload: dict[str, Any]) -> dict[str, str]:
         with out_path.open("w", encoding="utf-8") as f:
             json.dump(art, f, indent=2, ensure_ascii=False)
 
+        ctx_id = payload.get("ctx_id")
+        with SessionLocal() as db:
+            db.add(Export(ctx_id=ctx_id, path=str(out_path)))
+            db.commit()
+
+        log_event(ctx_id or "", "export", {"path": str(out_path)})
+
         return {"export_path": str(out_path)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.get("/audit/{ctx_id}", tags=["Audit"])
+def get_audit(ctx_id: str) -> dict[str, Any]:
+    """Return audit trail for a given context."""
+    with SessionLocal() as db:
+        rows = (
+            db.query(Audit)
+            .filter(Audit.ctx_id == ctx_id)
+            .order_by(Audit.timestamp.asc())
+            .all()
+        )
+        events = [
+            {
+                "stage": r.stage,
+                "timestamp": r.timestamp.isoformat(),
+                "payload": r.payload,
+            }
+            for r in rows
+        ]
+    return {"events": events}

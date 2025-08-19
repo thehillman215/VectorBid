@@ -5,6 +5,8 @@ from operator import itemgetter
 from typing import Any
 
 from app.models import CandidateSchedule, FeatureBundle
+from app.audit import log_event
+from app.db import Candidate, SessionLocal
 
 
 def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
@@ -283,4 +285,13 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
                 rationale=_generate_rationale(pairing, breakdown),
             )
         )
+
+    ctx_id = bundle.context.ctx_id
+    with SessionLocal() as db:
+        for cand in result:
+            db.add(Candidate(ctx_id=ctx_id, data=cand.model_dump()))
+        db.commit()
+
+    log_event(ctx_id, "optimize", {"candidates": [c.candidate_id for c in result]})
+
     return result
