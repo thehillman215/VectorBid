@@ -2,6 +2,8 @@
 
 AI-powered PBS 2.0 bidding assistant for airline pilots.
 
+See [DEVELOPER_QUICKSTART.md](DEVELOPER_QUICKSTART.md) to get a local dev environment running.
+
 ## Current Status
 - **Main branches**: `main` (stable), `staging` (integration)
 - **Work baselines**: `cursor/baseline` (primary), `codex/baseline` (parallel)
