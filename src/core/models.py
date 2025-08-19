@@ -20,6 +20,19 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_active = db.Column(db.DateTime)
 
+    # Relationships to settings models
+    security_settings = db.relationship(
+        "SecuritySettings", back_populates="user", uselist=False
+    )
+    communication_preferences = db.relationship(
+        "CommunicationPreference", back_populates="user", uselist=False
+    )
+    career_preferences = db.relationship(
+        "CareerPreference", back_populates="user", uselist=False
+    )
+    subscriptions = db.relationship("Subscription", back_populates="user")
+    billing_history = db.relationship("BillingRecord", back_populates="user")
+
 
 class BidPacket(db.Model):
     __tablename__ = "bid_packets"
@@ -58,3 +71,59 @@ class AdminActionLog(db.Model):
     admin_id = db.Column(db.String(120))
     action = db.Column(db.String(50), nullable=False)
     target = db.Column(db.String(255))
+
+
+class SecuritySettings(db.Model):
+    __tablename__ = "security_settings"
+
+    user_id = db.Column(db.String, db.ForeignKey("users.id"), primary_key=True)
+    two_factor_enabled = db.Column(db.Boolean, default=False, nullable=False)
+    last_password_change = db.Column(db.DateTime)
+
+    user = db.relationship("User", back_populates="security_settings")
+
+
+class CommunicationPreference(db.Model):
+    __tablename__ = "communication_preferences"
+
+    user_id = db.Column(db.String, db.ForeignKey("users.id"), primary_key=True)
+    email_opt_in = db.Column(db.Boolean, default=True, nullable=False)
+    sms_opt_in = db.Column(db.Boolean, default=False, nullable=False)
+    preferred_language = db.Column(db.String(10))
+
+    user = db.relationship("User", back_populates="communication_preferences")
+
+
+class CareerPreference(db.Model):
+    __tablename__ = "career_preferences"
+
+    user_id = db.Column(db.String, db.ForeignKey("users.id"), primary_key=True)
+    desired_base = db.Column(db.String(50))
+    desired_aircraft = db.Column(db.String(50))
+    long_term_goal = db.Column(db.String(255))
+
+    user = db.relationship("User", back_populates="career_preferences")
+
+
+class Subscription(db.Model):
+    __tablename__ = "subscriptions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
+    plan = db.Column(db.String(50))
+    status = db.Column(db.String(20))
+    renew_at = db.Column(db.DateTime)
+
+    user = db.relationship("User", back_populates="subscriptions")
+
+
+class BillingRecord(db.Model):
+    __tablename__ = "billing_records"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
+    amount = db.Column(db.Numeric(10, 2))
+    description = db.Column(db.String(255))
+    billed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", back_populates="billing_history")
