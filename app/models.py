@@ -93,7 +93,7 @@ class BidLayerArtifact(BaseModel):
     format: Literal["PBS2"]
     month: str
     layers: list[Layer]
-    lint: dict[str, list[str]]
+    lint: dict[str, list[str | dict[str, str]]]
     export_hash: str
 
 
