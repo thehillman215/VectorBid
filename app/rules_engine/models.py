@@ -7,7 +7,7 @@ Immutable, frozen dataclasses for rule packs, rules, and validation results.
 from __future__ import annotations
 
 from datetime import date
-from typing import Any
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel
 
@@ -19,7 +19,7 @@ class HardRule(BaseModel):
     description: str
     check: str  # DSL expression that must evaluate to True
     severity: str = "error"  # error, warning
-    bounds: tuple[float, float] | None = None
+    bounds: Optional[tuple[float, float]] = None
 
 
 class SoftRule(BaseModel):
@@ -29,7 +29,7 @@ class SoftRule(BaseModel):
     description: str
     weight: float
     score: str  # DSL expression that returns a score
-    bounds: tuple[float, float] | None = None
+    bounds: Optional[tuple[float, float]] = None
 
 
 class DerivedRule(BaseModel):
@@ -47,10 +47,10 @@ class RulePack(BaseModel):
     version: str
     airline: str
     contract_period: str
-    base: str | None
-    fleet: str | None
+    base: Optional[str] = None
+    fleet: Optional[str] = None
     effective_start: date
-    effective_end: date | None
+    effective_end: Optional[date] = None
     hard_rules: list[HardRule] = []
     soft_rules: list[SoftRule] = []
     derived_rules: list[DerivedRule] = []
@@ -64,9 +64,9 @@ class Violation(BaseModel):
     rule_type: str  # hard, soft, derived
     message: str
     severity: str
-    data_excerpt: str | None = None
-    fix_hint: str | None = None
-    ctx_id: str | None = None
+    data_excerpt: Optional[str] = None
+    fix_hint: Optional[str] = None
+    ctx_id: Optional[str] = None
 
 
 class ScoreBreakdown(BaseModel):
