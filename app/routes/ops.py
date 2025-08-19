@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import PlainTextResponse, Response
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.generate.layers import candidates_to_layers
 from app.generate.lint import lint_layers
@@ -15,16 +17,32 @@ from app.strategy.engine import propose_strategy
 router = APIRouter()
 
 
+def _get_rulepack_version() -> str:
+    root = Path(__file__).resolve().parents[2] / "rule_packs"
+    versions = sorted(p.stem for p in root.glob("*/*.yml"))
+    return versions[-1] if versions else "unknown"
+
+
+@router.get("/ping", response_class=PlainTextResponse)
+def ping() -> str:
+    """Simple liveness check returning plain text."""
+    return "pong"
+
+
 @router.get("/health")
 def root_health() -> dict[str, str]:
-    """Simple health check used by tests."""
-    return {"status": "ok"}
+    """Report service health without exposing secrets."""
+    return {
+        "db": "ok",
+        "storage": "ok",
+        "rulepack_version": _get_rulepack_version(),
+    }
 
 
-@router.get("/ping")
-def ping() -> dict[str, str]:
-    """Simple ping endpoint for CI smoke tests"""
-    return {"ping": "pong"}
+@router.get("/metrics")
+def metrics() -> Response:
+    """Expose Prometheus metrics."""
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @router.post("/optimize")
