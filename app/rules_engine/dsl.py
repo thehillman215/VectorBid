@@ -149,7 +149,7 @@ class DSLParser:
         elif isinstance(node, ast.Compare):
             # Comparison operators are safe
             self._validate_ast(node.left)
-            for op, comparator in zip(node.ops, node.comparators, strict=False):
+            for op, comparator in zip(node.ops, node.comparators):
                 if not isinstance(
                     op,
                     (
@@ -200,7 +200,7 @@ class DSLParser:
                 self._validate_ast(elt)
         elif isinstance(node, ast.Dict):
             # Dict literals are safe
-            for key, value in zip(node.keys, node.values, strict=False):
+            for key, value in zip(node.keys, node.values):
                 self._validate_ast(key)
                 self._validate_ast(value)
         elif isinstance(node, ast.Subscript):

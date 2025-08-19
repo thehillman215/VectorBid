@@ -33,8 +33,9 @@ def compile_rule_pack(yaml_obj: dict) -> RulePack:
                 HardRule(
                     name=r["id"],
                     description=r.get("desc", ""),
-                    check=r.get("check", "True"),
+                    check=r.get("check", r.get("predicate", "True")),
                     severity=r.get("severity", "error"),
+                    message=r.get("message", ""),
                 )
             )
         except (DSLParseError, DSLSecurityError) as e:
@@ -44,8 +45,9 @@ def compile_rule_pack(yaml_obj: dict) -> RulePack:
                 HardRule(
                     name=r["id"],
                     description=r.get("desc", ""),
-                    check="True",  # Default to always pass
+                    check=r.get("check", r.get("predicate", "True")),  # Default to always pass
                     severity=r.get("severity", "error"),
+                    message=r.get("message", ""),
                 )
             )
 
@@ -58,7 +60,7 @@ def compile_rule_pack(yaml_obj: dict) -> RulePack:
                     name=r["id"],
                     description=r.get("desc", ""),
                     weight=float(r.get("weight", 1.0)),
-                    score=r.get("score", "1.0"),
+                    score=r.get("score", r.get("expr", "1.0")),
                 )
             )
         except (DSLParseError, DSLSecurityError) as e:
@@ -69,7 +71,7 @@ def compile_rule_pack(yaml_obj: dict) -> RulePack:
                     name=r["id"],
                     description=r.get("desc", ""),
                     weight=float(r.get("weight", 1.0)),
-                    score="1.0",  # Default score
+                    score=r.get("score", r.get("expr", "1.0")),  # Default score
                 )
             )
 
@@ -81,7 +83,7 @@ def compile_rule_pack(yaml_obj: dict) -> RulePack:
                 DerivedRule(
                     name=r["id"],
                     description=r.get("desc", ""),
-                    compute=r.get("expr", "{}"),
+                    compute=r.get("expr", r.get("compute", "{}")),
                     output_type=r.get("output_type", "dict"),
                 )
             )
@@ -92,13 +94,13 @@ def compile_rule_pack(yaml_obj: dict) -> RulePack:
                 DerivedRule(
                     name=r["id"],
                     description=r.get("desc", ""),
-                    compute="{}",  # Default empty dict
+                    compute=r.get("expr", r.get("compute", "{}")),  # Default empty dict
                     output_type=r.get("output_type", "dict"),
                 )
             )
 
     return RulePack(
-        version=yaml_obj["version"],
+        version=yaml_obj.get("schema_version", yaml_obj["version"]),
         airline=yaml_obj["airline"],
         contract_period=yaml_obj.get("month", yaml_obj["version"]),
         base=yaml_obj.get("base"),
@@ -111,4 +113,5 @@ def compile_rule_pack(yaml_obj: dict) -> RulePack:
         soft_rules=soft,
         derived_rules=derived,
         metadata=yaml_obj.get("metadata", {}),
+        original_checksum=yaml_obj.get("checksum"),
     )

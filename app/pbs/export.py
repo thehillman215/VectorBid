@@ -4,11 +4,11 @@ import hashlib
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, cast, Union
 
 from app.models import BidLayerArtifact
 
-ArtifactLike = BidLayerArtifact | Mapping[str, Any]
+ArtifactLike = Union[BidLayerArtifact, Mapping[str, Any]]
 
 
 def _to_plain_dict(artifact: ArtifactLike) -> dict[str, Any]:
