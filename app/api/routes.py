@@ -24,7 +24,7 @@ from app.models import (
 )
 from app.rules.engine import load_rule_pack, validate_feasibility
 from app.security.jwt import require_jwt
-from app.services.optimizer import select_topk
+from app.services.optimizer import retune_candidates, select_topk
 from app.strategy.engine import propose_strategy
 
 router = APIRouter(prefix="/api")
@@ -160,6 +160,15 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     K = int(payload.get("K", 50))
     topk = select_topk(bundle, K)
     return {"candidates": [c.model_dump() for c in topk]}
+
+
+@router.post("/optimize/retune", tags=["Optimize"])
+def retune(payload: dict[str, Any]) -> dict[str, Any]:
+    _candidate_id = payload.get("candidate_id")  # for API symmetry; unused
+    candidates = [CandidateSchedule(**c) for c in payload.get("candidates", [])]
+    weight_deltas = payload.get("weight_deltas", {})
+    adjusted = retune_candidates(candidates, weight_deltas)
+    return {"candidates": [c.model_dump() for c in adjusted]}
 
 
 @router.post("/strategy", tags=["Strategy"])
