@@ -7,7 +7,7 @@
 
 #### API Endpoints Implemented:
 - ✅ `GET /api/personas` - Get available pilot personas
-- ✅ `POST /api/parse_preferences` - Parse free-text preferences → live preview  
+- ✅ `POST /api/parse_preferences` - Parse free-text preferences → live preview
 - ✅ `POST /api/validate_constraints` - Validate preference constraints
 - ✅ `POST /api/optimize` - Optimize schedule → display ranked results
 - ✅ `POST /api/generate_layers` - Generate PBS-style bid layers
@@ -29,7 +29,7 @@
 - Step indicator (1: Persona → 2: Preferences → 3: Results)
 - Persona picker with visual cards
 - Free-text preference input with live preview
-- Weight sliders and hard constraint toggles  
+- Weight sliders and hard constraint toggles
 - Results table with ranked candidates and rationales
 - Layers view with PBS-style filters
 - Violations panel for constraint analysis
@@ -59,7 +59,7 @@
 #### Coverage:
 - Quick start instructions
 - API endpoint documentation
-- Frontend feature overview  
+- Frontend feature overview
 - Data schema explanations
 - Development workflow
 - Troubleshooting guide
@@ -85,7 +85,7 @@
 2. **Free-text Input** → Live parsing preview via `/api/parse_preferences`
 3. **Weight Adjustment** → Real-time slider updates
 4. **Bid Compilation** → Sequential API calls:
-   - `/api/validate_constraints` 
+   - `/api/validate_constraints`
    - `/api/optimize`
    - `/api/generate_layers`
 5. **Results Display** → Ranked candidates + PBS layers
@@ -97,7 +97,7 @@ All endpoints return deterministic stub data to enable independent frontend deve
 
 - **Personas**: 3 realistic pilot personas with weights and preferences
 - **Schedules**: Mock candidates with scores, rationales, and pairings
-- **Layers**: Sample PBS layers with commands and probabilities  
+- **Layers**: Sample PBS layers with commands and probabilities
 - **Validation**: Realistic constraint violations and warnings
 - **Explanations**: Detailed score breakdowns and suggestions
 
@@ -130,7 +130,7 @@ python3 -m uvicorn app.fastapi_main:app --host 0.0.0.0 --port 8000 --reload
 
 ### New Files:
 - `app/fastapi_main.py` - FastAPI backend application
-- `app/static/index.html` - SPA frontend  
+- `app/static/index.html` - SPA frontend
 - `app/static/app.js` - Frontend JavaScript
 - `dev.sh` - Development startup script
 - `DEVELOPER_QUICKSTART.md` - Development documentation
@@ -144,10 +144,15 @@ python3 -m uvicorn app.fastapi_main:app --host 0.0.0.0 --port 8000 --reload
 ## Quality Assurance:
 
 ✅ **Frontend Polish**: Clean Tailwind UI with all MVP components
-✅ **API Wiring**: All required endpoints implemented and tested  
+✅ **API Wiring**: All required endpoints implemented and tested
 ✅ **Schema Compliance**: Matches Pydantic models from data contracts
 ✅ **Mock Data**: Deterministic fixtures for independent development
 ✅ **Developer QoL**: Hot-reload, one-click startup, comprehensive docs
 ✅ **MVP Acceptance**: Complete persona → preferences → results flow
 
 The implementation provides a fully functional MVP that allows selecting personas, inputting preferences, adjusting weights, and viewing optimized results with mock but realistic data.
+## Security Hardening
+
+- Added JWT authentication dependency for protected exports.
+- Implemented logging filter to redact emails and full names.
+- Exports now signed with HMAC-SHA256 and return signature metadata.

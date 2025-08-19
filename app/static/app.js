@@ -5,11 +5,13 @@ class VectorBidApp {
         this.selectedPersona = null;
         this.preferences = {};
         this.results = {};
+        this.rulesCatalog = {};
         this.init();
     }
 
     init() {
         this.loadPersonas();
+        this.loadRulesCatalog();
         this.bindEvents();
         this.updateSliderValues();
     }
@@ -21,6 +23,15 @@ class VectorBidApp {
             this.renderPersonas(data.personas);
         } catch (error) {
             console.error('Failed to load personas:', error);
+        }
+    }
+
+    async loadRulesCatalog() {
+        try {
+            const res = await fetch('/static/rules_catalog.json');
+            this.rulesCatalog = await res.json();
+        } catch (error) {
+            console.error('Failed to load rules catalog:', error);
         }
     }
 
@@ -47,7 +58,7 @@ class VectorBidApp {
         const card = document.createElement('div');
         card.className = 'persona-card bg-gray-50 border-2 border-gray-200 rounded-lg p-4 cursor-pointer';
         card.dataset.persona = key;
-        
+
         card.innerHTML = `
             <div class="text-center">
                 <i class="${persona.icon} text-3xl text-blue-600 mb-3"></i>
@@ -84,7 +95,7 @@ class VectorBidApp {
         const response = await fetch('/api/personas');
         const data = await response.json();
         const personaData = data.personas[persona];
-        
+
         if (personaData && personaData.preferences) {
             document.getElementById('preferences-text').value = personaData.preferences;
         }
@@ -161,9 +172,9 @@ class VectorBidApp {
             const response = await fetch('/api/parse_preferences', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     preferences: text,
-                    persona: this.selectedPersona 
+                    persona: this.selectedPersona
                 })
             });
 
@@ -177,7 +188,7 @@ class VectorBidApp {
     displayParsedPreferences(data) {
         const preview = document.getElementById('parsed-preview');
         const content = document.getElementById('parsed-content');
-        
+
         let html = '<div class="space-y-2">';
         data.parsed_preferences.parsed_items.forEach(item => {
             const badge = item.category === 'hard_constraint' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800';
@@ -191,7 +202,7 @@ class VectorBidApp {
             `;
         });
         html += '</div>';
-        
+
         content.innerHTML = html;
         preview.classList.remove('hidden');
     }
@@ -339,7 +350,7 @@ class VectorBidApp {
                         <div class="text-xs text-gray-500">Match</div>
                     </div>
                 </div>
-                
+
                 <div class="grid grid-cols-3 gap-2 mb-3">
                     ${Object.entries(candidate.soft_breakdown).map(([key, value]) => `
                         <div class="text-center">
@@ -357,11 +368,11 @@ class VectorBidApp {
                 <div class="mb-3">
                     <h5 class="text-sm font-medium text-gray-700 mb-1">Why this works:</h5>
                     <ul class="text-sm text-gray-600 list-disc list-inside">
-                        ${candidate.rationale.map(reason => `<li>${reason}</li>`).join('')}
+                        ${candidate.rationale.notes.map(reason => `<li>${reason}</li>`).join('')}
                     </ul>
                 </div>
 
-                <button onclick="app.explainCandidate('${candidate.candidate_id}')" 
+                <button onclick="app.showRationale('${candidate.candidate_id}')"
                         class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                     <i class="fas fa-info-circle mr-1"></i>
                     Explain ranking
@@ -418,9 +429,9 @@ class VectorBidApp {
                         ${(layer.probability * 100).toFixed(0)}% chance
                     </span>
                 </div>
-                
+
                 <p class="text-gray-600 mb-3">${layer.description}</p>
-                
+
                 <div class="mb-3">
                     <h5 class="text-sm font-medium text-gray-700 mb-2">PBS Commands:</h5>
                     <div class="bg-gray-50 rounded-md p-3">
@@ -429,7 +440,7 @@ class VectorBidApp {
                         </code>
                     </div>
                 </div>
-                
+
                 <p class="text-sm text-gray-500">Expected: ${layer.expected_outcome}</p>
             </div>
         `).join('');
@@ -438,7 +449,7 @@ class VectorBidApp {
     showScheduleView() {
         document.getElementById('schedule-results').classList.remove('hidden');
         document.getElementById('layers-results').classList.add('hidden');
-        
+
         document.getElementById('view-schedule').className = 'bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors';
         document.getElementById('view-layers').className = 'bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors';
     }
@@ -446,24 +457,39 @@ class VectorBidApp {
     showLayersView() {
         document.getElementById('schedule-results').classList.add('hidden');
         document.getElementById('layers-results').classList.remove('hidden');
-        
+
         document.getElementById('view-schedule').className = 'bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors';
         document.getElementById('view-layers').className = 'bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors';
     }
 
-    async explainCandidate(candidateId) {
+    async showRationale(candidateId) {
         try {
-            const response = await fetch(`/api/explain/${candidateId}`);
-            const explanation = await response.json();
-            
-            alert(`Score Breakdown for ${candidateId}:\n\n` +
-                  `Base Score: ${explanation.explanation.score_breakdown.base_score}\n` +
-                  `Bonuses: ${explanation.explanation.score_breakdown.weekend_bonus + explanation.explanation.score_breakdown.credit_bonus}\n` +
-                  `Penalties: ${explanation.explanation.score_breakdown.penalties}\n\n` +
-                  `Key Factors:\n${explanation.explanation.key_factors.join('\n• ')}`
-            );
+            const response = await fetch(`/api/candidates/${candidateId}`);
+            const data = await response.json();
+            const rat = data.candidate.rationale;
+            const hits = rat.hard_hits
+                .map(id => `<li>${id}: ${this.rulesCatalog[id] || id}</li>`)
+                .join('');
+            const misses = rat.hard_misses
+                .map(id => `<li>${id}: ${this.rulesCatalog[id] || id}</li>`)
+                .join('');
+            const notes = rat.notes.map(n => `<li>${n}</li>`).join('');
+            let html = '';
+            if (hits) {
+                html += `<h5 class="font-medium text-green-700">Hard Hits</h5><ul class="mb-2 text-sm text-green-700 list-disc list-inside">${hits}</ul>`;
+            }
+            if (misses) {
+                html += `<h5 class="font-medium text-red-700">Hard Misses</h5><ul class="mb-2 text-sm text-red-700 list-disc list-inside">${misses}</ul>`;
+            }
+            if (notes) {
+                html += `<h5 class="font-medium text-gray-700">Notes</h5><ul class="mb-2 text-sm text-gray-700 list-disc list-inside">${notes}</ul>`;
+            }
+            document.getElementById('rationale-content').innerHTML = html;
+            const sidebar = document.getElementById('rationale-sidebar');
+            sidebar.classList.remove('hidden');
+            document.getElementById('close-rationale').onclick = () => sidebar.classList.add('hidden');
         } catch (error) {
-            console.error('Failed to get explanation:', error);
+            console.error('Failed to load candidate rationale:', error);
         }
     }
 
@@ -471,7 +497,7 @@ class VectorBidApp {
         try {
             const response = await fetch(`/api/exports/${this.results.layers.export_hash}`);
             const exportData = await response.json();
-            
+
             // Create download
             const blob = new Blob([exportData.content], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);

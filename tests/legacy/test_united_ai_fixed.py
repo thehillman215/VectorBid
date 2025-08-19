@@ -54,9 +54,7 @@ def create_united_prompt(trips, preferences, top_n=5):
     for trip in trips:
         efficiency = trip.get("credit_hours", 0) / max(trip.get("days", 1), 1)
         routing = trip.get("routing", "")
-        weekend_status = (
-            "includes weekend" if trip.get("includes_weekend") else "weekdays only"
-        )
+        weekend_status = "includes weekend" if trip.get("includes_weekend") else "weekdays only"
 
         # Add United-specific insights
         route_notes = []
@@ -170,9 +168,7 @@ def test_with_openai_api():
             for i, result in enumerate(results[:4]):
                 trip_id = result.get("trip_id", "?")
                 score = result.get("score", "?")
-                reasoning = result.get(
-                    "reasoning", result.get("comment", "No reasoning")
-                )
+                reasoning = result.get("reasoning", result.get("comment", "No reasoning"))
                 print(f"  {i + 1}. {trip_id} (Score: {score})")
                 print(f"     → {reasoning}")
             print("-" * 40)
@@ -221,9 +217,7 @@ def test_with_openai_api():
                         score = ranking.get("score", "?")
                         reasoning = ranking.get("reasoning", "No reasoning provided")
                         efficiency = ranking.get("efficiency", "?")
-                        print(
-                            f"  {rank}. {trip_id} (Score: {score}/100, {efficiency} hrs/day)"
-                        )
+                        print(f"  {rank}. {trip_id} (Score: {score}/100, {efficiency} hrs/day)")
                         print(f"     → {reasoning}")
 
                 except json.JSONDecodeError as e:
@@ -293,6 +287,4 @@ if __name__ == "__main__":
         success = test_with_openai_api()
         if not success:
             print()
-            print(
-                "💡 To see prompt example, run: python3 test_united_ai_fixed.py example"
-            )
+            print("💡 To see prompt example, run: python3 test_united_ai_fixed.py example")

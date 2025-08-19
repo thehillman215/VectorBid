@@ -47,9 +47,7 @@ def test_admin_upload_auth(base_url):
     # Test with wrong auth
     try:
         headers = {"Authorization": "Bearer wrongtoken"}
-        response = requests.post(
-            f"{base_url}/admin/upload-bid", headers=headers, timeout=10
-        )
+        response = requests.post(f"{base_url}/admin/upload-bid", headers=headers, timeout=10)
         if response.status_code == 401:
             print("✅ Correctly rejects invalid tokens")
             return True

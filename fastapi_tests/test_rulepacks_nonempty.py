@@ -28,9 +28,7 @@ def test_ual_2025_08_rule_pack_non_empty():
     assert len(rp["hard"]) > 0, "Hard rules list should contain rules"
     assert len(rp["soft"]) > 0, "Soft rules list should contain rules"
 
-    print(
-        f"✅ Rule pack validation passed: {len(rp['hard'])} hard, {len(rp['soft'])} soft rules"
-    )
+    print(f"✅ Rule pack validation passed: {len(rp['hard'])} hard, {len(rp['soft'])} soft rules")
 
 
 def test_rule_pack_structure_validity():
@@ -56,11 +54,7 @@ def test_rule_pack_structure_validity():
     for section in ["far117", "union"]:
         assert "hard" in data[section], f"Missing 'hard' in {section}"
         assert "soft" in data[section], f"Missing 'soft' in {section}"
-        assert isinstance(data[section]["hard"], list), (
-            f"{section}.hard should be a list"
-        )
-        assert isinstance(data[section]["soft"], list), (
-            f"{section}.soft should be a list"
-        )
+        assert isinstance(data[section]["hard"], list), f"{section}.hard should be a list"
+        assert isinstance(data[section]["soft"], list), f"{section}.soft should be a list"
 
     print("✅ Rule pack structure validation passed")

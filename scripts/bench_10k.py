@@ -97,9 +97,7 @@ def run_once(n: int, k: int) -> None:
     r.json()["directives"]
 
     t0 = time.time()
-    r = client.post(
-        "/generate_layers", json={"feature_bundle": bundle, "candidates": topk}
-    )
+    r = client.post("/generate_layers", json={"feature_bundle": bundle, "candidates": topk})
     r.raise_for_status()
     timings["generate_layers"] = time.time() - t0
     artifact = r.json()["artifact"]
@@ -120,9 +118,7 @@ def run_once(n: int, k: int) -> None:
 
     if violations:
         print(f"violations: {len(violations)} (sample: {violations[:2]})")
-    print(
-        f"candidates: {len(topk)}; top 5 ids: {[c['candidate_id'] for c in topk[:5]]}"
-    )
+    print(f"candidates: {len(topk)}; top 5 ids: {[c['candidate_id'] for c in topk[:5]]}")
     print(
         f"artifact: month={artifact['month']} format={artifact['format']} hash={artifact['export_hash'][:12]}…"
     )
@@ -133,12 +129,8 @@ def run_once(n: int, k: int) -> None:
 
 
 def main():
-    ap = argparse.ArgumentParser(
-        description="Benchmark VectorBid pipeline on a large batch."
-    )
-    ap.add_argument(
-        "--n", type=int, default=10_000, help="number of pairings to include"
-    )
+    ap = argparse.ArgumentParser(description="Benchmark VectorBid pipeline on a large batch.")
+    ap.add_argument("--n", type=int, default=10_000, help="number of pairings to include")
     ap.add_argument("--k", type=int, default=50, help="top-K candidates to return")
     args = ap.parse_args()
     run_once(args.n, args.k)

@@ -7,10 +7,12 @@ far117:
   hard:
     - id: FAR117_MIN_REST
       desc: Rest >= 10h
+      clause: https://www.ecfr.gov/current/title-14/part-117
       check: pairing.rest_hours >= 10
   soft:
     - id: FAR117_SOFT_DUTY_LIMIT
       desc: Prefer duty time under 14h
+      clause: https://www.ecfr.gov/current/title-14/part-117#duty
       weight: 0.3
       score: "pairing.duty_hours <= 14 ? 1.0 : 0.7"
 
@@ -20,9 +22,11 @@ union:
     - id: NO_REDEYE_IF_SET
       when: pref.hard_constraints.no_red_eyes
       check: pairing.redeye == false
+      clause: UAL-CBA#no-redeye
   soft:
     - id: PREFER_LAYOVER_CITY
       weight: "pref.soft_prefs.layovers.weight"
       score: "city in pref.soft_prefs.layovers.prefer ? 1.0 : (city in pref.soft_prefs.layovers.avoid ? 0.0 : 0.5)"
+      clause: UAL-CBA#layover-city
 
 rules: []

@@ -1,0 +1,11 @@
+version: '1'
+airline: TEST
+id: TEST-1
+far117:
+  hard:
+    - id: H1
+      check: x > 1
+  soft:
+    - id: S1
+      score: '1'
+rules: []

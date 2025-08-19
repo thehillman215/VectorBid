@@ -152,9 +152,7 @@ def test_full_pipeline_golden(client, scenario):
     strategy = r.json()
 
     # 5) generate layers
-    r = client.post(
-        _pick("generate_layers"), json={"strategy": strategy, "context": ctx}
-    )
+    r = client.post(_pick("generate_layers"), json={"strategy": strategy, "context": ctx})
     assert r.status_code == 200, r.text
     layers = r.json()
 

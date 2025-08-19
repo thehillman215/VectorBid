@@ -50,11 +50,11 @@ def test_export_hash_golden(monkeypatch):
         },
         "K": 5,
     }
-    topk = client.post("/optimize", json=fb).json()["candidates"]
+    topk = client.post("/api/optimize", json=fb).json()["candidates"]
 
     # Generate → artifact with deterministic export_hash
     artifact = client.post(
-        "/generate_layers",
+        "/api/generate_layers",
         json={"feature_bundle": fb["feature_bundle"], "candidates": topk},
     ).json()["artifact"]
 

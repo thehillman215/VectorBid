@@ -101,11 +101,7 @@ def _as_dict(obj: Any) -> dict[str, Any]:
 def _get_in(obj: Any, *path: str, default: Any = None) -> Any:
     cur = obj
     for p in path:
-        cur = (
-            cur.get(p, default)
-            if isinstance(cur, Mapping)
-            else getattr(cur, p, default)
-        )
+        cur = cur.get(p, default) if isinstance(cur, Mapping) else getattr(cur, p, default)
         if cur is default:
             break
     return cur
@@ -141,10 +137,7 @@ def _get_scoring_weights(
 ) -> dict[str, float]:
     base: dict[str, float]
     is_bundle = bundle_or_categories is not None and (
-        (
-            isinstance(bundle_or_categories, Mapping)
-            and "context" in bundle_or_categories
-        )
+        (isinstance(bundle_or_categories, Mapping) and "context" in bundle_or_categories)
         or hasattr(bundle_or_categories, "context")
     )
     if is_bundle:
@@ -162,16 +155,12 @@ def _get_scoring_weights(
         if sum(base.values()) <= 0:
             base.update(_derive_defaults_from_bundle(bundle_or_categories))
         # persona: family_first => bump layovers and downweight award_rate (pre-normalization)
-        persona = _get_in(
-            bundle_or_categories, "preference_schema", "source", "persona"
-        )
+        persona = _get_in(bundle_or_categories, "preference_schema", "source", "persona")
         if isinstance(persona, str) and persona.lower() == "family_first":
             base["layovers"] = base.get("layovers", 0.0) + 2.0
             base["award_rate"] = base.get("award_rate", 0.0) * 0.5
     else:
-        cats = (
-            tuple(bundle_or_categories) if bundle_or_categories else SCORING_CATEGORIES
-        )
+        cats = tuple(bundle_or_categories) if bundle_or_categories else SCORING_CATEGORIES
         base = {str(c): 1.0 for c in cats}
     # allow overrides to introduce new keys
     if overrides:
@@ -219,9 +208,7 @@ def _fallback_v1_rank(
 ) -> list[dict[str, Any]]:
     q = str(query) if not isinstance(query, str) else query
     q_tokens = _tokenize(q) or ["*"]
-    q_weight = {
-        t: 1.0 / (1.0 + math.log1p(i)) for i, t in enumerate(sorted(set(q_tokens)))
-    }
+    q_weight = {t: 1.0 / (1.0 + math.log1p(i)) for i, t in enumerate(sorted(set(q_tokens)))}
     scored = []
     for it in candidates:
         rid = _coerce_id(it)
@@ -280,9 +267,7 @@ def rank_candidates(
             norm.append(m)
         norm.sort(key=lambda x: (-x["score"], x["id"]))
         return norm[:top_k]
-    return _fallback_v1_rank(
-        candidates, query, top_k=top_k, strategy=strategy, **kwargs
-    )[:top_k]
+    return _fallback_v1_rank(candidates, query, top_k=top_k, strategy=strategy, **kwargs)[:top_k]
 
 
 # === High-level select_topk ===
@@ -297,26 +282,16 @@ class RankedCandidate(BaseModel):
 def _extract_bundle(bundle: Any) -> dict[str, Any]:
     b = _as_dict(bundle)
     context = b.get("context") or _as_dict(getattr(bundle, "context", None))
-    prefs = b.get("preference_schema") or _as_dict(
-        getattr(bundle, "preference_schema", None)
-    )
-    analytics = b.get("analytics_features") or _as_dict(
-        getattr(bundle, "analytics_features", None)
-    )
-    compliance = b.get("compliance_flags") or _as_dict(
-        getattr(bundle, "compliance_flags", None)
-    )
-    pf = b.get("pairing_features") or _as_dict(
-        getattr(bundle, "pairing_features", None)
-    )
+    prefs = b.get("preference_schema") or _as_dict(getattr(bundle, "preference_schema", None))
+    analytics = b.get("analytics_features") or _as_dict(getattr(bundle, "analytics_features", None))
+    compliance = b.get("compliance_flags") or _as_dict(getattr(bundle, "compliance_flags", None))
+    pf = b.get("pairing_features") or _as_dict(getattr(bundle, "pairing_features", None))
     pairings = pf.get("pairings") if isinstance(pf, Mapping) else None
     if pairings is None:
         pairings = _get_in(bundle, "pairing_features", "pairings", default=[])
     if not isinstance(pairings, Sequence):
         pairings = []
-    pairings = [
-        _as_dict(p) if not isinstance(p, Mapping) else dict(p) for p in pairings
-    ]
+    pairings = [_as_dict(p) if not isinstance(p, Mapping) else dict(p) for p in pairings]
     return {
         "context": _as_dict(context),
         "prefs": _as_dict(prefs),

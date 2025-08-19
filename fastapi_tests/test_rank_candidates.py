@@ -55,7 +55,7 @@ def test_select_topk_deterministic():
     assert first[0].pairings == ["A"]
     assert "award_rate" in first[0].soft_breakdown
     assert 0.0 <= first[0].score <= 2.0
-    assert first[0].rationale
+    assert first[0].rationale.notes
 
 
 def test_select_topk_handles_missing_data():

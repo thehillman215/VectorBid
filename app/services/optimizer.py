@@ -4,7 +4,9 @@ import heapq
 from operator import itemgetter
 from typing import Any
 
-from app.models import CandidateSchedule, FeatureBundle
+from app.audit import log_event
+from app.db import Candidate, SessionLocal
+from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 
 
 def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
@@ -35,6 +37,30 @@ def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
         messages.append(f"{key} contributed {val:.2f}")
 
     return messages
+
+
+def _rule_hits_misses(bundle: FeatureBundle, pairing: Any) -> tuple[list[str], list[str]]:
+    """Determine which hard rules are satisfied or violated."""
+
+    hits: list[str] = []
+    misses: list[str] = []
+
+    hard = _to_dict(_get(bundle.preference_schema, "hard_constraints", {}))
+    no_red = bool(hard.get("no_red_eyes"))
+
+    rest_hours = float(_get(pairing, "rest_hours", 999) or 999)
+    if rest_hours < 10:
+        misses.append("FAR117_MIN_REST")
+    else:
+        hits.append("FAR117_MIN_REST")
+
+    is_redeye = bool(_get(pairing, "redeye", False))
+    if no_red and is_redeye:
+        misses.append("NO_REDEYE_IF_SET")
+    else:
+        hits.append("NO_REDEYE_IF_SET")
+
+    return hits, misses
 
 
 def _to_dict(x: Any) -> dict[str, Any]:
@@ -97,20 +123,13 @@ def _get_seniority_adjustment(bundle: FeatureBundle) -> float:
     return 0.9 + 0.2 * seniority
 
 
-def _score_days_off(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_days_off(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score whether pairing avoids requested days off."""
 
     req = set(
-        _to_dict(
-            _get(_get(bundle.preference_schema, "hard_constraints", {}), "days_off", [])
-        )
-        or []
+        _to_dict(_get(_get(bundle.preference_schema, "hard_constraints", {}), "days_off", [])) or []
     )
-    pairing_days = set(
-        _get(pairing, "dates", []) or _get(pairing, "duty_days", []) or []
-    )
+    pairing_days = set(_get(pairing, "dates", []) or _get(pairing, "duty_days", []) or [])
     if not req or not pairing_days:
         base = 0.0
     else:
@@ -121,9 +140,7 @@ def _score_days_off(
 def _score_block_hours(pairing: Any, weights: dict[str, float]) -> float:
     """Favor higher block or credit hours."""
 
-    block = float(
-        _get(pairing, "block_hours", _get(pairing, "credit_hours", 0.0)) or 0.0
-    )
+    block = float(_get(pairing, "block_hours", _get(pairing, "credit_hours", 0.0)) or 0.0)
     base = min(block, 100.0) / 100.0
     return weights.get("block_hours", 0.0) * base
 
@@ -142,16 +159,12 @@ def _score_duty_hours(pairing: Any, weights: dict[str, float]) -> float:
 def _score_layover_quality(pairing: Any, weights: dict[str, float]) -> float:
     """Use rest hours as a proxy for layover quality."""
 
-    rest = float(
-        _get(pairing, "rest_hours", _get(pairing, "layover_rest_hours", 0.0)) or 0.0
-    )
+    rest = float(_get(pairing, "rest_hours", _get(pairing, "layover_rest_hours", 0.0)) or 0.0)
     base = min(rest, 24.0) / 24.0
     return weights.get("layover_quality", 0.0) * base
 
 
-def _score_report_time(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_report_time(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score later report times higher."""
 
     time_str = _get(pairing, "report_time", "") or ""
@@ -175,9 +188,7 @@ def _score_commutability(pairing: Any, weights: dict[str, float]) -> float:
     return weights.get("commutability", 0.0) * base
 
 
-def _score_trip_length(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_trip_length(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score against preferred trip lengths."""
 
     prefs_d = _to_dict(_get(bundle.preference_schema, "soft_prefs", {}))
@@ -204,9 +215,7 @@ def _score_trip_length(
     return weights.get("trip_length", 0.0) * pref_w * base
 
 
-def _score_equipment(
-    bundle: FeatureBundle, pairing: Any, weights: dict[str, float]
-) -> float:
+def _score_equipment(bundle: FeatureBundle, pairing: Any, weights: dict[str, float]) -> float:
     """Score if the pairing's equipment matches pilot preferences."""
 
     desired = set(_get(bundle.preference_schema, "equip", []) or [])
@@ -273,14 +282,75 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
 
     result: list[CandidateSchedule] = []
     for winner_score, _neg_i, pid, breakdown, pairing in winners:
+        hits, misses = _rule_hits_misses(bundle, pairing)
         result.append(
             CandidateSchedule(
                 candidate_id=pid,
                 score=winner_score,
-                hard_ok=True,
+                hard_ok=len(misses) == 0,
                 soft_breakdown=breakdown,
                 pairings=[pid],
-                rationale=_generate_rationale(pairing, breakdown),
+                rationale=CandidateRationale(
+                    hard_hits=hits,
+                    hard_misses=misses,
+                    notes=_generate_rationale(pairing, breakdown),
+                ),
             )
         )
+
+    ctx_id = bundle.context.ctx_id
+    with SessionLocal() as db:
+        for cand in result:
+            db.add(Candidate(ctx_id=ctx_id, data=cand.model_dump()))
+        db.commit()
+
+    log_event(ctx_id, "optimize", {"candidates": [c.candidate_id for c in result]})
+
     return result
+
+
+def retune_candidates(
+    candidates: list[CandidateSchedule], weight_deltas: dict[str, float]
+) -> list[CandidateSchedule]:
+    """Re-score already feasible candidates with lightweight weight tweaks.
+
+    Parameters
+    ----------
+    candidates:
+        List of pre-computed feasible candidates, typically output from
+        :func:`select_topk`. Each candidate must contain a ``soft_breakdown``
+        with the contribution of every scoring factor.
+    weight_deltas:
+        Mapping of factor name to a *relative* weight adjustment. The new
+        contribution for factor ``k`` becomes ``breakdown[k] * (1 + delta)``.
+
+    Returns
+    -------
+    list[CandidateSchedule]
+        Candidates with updated ``score`` and ``soft_breakdown`` fields,
+        sorted in descending score order. No feasibility checks or parsing is
+        performed; this function is purely a stateless reweighting step and
+        runs in O(N·F) where ``F`` is the number of scoring factors. With 50
+        candidates it completes well under 150 ms on commodity hardware.
+    """
+
+    adjusted: list[CandidateSchedule] = []
+    for cand in candidates:
+        new_breakdown: dict[str, float] = {}
+        for key, val in cand.soft_breakdown.items():
+            factor = 1.0 + float(weight_deltas.get(key, 0.0))
+            new_breakdown[key] = val * factor
+
+        new_score = sum(new_breakdown.values())
+        adjusted.append(
+            cand.model_copy(
+                update={
+                    "score": new_score,
+                    "soft_breakdown": new_breakdown,
+                    "rationale": _generate_rationale(None, new_breakdown),
+                }
+            )
+        )
+
+    adjusted.sort(key=lambda c: c.score, reverse=True)
+    return adjusted

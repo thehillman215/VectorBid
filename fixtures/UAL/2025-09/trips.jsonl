@@ -1,0 +1,10 @@
+{"trip_id":"EWR-73N-901-T1","pairing_id":"EWR-73N-901","day":1,"origin":"EWR","destination":"LAX"}
+{"trip_id":"EWR-73N-901-T2","pairing_id":"EWR-73N-901","day":2,"origin":"LAX","destination":"SFO"}
+{"trip_id":"EWR-73N-901-T3","pairing_id":"EWR-73N-901","day":3,"origin":"SFO","destination":"SEA"}
+{"trip_id":"EWR-73N-901-T4","pairing_id":"EWR-73N-901","day":4,"origin":"SEA","destination":"ORD"}
+{"trip_id":"EWR-73N-901-T5","pairing_id":"EWR-73N-901","day":5,"origin":"ORD","destination":"EWR"}
+{"trip_id":"EWR-73N-902-T1","pairing_id":"EWR-73N-902","day":1,"origin":"EWR","destination":"DEN"}
+{"trip_id":"EWR-73N-902-T2","pairing_id":"EWR-73N-902","day":2,"origin":"DEN","destination":"LAS"}
+{"trip_id":"EWR-73N-902-T3","pairing_id":"EWR-73N-902","day":3,"origin":"LAS","destination":"PHX"}
+{"trip_id":"EWR-73N-902-T4","pairing_id":"EWR-73N-902","day":4,"origin":"PHX","destination":"IAD"}
+{"trip_id":"EWR-73N-902-T5","pairing_id":"EWR-73N-902","day":5,"origin":"IAD","destination":"EWR"}

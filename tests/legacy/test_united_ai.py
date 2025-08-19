@@ -57,9 +57,7 @@ def create_united_prompt(trips, preferences, top_n=5):
     for trip in trips:
         efficiency = trip.get("credit_hours", 0) / max(trip.get("days", 1), 1)
         routing = trip.get("routing", "")
-        weekend_status = (
-            "includes weekend" if trip.get("includes_weekend") else "weekdays only"
-        )
+        weekend_status = "includes weekend" if trip.get("includes_weekend") else "weekdays only"
 
         # Add United-specific insights
         route_notes = []
@@ -197,9 +195,7 @@ def test_with_openai_api():
 
             print()
             print("💰 API USAGE:")
-            print(
-                f"  Tokens: {input_tokens} input + {output_tokens} output = {total_tokens} total"
-            )
+            print(f"  Tokens: {input_tokens} input + {output_tokens} output = {total_tokens} total")
             print(
                 f"  Cost: ~${total_cost:.4f} (input: ${input_cost:.4f}, output: ${output_cost:.4f})"
             )

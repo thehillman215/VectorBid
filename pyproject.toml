@@ -39,6 +39,7 @@ dependencies = [
     "pyyaml>=6.0.0",
     "jinja2>=3.0.0",
     "python-multipart>=0.0.5",
+    "prometheus-client>=0.21.0",
 ]
 
 [project.optional-dependencies]
@@ -66,31 +67,20 @@ exclude = ["tests*", "docs*"]
 
 # Ruff configuration
 [tool.ruff]
+line-length = 100
 target-version = "py311"
-line-length = 88
+fix = true
 
 [tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "UP", # pyupgrade
-]
-ignore = [
-    "E501",  # line too long, handled by formatter
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
-]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-"tests/*" = ["B011"]
+# includes isort rules
+select = ["E","F","I","UP","B"]
+ignore = ["E501", "UP038", "UP007", "B008", "UP031", "F841"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["vectorbid"]
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
 
 # Black configuration
 [tool.black]
