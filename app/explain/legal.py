@@ -15,9 +15,23 @@ def _rules() -> Dict[str, Dict[str, Any]]:
     if _RULE_MAP is None:
         data = load_rule_pack(RULE_PACK_PATH)
         mapping: Dict[str, Dict[str, Any]] = {}
+        
+        # Handle nested rule structure (far117, union, etc.)
+        for section_name, section_data in data.items():
+            if isinstance(section_data, dict):
+                for bucket in ("hard", "soft"):
+                    rules_list = section_data.get(bucket, [])
+                    if isinstance(rules_list, list):
+                        for rule in rules_list:
+                            if isinstance(rule, dict) and "id" in rule:
+                                mapping[rule.get("id")] = rule
+        
+        # Also handle top-level hard/soft rules for backward compatibility
         for bucket in ("hard", "soft"):
             for rule in data.get(bucket, []):
-                mapping[rule.get("id")] = rule
+                if isinstance(rule, dict) and "id" in rule:
+                    mapping[rule.get("id")] = rule
+                    
         _RULE_MAP = mapping
     return _RULE_MAP
 

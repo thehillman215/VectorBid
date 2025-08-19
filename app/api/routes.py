@@ -253,7 +253,14 @@ def export(payload: dict[str, Any]) -> dict[str, str]:
         out_path = write_artifact(art, export_dir)
 
         data = out_path.read_bytes()
-        signature = hashlib.sha256(data).hexdigest()
+        
+        # Use HMAC signing if EXPORT_SIGNING_KEY is set, otherwise fall back to SHA256
+        signing_key = os.environ.get("EXPORT_SIGNING_KEY")
+        if signing_key:
+            signature = hmac.new(signing_key.encode(), data, hashlib.sha256).hexdigest()
+        else:
+            signature = hashlib.sha256(data).hexdigest()
+            
         sig_path = out_path.with_suffix(out_path.suffix + ".sig")
         sig_path.write_text(signature, encoding="utf-8")
 
@@ -268,12 +275,12 @@ def export(payload: dict[str, Any]) -> dict[str, str]:
             "export_created",
             {
                 "id": export_id,
-                "path": str(out_path),
-                "sha256": signature,
+                "export_path": str(out_path),
+                "signature": signature,
             }
         )
 
-        return {"id": export_id, "path": str(out_path), "sha256": signature}
+        return {"id": export_id, "export_path": str(out_path), "path": str(out_path), "signature": signature, "sha256": signature}
     except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e)) from e
 

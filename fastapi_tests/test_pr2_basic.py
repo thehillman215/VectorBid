@@ -74,8 +74,8 @@ def test_validate_and_optimize_generate_lint_and_hash():
     assert topk and topk[0]["candidate_id"] == "P1"  # SAN preferred
     # ensure legal rationale attached for violating pairing P3
     p3 = next(c for c in topk if c["candidate_id"] == "P3")
-    assert any("FAR117_MIN_REST" in msg for msg in p3["rationale"])
-    assert any("ecfr" in msg for msg in p3["rationale"])
+    assert any("FAR117_MIN_REST" in msg for msg in p3["rationale"]["notes"])
+    assert any("ecfr" in msg for msg in p3["rationale"]["notes"])
 
     # strategy
     r = client.post(

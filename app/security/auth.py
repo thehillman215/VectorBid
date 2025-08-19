@@ -26,12 +26,14 @@ def require_auth(
     api_key_expected = os.environ.get("VECTORBID_API_KEY")
 
     if jwt_secret:
-        if not authorization or not authorization.startswith("Bearer "):
+        # Handle both string and Header object cases
+        auth_value = str(authorization) if authorization is not None else None
+        if not auth_value or auth_value == "None" or not auth_value.startswith("Bearer "):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="missing bearer token",
             )
-        token = authorization.split(" ", 1)[1]
+        token = auth_value.split(" ", 1)[1]
         try:
             return jwt.decode(token, jwt_secret, algorithms=["HS256"])
         except Exception as e:  # pragma: no cover - specific errors not needed
@@ -41,7 +43,16 @@ def require_auth(
             ) from e
 
     if api_key_expected:
-        provided = x_api_key or api_key
+        x_api_key_str = str(x_api_key) if x_api_key is not None else None
+        api_key_str = str(api_key) if api_key is not None else None
+        
+        # Handle case where None converts to string "None"
+        if x_api_key_str == "None":
+            x_api_key_str = None
+        if api_key_str == "None":
+            api_key_str = None
+            
+        provided = x_api_key_str or api_key_str
         if provided != api_key_expected:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
