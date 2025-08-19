@@ -1,6 +1,6 @@
 import pytest
 
-from app.parsers.ual_pdf import parse_bid_pdf, _parse_trip_block
+from app.parsers.ual_pdf import _parse_trip_block, parse_bid_pdf
 
 FIXTURES = [
     "tests/fixtures/bid_packages/202508_first.txt",

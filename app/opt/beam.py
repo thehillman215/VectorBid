@@ -64,11 +64,7 @@ def search(
             break
         pid = p.get("id", "")
         city = p.get("layover_city")
-        award = (
-            bundle.analytics_features.get("base_stats", {})
-            .get(city, {})
-            .get("award_rate", 0.5)
-        )
+        award = bundle.analytics_features.get("base_stats", {}).get(city, {}).get("award_rate", 0.5)
         prefs_d = bundle.preference_schema.soft_prefs.model_dump()
         layover_pref = prefs_d.get("layovers") or {}
         prefer = set(layover_pref.get("prefer") or [])

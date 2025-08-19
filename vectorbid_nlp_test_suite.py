@@ -383,10 +383,8 @@ def run_full_test_suite(llm_function=None) -> dict:
     print("=" * 80)
     print("\n📊 Overall Results:")
     print(f"  • Total Tests: {results['total_tests']}")
-    print(
-        pass_rate = results['passed'] / results['total_tests'] * 100
-    f"  • Passed: {results['passed']} ({pass_rate:.1f}%)"
-    )
+    pass_rate = results["passed"] / results["total_tests"] * 100
+    print(f"  • Passed: {results['passed']} ({pass_rate:.1f}%)")
     print(f"  • Failed: {results['failed']}")
     print(f"  • Average Score: {results['average_score']:.1f}/100")
 
@@ -394,7 +392,7 @@ def run_full_test_suite(llm_function=None) -> dict:
     for category, stats in results["categories"].items():
         print(f"\n  {category}:")
         print(f"    • Tests: {stats['total']}")
-        pass_rate = stats['passed'] / stats['total'] * 100
+        pass_rate = stats["passed"] / stats["total"] * 100
         print(f"    • Pass Rate: {stats['passed']}/{stats['total']} ({pass_rate:.1f}%)")
         print(f"    • Avg Score: {stats['avg_score']:.1f}/100")
 

@@ -6,8 +6,9 @@ from .auth import require_auth
 
 
 def require_api_key(
-    x_api_key: str | None = Header(default=None),
-    api_key: str | None = Query(default=None),
+    authorization=Header(None),
+    x_api_key=Header(None),
+    api_key=Query(None),
 ) -> None:
-    """Backward-compatible wrapper for API key auth."""
-    return require_auth(x_api_key=x_api_key, api_key=api_key)
+    """Backward-compatible wrapper supporting both JWT and API key auth."""
+    return require_auth(authorization=authorization, x_api_key=x_api_key, api_key=api_key)

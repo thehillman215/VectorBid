@@ -7,6 +7,8 @@ from typing import Any
 import yaml
 from pydantic import ValidationError
 
+from app.audit import log_event
+from app.db import Pilot, Preference, RulePack as RulePackModel, SessionLocal
 from app.models import FeatureBundle
 from app.rules.models import RulePack
 
@@ -127,5 +129,27 @@ def validate_feasibility(bundle: FeatureBundle, rules: dict[str, Any]) -> dict[s
             violations.append({"pairing_id": p.get("id"), "rule": "NO_REDEYE_IF_SET"})
         else:
             feasible.append(p)
+
+    ctx = bundle.context
+    with SessionLocal() as db:
+        db.merge(Pilot(pilot_id=ctx.pilot_id))
+        db.add(
+            Preference(
+                ctx_id=ctx.ctx_id,
+                pilot_id=ctx.pilot_id,
+                data=bundle.preference_schema.model_dump(),
+            )
+        )
+        db.add(
+            RulePackModel(
+                ctx_id=ctx.ctx_id,
+                airline=ctx.airline,
+                version="",  # version unknown
+                data=rules,
+            )
+        )
+        db.commit()
+
+    log_event(ctx.ctx_id, "validate", {"violations": len(violations)})
 
     return {"violations": violations, "feasible_pairings": feasible}

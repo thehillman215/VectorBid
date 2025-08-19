@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import re
-from typing import List
+from datetime import datetime, timedelta
 
 import pytz
 from pydantic import BaseModel
@@ -38,24 +37,24 @@ TRIP_BLOCK_RE = re.compile(
     re.DOTALL,
 )
 LEG_RE = re.compile(
-    r"(?P<equip>\w+)\s+(?P<flight>\d+)\s+(?P<dep>[A-Z]{3})\s+(?P<arr>[A-Z]{3})\s+"\
+    r"(?P<equip>\w+)\s+(?P<flight>\d+)\s+(?P<dep>[A-Z]{3})\s+(?P<arr>[A-Z]{3})\s+"
     r"(?P<dep_time>\d{4})\s+(?P<arr_time>\d{4})",
 )
 
 
-def parse_bid_pdf(path: str) -> List[Trip]:
+def parse_bid_pdf(path: str) -> list[Trip]:
     """Parse a UAL bid packet text file into Trip models.
 
     The production system reads PDFs, but the tests supply plain text that was
     extracted from real bid packets to avoid committing binary fixtures.
     """
-    with open(path, "r", encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         text = fh.read()
     return _parse_text(text)
 
 
-def _parse_text(text: str) -> List[Trip]:
-    trips: List[Trip] = []
+def _parse_text(text: str) -> list[Trip]:
+    trips: list[Trip] = []
     for match in TRIP_BLOCK_RE.finditer(text):
         block = match.group(0)
         trip = _parse_trip_block(block)

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from typing import Union
+
 from app.models import BidLayerArtifact
 
-ArtifactLike = BidLayerArtifact | dict
+ArtifactLike = Union[BidLayerArtifact, dict]
 
 
 def _to_plain_dict(artifact: ArtifactLike) -> dict:

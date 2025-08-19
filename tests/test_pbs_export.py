@@ -14,9 +14,7 @@ def test_append_hash(tmp_path: Path) -> None:
         "lint": {},
     }
     data = append_hash(artifact)
-    canonical = json.dumps(
-        artifact, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    )
+    canonical = json.dumps(artifact, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     expected = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     assert data["export_hash"] == expected
 

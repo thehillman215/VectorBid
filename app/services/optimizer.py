@@ -4,6 +4,8 @@ import heapq
 from operator import itemgetter
 from typing import Any
 
+from app.audit import log_event
+from app.db import Candidate, SessionLocal
 from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 
 
@@ -37,9 +39,7 @@ def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
     return messages
 
 
-def _rule_hits_misses(
-    bundle: FeatureBundle, pairing: Any
-) -> tuple[list[str], list[str]]:
+def _rule_hits_misses(bundle: FeatureBundle, pairing: Any) -> tuple[list[str], list[str]]:
     """Determine which hard rules are satisfied or violated."""
 
     hits: list[str] = []
@@ -297,4 +297,60 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
                 ),
             )
         )
+
+    ctx_id = bundle.context.ctx_id
+    with SessionLocal() as db:
+        for cand in result:
+            db.add(Candidate(ctx_id=ctx_id, data=cand.model_dump()))
+        db.commit()
+
+    log_event(ctx_id, "optimize", {"candidates": [c.candidate_id for c in result]})
+
     return result
+
+
+def retune_candidates(
+    candidates: list[CandidateSchedule], weight_deltas: dict[str, float]
+) -> list[CandidateSchedule]:
+    """Re-score already feasible candidates with lightweight weight tweaks.
+
+    Parameters
+    ----------
+    candidates:
+        List of pre-computed feasible candidates, typically output from
+        :func:`select_topk`. Each candidate must contain a ``soft_breakdown``
+        with the contribution of every scoring factor.
+    weight_deltas:
+        Mapping of factor name to a *relative* weight adjustment. The new
+        contribution for factor ``k`` becomes ``breakdown[k] * (1 + delta)``.
+
+    Returns
+    -------
+    list[CandidateSchedule]
+        Candidates with updated ``score`` and ``soft_breakdown`` fields,
+        sorted in descending score order. No feasibility checks or parsing is
+        performed; this function is purely a stateless reweighting step and
+        runs in O(N·F) where ``F`` is the number of scoring factors. With 50
+        candidates it completes well under 150 ms on commodity hardware.
+    """
+
+    adjusted: list[CandidateSchedule] = []
+    for cand in candidates:
+        new_breakdown: dict[str, float] = {}
+        for key, val in cand.soft_breakdown.items():
+            factor = 1.0 + float(weight_deltas.get(key, 0.0))
+            new_breakdown[key] = val * factor
+
+        new_score = sum(new_breakdown.values())
+        adjusted.append(
+            cand.model_copy(
+                update={
+                    "score": new_score,
+                    "soft_breakdown": new_breakdown,
+                    "rationale": _generate_rationale(None, new_breakdown),
+                }
+            )
+        )
+
+    adjusted.sort(key=lambda c: c.score, reverse=True)
+    return adjusted

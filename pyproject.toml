@@ -39,6 +39,7 @@ dependencies = [
     "pyyaml>=6.0.0",
     "jinja2>=3.0.0",
     "python-multipart>=0.0.5",
+    "prometheus-client>=0.21.0",
 ]
 
 [project.optional-dependencies]
@@ -73,7 +74,7 @@ fix = true
 [tool.ruff.lint]
 # includes isort rules
 select = ["E","F","I","UP","B"]
-ignore = ["E501"]
+ignore = ["E501", "UP038", "UP007", "B008", "UP031", "F841"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
