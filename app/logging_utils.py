@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from typing import Any
@@ -25,3 +26,10 @@ def install_pii_filter() -> None:
         return record
 
     logging.setLogRecordFactory(factory)
+
+
+def log_event(event: str, **data: Any) -> None:
+    """Emit a structured log event."""
+    logging.getLogger("vectorbid.events").info(
+        "%s %s", event, json.dumps(data, sort_keys=True)
+    )

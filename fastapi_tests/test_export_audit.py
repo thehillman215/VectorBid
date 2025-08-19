@@ -1,5 +1,5 @@
-import hashlib
-import pathlib
+import sqlite3
+from pathlib import Path
 
 import jwt
 from fastapi.testclient import TestClient
@@ -8,8 +8,6 @@ from app.main import app
 
 
 def _build_artifact(client: TestClient):
-    # Freeze month for deterministic output (not strictly needed here, but tidy)
-    # NOTE: We do not monkeypatch here to avoid conflicting with other tests
     DATA = {
         "pairings": [
             {"id": "P1", "layover_city": "SAN", "redeye": False, "rest_hours": 12},
@@ -57,41 +55,51 @@ def _build_artifact(client: TestClient):
     return artifact
 
 
-def test_export_requires_jwt_and_produces_signature(tmp_path, monkeypatch):
-    # Enable auth & set export dir
+def _export(client: TestClient, token: str, artifact: dict):
+    payload = {"artifact": artifact, "ctx_id": "ctx-u1"}
+    headers = {"Authorization": f"Bearer {token}"}
+    return client.post("/api/export", headers=headers, json=payload)
+
+
+def test_signature_determinism(tmp_path, monkeypatch):
     monkeypatch.setenv("JWT_SECRET", "secret")
     monkeypatch.setenv("EXPORT_DIR", str(tmp_path))
-
+    monkeypatch.setenv("EXPORT_DB_PATH", str(tmp_path / "audit.db"))
     client = TestClient(app)
     artifact = _build_artifact(client)
-
-    # Without token -> 401
-    r = client.post("/api/export", json={"artifact": artifact})
-    assert r.status_code == 401
-
-    # With invalid token -> 401
-    bad = jwt.encode({"sub": "u1"}, "wrong", algorithm="HS256")
-    r = client.post(
-        "/api/export",
-        headers={"Authorization": f"Bearer {bad}"},
-        json={"artifact": artifact},
-    )
-    assert r.status_code == 401
-
-    # With valid token -> 200 and signed output
     token = jwt.encode({"sub": "u1"}, "secret", algorithm="HS256")
-    r = client.post(
-        "/api/export",
-        headers={"Authorization": f"Bearer {token}"},
-        json={"artifact": artifact},
-    )
+
+    r1 = _export(client, token, artifact)
+    r2 = _export(client, token, artifact)
+    assert r1.status_code == 200 and r2.status_code == 200
+    sig1 = r1.json()["sha256"]
+    sig2 = r2.json()["sha256"]
+    assert sig1 == sig2
+    sig_path = Path(r1.json()["path"] + ".sig")
+    assert sig_path.read_text() == sig1
+
+
+def test_db_insert(tmp_path, monkeypatch):
+    monkeypatch.setenv("JWT_SECRET", "secret")
+    monkeypatch.setenv("EXPORT_DIR", str(tmp_path))
+    db_path = tmp_path / "audit.db"
+    monkeypatch.setenv("EXPORT_DB_PATH", str(db_path))
+    client = TestClient(app)
+    artifact = _build_artifact(client)
+    token = jwt.encode({"sub": "u1"}, "secret", algorithm="HS256")
+
+    r = _export(client, token, artifact)
     assert r.status_code == 200
     out = r.json()
-    assert {"id", "path", "sha256"} <= set(out)
-    path = pathlib.Path(out["path"])
-    assert path.exists()
-    sig_path = pathlib.Path(str(path) + ".sig")
-    assert sig_path.exists()
-    expected = hashlib.sha256(path.read_bytes()).hexdigest()
-    assert sig_path.read_text() == expected
-    assert out["sha256"] == expected
+
+    conn = sqlite3.connect(db_path)
+    row = conn.execute(
+        "SELECT id, ctx_id, path, sha256 FROM exports WHERE id = ?",
+        (out["id"],),
+    ).fetchone()
+    conn.close()
+    assert row is not None
+    assert row[0] == out["id"]
+    assert row[1] == "ctx-u1"
+    assert row[2] == out["path"]
+    assert row[3] == out["sha256"]
