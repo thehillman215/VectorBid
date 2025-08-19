@@ -1,0 +1,20 @@
+[
+  {
+    "id": "bidding",
+    "question": "How does VectorBid choose bids?",
+    "answer": "VectorBid uses your preferences to generate optimal bid layers.",
+    "rationale": "https://www.law.cornell.edu/cfr/text/14/117"
+  },
+  {
+    "id": "data",
+    "question": "Do you store my data?",
+    "answer": "Preferences are stored securely and never shared.",
+    "rationale": "https://example.com/privacy"
+  },
+  {
+    "id": "refund",
+    "question": "Is there a refund policy?",
+    "answer": "We offer a no-questions-asked refund within 30 days.",
+    "rationale": "https://example.com/refund-policy"
+  }
+]

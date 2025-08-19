@@ -111,7 +111,10 @@ PILOT_TEST_CASES = [
     # === COMPLEX MULTI-PREFERENCE ===
     {
         "id": "complex_1",
-        "input": "I want weekends off, no red-eyes, prefer 3-day trips, and need Fridays at home for family commitments",
+        "input": (
+            "I want weekends off, no red-eyes, prefer 3-day trips, "
+            "and need Fridays at home for family commitments"
+        ),
         "expected_commands": [
             "AVOID TRIPS IF DUTY_PERIOD OVERLAPS SAT OR SUN",
             "AVOID TRIPS WITH DEPARTURE_TIME BETWEEN 2200 AND 0559",
@@ -122,7 +125,10 @@ PILOT_TEST_CASES = [
     },
     {
         "id": "complex_2",
-        "input": "Senior captain wants Europe trips, avoid CDG, prefer LHR or FRA, no back-to-back atlantics",
+        "input": (
+            "Senior captain wants Europe trips, avoid CDG, "
+            "prefer LHR or FRA, no back-to-back atlantics"
+        ),
         "expected_commands": [
             "PREFER INTERNATIONAL_DESTINATIONS",
             "PREFER DESTINATIONS INCLUDE LHR OR FRA",
@@ -378,7 +384,8 @@ def run_full_test_suite(llm_function=None) -> dict:
     print("\n📊 Overall Results:")
     print(f"  • Total Tests: {results['total_tests']}")
     print(
-        f"  • Passed: {results['passed']} ({results['passed'] / results['total_tests'] * 100:.1f}%)"
+        pass_rate = results['passed'] / results['total_tests'] * 100
+    f"  • Passed: {results['passed']} ({pass_rate:.1f}%)"
     )
     print(f"  • Failed: {results['failed']}")
     print(f"  • Average Score: {results['average_score']:.1f}/100")
@@ -387,9 +394,8 @@ def run_full_test_suite(llm_function=None) -> dict:
     for category, stats in results["categories"].items():
         print(f"\n  {category}:")
         print(f"    • Tests: {stats['total']}")
-        print(
-            f"    • Pass Rate: {stats['passed']}/{stats['total']} ({stats['passed'] / stats['total'] * 100:.1f}%)"
-        )
+        pass_rate = stats['passed'] / stats['total'] * 100
+        print(f"    • Pass Rate: {stats['passed']}/{stats['total']} ({pass_rate:.1f}%)")
         print(f"    • Avg Score: {stats['avg_score']:.1f}/100")
 
     # Identify problem areas

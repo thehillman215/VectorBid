@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -55,13 +55,19 @@ class FeatureBundle(BaseModel):
     pairing_features: dict[str, Any]
 
 
+class CandidateRationale(BaseModel):
+    hard_hits: list[str] = Field(default_factory=list)
+    hard_misses: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class CandidateSchedule(BaseModel):
     candidate_id: str
     score: float
     hard_ok: bool
     soft_breakdown: dict[str, float]
     pairings: list[str]
-    rationale: list[str] = []
+    rationale: CandidateRationale = CandidateRationale()
 
 
 class StrategyDirectives(BaseModel):
@@ -88,7 +94,7 @@ class BidLayerArtifact(BaseModel):
     format: Literal["PBS2"]
     month: str
     layers: list[Layer]
-    lint: dict[str, list[str]]
+    lint: dict[str, list[str | dict[str, str]]]
     export_hash: str
 
 
@@ -117,3 +123,12 @@ class BidPackage(BaseModel):
     meta: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
     hash: str | None = None
+
+
+class FAQItem(BaseModel):
+    """FAQ entry served by `/faq`"""
+
+    id: str
+    question: str
+    answer: str
+    rationale: str | None = None

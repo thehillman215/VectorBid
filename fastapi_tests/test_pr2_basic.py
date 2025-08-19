@@ -45,7 +45,7 @@ def test_validate_and_optimize_generate_lint_and_hash():
     # validate
     bundle = _bundle()
     r = client.post(
-        "/validate",
+        "/api/validate",
         json={
             "preference_schema": bundle["preference_schema"],
             "context": bundle["context"],
@@ -68,13 +68,16 @@ def test_validate_and_optimize_generate_lint_and_hash():
         },
         "K": 5,
     }
-    r = client.post("/optimize", json=fb)
+    r = client.post("/api/optimize", json=fb)
     assert r.status_code == 200
     topk = r.json()["candidates"]
     assert topk and topk[0]["candidate_id"] == "P1"  # SAN preferred
 
     # strategy
-    r = client.post("/strategy", json={"feature_bundle": fb["feature_bundle"], "candidates": topk})
+    r = client.post(
+        "/api/strategy",
+        json={"feature_bundle": fb["feature_bundle"], "candidates": topk},
+    )
     assert r.status_code == 200
     directives = r.json()["directives"]
     # bounded delta or no-op
@@ -84,7 +87,7 @@ def test_validate_and_optimize_generate_lint_and_hash():
 
     # generate layers
     r = client.post(
-        "/generate_layers",
+        "/api/generate_layers",
         json={"feature_bundle": fb["feature_bundle"], "candidates": topk},
     )
     assert r.status_code == 200
@@ -93,7 +96,7 @@ def test_validate_and_optimize_generate_lint_and_hash():
     assert artifact["format"] == "PBS2"
     assert artifact["export_hash"]  # hash present
     # lint happy path
-    r = client.post("/lint", json={"artifact": artifact})
+    r = client.post("/api/lint", json={"artifact": artifact})
     assert r.status_code == 200
     lint = r.json()
     assert lint["errors"] == []
