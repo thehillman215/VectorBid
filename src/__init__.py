@@ -1,1 +1,0 @@
-# VectorBid package

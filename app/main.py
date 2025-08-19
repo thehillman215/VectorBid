@@ -1,7 +1,7 @@
 import json
 from contextlib import asynccontextmanager
+from datetime import UTC
 from pathlib import Path
-from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -80,6 +80,7 @@ app.include_router(ui_router, tags=["UI"])
 # Legacy compatibility
 app.include_router(compat_validate_router)
 
+
 # Serve the SPA
 @app.get("/")
 async def serve_spa():
@@ -126,15 +127,64 @@ async def get_personas():
 
 
 @app.get("/health", tags=["Meta"])
-def health() -> dict[str, str]:
+def health() -> dict:
     """Main application health check"""
-    return {"status": "healthy", "service": "VectorBid FastAPI", "version": "1.0.0"}
+    from datetime import datetime
+
+    # Get rule pack health status
+    try:
+        from app.rules_engine import dsl_health, pack_registry_health
+
+        # For now, return empty registry until we load actual rule packs
+        rule_pack_health = pack_registry_health([])
+        dsl_health_status = dsl_health()
+    except ImportError:
+        rule_pack_health = {"status": "error", "message": "Rules engine not available"}
+        dsl_health_status = {"status": "error", "message": "DSL not available"}
+
+    return {
+        "status": "ok",
+        "service": "VectorBid FastAPI",
+        "version": "1.0.0",
+        "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "rule_packs": rule_pack_health,
+        "dsl": dsl_health_status,
+    }
 
 
 @app.get("/ping", tags=["Meta"])
 def ping() -> dict[str, str]:
     """Simple liveness check."""
-    return {"ping": "pong"}
+    from datetime import datetime
+
+    return {
+        "ping": "pong",
+        "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+    }
+
+
+@app.get("/health/rulepacks", tags=["Meta"])
+def rule_pack_health() -> dict:
+    """Rule pack health and status information."""
+    try:
+        from app.rules_engine import pack_registry_health, pack_validation_health
+
+        # For now, return empty registry until we load actual rule packs
+        registry_health = pack_registry_health([])
+        validation_health = pack_validation_health([])
+
+        return {
+            "registry": registry_health,
+            "validation": validation_health,
+            "message": "Rules engine operational (no rule packs loaded yet)",
+        }
+    except ImportError:
+        return {
+            "status": "error",
+            "message": "Rules engine not available",
+            "registry": {"status": "error", "message": "Not available"},
+            "validation": {"status": "error", "message": "Not available"},
+        }
 
 
 @app.get("/schemas", tags=["Meta"])

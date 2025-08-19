@@ -1,1 +1,0 @@
-"""Welcome wizard blueprint package."""
