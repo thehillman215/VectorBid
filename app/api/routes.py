@@ -15,7 +15,9 @@ from app.models import (
     CandidateSchedule,
     ContextSnapshot,
     FeatureBundle,
+    HardConstraints,
     PreferenceSchema,
+    SoftPrefs,
     StrategyDirectives,
 )
 from app.rules.engine import load_rule_pack, validate_feasibility
@@ -34,7 +36,7 @@ _RULES = load_rule_pack(RULE_PACK_PATH)
 def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Parse free-text preferences into structured format using NLP/LLM
-    
+
     Body:
       {
         "preferences_text": "I want weekends off and no red-eyes",
@@ -46,27 +48,42 @@ def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         preferences_text = payload.get("preferences_text", "")
         persona = payload.get("persona")
-        
+
         # TODO: Implement actual NLP parsing logic
         # For now, return mock parsed data
         parsed = {
             "hard_constraints": {
                 "no_weekends": "weekend" in preferences_text.lower(),
-                "no_redeyes": "red-eye" in preferences_text.lower() or "redeye" in preferences_text.lower(),
+                "no_redeyes": "red-eye" in preferences_text.lower()
+                or "redeye" in preferences_text.lower(),
                 "max_duty_days": 4 if "short trip" in preferences_text.lower() else 6,
             },
             "soft_preferences": {
-                "morning_departures": 0.8 if "morning" in preferences_text.lower() else 0.3,
-                "domestic_preferred": 0.7 if "domestic" in preferences_text.lower() else 0.4,
-                "weekend_priority": 0.9 if "weekend" in preferences_text.lower() else 0.2,
+                "morning_departures": (
+                    0.8 if "morning" in preferences_text.lower() else 0.3
+                ),
+                "domestic_preferred": (
+                    0.7 if "domestic" in preferences_text.lower() else 0.4
+                ),
+                "weekend_priority": (
+                    0.9 if "weekend" in preferences_text.lower() else 0.2
+                ),
             },
             "confidence": 0.85,
             "parsed_items": [
-                {"text": "Weekends off", "confidence": 0.9, "category": "hard_constraint"},
-                {"text": "Morning departures preferred", "confidence": 0.8, "category": "soft_preference"},
+                {
+                    "text": "Weekends off",
+                    "confidence": 0.9,
+                    "category": "hard_constraint",
+                },
+                {
+                    "text": "Morning departures preferred",
+                    "confidence": 0.8,
+                    "category": "soft_preference",
+                },
             ],
         }
-        
+
         return {
             "original_text": preferences_text,
             "parsed_preferences": parsed,
@@ -76,6 +93,33 @@ def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
                 "Add aircraft type preferences",
             ],
         }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post("/parse_preview", tags=["Parse"])
+def parse_preview(payload: dict[str, Any]) -> dict[str, Any]:
+    """Return a PreferenceSchema preview without persistence."""
+    try:
+        text = payload.get("text", "")
+        persona = payload.get("persona")
+        hard = HardConstraints(
+            no_red_eyes="red-eye" in text.lower() or "redeye" in text.lower()
+        )
+        soft = SoftPrefs(
+            weekend_priority={"weight": 0.9} if "weekend" in text.lower() else {}
+        )
+        schema = PreferenceSchema(
+            pilot_id="preview",
+            airline="UAL",
+            base="SFO",
+            seat="FO",
+            equip=["73G"],
+            hard_constraints=hard,
+            soft_prefs=soft,
+            source={"persona": persona, "preview": True},
+        )
+        return {"preference_schema": schema.model_dump()}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
