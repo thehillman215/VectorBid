@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Index
+
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Index, Integer, String
+
 from .database import Base
 
 

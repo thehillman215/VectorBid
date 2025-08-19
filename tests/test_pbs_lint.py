@@ -43,20 +43,15 @@ def test_unreachable_layer() -> None:
         "layers": [
             {
                 "n": 1,
-                "filters": [
-                    {"type": "PairingId", "op": "IN", "values": ["A", "B"]}
-                ],
+                "filters": [{"type": "PairingId", "op": "IN", "values": ["A", "B"]}],
                 "prefer": "YES",
             },
             {
                 "n": 2,
-                "filters": [
-                    {"type": "PairingId", "op": "IN", "values": ["A"]}
-                ],
+                "filters": [{"type": "PairingId", "op": "IN", "values": ["A"]}],
                 "prefer": "YES",
             },
         ]
     }
     result = lint_artifact(artifact)
     assert any(w["code"] == "LAYER_UNREACHABLE" for w in result["warnings"])
-

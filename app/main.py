@@ -2,12 +2,10 @@ import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-
-from fastapi import Depends
 
 from app.api.routes import (
     export as api_export,
@@ -17,7 +15,6 @@ from app.api.routes import (
     router as api_router,
     strategy as api_strategy,
 )
-from app.security.api_key import require_api_key
 from app.compat.validate_router import router as compat_validate_router
 from app.logging_utils import install_pii_filter
 from app.middleware import RequestIDMiddleware
@@ -34,6 +31,7 @@ from app.routes.ingestion import router as ingestion_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
 from app.routes.ui import router as ui_router
+from app.security.api_key import require_api_key
 
 MODELS = [
     PreferenceSchema,
@@ -101,9 +99,7 @@ app.include_router(faq_router, tags=["FAQ"])
 app.include_router(compat_validate_router)
 app.add_api_route("/optimize", api_optimize, methods=["POST"], tags=["compat"])
 app.add_api_route("/strategy", api_strategy, methods=["POST"], tags=["compat"])
-app.add_api_route(
-    "/generate_layers", api_generate_layers, methods=["POST"], tags=["compat"]
-)
+app.add_api_route("/generate_layers", api_generate_layers, methods=["POST"], tags=["compat"])
 app.add_api_route("/lint", api_lint, methods=["POST"], tags=["compat"])
 app.add_api_route(
     "/export",
@@ -131,8 +127,7 @@ MOCK_PERSONAS = {
         "description": "Maximize time at home with family",
         "icon": "fas fa-home",
         "preferences": (
-            "I want weekends off and no early departures. "
-            "Prefer short trips of 1-3 days."
+            "I want weekends off and no early departures. Prefer short trips of 1-3 days."
         ),
         "weights": {"weekend_priority": 0.9, "trip_length": 0.8, "time_of_day": 0.7},
     },

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -15,7 +14,7 @@ class FAR117(BaseModel):
 class UnionRules(BaseModel):
     """Union contract parameters."""
 
-    max_duty_hours_per_day: Optional[int] = None
+    max_duty_hours_per_day: int | None = None
     no_red_eyes: bool = False
     hard: list[HardRule] = Field(default_factory=list)
     soft: list[SoftRule] = Field(default_factory=list)
@@ -25,20 +24,20 @@ class HardRule(BaseModel):
     """Schema for a hard rule entry."""
 
     id: str
-    desc: Optional[str] = None
-    when: Optional[str] = None
-    check: Optional[str] = None
-    clause: Optional[str] = None
+    desc: str | None = None
+    when: str | None = None
+    check: str | None = None
+    clause: str | None = None
 
 
 class SoftRule(BaseModel):
     """Schema for a soft rule entry."""
 
     id: str
-    weight: Optional[Union[float, str]] = None
-    score: Optional[str] = None
-    desc: Optional[str] = None
-    clause: Optional[str] = None
+    weight: float | str | None = None
+    score: str | None = None
+    desc: str | None = None
+    clause: str | None = None
 
 
 class RulePack(BaseModel):

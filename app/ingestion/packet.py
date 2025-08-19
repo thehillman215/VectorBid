@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
 import json
-from typing import Optional
+from pathlib import Path
 
 from app.audit import log_event
 from app.db import BidPackage, SessionLocal
 
-def parse_bid_packet(upload_path: str, ctx_id: Optional[str] = None) -> dict:
+
+def parse_bid_packet(upload_path: str, ctx_id: str | None = None) -> dict:
     """Parse a bid packet into a canonical pairing feature dict.
 
     MVP v0.3: support JSON inputs only. Expected formats:

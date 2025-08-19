@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-import json
 import os
 from pathlib import Path
 from typing import Any
@@ -11,6 +10,11 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
+from app.audit import log_event
+from app.db import Audit, SessionLocal
+from app.explain.legal import explain as explain_legal
+from app.export.audit import get_record, insert_record
+from app.export.storage import write_artifact
 from app.generate.layers import candidates_to_layers
 from app.generate.lint import lint_layers
 from app.models import (
@@ -24,14 +28,9 @@ from app.models import (
     StrategyDirectives,
 )
 from app.rules.engine import load_rule_pack, validate_feasibility
-from app.explain.legal import explain as explain_legal
 from app.security.api_key import require_api_key
 from app.services.optimizer import retune_candidates, select_topk
 from app.strategy.engine import propose_strategy
-from app.audit import log_event
-from app.export.audit import get_record, insert_record
-from app.export.storage import write_artifact
-from app.db import Audit, SessionLocal
 
 router = APIRouter()
 
@@ -68,15 +67,9 @@ def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
                 "max_duty_days": 4 if "short trip" in preferences_text.lower() else 6,
             },
             "soft_preferences": {
-                "morning_departures": (
-                    0.8 if "morning" in preferences_text.lower() else 0.3
-                ),
-                "domestic_preferred": (
-                    0.7 if "domestic" in preferences_text.lower() else 0.4
-                ),
-                "weekend_priority": (
-                    0.9 if "weekend" in preferences_text.lower() else 0.2
-                ),
+                "morning_departures": (0.8 if "morning" in preferences_text.lower() else 0.3),
+                "domestic_preferred": (0.7 if "domestic" in preferences_text.lower() else 0.4),
+                "weekend_priority": (0.9 if "weekend" in preferences_text.lower() else 0.2),
             },
             "confidence": 0.85,
             "parsed_items": [
@@ -112,12 +105,8 @@ def parse_preview(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         text = payload.get("text", "")
         persona = payload.get("persona")
-        hard = HardConstraints(
-            no_red_eyes="red-eye" in text.lower() or "redeye" in text.lower()
-        )
-        soft = SoftPrefs(
-            weekend_priority={"weight": 0.9} if "weekend" in text.lower() else {}
-        )
+        hard = HardConstraints(no_red_eyes="red-eye" in text.lower() or "redeye" in text.lower())
+        soft = SoftPrefs(weekend_priority={"weight": 0.9} if "weekend" in text.lower() else {})
         schema = PreferenceSchema(
             pilot_id="preview",
             airline="UAL",
@@ -253,14 +242,14 @@ def export(payload: dict[str, Any]) -> dict[str, str]:
         out_path = write_artifact(art, export_dir)
 
         data = out_path.read_bytes()
-        
+
         # Use HMAC signing if EXPORT_SIGNING_KEY is set, otherwise fall back to SHA256
         signing_key = os.environ.get("EXPORT_SIGNING_KEY")
         if signing_key:
             signature = hmac.new(signing_key.encode(), data, hashlib.sha256).hexdigest()
         else:
             signature = hashlib.sha256(data).hexdigest()
-            
+
         sig_path = out_path.with_suffix(out_path.suffix + ".sig")
         sig_path.write_text(signature, encoding="utf-8")
 
@@ -277,10 +266,16 @@ def export(payload: dict[str, Any]) -> dict[str, str]:
                 "id": export_id,
                 "export_path": str(out_path),
                 "signature": signature,
-            }
+            },
         )
 
-        return {"id": export_id, "export_path": str(out_path), "path": str(out_path), "signature": signature, "sha256": signature}
+        return {
+            "id": export_id,
+            "export_path": str(out_path),
+            "path": str(out_path),
+            "signature": signature,
+            "sha256": signature,
+        }
     except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -300,11 +295,11 @@ def download_export(export_id: str) -> FileResponse:
     record = get_record(export_id)
     if not record:
         raise HTTPException(status_code=404, detail="export not found")
-    
+
     file_path = Path(record["path"])
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="export file not found")
-    
+
     return FileResponse(file_path, filename=f"{export_id}.json")
 
 
@@ -312,12 +307,7 @@ def download_export(export_id: str) -> FileResponse:
 def get_audit(ctx_id: str) -> dict[str, Any]:
     """Return audit trail for a given context."""
     with SessionLocal() as db:
-        rows = (
-            db.query(Audit)
-            .filter(Audit.ctx_id == ctx_id)
-            .order_by(Audit.timestamp.asc())
-            .all()
-        )
+        rows = db.query(Audit).filter(Audit.ctx_id == ctx_id).order_by(Audit.timestamp.asc()).all()
         events = [
             {
                 "stage": r.stage,

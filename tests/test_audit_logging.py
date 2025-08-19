@@ -1,10 +1,10 @@
 from pathlib import Path
 
+from app.db import Audit, SessionLocal
 from app.ingestion.packet import parse_bid_packet
 from app.models import ContextSnapshot, FeatureBundle, PreferenceSchema
 from app.rules.engine import load_rule_pack, validate_feasibility
 from app.services.optimizer import select_topk
-from app.db import Audit, SessionLocal
 
 
 def _repo_root() -> Path:

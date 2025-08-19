@@ -7,10 +7,10 @@ from typing import Any
 import yaml
 from pydantic import ValidationError
 
+from app.audit import log_event
+from app.db import Pilot, Preference, RulePack as RulePackModel, SessionLocal
 from app.models import FeatureBundle
 from app.rules.models import RulePack
-from app.audit import log_event
-from app.db import Preference, Pilot, RulePack as RulePackModel, SessionLocal
 
 DEFAULT_RULES: dict[str, Any] = {
     "hard": [

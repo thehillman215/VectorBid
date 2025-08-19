@@ -113,9 +113,7 @@ class DSLParser:
         # Pattern to find consecutive operators
         consecutive_ops = re.search(r"[+\-*/%**]\s*[+\-*/%**]+", expr)
         if consecutive_ops:
-            raise DSLParseError(
-                f"Invalid syntax: consecutive operators found in '{expr}'"
-            )
+            raise DSLParseError(f"Invalid syntax: consecutive operators found in '{expr}'")
 
         # Check for operators at start/end (except unary + and -)
         if re.match(r"^[*/%**]", expr.strip()):
@@ -165,33 +163,23 @@ class DSLParser:
                         ast.NotIn,
                     ),
                 ):  # noqa: UP038
-                    raise DSLSecurityError(
-                        f"Unsafe comparison operator: {type(op).__name__}"
-                    )
+                    raise DSLSecurityError(f"Unsafe comparison operator: {type(op).__name__}")
                 self._validate_ast(comparator)
         elif isinstance(node, ast.BoolOp):
             # Boolean operators are safe
             if not isinstance(node.op, (ast.And, ast.Or)):  # noqa: UP038
-                raise DSLSecurityError(
-                    f"Unsafe boolean operator: {type(node.op).__name__}"
-                )
+                raise DSLSecurityError(f"Unsafe boolean operator: {type(node.op).__name__}")
             for value in node.values:
                 self._validate_ast(value)
         elif isinstance(node, ast.UnaryOp):
             # Unary operators are safe
             if not isinstance(node.op, (ast.UAdd, ast.USub, ast.Not)):  # noqa: UP038
-                raise DSLSecurityError(
-                    f"Unsafe unary operator: {type(node.op).__name__}"
-                )
+                raise DSLSecurityError(f"Unsafe unary operator: {type(node.op).__name__}")
             self._validate_ast(node.operand)
         elif isinstance(node, ast.BinOp):
             # Binary operators are safe
-            if not isinstance(
-                node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod, ast.Pow)
-            ):  # noqa: UP038
-                raise DSLSecurityError(
-                    f"Unsafe binary operator: {type(node.op).__name__}"
-                )
+            if not isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod, ast.Pow)):  # noqa: UP038
+                raise DSLSecurityError(f"Unsafe binary operator: {type(node.op).__name__}")
             self._validate_ast(node.left)
             self._validate_ast(node.right)
         elif isinstance(node, ast.Call):
@@ -253,9 +241,7 @@ class DSLParser:
             # Check whitelist for other objects
             if obj_name in self.whitelist:
                 if attr_name not in self.whitelist[obj_name]:
-                    raise DSLSecurityError(
-                        f"Unauthorized attribute access: {obj_name}.{attr_name}"
-                    )
+                    raise DSLSecurityError(f"Unauthorized attribute access: {obj_name}.{attr_name}")
             else:
                 # Reject access to unknown objects
                 raise DSLSecurityError(f"Unauthorized object access: {obj_name}")

@@ -1,23 +1,24 @@
 """Legal rationale utilities."""
+
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from app.models import CandidateSchedule
 from app.rules.engine import load_rule_pack
 
 RULE_PACK_PATH = "rule_packs/UAL/2025.08.yml"
-_RULE_MAP: Dict[str, Dict[str, Any]] | None = None
+_RULE_MAP: dict[str, dict[str, Any]] | None = None
 
 
-def _rules() -> Dict[str, Dict[str, Any]]:
+def _rules() -> dict[str, dict[str, Any]]:
     global _RULE_MAP
     if _RULE_MAP is None:
         data = load_rule_pack(RULE_PACK_PATH)
-        mapping: Dict[str, Dict[str, Any]] = {}
-        
+        mapping: dict[str, dict[str, Any]] = {}
+
         # Handle nested rule structure (far117, union, etc.)
-        for section_name, section_data in data.items():
+        for _section_name, section_data in data.items():
             if isinstance(section_data, dict):
                 for bucket in ("hard", "soft"):
                     rules_list = section_data.get(bucket, [])
@@ -25,13 +26,13 @@ def _rules() -> Dict[str, Dict[str, Any]]:
                         for rule in rules_list:
                             if isinstance(rule, dict) and "id" in rule:
                                 mapping[rule.get("id")] = rule
-        
+
         # Also handle top-level hard/soft rules for backward compatibility
         for bucket in ("hard", "soft"):
             for rule in data.get(bucket, []):
                 if isinstance(rule, dict) and "id" in rule:
                     mapping[rule.get("id")] = rule
-                    
+
         _RULE_MAP = mapping
     return _RULE_MAP
 

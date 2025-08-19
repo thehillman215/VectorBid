@@ -18,9 +18,7 @@ def pack_status(pack: RulePack) -> dict:
         "soft_rules": len(pack.soft_rules),
         "derived_rules": len(pack.derived_rules),
         "version": pack.version,
-        "effective_start": pack.effective_start.isoformat()
-        if pack.effective_start
-        else None,
+        "effective_start": pack.effective_start.isoformat() if pack.effective_start else None,
         "effective_end": pack.effective_end.isoformat() if pack.effective_end else None,
     }
 

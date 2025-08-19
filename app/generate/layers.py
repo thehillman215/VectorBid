@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.models import BidLayerArtifact, CandidateSchedule, FeatureBundle
 
@@ -37,7 +37,7 @@ def candidates_to_layers(topk: list[CandidateSchedule], bundle: FeatureBundle) -
     # Airline priority: preference_schema.airline → context.airline → "UNK"
     airline = bundle.preference_schema.airline or bundle.context.airline or "UNK"
 
-    month = _next_month_tag(datetime.now(timezone.utc))
+    month = _next_month_tag(datetime.now(UTC))
     artifact = BidLayerArtifact(
         airline=airline,
         format="PBS2",

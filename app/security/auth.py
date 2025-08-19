@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 import jwt
 from fastapi import Header, HTTPException, Query, status
@@ -11,7 +11,7 @@ def require_auth(
     authorization=Header(None),
     x_api_key=Header(None),
     api_key=Query(None),
-) -> Optional[dict[str, Any]]:
+) -> dict[str, Any] | None:
     """Unified auth dependency supporting JWT or API key.
 
     Auth mode is determined by environment configuration:
@@ -45,13 +45,13 @@ def require_auth(
     if api_key_expected:
         x_api_key_str = str(x_api_key) if x_api_key is not None else None
         api_key_str = str(api_key) if api_key is not None else None
-        
+
         # Handle case where None converts to string "None"
         if x_api_key_str == "None":
             x_api_key_str = None
         if api_key_str == "None":
             api_key_str = None
-            
+
         provided = x_api_key_str or api_key_str
         if provided != api_key_expected:
             raise HTTPException(

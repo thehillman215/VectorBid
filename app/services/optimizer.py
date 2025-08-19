@@ -4,9 +4,9 @@ import heapq
 from operator import itemgetter
 from typing import Any
 
-from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 from app.audit import log_event
 from app.db import Candidate, SessionLocal
+from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 
 
 def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
@@ -39,9 +39,7 @@ def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
     return messages
 
 
-def _rule_hits_misses(
-    bundle: FeatureBundle, pairing: Any
-) -> tuple[list[str], list[str]]:
+def _rule_hits_misses(bundle: FeatureBundle, pairing: Any) -> tuple[list[str], list[str]]:
     """Determine which hard rules are satisfied or violated."""
 
     hits: list[str] = []

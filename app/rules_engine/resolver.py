@@ -13,14 +13,10 @@ class PackResolver:
     def __init__(self, registry: list[RulePack]):
         self.registry = registry
 
-    def resolve(
-        self, airline: str, month: str, base: str = None, fleet: str = None
-    ) -> RulePack:
+    def resolve(self, airline: str, month: str, base: str = None, fleet: str = None) -> RulePack:
         """Find the most specific rule pack available."""
         # Find candidates matching airline and month
-        candidates = [
-            p for p in self.registry if p.airline == airline and p.month == month
-        ]
+        candidates = [p for p in self.registry if p.airline == airline and p.month == month]
 
         if candidates:
             # Filter candidates by base/fleet compatibility
@@ -30,9 +26,7 @@ class PackResolver:
                 # 1. Base matches or pack has no base (general)
                 # 2. Fleet matches or pack has no fleet (general)
                 base_compatible = (p.base is None) or (p.base == base) or (base is None)
-                fleet_compatible = (
-                    (p.fleet is None) or (p.fleet == fleet) or (fleet is None)
-                )
+                fleet_compatible = (p.fleet is None) or (p.fleet == fleet) or (fleet is None)
 
                 if base_compatible and fleet_compatible:
                     compatible_candidates.append(p)
@@ -46,9 +40,7 @@ class PackResolver:
                 return compatible_candidates[0]
 
         # Fallback to latest pack <= month (lexicographic compare ok for YYYY.MM)
-        candidates = [
-            p for p in self.registry if p.airline == airline and p.month <= month
-        ]
+        candidates = [p for p in self.registry if p.airline == airline and p.month <= month]
         candidates.sort(key=lambda p: p.month, reverse=True)
 
         if not candidates:

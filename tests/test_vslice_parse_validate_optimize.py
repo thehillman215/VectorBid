@@ -55,7 +55,9 @@ def test_parse_validate_optimize_vslice():
     violations = result["violations"]
     feasible = result["feasible_pairings"]
 
-    assert any(v.get("pairing_id") == "P3" and v.get("rule") == "FAR117_MIN_REST" for v in violations)
+    assert any(
+        v.get("pairing_id") == "P3" and v.get("rule") == "FAR117_MIN_REST" for v in violations
+    )
     feasible_ids = {p.get("id") for p in feasible}
     assert feasible_ids == {"P1", "P2"}
 

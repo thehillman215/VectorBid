@@ -37,9 +37,7 @@ def test_max_duty_hours_rule() -> None:
     }
     report = validate(trips, context)
     assert {t["id"] for t in report.valid_trips} == {"T1"}
-    assert any(
-        hit.id == "MAX_DUTY_HOURS" and hit.trip_id == "T2" for hit in report.rule_hits
-    )
+    assert any(hit.id == "MAX_DUTY_HOURS" and hit.trip_id == "T2" for hit in report.rule_hits)
 
 
 def test_max_flight_time_rule() -> None:
@@ -67,9 +65,7 @@ def test_max_flight_time_rule() -> None:
     }
     report = validate(trips, context)
     assert {t["id"] for t in report.valid_trips} == {"T1"}
-    assert any(
-        hit.id == "MAX_FLIGHT_TIME" and hit.trip_id == "T2" for hit in report.rule_hits
-    )
+    assert any(hit.id == "MAX_FLIGHT_TIME" and hit.trip_id == "T2" for hit in report.rule_hits)
 
 
 def test_min_rest_hours_rule() -> None:
@@ -97,9 +93,7 @@ def test_min_rest_hours_rule() -> None:
     }
     report = validate(trips, context)
     assert {t["id"] for t in report.valid_trips} == {"T1"}
-    assert any(
-        hit.id == "MIN_REST_HOURS" and hit.trip_id == "T2" for hit in report.rule_hits
-    )
+    assert any(hit.id == "MIN_REST_HOURS" and hit.trip_id == "T2" for hit in report.rule_hits)
 
 
 def test_min_break_minutes_rule() -> None:
@@ -127,7 +121,4 @@ def test_min_break_minutes_rule() -> None:
     }
     report = validate(trips, context)
     assert {t["id"] for t in report.valid_trips} == {"T1"}
-    assert any(
-        hit.id == "MIN_BREAK_MINUTES" and hit.trip_id == "T2"
-        for hit in report.rule_hits
-    )
+    assert any(hit.id == "MIN_BREAK_MINUTES" and hit.trip_id == "T2" for hit in report.rule_hits)
