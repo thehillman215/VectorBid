@@ -18,6 +18,7 @@ from app.models import (
     PreferenceSchema,
     StrategyDirectives,
 )
+from app.routes.faq import router as faq_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
 from app.routes.ui import router as ui_router
@@ -78,6 +79,7 @@ app.include_router(api_router, tags=["API"])
 app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
 app.include_router(ui_router, tags=["UI"])
+app.include_router(faq_router, tags=["FAQ"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
