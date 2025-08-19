@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api.routes import router as api_router
 from app.compat.validate_router import router as compat_validate_router
 from app.logging_utils import install_pii_filter
+from app.middleware import RequestIDMiddleware
 from app.models import (
     BidLayerArtifact,
     CandidateSchedule,
@@ -68,6 +69,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Request ID middleware
+app.add_middleware(RequestIDMiddleware)
 
 # Mount static files
 static_path = Path(__file__).parent / "static"
@@ -128,18 +132,6 @@ MOCK_PERSONAS = {
 async def get_personas():
     """Get available pilot personas"""
     return {"personas": MOCK_PERSONAS}
-
-
-@app.get("/health", tags=["Meta"])
-def health() -> dict[str, str]:
-    """Main application health check"""
-    return {"status": "healthy", "service": "VectorBid FastAPI", "version": "1.0.0"}
-
-
-@app.get("/ping", tags=["Meta"])
-def ping() -> dict[str, str]:
-    """Simple liveness check."""
-    return {"ping": "pong"}
 
 
 @app.get("/schemas", tags=["Meta"])
