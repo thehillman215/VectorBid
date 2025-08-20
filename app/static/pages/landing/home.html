@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid - World's First AI-Powered Pilot Bidding System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/design-system.css" rel="stylesheet">
+    <style>
+        .hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .feature-card { transition: all 0.3s ease; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 3rem; font-weight: 700; }
+        .testimonial-card { background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%); }
+        .cta-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .demo-preview { background: linear-gradient(145deg, #1e293b 0%, #334155 100%); }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Header Navigation -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-plane text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">VectorBid</h1>
+                    <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">AI-Powered</span>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <div class="relative group">
+                        <a href="/products" class="text-gray-700 hover:text-blue-600 transition-colors">Products <i class="fas fa-chevron-down ml-1"></i></a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="p-4">
+                                <a href="/products/bid-optimizer" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                    <i class="fas fa-magic mr-2 text-blue-600"></i>Bid Optimizer
+                                </a>
+                                <a href="/products/route-analyzer" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                    <i class="fas fa-route mr-2 text-blue-600"></i>Route Analyzer
+                                </a>
+                                <a href="/products/schedule-builder" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                    <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Schedule Builder
+                                </a>
+                                <a href="/products/pattern-intelligence" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                    <i class="fas fa-brain mr-2 text-blue-600"></i>Pattern Intelligence
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative group">
+                        <a href="/solutions" class="text-gray-700 hover:text-blue-600 transition-colors">Solutions <i class="fas fa-chevron-down ml-1"></i></a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="p-4">
+                                <a href="/solutions/regional" class="block py-2 px-3 rounded hover:bg-gray-50">Regional Airlines</a>
+                                <a href="/solutions/major" class="block py-2 px-3 rounded hover:bg-gray-50">Major Airlines</a>
+                                <a href="/solutions/corporate" class="block py-2 px-3 rounded hover:bg-gray-50">Corporate Aviation</a>
+                                <a href="/solutions/first-officers" class="block py-2 px-3 rounded hover:bg-gray-50">First Officers</a>
+                                <a href="/solutions/captains" class="block py-2 px-3 rounded hover:bg-gray-50">Captains</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="/pricing" class="text-gray-700 hover:text-blue-600 transition-colors">Pricing</a>
+                    <a href="/company/about" class="text-gray-700 hover:text-blue-600 transition-colors">Company</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="/demo" class="text-blue-600 hover:text-blue-700 transition-colors">Live Demo</a>
+                    <a href="/auth/login" class="text-gray-700 hover:text-gray-900 transition-colors">Login</a>
+                    <a href="/auth/signup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Start Free Trial</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="mb-6">
+                    <span class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-full text-sm font-medium">
+                        🚀 World's First AI-Powered Pilot Bidding System
+                    </span>
+                </div>
+                
+                <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                    From <span class="text-yellow-300">Hours of Confusion</span><br>
+                    to <span class="text-green-300">Perfect Schedules</span><br>
+                    in <span class="text-blue-300">Seconds</span>
+                </h1>
+                
+                <p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-4xl mx-auto">
+                    VectorBid transforms pilot bidding from complex form-filling to intelligent conversation. 
+                    Get AI-powered schedule optimization that understands your priorities, not just math.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                    <a href="/demo" class="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-play mr-2"></i>Watch 60-Second Demo
+                    </a>
+                    <a href="/auth/signup" class="cta-gradient text-white px-8 py-4 rounded-lg text-lg font-semibold hover:shadow-lg transition-all">
+                        <i class="fas fa-rocket mr-2"></i>Start Free Trial
+                    </a>
+                </div>
+                
+                <!-- Social Proof -->
+                <div class="flex flex-wrap justify-center items-center gap-8 text-blue-200">
+                    <div class="flex items-center">
+                        <div class="stat-number text-yellow-300">94%</div>
+                        <span class="ml-2">Pilot Satisfaction</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="stat-number text-green-300">40+</div>
+                        <span class="ml-2">Hours Saved Annually</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="stat-number text-blue-300">3s</div>
+                        <span class="ml-2">Processing Time</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo Widget -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    See VectorBid AI in Action
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Watch how natural language transforms into perfect schedules with AI-powered optimization
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Input Side -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">Tell VectorBid What You Want</h3>
+                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div id="demo-input" class="typing-effect">
+                                        "I want weekends off for family time, prefer morning departures, avoid red-eyes completely"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-check text-green-600"></i>
+                                <span class="text-sm text-gray-600">AI understands natural language</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-check text-green-600"></i>
+                                <span class="text-sm text-gray-600">Analyzes seniority and base constraints</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-check text-green-600"></i>
+                                <span class="text-sm text-gray-600">Considers lifestyle priorities</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Output Side -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">Get Perfect Recommendations</h3>
+                        <div class="demo-preview rounded-lg p-4 text-white">
+                            <div class="mb-3">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-green-400 font-semibold">✅ RECOMMENDED: Schedule A</span>
+                                    <span class="text-blue-400">94% Confidence</span>
+                                </div>
+                                <p class="text-sm text-gray-300 mb-3">
+                                    Perfect family-friendly schedule with 87% weekend protection and consistent early departures
+                                </p>
+                            </div>
+                            
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Weekend Protection:</span>
+                                    <span class="text-green-400">87%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Avg Departure:</span>
+                                    <span class="text-blue-400">6:15 AM</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Family Dinners:</span>
+                                    <span class="text-green-400">90%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-magic mr-2"></i>Try Interactive Demo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem/Solution Section -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Problem -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">
+                        Pilot Bidding is <span class="text-red-600">Broken</span>
+                    </h2>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-times text-red-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Complex Forms</h4>
+                                <p class="text-gray-600">50+ fields, mathematical weights, and cryptic PBS syntax</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-times text-red-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Hours of Analysis</h4>
+                                <p class="text-gray-600">Pilots spend 3-4 hours per month just figuring out preferences</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-times text-red-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Suboptimal Results</h4>
+                                <p class="text-gray-600">60% of pilots unsatisfied with their schedule outcomes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Solution -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">
+                        VectorBid <span class="text-green-600">Fixes Everything</span>
+                    </h2>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Natural Language</h4>
+                                <p class="text-gray-600">Just tell us what you want in plain English</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">3-Second Processing</h4>
+                                <p class="text-gray-600">AI analyzes and optimizes in seconds, not hours</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">94% Satisfaction</h4>
+                                <p class="text-gray-600">Pilots love their AI-optimized schedules</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Revolutionary AI Features
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    The only bidding system that combines mathematical optimization with contextual intelligence
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="feature-card bg-white rounded-xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-brain text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Natural Language Processing</h3>
+                    <p class="text-gray-600 mb-4">
+                        Convert "I want weekends off" into precise mathematical preferences instantly
+                    </p>
+                    <div class="text-sm text-gray-500">
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">GPT-4 Powered</span>
+                    </div>
+                </div>
+                
+                <div class="feature-card bg-white rounded-xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-magic text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">AI-Enhanced Optimization</h3>
+                    <p class="text-gray-600 mb-4">
+                        Beyond math - AI understands your lifestyle, seniority, and career goals
+                    </p>
+                    <div class="text-sm text-gray-500">
+                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded">Context Aware</span>
+                    </div>
+                </div>
+                
+                <div class="feature-card bg-white rounded-xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-lightbulb text-orange-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Explainable AI</h3>
+                    <p class="text-gray-600 mb-4">
+                        Every recommendation includes detailed reasoning and strategic guidance
+                    </p>
+                    <div class="text-sm text-gray-500">
+                        <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded">Transparent</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Pilots Love VectorBid
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Join thousands of pilots who've transformed their bidding experience
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="testimonial-card rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Captain Sarah M.</h4>
+                            <p class="text-gray-600 text-sm">777 Captain, United</p>
+                        </div>
+                    </div>
+                    <blockquote class="text-gray-700 mb-4">
+                        "VectorBid gave me my weekends back. The AI understands family priorities better than I expected."
+                    </blockquote>
+                    <div class="flex text-yellow-500">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">FO Mike R.</h4>
+                            <p class="text-gray-600 text-sm">737 First Officer, Delta</p>
+                        </div>
+                    </div>
+                    <blockquote class="text-gray-700 mb-4">
+                        "Maximized my credit hours and got premium routes. The optimization is incredible."
+                    </blockquote>
+                    <div class="flex text-yellow-500">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Captain Lisa T.</h4>
+                            <p class="text-gray-600 text-sm">A320 Captain, Southwest</p>
+                        </div>
+                    </div>
+                    <blockquote class="text-gray-700 mb-4">
+                        "Commuting is finally manageable. VectorBid optimizes for my SEA-DEN pattern perfectly."
+                    </blockquote>
+                    <div class="flex text-yellow-500">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-gradient text-white py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">
+                Ready to Transform Your Bidding?
+            </h2>
+            <p class="text-xl mb-8 text-green-100">
+                Join the AI revolution in pilot scheduling. Start your free trial today.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/auth/signup" class="bg-white text-green-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>Start Free Trial
+                </a>
+                <a href="/demo" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-green-600 transition-colors">
+                    <i class="fas fa-play mr-2"></i>Watch Demo
+                </a>
+            </div>
+            
+            <p class="text-sm text-green-200 mt-6">
+                No credit card required • 30-day free trial • Cancel anytime
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-plane text-blue-400 text-xl mr-2"></i>
+                        <span class="text-xl font-bold">VectorBid</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        The world's first AI-powered pilot bidding system
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Products</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/products/bid-optimizer" class="hover:text-white">Bid Optimizer</a></li>
+                        <li><a href="/products/route-analyzer" class="hover:text-white">Route Analyzer</a></li>
+                        <li><a href="/products/schedule-builder" class="hover:text-white">Schedule Builder</a></li>
+                        <li><a href="/products/mobile" class="hover:text-white">Mobile App</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Solutions</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/solutions/regional" class="hover:text-white">Regional Airlines</a></li>
+                        <li><a href="/solutions/major" class="hover:text-white">Major Airlines</a></li>
+                        <li><a href="/solutions/first-officers" class="hover:text-white">First Officers</a></li>
+                        <li><a href="/solutions/captains" class="hover:text-white">Captains</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/company/about" class="hover:text-white">About</a></li>
+                        <li><a href="/company/security" class="hover:text-white">Security</a></li>
+                        <li><a href="/pricing" class="hover:text-white">Pricing</a></li>
+                        <li><a href="/support" class="hover:text-white">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 VectorBid. All rights reserved. World's first AI-powered pilot bidding system.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Demo typing effect
+        document.addEventListener('DOMContentLoaded', function() {
+            const demoInput = document.getElementById('demo-input');
+            const text = '"I want weekends off for family time, prefer morning departures, avoid red-eyes completely"';
+            let index = 0;
+            
+            function typeText() {
+                if (index < text.length) {
+                    demoInput.textContent = text.slice(0, index + 1);
+                    index++;
+                    setTimeout(typeText, 50);
+                } else {
+                    setTimeout(() => {
+                        index = 0;
+                        demoInput.textContent = '';
+                        typeText();
+                    }, 3000);
+                }
+            }
+            
+            typeText();
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid Solutions - Tailored for Every Pilot and Airline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/design-system.css" rel="stylesheet">
+    <style>
+        .solutions-hero { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+        .solution-card { transition: all 0.3s ease; }
+        .solution-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .pilot-type-card { background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%); }
+        .airline-type-card { background: linear-gradient(145deg, #ffffff 0%, #ecfdf5 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-plane text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">VectorBid</h1>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="/products" class="text-gray-700 hover:text-blue-600 transition-colors">Products</a>
+                    <a href="/solutions" class="text-green-600 font-medium">Solutions</a>
+                    <a href="/pricing" class="text-gray-700 hover:text-blue-600 transition-colors">Pricing</a>
+                    <a href="/company/about" class="text-gray-700 hover:text-blue-600 transition-colors">Company</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="/demo" class="text-blue-600 hover:text-blue-700 transition-colors">Live Demo</a>
+                    <a href="/auth/login" class="text-gray-700 hover:text-gray-900 transition-colors">Login</a>
+                    <a href="/auth/signup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Start Free Trial</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Solutions Hero -->
+    <section class="solutions-hero text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="mb-6">
+                <span class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-full text-sm font-medium">
+                    🎯 Tailored Solutions
+                </span>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">
+                Solutions for Every Pilot
+            </h1>
+            
+            <p class="text-xl md:text-2xl mb-8 text-green-100 max-w-4xl mx-auto">
+                Whether you're a family-focused captain, earnings-maximizing first officer, or managing commuter logistics, 
+                VectorBid has solutions designed specifically for your unique needs.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a href="#pilot-solutions" class="bg-white text-green-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-user mr-2"></i>Find Your Pilot Solution
+                </a>
+                <a href="#airline-solutions" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-green-600 transition-colors">
+                    <i class="fas fa-building mr-2"></i>Enterprise Solutions
+                </a>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="bg-white bg-opacity-10 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-yellow-300 mb-2">200K+</div>
+                    <div class="text-green-200 font-medium">Pilots Served</div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-300 mb-2">50+</div>
+                    <div class="text-green-200 font-medium">Airlines</div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-purple-300 mb-2">94%</div>
+                    <div class="text-green-200 font-medium">Satisfaction</div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-orange-300 mb-2">$15K</div>
+                    <div class="text-green-200 font-medium">Avg Annual Benefit</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pilot Solutions -->
+    <section id="pilot-solutions" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Solutions by Pilot Type
+                </h2>
+                <p class="text-xl text-gray-600">
+                    VectorBid adapts to your career stage, priorities, and flying style
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- First Officers -->
+                <div class="solution-card pilot-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-user-graduate text-blue-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">First Officers</h3>
+                    <p class="text-gray-600 mb-6">
+                        Build experience, maximize earnings, and position yourself for career advancement with strategic bidding guidance.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Credit hour optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Experience building routes</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Captain upgrade preparation</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Junior pilot friendly constraints</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/first-officers" class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- Captains -->
+                <div class="solution-card pilot-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-star text-green-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Captains</h3>
+                    <p class="text-gray-600 mb-6">
+                        Leverage your seniority for optimal work-life balance, premium routes, and strategic career positioning.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Premium route optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Senior pilot work-life balance</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Leadership schedule flexibility</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Retirement planning integration</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/captains" class="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- Commuter Pilots -->
+                <div class="solution-card pilot-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-plane-departure text-purple-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Commuter Pilots</h3>
+                    <p class="text-gray-600 mb-6">
+                        Optimize schedules for commuting logistics with AI-powered connection analysis and reliability optimization.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Connection optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Weather risk analysis</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Backup planning</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Cost minimization</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/commuters" class="block w-full bg-purple-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- International Pilots -->
+                <div class="solution-card pilot-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-globe text-orange-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">International Specialists</h3>
+                    <p class="text-gray-600 mb-6">
+                        Maximize international flying opportunities with route quality analysis and strategic positioning.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">International route analysis</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Layover quality optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Per diem maximization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Wide-body equipment focus</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/international" class="block w-full bg-orange-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- Family-Focused Pilots -->
+                <div class="solution-card pilot-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-home text-red-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Family-Focused</h3>
+                    <p class="text-gray-600 mb-6">
+                        Prioritize family time with weekend protection, predictable schedules, and work-life balance optimization.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Weekend protection strategies</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">School schedule alignment</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Predictable pattern optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Short trip preferences</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/family-focused" class="block w-full bg-red-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- Money Makers -->
+                <div class="solution-card pilot-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-dollar-sign text-indigo-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Earnings Maximizers</h3>
+                    <p class="text-gray-600 mb-6">
+                        Optimize for maximum compensation through credit hour analysis, premium route identification, and efficiency maximization.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Credit hour maximization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Premium pay opportunities</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Overtime optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Efficiency analysis</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/earnings-maximizers" class="block w-full bg-indigo-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Airline Solutions -->
+    <section id="airline-solutions" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Enterprise Airline Solutions
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Scalable solutions for airlines of all sizes, from regional carriers to global networks
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Regional Airlines -->
+                <div class="solution-card airline-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-map text-blue-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Regional Airlines</h3>
+                    <p class="text-gray-600 mb-6">
+                        Tailored solutions for regional carriers with focus on efficiency, pilot retention, and operational optimization.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Pilot retention optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Rapid deployment</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Cost-effective licensing</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Training & support included</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/regional" class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- Major Airlines -->
+                <div class="solution-card airline-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-building text-purple-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Major Airlines</h3>
+                    <p class="text-gray-600 mb-6">
+                        Enterprise-grade solutions for major carriers with complex route networks and large pilot groups.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Enterprise integration</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Advanced analytics</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Multi-base optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Dedicated support team</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/major" class="block w-full bg-purple-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- Corporate Aviation -->
+                <div class="solution-card airline-type-card rounded-2xl p-8 border shadow-lg">
+                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-jet-fighter text-green-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Corporate Aviation</h3>
+                    <p class="text-gray-600 mb-6">
+                        Specialized solutions for corporate flight departments and charter operations with unique scheduling needs.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">On-demand optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Charter integration</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">Flexible scheduling</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-gray-700">VIP service management</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/solutions/corporate" class="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Stories -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Real Success Stories
+                </h2>
+                <p class="text-xl text-gray-600">
+                    See how VectorBid solutions transform pilot satisfaction and airline operations
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Regional Airline Success -->
+                <div class="bg-white rounded-xl p-8 shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-building text-blue-600 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-xl font-semibold text-gray-900">Regional Carrier Success</h4>
+                            <p class="text-gray-600">150-pilot airline</p>
+                        </div>
+                    </div>
+                    
+                    <blockquote class="text-lg text-gray-700 mb-6">
+                        "VectorBid reduced pilot turnover by 35% in our first year. Pilots are happier with their schedules, and our operations team loves the reduced complaints."
+                    </blockquote>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-blue-600">35%</div>
+                            <div class="text-sm text-gray-600">Turnover Reduction</div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-green-600">92%</div>
+                            <div class="text-sm text-gray-600">Pilot Satisfaction</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Major Airline Success -->
+                <div class="bg-white rounded-xl p-8 shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-globe text-purple-600 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-xl font-semibold text-gray-900">Global Network Impact</h4>
+                            <p class="text-gray-600">8,000+ pilot airline</p>
+                        </div>
+                    </div>
+                    
+                    <blockquote class="text-lg text-gray-700 mb-6">
+                        "The AI optimization improved our pilot productivity metrics while dramatically reducing bidding-related grievances and support tickets."
+                    </blockquote>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-purple-600">60%</div>
+                            <div class="text-sm text-gray-600">Fewer Grievances</div>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-4">
+                            <div class="text-2xl font-bold text-orange-600">$2M</div>
+                            <div class="text-sm text-gray-600">Annual Savings</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-green-600 text-white py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-6">
+                Ready to Find Your Perfect Solution?
+            </h2>
+            <p class="text-xl mb-8 text-green-100">
+                Whether you're an individual pilot or airline decision-maker, we have a solution tailored for your needs.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/auth/signup" class="bg-white text-green-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>Start Free Trial
+                </a>
+                <a href="/demo" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-green-600 transition-colors">
+                    <i class="fas fa-phone mr-2"></i>Schedule Demo
+                </a>
+            </div>
+            
+            <p class="text-sm text-green-200 mt-6">
+                All solutions include 30-day free trial • No setup fees • Cancel anytime
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-plane text-blue-400 text-xl mr-2"></i>
+                        <span class="text-xl font-bold">VectorBid</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Tailored solutions for every pilot and airline
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Pilot Solutions</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/solutions/first-officers" class="hover:text-white">First Officers</a></li>
+                        <li><a href="/solutions/captains" class="hover:text-white">Captains</a></li>
+                        <li><a href="/solutions/commuters" class="hover:text-white">Commuter Pilots</a></li>
+                        <li><a href="/solutions/family-focused" class="hover:text-white">Family-Focused</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Airline Solutions</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/solutions/regional" class="hover:text-white">Regional Airlines</a></li>
+                        <li><a href="/solutions/major" class="hover:text-white">Major Airlines</a></li>
+                        <li><a href="/solutions/corporate" class="hover:text-white">Corporate Aviation</a></li>
+                        <li><a href="/enterprise" class="hover:text-white">Enterprise</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/demo" class="hover:text-white">Live Demo</a></li>
+                        <li><a href="/case-studies" class="hover:text-white">Case Studies</a></li>
+                        <li><a href="/support" class="hover:text-white">Support</a></li>
+                        <li><a href="/contact" class="hover:text-white">Contact Sales</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 VectorBid. All rights reserved. Solutions for every pilot and airline.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

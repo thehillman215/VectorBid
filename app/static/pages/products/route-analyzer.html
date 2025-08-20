@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Analyzer - VectorBid's Intelligent Route Intelligence System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/design-system.css" rel="stylesheet">
+    <style>
+        .hero-gradient { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+        .route-visualization { background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%); }
+        .metric-card { background: linear-gradient(145deg, #ffffff 0%, #faf5ff 100%); }
+        .analysis-card { background: linear-gradient(145deg, #f9fafb 0%, #f3e8ff 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-plane text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">VectorBid</h1>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="/products" class="text-blue-600 font-medium">Products</a>
+                    <a href="/solutions" class="text-gray-700 hover:text-blue-600 transition-colors">Solutions</a>
+                    <a href="/pricing" class="text-gray-700 hover:text-blue-600 transition-colors">Pricing</a>
+                    <a href="/company/about" class="text-gray-700 hover:text-blue-600 transition-colors">Company</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="/demo" class="text-blue-600 hover:text-blue-700 transition-colors">Live Demo</a>
+                    <a href="/auth/login" class="text-gray-700 hover:text-gray-900 transition-colors">Login</a>
+                    <a href="/auth/signup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Start Free Trial</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <div class="mb-6">
+                    <span class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-full text-sm font-medium">
+                        📊 AI-Powered Analytics
+                    </span>
+                </div>
+                
+                <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                    Route Analyzer
+                </h1>
+                
+                <p class="text-xl md:text-2xl mb-8 text-purple-100 max-w-4xl mx-auto">
+                    Deep intelligence on route profitability, layover quality, and strategic value. 
+                    Make informed bidding decisions with comprehensive route analysis.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                    <a href="/demo" class="bg-white text-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>See Route Analysis
+                    </a>
+                    <a href="/auth/signup" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors">
+                        <i class="fas fa-rocket mr-2"></i>Start Free Trial
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Key Metrics -->
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-purple-600 mb-2">2,500+</div>
+                    <div class="text-gray-700 font-medium">Routes Analyzed</div>
+                </div>
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-green-600 mb-2">$12K</div>
+                    <div class="text-gray-700 font-medium">Avg Annual Increase</div>
+                </div>
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-600 mb-2">98%</div>
+                    <div class="text-gray-700 font-medium">Accuracy Rate</div>
+                </div>
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-orange-600 mb-2">15 min</div>
+                    <div class="text-gray-700 font-medium">Analysis Time</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Route Visualization Demo -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Intelligent Route Analysis
+                </h2>
+                <p class="text-xl text-gray-600">
+                    See how VectorBid analyzes routes for profitability, quality, and strategic value
+                </p>
+            </div>
+            
+            <div class="route-visualization rounded-2xl p-8 text-white">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Route Map Visualization -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-6">Route Profitability Analysis</h3>
+                        <div class="bg-white bg-opacity-10 rounded-lg p-6">
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-green-400">🔥 ORD-LHR (Premium)</span>
+                                    <span class="bg-green-600 px-3 py-1 rounded-full text-sm font-medium">$2,850</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-blue-400">✈️ LAX-NRT (Strong)</span>
+                                    <span class="bg-blue-600 px-3 py-1 rounded-full text-sm font-medium">$2,420</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-yellow-400">📍 DEN-FRA (Good)</span>
+                                    <span class="bg-yellow-600 px-3 py-1 rounded-full text-sm font-medium">$1,890</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">🏠 SFO-DFW (Domestic)</span>
+                                    <span class="bg-gray-600 px-3 py-1 rounded-full text-sm font-medium">$1,240</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-300">
+                            * Monthly earnings potential including per diem and premium pay
+                        </div>
+                    </div>
+                    
+                    <!-- Quality Metrics -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-6">Layover Quality Scoring</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-medium">London Heathrow (LHR)</span>
+                                    <span class="text-green-400 font-bold">9.2/10</span>
+                                </div>
+                                <div class="text-sm text-gray-300">
+                                    ✓ 24hr+ layover • ✓ City center access • ✓ Premium hotels
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-medium">Tokyo Narita (NRT)</span>
+                                    <span class="text-blue-400 font-bold">8.7/10</span>
+                                </div>
+                                <div class="text-sm text-gray-300">
+                                    ✓ Long layover • ✓ Cultural experience • ✓ Rest facilities
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-medium">Frankfurt (FRA)</span>
+                                    <span class="text-yellow-400 font-bold">7.8/10</span>
+                                </div>
+                                <div class="text-sm text-gray-300">
+                                    ✓ Efficient transit • ✓ Business facilities • ~ Short layover
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Comprehensive Route Intelligence
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Advanced analytics that reveal the true value of every route
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Profitability Analysis -->
+                <div class="analysis-card rounded-xl p-6">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Profitability Analysis</h3>
+                    <p class="text-gray-600 mb-4">
+                        Calculate total compensation including credit hours, per diem, international pay, and premium bonuses.
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Credit hour optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Per diem calculation</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Premium pay analysis</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layover Quality -->
+                <div class="analysis-card rounded-xl p-6">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-bed text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Layover Quality Scoring</h3>
+                    <p class="text-gray-600 mb-4">
+                        Comprehensive scoring of layover destinations based on duration, facilities, and experiences.
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Duration optimization</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Hotel quality ratings</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>City experience scores</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historical Trends -->
+                <div class="analysis-card rounded-xl p-6">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Historical Trend Analysis</h3>
+                    <p class="text-gray-600 mb-4">
+                        Track route performance over time to identify seasonal patterns and long-term trends.
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Seasonal variation tracking</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Performance trends</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Predictive insights</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Career Progression -->
+                <div class="analysis-card rounded-xl p-6">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-graduation-cap text-orange-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Career Progression Insights</h3>
+                    <p class="text-gray-600 mb-4">
+                        Understand which routes build valuable experience for career advancement and captain upgrades.
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Captain upgrade value</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Equipment transition prep</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Experience building</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Intelligence -->
+                <div class="analysis-card rounded-xl p-6">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-globe text-red-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Market Intelligence</h3>
+                    <p class="text-gray-600 mb-4">
+                        Real-time analysis of route availability, competition, and strategic positioning.
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Availability forecasting</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Competition analysis</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Strategic recommendations</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integration Hub -->
+                <div class="analysis-card rounded-xl p-6">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-sync text-indigo-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Real-time Data Integration</h3>
+                    <p class="text-gray-600 mb-4">
+                        Seamless integration with airline scheduling systems for up-to-date route information.
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Live schedule updates</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Equipment assignments</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span>Crew base optimization</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analysis Dashboard Preview -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Route Analysis Dashboard
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Comprehensive insights at your fingertips
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="p-8">
+                    <div class="grid lg:grid-cols-3 gap-8">
+                        <!-- Top Routes -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                                Top Earning Routes
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <div class="font-medium">ORD → LHR → ORD</div>
+                                        <div class="text-sm text-gray-600">777-300ER • 24hr London</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-green-600 font-bold">$2,850</div>
+                                        <div class="text-xs text-gray-500">per month</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <div class="font-medium">LAX → NRT → LAX</div>
+                                        <div class="text-sm text-gray-600">787-9 • 30hr Tokyo</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-green-600 font-bold">$2,420</div>
+                                        <div class="text-xs text-gray-500">per month</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <div class="font-medium">SFO → FRA → SFO</div>
+                                        <div class="text-sm text-gray-600">A350 • 20hr Frankfurt</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-green-600 font-bold">$2,180</div>
+                                        <div class="text-xs text-gray-500">per month</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quality Scores -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-star text-blue-500 mr-2"></i>
+                                Highest Quality Layovers
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium">London (LHR)</span>
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">9.2</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Perfect for sightseeing and rest</div>
+                                </div>
+                                
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium">Tokyo (NRT)</span>
+                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">8.7</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Cultural experience and excellent facilities</div>
+                                </div>
+                                
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium">Amsterdam (AMS)</span>
+                                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">8.4</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Easy transit and city access</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Trend Analysis -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-chart-line text-purple-500 mr-2"></i>
+                                Market Trends
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium">International Routes</span>
+                                        <span class="text-green-600">↗ +15%</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Increasing demand for long-haul</div>
+                                </div>
+                                
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium">Weekend Flying</span>
+                                        <span class="text-orange-600">↗ +8%</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Premium weekend rates rising</div>
+                                </div>
+                                
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium">Red-eye Premium</span>
+                                        <span class="text-blue-600">↗ +12%</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Night flying bonuses increasing</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-purple-600 text-white py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-6">
+                Make Smarter Route Decisions
+            </h2>
+            <p class="text-xl mb-8 text-purple-100">
+                Stop guessing about route value. Get data-driven insights that maximize your earnings and satisfaction.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/auth/signup" class="bg-white text-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>Start Free Trial
+                </a>
+                <a href="/demo" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors">
+                    <i class="fas fa-chart-line mr-2"></i>See Route Analysis
+                </a>
+            </div>
+            
+            <p class="text-sm text-purple-200 mt-6">
+                Includes Route Analyzer + AI Bid Optimizer • 30-day free trial
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-plane text-blue-400 text-xl mr-2"></i>
+                        <span class="text-xl font-bold">VectorBid</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        AI-powered pilot bidding and route intelligence
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Products</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/products/bid-optimizer" class="hover:text-white">AI Bid Optimizer</a></li>
+                        <li><a href="/products/route-analyzer" class="hover:text-white font-medium">Route Analyzer</a></li>
+                        <li><a href="/products/schedule-builder" class="hover:text-white">Schedule Builder</a></li>
+                        <li><a href="/products/pattern-intelligence" class="hover:text-white">Pattern Intelligence</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/demo" class="hover:text-white">Route Analysis Demo</a></li>
+                        <li><a href="/support/docs" class="hover:text-white">Documentation</a></li>
+                        <li><a href="/support" class="hover:text-white">Support</a></li>
+                        <li><a href="/company/security" class="hover:text-white">Security</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/company/about" class="hover:text-white">About Us</a></li>
+                        <li><a href="/pricing" class="hover:text-white">Pricing</a></li>
+                        <li><a href="/contact" class="hover:text-white">Contact</a></li>
+                        <li><a href="/careers" class="hover:text-white">Careers</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 VectorBid. All rights reserved. Intelligent route analysis for smarter bidding decisions.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -28,6 +28,9 @@ from app.models import (
 )
 from app.routes.faq import router as faq_router
 from app.routes.ingestion import router as ingestion_router
+from app.routes.marketing import router as marketing_router
+from app.routes.products import router as products_router
+from app.routes.solutions import router as solutions_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
 from app.routes.ui import router as ui_router
@@ -94,6 +97,9 @@ app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
 app.include_router(ui_router, tags=["UI"])
 app.include_router(faq_router, tags=["FAQ"])
+app.include_router(marketing_router, tags=["Marketing"])
+app.include_router(products_router, prefix="/products", tags=["Products"])
+app.include_router(solutions_router, prefix="/solutions", tags=["Solutions"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
@@ -110,14 +116,8 @@ app.add_api_route(
 )
 
 
-# Serve the SPA
-@app.get("/")
-async def serve_spa():
-    """Serve the single page application"""
-    spa_path = Path(__file__).parent / "static" / "index.html"
-    if spa_path.exists():
-        return FileResponse(spa_path)
-    return {"message": "SPA not found - please build frontend"}
+# Root route now handled by marketing router
+# Professional landing page served by /app/routes/marketing.py
 
 
 # Mock data for development
