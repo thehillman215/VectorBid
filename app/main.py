@@ -28,6 +28,9 @@ from app.models import (
 )
 from app.routes.faq import router as faq_router
 from app.routes.ingestion import router as ingestion_router
+from app.routes.marketing import router as marketing_router
+from app.routes.products import router as products_router
+from app.routes.solutions import router as solutions_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
 from app.routes.rule_packs import router as rule_packs_router
@@ -96,6 +99,9 @@ app.include_router(ops_router, tags=["Ops"])
 app.include_router(rule_packs_router, tags=["Rule Packs"])
 app.include_router(ui_router, tags=["UI"])
 app.include_router(faq_router, tags=["FAQ"])
+app.include_router(marketing_router, tags=["Marketing"])
+app.include_router(products_router, prefix="/products", tags=["Products"])
+app.include_router(solutions_router, prefix="/solutions", tags=["Solutions"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
@@ -112,14 +118,8 @@ app.add_api_route(
 )
 
 
-# Serve the Professional Landing Page
-@app.get("/")
-async def serve_landing_page():
-    """Serve professional landing page"""
-    landing_path = Path(__file__).parent / "static" / "pages" / "landing" / "v1.html"
-    if landing_path.exists():
-        return FileResponse(landing_path)
-    return {"message": "Landing page not found"}
+# Root route now handled by marketing router
+# Professional landing page served by /app/routes/marketing.py
 
 # A/B testing route for landing page v2
 @app.get("/landing/v2")

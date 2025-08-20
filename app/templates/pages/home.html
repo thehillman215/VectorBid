@@ -1,0 +1,206 @@
+{% extends "layouts/marketing.html" %}
+
+{% block title %}{{ page_title }} - VectorBid{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="section hero-section">
+    <div class="container">
+        <div class="grid grid-cols-2 gap-8 items-center">
+            <div>
+                <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                    Win the schedule you want with AI precision
+                </h1>
+                <p class="text-xl text-gray-600 mb-8">
+                    VectorBid reads your contract and preferences to build PBS bids that maximize time at home. 
+                    Join {{ stats.pilots_served }} pilots already using AI to optimize their schedules.
+                </p>
+                <div class="flex gap-4 mb-8">
+                    <a href="/signup" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i>
+                        Start Free Trial
+                    </a>
+                    <a href="/demo" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-play"></i>
+                        Watch Demo
+                    </a>
+                </div>
+                <div class="flex items-center gap-6 text-sm text-gray-500">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-success"></i>
+                        <span>No credit card required</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-success"></i>
+                        <span>7-day free trial</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-success"></i>
+                        <span>{{ stats.success_rate }} success rate</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="card card-elevated p-8">
+                    <h3 class="text-2xl font-semibold mb-6">Real Results</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.success_rate }}</div>
+                            <div class="text-sm text-gray-600">Success Rate</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.time_saved }}</div>
+                            <div class="text-sm text-gray-600">Hours Saved</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.days_gained }}</div>
+                            <div class="text-sm text-gray-600">Extra Days Home</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.pilots_served }}</div>
+                            <div class="text-sm text-gray-600">Pilots Served</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section bg-gray-50">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Built for Professional Pilots</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Stop manually calculating PBS layers. Let AI do the heavy lifting while you focus on flying.
+            </p>
+        </div>
+        
+        <div class="cards-grid cards-grid-3">
+            <div class="card card-feature">
+                <div class="card-feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="card-title">AI-Powered Analysis</h3>
+                <p class="card-description">
+                    Advanced algorithms understand your preferences and constraints to generate optimal bid strategies.
+                </p>
+            </div>
+            
+            <div class="card card-feature">
+                <div class="card-feature-icon">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <h3 class="card-title">Contract Aware</h3>
+                <p class="card-description">
+                    Knows your airline's specific rules, PBS logic, and FAR regulations to ensure compliant bids.
+                </p>
+            </div>
+            
+            <div class="card card-feature">
+                <div class="card-feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3 class="card-title">Save Hours</h3>
+                <p class="card-description">
+                    What used to take hours of manual work now takes minutes. Get your bid done faster and more accurately.
+                </p>
+            </div>
+            
+            <div class="card card-feature">
+                <div class="card-feature-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <h3 class="card-title">Instant Export</h3>
+                <p class="card-description">
+                    Export your optimized PBS layers directly to your airline's bidding system. No manual copy-paste needed.
+                </p>
+            </div>
+            
+            <div class="card card-feature">
+                <div class="card-feature-icon">
+                    <i class="fas fa-user-friends"></i>
+                </div>
+                <h3 class="card-title">Pilot Personas</h3>
+                <p class="card-description">
+                    Choose from common pilot personas or customize your own preferences. VectorBid adapts to your lifestyle.
+                </p>
+            </div>
+            
+            <div class="card card-feature">
+                <div class="card-feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="card-title">Smart Optimization</h3>
+                <p class="card-description">
+                    Maximize quality of life metrics like days off, commute efficiency, and preferred destinations.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">What Pilots Are Saying</h2>
+            <p class="text-xl text-gray-600">Join thousands of pilots who've transformed their bidding strategy</p>
+        </div>
+        
+        <div class="cards-grid cards-grid-2">
+            {% for testimonial in featured_testimonials %}
+            <div class="card card-testimonial">
+                <div class="card-testimonial-content">
+                    "{{ testimonial.quote }}"
+                </div>
+                <div class="card-testimonial-author">
+                    <div class="card-testimonial-avatar">{{ testimonial.avatar }}</div>
+                    <div class="card-testimonial-details">
+                        <h4>{{ testimonial.author }}</h4>
+                        <p>{{ testimonial.company }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section bg-primary-blue text-white">
+    <div class="container text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to Win Your Schedule?</h2>
+        <p class="text-xl mb-8 opacity-90">
+            Join thousands of pilots using AI to optimize their PBS bids
+        </p>
+        <div class="flex justify-center gap-4">
+            <a href="/signup" class="btn btn-lg" style="background: white; color: var(--primary-blue);">
+                <i class="fas fa-rocket"></i>
+                Start Free Trial
+            </a>
+            <a href="/demo" class="btn btn-lg btn-outline" style="border-color: white; color: white;">
+                <i class="fas fa-play"></i>
+                Try Demo
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.hero-section h1 {
+    background: linear-gradient(135deg, var(--gray-900) 0%, var(--primary-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+</style>
+{% endblock %}

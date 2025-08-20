@@ -1,0 +1,143 @@
+{% extends "layouts/marketing.html" %}
+
+{% block title %}{{ page_title }} - VectorBid{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="section bg-gradient-to-br from-green-600 to-green-800 text-white">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="text-5xl font-bold mb-4">{{ hero.headline }}</h1>
+            <p class="text-xl mb-8 opacity-90 max-w-3xl mx-auto">{{ hero.subheadline }}</p>
+            
+            {% if hero.stats %}
+            <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+                {% for key, value in hero.stats.items() %}
+                <div class="text-center">
+                    <div class="text-3xl font-bold mb-2">{{ value }}</div>
+                    <div class="text-sm opacity-80">{{ key.replace('_', ' ').title() }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Challenges and Solutions -->
+{% if challenges %}
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Regional Airline Challenges</h2>
+            <p class="text-xl text-gray-600">Unique operational constraints require specialized solutions</p>
+        </div>
+        
+        <div class="space-y-8">
+            {% for challenge in challenges %}
+            <div class="card card-spacious">
+                <div class="grid grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-4">{{ challenge.title }}</h3>
+                        <p class="text-gray-600 mb-4">{{ challenge.description }}</p>
+                        <div class="text-sm text-gray-500">
+                            <strong>Challenge Impact:</strong> Complex scheduling, increased costs, pilot fatigue
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-lg">
+                        <h4 class="font-semibold text-blue-900 mb-3">VectorBid Solution</h4>
+                        <p class="text-blue-800">{{ challenge.solution }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Regional Features -->
+{% if regional_features %}
+<section class="section bg-gray-50">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Regional-Specific Features</h2>
+            <p class="text-xl text-gray-600">Purpose-built tools for regional airline operations</p>
+        </div>
+        
+        <div class="cards-grid cards-grid-3">
+            {% for feature in regional_features %}
+            <div class="card">
+                <h3 class="card-title">{{ feature.name }}</h3>
+                <p class="card-description">{{ feature.description }}</p>
+                
+                <div class="mt-4">
+                    <h4 class="font-semibold text-gray-900 mb-2">Benefits:</h4>
+                    <ul class="space-y-1">
+                        {% for benefit in feature.benefits %}
+                        <li class="flex items-center gap-2 text-gray-600">
+                            <i class="fas fa-check text-success text-sm"></i>
+                            <span>{{ benefit }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Case Studies -->
+{% if case_studies %}
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Success Stories</h2>
+            <p class="text-xl text-gray-600">Real results from regional airlines using VectorBid</p>
+        </div>
+        
+        {% for study in case_studies %}
+        <div class="card card-spacious mb-8">
+            <div class="grid grid-cols-3 gap-8">
+                <div class="col-span-2">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-4">{{ study.airline }}</h3>
+                    <p class="text-gray-600 mb-4"><strong>Challenge:</strong> {{ study.challenge }}</p>
+                    <p class="text-gray-600 mb-4"><strong>Solution:</strong> {{ study.solution }}</p>
+                </div>
+                <div class="bg-green-50 p-6 rounded-lg">
+                    <h4 class="font-semibold text-green-900 mb-4">Results</h4>
+                    {% for key, value in study.results.items() %}
+                    <div class="mb-3">
+                        <div class="text-2xl font-bold text-green-700">{{ value }}</div>
+                        <div class="text-sm text-green-600">{{ key.replace('_', ' ').title() }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="section bg-green-600 text-white">
+    <div class="container text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to Optimize Your Regional Operations?</h2>
+        <p class="text-xl mb-8 opacity-90">
+            See how VectorBid can transform your regional airline's scheduling efficiency
+        </p>
+        <div class="flex justify-center gap-4">
+            <a href="/contact?type=regional" class="btn btn-lg" style="background: white; color: #16a34a;">
+                Schedule Consultation
+            </a>
+            <a href="/demo" class="btn btn-outline btn-lg" style="border-color: white; color: white;">
+                Watch Demo
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

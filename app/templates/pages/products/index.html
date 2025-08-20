@@ -1,0 +1,69 @@
+{% extends "layouts/marketing.html" %}
+
+{% block title %}{{ page_title }} - VectorBid{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ page_title }}</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">{{ page_description }}</p>
+        </div>
+        
+        {% if products %}
+        <div class="cards-grid cards-grid-2 mb-12">
+            {% for product in products %}
+            <div class="card card-interactive card-product">
+                <div class="card-product-image">
+                    <i class="{{ product.icon }} text-primary-blue"></i>
+                </div>
+                <div class="card-product-content">
+                    <h3 class="card-title">{{ product.name }}</h3>
+                    <p class="text-primary-blue font-medium mb-2">{{ product.tagline }}</p>
+                    <p class="card-description">{{ product.description }}</p>
+                    
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-gray-900 mb-2">Key Features:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            {% for feature in product.features %}
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">{{ feature }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    {% if product.stats %}
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        {% for key, value in product.stats.items() %}
+                        <div class="text-center">
+                            <div class="font-bold text-primary-blue">{{ value }}</div>
+                            <div class="text-xs text-gray-600">{{ key.replace('_', ' ').title() }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-product-footer">
+                    <a href="{{ product.url }}" class="btn btn-primary btn-block">
+                        Learn More
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if comparison_cta %}
+        <div class="card card-spacious text-center bg-gray-50">
+            <h2 class="text-2xl font-semibold mb-4">{{ comparison_cta.title }}</h2>
+            <p class="text-gray-600 mb-6">{{ comparison_cta.description }}</p>
+            <a href="{{ comparison_cta.button_url }}" class="btn btn-secondary btn-lg">
+                {{ comparison_cta.button_text }}
+                <i class="fas fa-chart-bar"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
