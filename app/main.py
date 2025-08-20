@@ -30,6 +30,7 @@ from app.routes.faq import router as faq_router
 from app.routes.ingestion import router as ingestion_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
+from app.routes.rule_packs import router as rule_packs_router
 from app.routes.ui import router as ui_router
 from app.security.api_key import require_api_key
 
@@ -92,6 +93,7 @@ app.include_router(api_router, prefix="/api", tags=["API"])
 app.include_router(ingestion_router, tags=["Ingestion"])
 app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
+app.include_router(rule_packs_router, tags=["Rule Packs"])
 app.include_router(ui_router, tags=["UI"])
 app.include_router(faq_router, tags=["FAQ"])
 
@@ -110,14 +112,23 @@ app.add_api_route(
 )
 
 
-# Serve the SPA
+# Serve the Professional Landing Page
 @app.get("/")
-async def serve_spa():
-    """Serve the single page application"""
-    spa_path = Path(__file__).parent / "static" / "index.html"
-    if spa_path.exists():
-        return FileResponse(spa_path)
-    return {"message": "SPA not found - please build frontend"}
+async def serve_landing_page():
+    """Serve professional landing page"""
+    landing_path = Path(__file__).parent / "static" / "pages" / "landing" / "v1.html"
+    if landing_path.exists():
+        return FileResponse(landing_path)
+    return {"message": "Landing page not found"}
+
+# A/B testing route for landing page v2
+@app.get("/landing/v2")
+async def serve_landing_v2():
+    """Alternative landing page for A/B testing"""
+    landing_path = Path(__file__).parent / "static" / "pages" / "landing" / "v2.html"
+    if landing_path.exists():
+        return FileResponse(landing_path)
+    return {"message": "Landing page v2 not found"}
 
 
 # Mock data for development

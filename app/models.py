@@ -39,6 +39,7 @@ class ContextSnapshot(BaseModel):
     ctx_id: str
     pilot_id: str
     airline: str
+    month: str  # Added for rule pack integration
     base: str
     seat: str
     equip: list[str]

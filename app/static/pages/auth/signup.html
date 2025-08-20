@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - VectorBid</title>
+    <meta name="description" content="Create your VectorBid account and start optimizing your PBS bids with AI.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/landing.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-header h1 {
+            font-size: 2rem;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-header p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .auth-footer a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s ease;
+        }
+        
+        .back-link:hover {
+            opacity: 0.8;
+        }
+        
+        .pilot-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 640px) {
+            .pilot-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <a href="/" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to VectorBid
+        </a>
+        
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1><i class="fas fa-plane"></i> Join VectorBid</h1>
+                <p>Start optimizing your PBS bids with AI</p>
+            </div>
+            
+            <form id="signup-form">
+                <!-- Personal Information -->
+                <div class="form-group">
+                    <label class="form-label" for="first-name">First Name</label>
+                    <input type="text" id="first-name" name="first_name" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="last-name">Last Name</label>
+                    <input type="text" id="last-name" name="last_name" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required>
+                </div>
+                
+                <!-- Pilot Information -->
+                <div class="pilot-info-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="airline">Airline</label>
+                        <select id="airline" name="airline" class="form-select" required>
+                            <option value="">Select Airline</option>
+                            <option value="UAL">United Airlines</option>
+                            <option value="DAL">Delta Air Lines</option>
+                            <option value="AAL">American Airlines</option>
+                            <option value="SWA">Southwest Airlines</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="base">Base</label>
+                        <input type="text" id="base" name="base" class="form-input" placeholder="e.g., SFO" required>
+                    </div>
+                </div>
+                
+                <div class="pilot-info-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="seat">Position</label>
+                        <select id="seat" name="seat" class="form-select" required>
+                            <option value="">Select Position</option>
+                            <option value="FO">First Officer</option>
+                            <option value="CA">Captain</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="fleet">Fleet</label>
+                        <input type="text" id="fleet" name="fleet" class="form-input" placeholder="e.g., 737" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-rocket"></i> Create Account
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login">Sign in here</a></p>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                    By signing up, you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Basic validation
+            if (data.password.length < 8) {
+                alert('Password must be at least 8 characters long');
+                return;
+            }
+            
+            if (!data.email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Simulate API call
+            console.log('Signup data:', data);
+            
+            // For demo purposes, show success and redirect
+            alert('Account created successfully! Welcome to VectorBid.');
+            
+            // In a real implementation, you would send data to your backend
+            // and handle the response appropriately
+            window.location.href = '/onboarding';
+        });
+        
+        // Track signup attempt
+        if (typeof track !== 'undefined') {
+            track('signup_page_view');
+        }
+    </script>
+</body>
+</html>

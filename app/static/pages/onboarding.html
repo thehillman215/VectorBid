@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to VectorBid - Getting Started</title>
+    <meta name="description" content="Get started with VectorBid and optimize your first PBS bid with AI.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/landing.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .onboarding-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 0;
+        }
+        
+        .onboarding-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+        
+        .onboarding-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .onboarding-steps {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .step-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+        
+        .step-content h3 {
+            margin: 0 0 0.5rem 0;
+            color: #1f2937;
+        }
+        
+        .step-content p {
+            margin: 0;
+            color: #6b7280;
+        }
+        
+        .step-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .quick-start {
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .quick-start h3 {
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .feature-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .onboarding-container {
+                padding: 1rem;
+            }
+            
+            .step-card {
+                padding: 1.5rem;
+            }
+            
+            .step-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-container">
+        <div class="container">
+            <div class="onboarding-header">
+                <h1><i class="fas fa-rocket"></i> Welcome to VectorBid!</h1>
+                <p class="lead">Let's get you set up to optimize your first PBS bid with AI</p>
+            </div>
+            
+            <div class="onboarding-steps">
+                <!-- Step 1: Profile Setup -->
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Complete Your Pilot Profile</h3>
+                            <p>Set up your preferences and flying constraints so VectorBid can optimize for your lifestyle</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-user"></i></div>
+                            <h4>Personal Info</h4>
+                            <p>Base, fleet, position</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                            <h4>Preferences</h4>
+                            <p>Days off, destinations</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-home"></i></div>
+                            <h4>Commute</h4>
+                            <p>Distance, timing</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-actions">
+                        <a href="/profile" class="btn-primary">Complete Profile</a>
+                        <a href="/demo" class="btn-secondary">Try Demo First</a>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Upload Bid Package -->
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Upload Your Bid Package</h3>
+                            <p>Upload your airline's monthly bid package so VectorBid can analyze real pairings and trips</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-file-pdf"></i></div>
+                            <h4>PDF Support</h4>
+                            <p>United Airlines format</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-table"></i></div>
+                            <h4>CSV/JSONL</h4>
+                            <p>Structured data formats</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-sync"></i></div>
+                            <h4>Auto-Parse</h4>
+                            <p>Instant trip extraction</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-actions">
+                        <a href="/upload" class="btn-primary">Upload Bid Package</a>
+                        <a href="/help/formats" class="btn-secondary">Supported Formats</a>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Generate Your First Bid -->
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Generate Your Optimized Bid</h3>
+                            <p>Let AI create PBS layers that maximize your chances of getting the schedule you want</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                            <h4>AI Analysis</h4>
+                            <p>Smart optimization</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-layer-group"></i></div>
+                            <h4>PBS Layers</h4>
+                            <p>Ranked strategies</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-download"></i></div>
+                            <h4>Export</h4>
+                            <p>Direct to PBS system</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-actions">
+                        <a href="/dashboard" class="btn-primary">Go to Dashboard</a>
+                        <a href="/demo" class="btn-secondary">See Demo</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Start -->
+            <div class="quick-start">
+                <h3><i class="fas fa-bolt"></i> Ready to Jump In?</h3>
+                <p>Skip the setup and try VectorBid with demo data to see how it works</p>
+                <div style="margin-top: 1.5rem;">
+                    <a href="/demo" class="btn-primary">
+                        <i class="fas fa-play"></i> Launch Demo
+                    </a>
+                    <a href="/dashboard" class="btn-secondary" style="margin-left: 1rem;">
+                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="step-card" style="margin-top: 3rem;">
+                <div class="text-center">
+                    <h3><i class="fas fa-question-circle"></i> Need Help Getting Started?</h3>
+                    <p>We're here to help you get the most out of VectorBid</p>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <a href="/help" class="btn-secondary">
+                            <i class="fas fa-book"></i> Help Center
+                        </a>
+                        <a href="mailto:support@vectorbid.com" class="btn-secondary" style="margin-left: 1rem;">
+                            <i class="fas fa-envelope"></i> Contact Support
+                        </a>
+                    </div>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                        Average response time: Under 2 hours
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Track onboarding page view
+        if (typeof track !== 'undefined') {
+            track('onboarding_view');
+        }
+        
+        // Track button clicks
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
+            button.addEventListener('click', function() {
+                const action = this.textContent.trim();
+                if (typeof track !== 'undefined') {
+                    track('onboarding_action', { action: action });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

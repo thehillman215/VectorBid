@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid — Smarter PBS bids with AI</title>
+    <meta name="description" content="Precision PBS bidding with AI-driven contract and FAR awareness.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="VectorBid — Smarter PBS bids with AI">
+    <meta property="og:description" content="Let VectorBid craft bids that maximise time at home.">
+    <meta property="og:image" content="/static/images/og-vectorbid.svg">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="VectorBid — Smarter PBS bids with AI">
+    <meta name="twitter:description" content="Let VectorBid craft bids that maximise time at home.">
+    <meta name="twitter:image" content="/static/images/og-vectorbid.svg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/landing.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- V2 Specific Styles -->
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #1e40af 100%);
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero h1 {
+            font-size: 4.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .roi-highlight {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 80px 0;
+            margin: 80px 0;
+        }
+        
+        .roi-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+        
+        .stat-label {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .testimonial-highlight {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+            border-radius: 20px;
+            margin: 3rem 0;
+        }
+        
+        .testimonial-highlight blockquote {
+            font-size: 1.5rem;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+        
+        .social-proof {
+            text-align: center;
+            padding: 3rem 0;
+            background: #f8fafc;
+        }
+        
+        .pilot-count {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="logo">
+                    <i class="fas fa-plane"></i> VectorBid
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#benefits">Benefits</a></li>
+                    <li><a href="#how-it-works">How it Works</a></li>
+                    <li><a href="#testimonials">Reviews</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/signup" class="btn-primary" style="padding: 12px 24px; font-size: 1rem;">Get Started</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="fade-in-up">Smarter PBS bids with AI</h1>
+            <p class="lead fade-in-up">Let VectorBid craft bids that maximize time at home. Precision PBS bidding with AI-driven contract and FAR awareness.</p>
+            
+            <div class="hero-buttons fade-in-up">
+                <a href="/signup" class="btn-primary" onclick="track('hero_cta_click_v2')">
+                    <i class="fas fa-rocket"></i> Start Free Trial
+                </a>
+                <a href="/demo" class="btn-secondary">
+                    <i class="fas fa-play"></i> See It In Action
+                </a>
+            </div>
+            
+            <div class="badges fade-in-up">
+                <span class="badge"><i class="fas fa-users"></i> 2,000+ pilots</span>
+                <span class="badge"><i class="fas fa-star"></i> 4.9/5 rating</span>
+                <span class="badge"><i class="fas fa-award"></i> PBS 2.0 ready</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <div class="container">
+            <div class="pilot-count">2,147</div>
+            <p>Pilots already winning better schedules with VectorBid</p>
+        </div>
+    </section>
+
+    <!-- ROI Highlight -->
+    <section class="roi-highlight">
+        <div class="container">
+            <div class="text-center">
+                <h2 style="color: white; margin-bottom: 3rem;">Real Results for Real Pilots</h2>
+            </div>
+            
+            <div class="roi-stats">
+                <div class="fade-in-up">
+                    <div class="stat-number">94%</div>
+                    <div class="stat-label">Get preferred schedule</div>
+                </div>
+                
+                <div class="fade-in-up">
+                    <div class="stat-number">3.2</div>
+                    <div class="stat-label">Hours saved per month</div>
+                </div>
+                
+                <div class="fade-in-up">
+                    <div class="stat-number">2.5</div>
+                    <div class="stat-label">Extra days home</div>
+                </div>
+                
+                <div class="fade-in-up">
+                    <div class="stat-number">$847</div>
+                    <div class="stat-label">Average monthly value</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="benefits" class="section">
+        <div class="container">
+            <div class="text-center">
+                <h2>Why Pilots Choose VectorBid</h2>
+                <p class="lead">Stop spending hours on manual bid calculations. Get back to what matters.</p>
+            </div>
+            
+            <div class="features">
+                <div class="feature fade-in-up">
+                    <div class="feature-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>More Time at Home</h3>
+                    <p>Our AI optimizes for your personal preferences, getting you 2.5 more days home per month on average.</p>
+                </div>
+                
+                <div class="feature fade-in-up">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>3x Faster Than Manual</h3>
+                    <p>What takes hours of manual calculation now takes minutes. VectorBid does the heavy lifting.</p>
+                </div>
+                
+                <div class="feature fade-in-up">
+                    <div class="feature-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3>94% Success Rate</h3>
+                    <p>Pilots using VectorBid get their preferred schedule 94% of the time vs 67% with manual bidding.</p>
+                </div>
+                
+                <div class="feature fade-in-up">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3>Contract Compliant</h3>
+                    <p>Built-in knowledge of airline contracts and FAR regulations ensures your bids are always legal.</p>
+                </div>
+                
+                <div class="feature fade-in-up">
+                    <div class="feature-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3>One-Click Export</h3>
+                    <p>Export directly to your PBS system. No copy-paste, no formatting issues, no mistakes.</p>
+                </div>
+                
+                <div class="feature fade-in-up">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Learns Your Style</h3>
+                    <p>The more you use VectorBid, the better it gets at understanding your unique preferences.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="section" style="background: #f8fafc;">
+        <div class="container">
+            <div class="text-center">
+                <h2>From Preferences to Perfect Schedule</h2>
+                <p class="lead">Three simple steps to bidding success</p>
+            </div>
+            
+            <div class="steps">
+                <div class="step fade-in-up">
+                    <div class="step-number">1</div>
+                    <h3>Upload & Configure</h3>
+                    <p>Upload your bid package and set your preferences. VectorBid learns what matters most to you.</p>
+                </div>
+                
+                <div class="step fade-in-up">
+                    <div class="step-number">2</div>
+                    <h3>AI Optimization</h3>
+                    <p>Our AI analyzes thousands of possibilities, considering your contract rules and personal constraints.</p>
+                </div>
+                
+                <div class="step fade-in-up">
+                    <div class="step-number">3</div>
+                    <h3>Export & Submit</h3>
+                    <p>Get ranked PBS layers optimized for your goals. Export directly to your airline's system.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="section">
+        <div class="container">
+            <div class="testimonial-highlight fade-in-up">
+                <blockquote>"VectorBid got me 4 weekends off in February when I typically get 2. The AI really understands pilot life."</blockquote>
+                <p><strong>Captain Jennifer L.</strong> — United Airlines, 12-year pilot</p>
+            </div>
+            
+            <div class="testimonial-grid">
+                <div class="testimonial fade-in-up">
+                    <p class="testimonial-text">"Saved 3 hours on my last bid and got a way better schedule. This is a game-changer for commuters."</p>
+                    <p class="testimonial-author">— FO David K., UAL (Commuter)</p>
+                </div>
+                
+                <div class="testimonial fade-in-up">
+                    <p class="testimonial-text">"Finally, something that understands the complexity of PBS. The contract awareness is spot-on."</p>
+                    <p class="testimonial-author">— Captain Maria S., UAL</p>
+                </div>
+                
+                <div class="testimonial fade-in-up">
+                    <p class="testimonial-text">"My quality of life has improved dramatically. More time with family, better rest patterns."</p>
+                    <p class="testimonial-author">— FO Robert T., UAL</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="section" style="background: #f8fafc;">
+        <div class="container">
+            <div class="text-center">
+                <h2>Start Winning Better Schedules Today</h2>
+                <p class="lead">Risk-free trial. Cancel anytime. See results from day one.</p>
+            </div>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card fade-in-up">
+                    <h3>Free Trial</h3>
+                    <div class="price">$0<span class="price-period">/7 days</span></div>
+                    <ul class="features-list">
+                        <li>1 complete bid optimization</li>
+                        <li>All core features</li>
+                        <li>Email support</li>
+                        <li>No credit card required</li>
+                    </ul>
+                    <a href="/signup" class="btn-secondary">Start Free Trial</a>
+                </div>
+                
+                <div class="pricing-card featured fade-in-up">
+                    <div class="pricing-badge">Best Value</div>
+                    <h3>Professional</h3>
+                    <div class="price">$29<span class="price-period">/month</span></div>
+                    <ul class="features-list">
+                        <li>Unlimited bid optimizations</li>
+                        <li>Advanced pilot personas</li>
+                        <li>Priority support</li>
+                        <li>Schedule analytics</li>
+                        <li>Export to all PBS systems</li>
+                        <li>30-day money-back guarantee</li>
+                    </ul>
+                    <a href="/signup?plan=pro" class="btn-primary">Get Started Now</a>
+                </div>
+                
+                <div class="pricing-card fade-in-up">
+                    <h3>Enterprise</h3>
+                    <div class="price">Custom<span class="price-period">pricing</span></div>
+                    <ul class="features-list">
+                        <li>Everything in Professional</li>
+                        <li>Custom contract integration</li>
+                        <li>Team analytics dashboard</li>
+                        <li>Dedicated support</li>
+                        <li>API access</li>
+                    </ul>
+                    <a href="/contact" class="btn-secondary">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center">
+                <h2>Common Questions</h2>
+                <p class="lead">Everything pilots want to know about VectorBid</p>
+            </div>
+            
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <button class="faq-question">Is VectorBid aware of PBS 2.0?</button>
+                    <div class="faq-answer">Yes. Our logic understands PBS 2.0 rules and formats.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">Which airlines do you support?</button>
+                    <div class="faq-answer">We are starting with United and adding more carriers soon.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">How accurate are the suggestions?</button>
+                    <div class="faq-answer">We follow your contract and FARs but final responsibility lies with the pilot.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">Do you store my data?</button>
+                    <div class="faq-answer">Preferences are stored securely and never shared.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">Is there a refund policy?</button>
+                    <div class="faq-answer">We offer a no-questions-asked refund within 30 days.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">Are you affiliated with any airline or PBS vendor?</button>
+                    <div class="faq-answer">No. VectorBid is an independent tool and not endorsed by any airline or PBS vendor.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="section">
+        <div class="container text-center">
+            <h2>Ready to Transform Your Bidding?</h2>
+            <p class="lead">Join 2,000+ pilots already using AI to win better schedules</p>
+            <div class="hero-buttons">
+                <a href="/signup" class="btn-primary">
+                    <i class="fas fa-rocket"></i> Start Free Trial
+                </a>
+                <a href="/demo" class="btn-secondary">
+                    <i class="fas fa-play"></i> Watch Demo
+                </a>
+            </div>
+            <p style="margin-top: 1rem; color: #6b7280; font-size: 0.875rem;">
+                No credit card required • 7-day free trial • Cancel anytime
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-plane"></i> VectorBid</h3>
+                    <p>AI-powered pilot bidding assistant for PBS systems. Maximize time at home with optimized bid strategies.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Product</h3>
+                    <a href="#benefits">Benefits</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="/demo">Demo</a>
+                    <a href="/help">Help</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <a href="/about">About</a>
+                    <a href="/contact">Contact</a>
+                    <a href="/privacy">Privacy</a>
+                    <a href="/terms">Terms</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <a href="/help">Help Center</a>
+                    <a href="mailto:support@vectorbid.com">support@vectorbid.com</a>
+                    <a href="/status">System Status</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 VectorBid. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/landing.js"></script>
+    
+    <!-- Analytics placeholder -->
+    <script>
+        function track(event) {
+            console.log('Analytics event (V2):', event);
+            // Analytics integration would go here
+        }
+    </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ Immutable, frozen dataclasses for rule packs, rules, and validation results.
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -21,13 +21,13 @@ class HardRule(BaseModel):
     severity: str = "error"  # error, warning
     bounds: Optional[tuple[float, float]] = None
     message: Optional[str] = None
-    
+
     # Add computed properties for backward compatibility
     @property
     def id(self) -> str:
         """Backward compatibility: return name as id."""
         return self.name
-    
+
     @property
     def predicate(self):
         """Backward compatibility: return check as predicate function."""
@@ -44,7 +44,7 @@ class SoftRule(BaseModel):
     weight: float
     score: str  # DSL expression that returns a score
     bounds: Optional[tuple[float, float]] = None
-    
+
     # Add computed property for backward compatibility
     @property
     def id(self) -> str:
@@ -59,7 +59,7 @@ class DerivedRule(BaseModel):
     description: str
     compute: str  # DSL expression that computes a value
     output_type: str = "float"  # float, int, str, bool
-    
+
     # Add computed property for backward compatibility
     @property
     def id(self) -> str:
@@ -82,18 +82,18 @@ class RulePack(BaseModel):
     derived_rules: list[DerivedRule] = []
     metadata: dict[str, Any] = {}
     original_checksum: Optional[str] = None
-    
+
     # Add computed properties for backward compatibility
     @property
     def month(self) -> str:
         """Backward compatibility: return contract_period as month."""
         return self.contract_period
-    
+
     @property
     def schema_version(self) -> str:
         """Backward compatibility: return version as schema_version."""
         return self.version
-    
+
     @property
     def checksum(self) -> str:
         """Backward compatibility: return a computed checksum."""
