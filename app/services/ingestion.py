@@ -11,6 +11,12 @@ from app.services.pbs_parser.reader import load_csv, load_jsonl
 from app.services.store import bid_package_store
 
 
+class PDFParsingError(Exception):
+    """Raised when PDF parsing fails."""
+
+    pass
+
+
 class IngestionService:
     """Service for ingesting and parsing bid packages."""
 
@@ -73,6 +79,8 @@ class IngestionService:
                 message=f"Successfully ingested {filename}",
             )
 
+        except PDFParsingError as e:
+            return IngestionResponse(success=False, summary={}, error=str(e))
         except Exception as e:
             return IngestionResponse(
                 success=False, summary={}, error=f"Failed to ingest file: {str(e)}"
@@ -203,11 +211,23 @@ class IngestionService:
                 # Fallback to mock data if parsing fails
                 return self._create_mock_pairings()
 
-    def _parse_pdf(self, file_content: bytes, filename: str) -> list[dict[str, Any]]:
-        """Parse PDF format - placeholder for future implementation."""
-        # TODO: Integrate with existing PDF parser from src/lib/schedule_parser/
-        # For now, return mock data
-        return self._create_mock_trips()
+    def _parse_pdf(self, file_content: bytes, filename: str) -> list[Pairing]:
+        """Parse UAL PDF format using existing parser."""
+        try:
+            # Extract text from PDF
+            pdf_text = self._extract_pdf_text(file_content)
+
+            # Use existing UAL PDF parser to parse the text
+            from app.parsers.ual_pdf import _parse_text
+
+            ual_trips = _parse_text(pdf_text)
+
+            # Convert UAL Trip objects to Pairing objects
+            pairings = self._convert_to_pairings(ual_trips, filename)
+            return pairings
+
+        except Exception as e:
+            raise PDFParsingError(f"Failed to parse PDF {filename}: {str(e)}") from e
 
     def _parse_txt(self, file_content: bytes, filename: str) -> list[dict[str, Any]]:
         """Parse TXT format - placeholder for future implementation."""
@@ -295,6 +315,81 @@ class IngestionService:
                 trips=trips,
             )
         ]
+
+    def _extract_pdf_text(self, file_content: bytes) -> str:
+        """Extract text content from PDF bytes."""
+        try:
+            import io
+
+            from pypdf import PdfReader
+
+            pdf_reader = PdfReader(io.BytesIO(file_content))
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+
+            if not text.strip():
+                raise ValueError("No text content found in PDF")
+
+            return text
+        except ImportError as e:
+            raise PDFParsingError(
+                "pypdf library not installed. Please install with: pip install pypdf"
+            ) from e
+        except Exception as e:
+            raise PDFParsingError(f"Failed to extract text from PDF: {str(e)}") from e
+
+    def _convert_to_pairings(self, ual_trips: list, filename: str) -> list[Pairing]:
+        """Convert UAL PDF parser Trip objects to Pairing objects."""
+        from app.parsers.ual_pdf import Trip as UALTrip
+
+        # Group trips by base pairing logic
+        # For UAL trips, we'll create one pairing per trip for simplicity
+        pairings = []
+
+        for ual_trip in ual_trips:
+            if not isinstance(ual_trip, UALTrip):
+                continue
+
+            # Extract base and fleet information from the trip if available
+            # Default values for required fields
+            base = "UNK"  # Unknown base
+            fleet = "UNK"  # Unknown fleet
+
+            # Try to extract base from first leg if available
+            if ual_trip.legs:
+                first_leg = ual_trip.legs[0]
+                base = first_leg.departure_airport
+                if first_leg.equipment:
+                    fleet = first_leg.equipment
+
+            # Create pairing ID based on trip ID
+            pairing_id = f"PDF-{ual_trip.trip_id}"
+
+            # Convert UAL legs to PBS Trip objects
+            pbs_trips = []
+            for j, leg in enumerate(ual_trip.legs):
+                trip_id = f"{ual_trip.trip_id}-L{j + 1}"
+                pbs_trip = Trip(
+                    trip_id=trip_id,
+                    pairing_id=pairing_id,
+                    day=j + 1,  # Assign sequential days for legs
+                    origin=leg.departure_airport,
+                    destination=leg.arrival_airport,
+                )
+                pbs_trips.append(pbs_trip)
+
+            # Create Pairing object
+            pairing = Pairing(
+                pairing_id=pairing_id,
+                base=base,
+                fleet=fleet,
+                month=date.today().replace(day=1),  # Default to current month
+                trips=pbs_trips,
+            )
+            pairings.append(pairing)
+
+        return pairings
 
     def _create_mock_trips(self) -> list[dict[str, Any]]:
         """Create mock trips for testing."""
