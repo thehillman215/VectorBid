@@ -40,7 +40,7 @@ _RULES = load_rule_pack(RULE_PACK_PATH)
 CANDIDATE_STORE: dict[str, CandidateSchedule] = {}
 
 
-@router.post("/parse", tags=["Parse"])
+@router.post("/parse_preferences", tags=["Parse"])
 def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Parse free-text preferences into structured format using NLP/LLM
@@ -122,7 +122,7 @@ def parse_preview(payload: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/validate", tags=["Validate"])
+@router.post("/validate_constraints", tags=["Validate"])
 def validate(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Body:
