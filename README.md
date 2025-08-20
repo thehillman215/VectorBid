@@ -1,6 +1,18 @@
 # VectorBid
 
-AI-powered PBS 2.0 bidding assistant for airline pilots. A FastAPI-based application with intelligent rule processing and schedule optimization.
+🚀 **World's First AI-Powered Pilot Bidding System** - Transform pilot scheduling from complex form-filling to intelligent conversation.
+
+AI-powered pilot bidding assistant for airline pilots. A FastAPI-based application with intelligent rule processing, schedule optimization, and natural language preference parsing.
+
+## ✨ Latest Features
+- 🎨 **Professional Marketing Pages** - Complete landing page with interactive demo
+- 🔐 **Authentication System** - Signup/login with demo accounts  
+- 📊 **Data Flow Visualization** - Interactive D3.js architecture diagram
+- 🤖 **Live API Integration** - Real backend connectivity for demos
+- 📱 **Mobile-First Design** - Responsive across all devices (via Cursor AI)
+- ⚡ **Performance Optimized** - Fast loading with intelligent caching (via Cursor AI)
+- ♿ **Fully Accessible** - WCAG 2.1 AA compliant (via Cursor AI)
+- 🧪 **Comprehensive Testing** - Automated CI/CD pipeline (via Cursor AI)
 
 ## Quick Start
 
