@@ -48,6 +48,9 @@ VectorBid-codex/
 
 ## Development
 
+### AI Development Strategy
+For optimal cost-effectiveness, see [AI_DEVELOPMENT_STRATEGY.md](docs/AI_DEVELOPMENT_STRATEGY.md) - hybrid approach using Claude Code (unlimited with Max plan) and Cursor AI (strategic token usage).
+
 ### Workflow
 1) Branch from `cursor/baseline` for features
 2) Open PR → `staging`. CI must be green (ruff, pytest, bandit, Docker build)

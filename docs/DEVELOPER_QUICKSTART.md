@@ -2,6 +2,8 @@
 
 This guide will get you up and running with VectorBid development in under 10 minutes.
 
+> 💡 **Cost-Effective AI Development**: See [AI_DEVELOPMENT_STRATEGY.md](AI_DEVELOPMENT_STRATEGY.md) for the hybrid Claude Code + Cursor AI approach that maximizes your existing subscriptions.
+
 ## Prerequisites
 
 - **Python 3.11+** (recommended: use pyenv or conda)
