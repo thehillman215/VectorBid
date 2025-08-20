@@ -168,7 +168,7 @@ class VectorBidDemo {
                 clearInterval(typeInterval);
                 userInput.classList.remove('typing-cursor');
             }
-        }, 50);
+        }, 20);
     }
     
     startDemo() {

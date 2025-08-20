@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - VectorBid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/design-system.css" rel="stylesheet">
+    <link href="/static/css/edgy-theme.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-plane text-blue-600 text-2xl mr-3"></i>
+                    <span class="text-xl font-bold text-gray-900">VectorBid</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <div class="relative">
+                        <button id="user-menu" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                <span id="user-initials">PU</span>
+                            </div>
+                        </button>
+                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="/auth/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-sm p-6 text-white mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold mb-2">Welcome back, <span id="user-name">Pilot</span>!</h1>
+                    <p class="text-blue-100">Your next bid deadline is in <span class="font-semibold text-white">12 days</span></p>
+                </div>
+                <div class="hidden md:block">
+                    <i class="fas fa-calendar-alt text-6xl text-blue-400 opacity-20"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">This Month</p>
+                        <p class="text-2xl font-semibold text-gray-900">87h</p>
+                        <p class="text-xs text-green-600">+5% from last month</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-trophy text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Bid Success</p>
+                        <p class="text-2xl font-semibold text-gray-900">92%</p>
+                        <p class="text-xs text-blue-600">+8% improvement</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-globe text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Routes</p>
+                        <p class="text-2xl font-semibold text-gray-900">23</p>
+                        <p class="text-xs text-purple-600">Unique destinations</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-orange-100 text-orange-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Next Trip</p>
+                        <p class="text-2xl font-semibold text-gray-900">3d</p>
+                        <p class="text-xs text-orange-600">SFO-LAX-DEN</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Current Bid Status -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Current Bid Status</h3>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm font-medium text-gray-600">February 2025 Bid</span>
+                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Submitted</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Top Choice:</span>
+                            <span class="text-gray-900">SFO 737 Captain - Line 47</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Probability:</span>
+                            <span class="text-green-600 font-medium">89%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Credit Hours:</span>
+                            <span class="text-gray-900">85-92h</span>
+                        </div>
+                    </div>
+                    <button class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                        View Full Bid
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
+                            <div>
+                                <p class="text-sm text-gray-900">Bid submitted for February 2025</p>
+                                <p class="text-xs text-gray-500">2 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-green-600 rounded-full mt-2 mr-3"></div>
+                            <div>
+                                <p class="text-sm text-gray-900">January bid awarded - Line 52</p>
+                                <p class="text-xs text-gray-500">3 days ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-purple-600 rounded-full mt-2 mr-3"></div>
+                            <div>
+                                <p class="text-sm text-gray-900">AI optimization complete for Feb bid</p>
+                                <p class="text-xs text-gray-500">1 week ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-orange-600 rounded-full mt-2 mr-3"></div>
+                            <div>
+                                <p class="text-sm text-gray-900">New bid package published</p>
+                                <p class="text-xs text-gray-500">2 weeks ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Panel -->
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-plus-circle text-blue-600 text-xl mr-3"></i>
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900">Create New Bid</p>
+                            <p class="text-sm text-gray-500">Start optimizing next month</p>
+                        </div>
+                    </button>
+                    
+                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chart-bar text-green-600 text-xl mr-3"></i>
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900">View Analytics</p>
+                            <p class="text-sm text-gray-500">Track your performance</p>
+                        </div>
+                    </button>
+                    
+                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-cog text-purple-600 text-xl mr-3"></i>
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900">Update Preferences</p>
+                            <p class="text-sm text-gray-500">Fine-tune AI optimization</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="message-container" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            setupUserMenu();
+        });
+
+        function loadUserData() {
+            // Get user data from localStorage or make API call
+            const userData = JSON.parse(localStorage.getItem('vectorbid_user') || '{}');
+            
+            if (userData.email) {
+                // Update user name
+                const nameParts = userData.email.split('@')[0].split('.');
+                const firstName = nameParts[0] || 'Pilot';
+                document.getElementById('user-name').textContent = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+                
+                // Update user initials
+                const initials = firstName.charAt(0).toUpperCase() + (nameParts[1] ? nameParts[1].charAt(0).toUpperCase() : 'U');
+                document.getElementById('user-initials').textContent = initials;
+            }
+        }
+
+        function setupUserMenu() {
+            const userMenu = document.getElementById('user-menu');
+            const dropdown = document.getElementById('user-dropdown');
+            
+            userMenu.addEventListener('click', function() {
+                dropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!userMenu.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('vectorbid_token');
+            localStorage.removeItem('vectorbid_user');
+            window.location.href = '/auth/login';
+        }
+
+        function showMessage(text, type = 'info') {
+            const container = document.getElementById('message-container');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500', 
+                info: 'bg-blue-500'
+            };
+            
+            const message = document.createElement('div');
+            message.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg mb-2 transition-all duration-300`;
+            message.textContent = text;
+            
+            container.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 5000);
+        }
+
+        // Check authentication on page load
+        if (!localStorage.getItem('vectorbid_token') && !localStorage.getItem('vectorbid_user')) {
+            window.location.href = '/auth/login';
+        }
+    </script>
+</body>
+</html>

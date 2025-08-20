@@ -6,6 +6,8 @@ class InteractiveDemo {
         this.apiBase = '/api';
         this.isProcessing = false;
         this.demoState = 'idle'; // idle, parsing, optimizing, complete
+        this.isMobile = window.innerWidth < 768;
+        this.isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
         
         this.init();
     }
@@ -19,7 +21,7 @@ class InteractiveDemo {
         // Interactive demo button
         const demoBtn = document.querySelector('.demo-widget button');
         if (demoBtn) {
-            demoBtn.addEventListener('click', () => this.startDemo());
+            this.addTouchOptimizedClick(demoBtn, () => this.startDemo());
         }
         
         // Try interactive demo button
@@ -27,7 +29,37 @@ class InteractiveDemo {
                               document.querySelector('button:contains("Try Interactive Demo")') ||
                               document.querySelector('.demo-preview button');
         if (interactiveBtn) {
-            interactiveBtn.addEventListener('click', () => this.startDemo());
+            this.addTouchOptimizedClick(interactiveBtn, () => this.startDemo());
+        }
+        
+        // Handle window resize for mobile optimization
+        window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth < 768;
+            this.isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+        });
+    }
+    
+    addTouchOptimizedClick(element, callback) {
+        // Ensure minimum touch target size
+        if (this.isMobile) {
+            element.style.minHeight = '44px';
+            element.style.minWidth = '44px';
+            element.style.touchAction = 'manipulation';
+        }
+        
+        // Add both click and touch events
+        element.addEventListener('click', callback);
+        
+        if (this.isMobile) {
+            element.addEventListener('touchstart', (e) => {
+                element.style.transform = 'scale(0.95)';
+            });
+            
+            element.addEventListener('touchend', (e) => {
+                element.style.transform = 'scale(1)';
+                // Small delay to prevent double-tap zoom
+                setTimeout(() => callback(), 50);
+            });
         }
     }
     
@@ -44,21 +76,38 @@ class InteractiveDemo {
         
         const statusDiv = document.createElement('div');
         statusDiv.id = 'demo-status';
-        statusDiv.className = 'mt-4 p-3 rounded-lg border text-sm font-mono hidden';
+        
+        // Mobile-optimized status indicator
+        const mobileClasses = this.isMobile ? 
+            'fixed top-4 left-4 right-4 z-50 p-4 rounded-lg border text-sm font-mono hidden shadow-lg' :
+            'mt-4 p-3 rounded-lg border text-sm font-mono hidden';
+            
+        statusDiv.className = mobileClasses;
         statusDiv.innerHTML = `
-            <div class="flex items-center">
+            <div class="flex items-center ${this.isMobile ? 'justify-center' : ''}">
                 <div class="spinner hidden mr-2">⚡</div>
                 <span class="status-text">Ready for demo</span>
             </div>
         `;
         
-        demoSection.appendChild(statusDiv);
+        if (this.isMobile) {
+            // Append to body for mobile overlay
+            document.body.appendChild(statusDiv);
+        } else {
+            demoSection.appendChild(statusDiv);
+        }
     }
     
     async startDemo() {
         if (this.isProcessing) return;
         
         this.isProcessing = true;
+        
+        // Mobile-specific loading overlay
+        if (this.isMobile) {
+            this.showMobileLoadingOverlay();
+        }
+        
         this.updateStatus('🔄 Starting AI analysis...', 'processing');
         
         try {
@@ -78,7 +127,35 @@ class InteractiveDemo {
             this.handleError(error);
         } finally {
             this.isProcessing = false;
+            if (this.isMobile) {
+                this.hideMobileLoadingOverlay();
+            }
         }
+    }
+    
+    showMobileLoadingOverlay() {
+        const overlay = document.createElement('div');
+        overlay.id = 'mobile-demo-overlay';
+        overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-lg p-6 m-4 max-w-sm w-full text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <h3 class="text-lg font-semibold mb-2">AI Processing</h3>
+                <p class="text-gray-600">VectorBid AI is analyzing your preferences...</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
+    }
+    
+    hideMobileLoadingOverlay() {
+        const overlay = document.getElementById('mobile-demo-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+        document.body.style.overflow = '';
     }
     
     getDemoInputText() {
@@ -239,15 +316,33 @@ class InteractiveDemo {
         const statusEl = document.getElementById('demo-status');
         if (!statusEl) return;
         
-        statusEl.className = `mt-4 p-3 rounded-lg border text-sm font-mono ${this.getStatusClasses(type)}`;
+        // Mobile-optimized status classes
+        const baseClasses = this.isMobile ? 
+            'fixed top-4 left-4 right-4 z-50 p-4 rounded-lg border text-sm font-mono shadow-lg' :
+            'mt-4 p-3 rounded-lg border text-sm font-mono';
+            
+        statusEl.className = `${baseClasses} ${this.getStatusClasses(type)}`;
         statusEl.querySelector('.status-text').textContent = message;
         statusEl.classList.remove('hidden');
         
-        // Auto-hide success messages
+        // Mobile-specific status handling
+        if (this.isMobile && type === 'processing') {
+            // Update mobile overlay content if it exists
+            const overlay = document.getElementById('mobile-demo-overlay');
+            if (overlay) {
+                const overlayText = overlay.querySelector('p');
+                if (overlayText) {
+                    overlayText.textContent = message;
+                }
+            }
+        }
+        
+        // Auto-hide success messages (longer on mobile)
         if (type === 'success') {
+            const hideDelay = this.isMobile ? 4000 : 3000;
             setTimeout(() => {
                 statusEl.classList.add('hidden');
-            }, 3000);
+            }, hideDelay);
         }
     }
     

@@ -1,6 +1,6 @@
 # VectorBid Architecture
 
-VectorBid is an AI-powered bidding assistant for airline pilots. It converts natural language pilot preferences into optimized PBS 2.0 bid layers, validated against FAR 117 and union agreements.
+VectorBid is an AI-powered bidding assistant for airline pilots. It converts natural language pilot preferences into optimized bid layers, validated against FAR 117 and union agreements.
 
 ## System Overview
 - **Backend**: FastAPI monolith (Python 3.11), containerized via Docker.
@@ -10,7 +10,7 @@ VectorBid is an AI-powered bidding assistant for airline pilots. It converts nat
   2. **Parallel Processing** — NLP parsing, rule compliance, and analytics in parallel.
   3. **Data Fusion Layer** — combines signals into structured artifacts.
   4. **LLM Strategy Layer** — GPT-4 generates bid strategy and rationales.
-  5. **Output** — PBS 2.0 compatible bid layers and filters.
+  5. **Output** — PBS compatible bid layers and filters.
 
 ## Data Flow Architecture
 
@@ -50,7 +50,7 @@ VectorBid is an AI-powered bidding assistant for airline pilots. It converts nat
 - **Parse**: Natural language preference parsing via LLM
 - **Validate**: Rule compliance checking against contract + FAR
 - **Optimize**: Multi-objective optimization for bid layers
-- **Generate**: PBS 2.0 compatible bid layer creation
+- **Generate**: PBS compatible bid layer creation
 - **Lint**: Quality assurance and validation
 
 ### 3. Data Models
@@ -65,7 +65,7 @@ VectorBid is an AI-powered bidding assistant for airline pilots. It converts nat
 - **Scoring System**: Weighted preference scoring for optimization
 
 ### 5. Export & Storage
-- **Bid Layer Export**: PBS 2.0 format generation
+- **Bid Layer Export**: PBS format generation
 - **Metadata Storage**: JSON-based artifact tracking
 - **Version Control**: Rule pack versioning and schema evolution
 

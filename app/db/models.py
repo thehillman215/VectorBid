@@ -1,10 +1,35 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import List, Optional
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Index, Integer, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Index, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from .database import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+    
+    # Identity
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column(String)
+    
+    # Profile
+    first_name: Mapped[str] = mapped_column(String)
+    last_name: Mapped[str] = mapped_column(String)
+    airline: Mapped[str] = mapped_column(String)
+    base: Mapped[str] = mapped_column(String)
+    seat: Mapped[str] = mapped_column(String)  # FO, CA
+    equipment: Mapped[List[str]] = mapped_column(JSON)
+    
+    # System
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_login: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    subscription_tier: Mapped[str] = mapped_column(String, default="free")
 
 
 class Pilot(Base):

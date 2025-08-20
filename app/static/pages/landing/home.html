@@ -16,6 +16,79 @@
         .testimonial-card { background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%); }
         .cta-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
         .demo-preview { background: linear-gradient(145deg, #1e293b 0%, #334155 100%); }
+        
+        /* Mobile-specific optimizations */
+        @media (max-width: 768px) {
+            .hero h1 { 
+                font-size: 2.5rem !important; 
+                line-height: 1.2 !important;
+                margin-bottom: 1.5rem !important;
+            }
+            .nav-dropdown { 
+                position: static !important; 
+                width: 100% !important; 
+                opacity: 1 !important;
+                visibility: visible !important;
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                margin-top: 0.5rem;
+            }
+            #data-flow-container { 
+                height: 250px !important; 
+                overflow-x: auto !important; 
+            }
+            .feature-card { 
+                margin-bottom: 1rem !important; 
+            }
+            .stat-number { 
+                font-size: 2rem !important; 
+            }
+            .cta-btn, .btn, button { 
+                min-height: 44px !important;
+                padding: 0.75rem 1rem !important;
+                font-size: 16px !important;
+                touch-action: manipulation;
+            }
+            .mobile-nav-toggle {
+                display: block !important;
+            }
+            .desktop-nav {
+                display: none !important;
+            }
+            .mobile-nav {
+                display: block !important;
+            }
+            /* Improve text readability on mobile */
+            .hero p {
+                font-size: 1.125rem !important;
+                line-height: 1.6 !important;
+            }
+            /* Better spacing for social proof stats */
+            .social-proof {
+                flex-direction: column !important;
+                gap: 1rem !important;
+                text-align: center !important;
+            }
+            /* Stack testimonials on mobile */
+            .testimonial-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+        }
+        
+        /* Hidden mobile navigation by default */
+        .mobile-nav {
+            display: none;
+        }
+        .mobile-nav-toggle {
+            display: none;
+        }
+        
+        /* Ensure no horizontal scroll */
+        body {
+            overflow-x: hidden;
+        }
     </style>
 </head>
 <body class="bg-white">
@@ -29,21 +102,22 @@
                     <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">AI-Powered</span>
                 </div>
                 
-                <nav class="hidden md:flex space-x-8">
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav hidden md:flex space-x-8">
                     <div class="relative group">
                         <a href="/products" class="text-gray-700 hover:text-blue-600 transition-colors">Products <i class="fas fa-chevron-down ml-1"></i></a>
                         <div class="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                             <div class="p-4">
-                                <a href="/products/bid-optimizer" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                <a href="/products/bid-optimizer" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">
                                     <i class="fas fa-magic mr-2 text-blue-600"></i>Bid Optimizer
                                 </a>
-                                <a href="/products/route-analyzer" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                <a href="/products/route-analyzer" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">
                                     <i class="fas fa-route mr-2 text-blue-600"></i>Route Analyzer
                                 </a>
-                                <a href="/products/schedule-builder" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                <a href="/products/schedule-builder" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">
                                     <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Schedule Builder
                                 </a>
-                                <a href="/products/pattern-intelligence" class="block py-2 px-3 rounded hover:bg-gray-50">
+                                <a href="/products/pattern-intelligence" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">
                                     <i class="fas fa-brain mr-2 text-blue-600"></i>Pattern Intelligence
                                 </a>
                             </div>
@@ -54,11 +128,11 @@
                         <a href="/solutions" class="text-gray-700 hover:text-blue-600 transition-colors">Solutions <i class="fas fa-chevron-down ml-1"></i></a>
                         <div class="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                             <div class="p-4">
-                                <a href="/solutions/regional" class="block py-2 px-3 rounded hover:bg-gray-50">Regional Airlines</a>
-                                <a href="/solutions/major" class="block py-2 px-3 rounded hover:bg-gray-50">Major Airlines</a>
-                                <a href="/solutions/corporate" class="block py-2 px-3 rounded hover:bg-gray-50">Corporate Aviation</a>
-                                <a href="/solutions/first-officers" class="block py-2 px-3 rounded hover:bg-gray-50">First Officers</a>
-                                <a href="/solutions/captains" class="block py-2 px-3 rounded hover:bg-gray-50">Captains</a>
+                                <a href="/solutions/regional" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">Regional Airlines</a>
+                                <a href="/solutions/major" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">Major Airlines</a>
+                                <a href="/solutions/corporate" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">Corporate Aviation</a>
+                                <a href="/solutions/first-officers" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">First Officers</a>
+                                <a href="/solutions/captains" class="block py-2 px-3 rounded hover:bg-gray-50 touch-target">Captains</a>
                             </div>
                         </div>
                     </div>
@@ -66,11 +140,73 @@
                     <a href="/pricing" class="text-gray-700 hover:text-blue-600 transition-colors">Pricing</a>
                     <a href="/company/about" class="text-gray-700 hover:text-blue-600 transition-colors">Company</a>
                 </nav>
+
+                <!-- Mobile Navigation Toggle -->
+                <button class="mobile-nav-toggle md:hidden touch-target" id="mobile-nav-btn">
+                    <i class="fas fa-bars text-gray-700 text-xl"></i>
+                </button>
                 
                 <div class="flex items-center space-x-4">
-                    <a href="/demo" class="text-blue-600 hover:text-blue-700 transition-colors">Live Demo</a>
-                    <a href="/auth/login" class="text-gray-700 hover:text-gray-900 transition-colors">Login</a>
-                    <a href="/auth/signup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Start Free Trial</a>
+                    <a href="/demo" class="hidden sm:block text-blue-600 hover:text-blue-700 transition-colors touch-target">Live Demo</a>
+                    <a href="/auth/login" class="hidden sm:block text-gray-700 hover:text-gray-900 transition-colors touch-target">Login</a>
+                    <a href="/auth/signup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cta-btn touch-manipulation">Start Free Trial</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div class="mobile-nav md:hidden bg-white border-b shadow-lg" id="mobile-nav-menu" style="display: none;">
+            <div class="px-4 py-4 space-y-3">
+                <div class="border-b pb-3">
+                    <a href="/products" class="block py-3 text-gray-700 font-medium touch-target">
+                        <i class="fas fa-box mr-3 text-blue-600"></i>Products
+                    </a>
+                    <div class="pl-8 space-y-2">
+                        <a href="/products/bid-optimizer" class="block py-2 text-gray-600 text-sm touch-target">
+                            <i class="fas fa-magic mr-2 text-blue-600"></i>Bid Optimizer
+                        </a>
+                        <a href="/products/route-analyzer" class="block py-2 text-gray-600 text-sm touch-target">
+                            <i class="fas fa-route mr-2 text-blue-600"></i>Route Analyzer
+                        </a>
+                        <a href="/products/schedule-builder" class="block py-2 text-gray-600 text-sm touch-target">
+                            <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Schedule Builder
+                        </a>
+                        <a href="/products/pattern-intelligence" class="block py-2 text-gray-600 text-sm touch-target">
+                            <i class="fas fa-brain mr-2 text-blue-600"></i>Pattern Intelligence
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="border-b pb-3">
+                    <a href="/solutions" class="block py-3 text-gray-700 font-medium touch-target">
+                        <i class="fas fa-cogs mr-3 text-blue-600"></i>Solutions
+                    </a>
+                    <div class="pl-8 space-y-2">
+                        <a href="/solutions/regional" class="block py-2 text-gray-600 text-sm touch-target">Regional Airlines</a>
+                        <a href="/solutions/major" class="block py-2 text-gray-600 text-sm touch-target">Major Airlines</a>
+                        <a href="/solutions/corporate" class="block py-2 text-gray-600 text-sm touch-target">Corporate Aviation</a>
+                        <a href="/solutions/first-officers" class="block py-2 text-gray-600 text-sm touch-target">First Officers</a>
+                        <a href="/solutions/captains" class="block py-2 text-gray-600 text-sm touch-target">Captains</a>
+                    </div>
+                </div>
+                
+                <a href="/pricing" class="block py-3 text-gray-700 font-medium touch-target">
+                    <i class="fas fa-tag mr-3 text-blue-600"></i>Pricing
+                </a>
+                <a href="/company/about" class="block py-3 text-gray-700 font-medium touch-target">
+                    <i class="fas fa-building mr-3 text-blue-600"></i>Company
+                </a>
+                <a href="/demo" class="block py-3 text-blue-600 font-medium touch-target">
+                    <i class="fas fa-play mr-3"></i>Live Demo
+                </a>
+                <a href="/auth/login" class="block py-3 text-gray-700 font-medium touch-target">
+                    <i class="fas fa-sign-in-alt mr-3 text-blue-600"></i>Login
+                </a>
+                
+                <div class="pt-3">
+                    <a href="/auth/signup" class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors cta-btn touch-manipulation">
+                        <i class="fas fa-rocket mr-2"></i>Start Free Trial
+                    </a>
                 </div>
             </div>
         </div>
@@ -107,7 +243,7 @@
                 </div>
                 
                 <!-- Social Proof -->
-                <div class="flex flex-wrap justify-center items-center gap-8 text-blue-200">
+                <div class="social-proof flex flex-wrap justify-center items-center gap-8 text-blue-200">
                     <div class="flex items-center">
                         <div class="stat-number text-yellow-300">94%</div>
                         <span class="ml-2">Pilot Satisfaction</span>
@@ -374,7 +510,7 @@
                 </p>
             </div>
             
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="testimonial-grid grid md:grid-cols-3 gap-8">
                 <div class="testimonial-card rounded-xl p-6">
                     <div class="flex items-center mb-4">
                         <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
@@ -560,6 +696,46 @@
                     behavior: 'smooth'
                 });
             });
+        });
+
+        // Mobile navigation toggle
+        const mobileNavBtn = document.getElementById('mobile-nav-btn');
+        const mobileNavMenu = document.getElementById('mobile-nav-menu');
+        const mobileNavIcon = mobileNavBtn.querySelector('i');
+        let mobileNavOpen = false;
+
+        mobileNavBtn.addEventListener('click', function() {
+            mobileNavOpen = !mobileNavOpen;
+            
+            if (mobileNavOpen) {
+                mobileNavMenu.style.display = 'block';
+                mobileNavIcon.className = 'fas fa-times text-gray-700 text-xl';
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+            } else {
+                mobileNavMenu.style.display = 'none';
+                mobileNavIcon.className = 'fas fa-bars text-gray-700 text-xl';
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close mobile nav on link click
+        document.querySelectorAll('#mobile-nav-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                mobileNavMenu.style.display = 'none';
+                mobileNavIcon.className = 'fas fa-bars text-gray-700 text-xl';
+                document.body.style.overflow = '';
+                mobileNavOpen = false;
+            });
+        });
+
+        // Close mobile nav on resize to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                mobileNavMenu.style.display = 'none';
+                mobileNavIcon.className = 'fas fa-bars text-gray-700 text-xl';
+                document.body.style.overflow = '';
+                mobileNavOpen = false;
+            }
         });
     </script>
     

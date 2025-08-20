@@ -32,7 +32,7 @@ All core pipeline endpoints are implemented in `app/api/routes.py` and mounted w
 
 ### 5. Generate Bid Layers
 - **Endpoint**: `POST /api/generate_layers`
-- **Purpose**: Convert candidate schedules to PBS 2.0 bid layers
+- **Purpose**: Convert candidate schedules to PBS bid layers
 - **File**: `app/api/routes.py`
 - **Tags**: Generate
 

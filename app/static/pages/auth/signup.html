@@ -7,6 +7,89 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/static/css/design-system.css" rel="stylesheet">
+    <style>
+        /* Mobile-first auth page optimizations */
+        @media (max-width: 768px) {
+            /* Improve form input sizing for mobile */
+            input, select {
+                min-height: 44px !important;
+                font-size: 16px !important;
+                padding: 0.75rem !important;
+            }
+            
+            /* Better button touch targets */
+            button, .btn {
+                min-height: 44px !important;
+                padding: 0.75rem 1rem !important;
+                font-size: 16px !important;
+                touch-action: manipulation;
+            }
+            
+            /* Improve checkbox size for touch */
+            input[type="checkbox"] {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            
+            /* Better spacing between form elements */
+            .space-y-6 > * + * {
+                margin-top: 1.5rem !important;
+            }
+            
+            /* Improve label readability */
+            label {
+                font-size: 16px !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            /* Better container sizing on mobile */
+            .sm\:max-w-md {
+                max-width: calc(100vw - 2rem) !important;
+                margin: 0 1rem !important;
+            }
+            
+            /* Improve grid layout on mobile */
+            .grid-cols-2 {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            
+            /* Better error message positioning */
+            #message-container {
+                top: 1rem !important;
+                right: 1rem !important;
+                left: 1rem !important;
+                right: 1rem !important;
+            }
+            
+            /* Improve text size for terms */
+            .text-sm {
+                font-size: 16px !important;
+            }
+            
+            /* Better password requirements display */
+            .password-requirements {
+                font-size: 14px !important;
+                line-height: 1.4 !important;
+                margin-top: 0.5rem !important;
+            }
+        }
+        
+        /* Touch-friendly link styles */
+        a {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            touch-action: manipulation;
+        }
+        
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col justify-center">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
@@ -89,6 +172,12 @@
                         <input id="password" name="password" type="password" autocomplete="new-password" required
                             class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
+                    <div class="password-requirements mt-2 text-xs text-gray-600">
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span>Minimum 8 characters required</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -163,6 +252,7 @@
             
             if (password.length < 8) {
                 showMessage('Password must be at least 8 characters', 'error');
+                document.getElementById('password').focus();
                 return;
             }
             
@@ -171,18 +261,52 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
             
             try {
-                // Simulate API call for now
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Extract first and last name from email as fallback
+                const emailParts = email.split('@')[0].split('.');
+                const firstName = emailParts[0] || 'Pilot';
+                const lastName = emailParts[1] || 'User';
                 
-                // For demo purposes, just show success and redirect
-                showMessage('Account created successfully! Redirecting...', 'success');
+                const response = await fetch('/auth/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        first_name: firstName,
+                        last_name: lastName,
+                        airline: airline,
+                        base: base,
+                        seat: seat,
+                        equipment: []
+                    }),
+                });
                 
-                setTimeout(() => {
-                    window.location.href = '/demo';
-                }, 2000);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store token
+                    localStorage.setItem('vectorbid_token', data.access_token);
+                    localStorage.setItem('vectorbid_user', JSON.stringify({
+                        email: email,
+                        airline: airline,
+                        base: base,
+                        seat: seat
+                    }));
+                    
+                    showMessage('Account created successfully! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/demo';
+                    }, 1500);
+                } else {
+                    showMessage(data.detail || 'Failed to create account', 'error');
+                }
                 
             } catch (error) {
                 showMessage('Failed to create account. Please try again.', 'error');
+            } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span class="absolute left-0 inset-y-0 flex items-center pl-3"><i class="fas fa-rocket text-blue-500 group-hover:text-blue-400"></i></span>Start Free Trial';
             }
@@ -197,8 +321,13 @@
             };
             
             const message = document.createElement('div');
-            message.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg mb-2 transition-all duration-300`;
+            message.className = `${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg mb-2 transition-all duration-300 text-sm`;
             message.textContent = text;
+            
+            // Make messages mobile-friendly
+            if (window.innerWidth <= 768) {
+                message.className += ' text-center';
+            }
             
             container.appendChild(message);
             

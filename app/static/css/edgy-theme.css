@@ -1,0 +1,354 @@
+/* VectorBid Edgy Theme - Distinctive, Modern Pilot-Focused Design */
+/* Overrides the generic design system with cutting-edge aviation aesthetics */
+
+:root {
+  /* Edgy Color Palette - Dark Aviation Theme */
+  --color-primary-dark: #0a0f1c;
+  --color-primary-electric: #00d4ff;
+  --color-primary-neon: #39ff14;
+  --color-accent-orange: #ff6b35;
+  --color-accent-red: #ff073a;
+  --color-accent-gold: #ffd700;
+  
+  /* Dark Grays with Blue Undertones */
+  --color-dark-900: #0a0f1c;
+  --color-dark-800: #1a1f2e;
+  --color-dark-700: #2a2f3e;
+  --color-dark-600: #3a3f4e;
+  --color-dark-500: #4a4f5e;
+  --color-dark-400: #5a5f6e;
+  
+  /* Electric Accents */
+  --color-electric-blue: #00d4ff;
+  --color-electric-green: #39ff14;
+  --color-electric-purple: #bf00ff;
+  --color-electric-orange: #ff6b35;
+  
+  /* Aviation Inspired */
+  --color-cockpit-red: #ff073a;
+  --color-radar-green: #39ff14;
+  --color-warning-amber: #ffb000;
+  --color-sky-blue: #87ceeb;
+  
+  /* Modern Gradients */
+  --gradient-primary: linear-gradient(135deg, #0a0f1c 0%, #1a1f2e 50%, #00d4ff 100%);
+  --gradient-electric: linear-gradient(135deg, #00d4ff 0%, #39ff14 100%);
+  --gradient-neon: linear-gradient(135deg, #bf00ff 0%, #00d4ff 50%, #39ff14 100%);
+  --gradient-cockpit: linear-gradient(135deg, #0a0f1c 0%, #ff073a 100%);
+  --gradient-dark: linear-gradient(135deg, #1a1f2e 0%, #2a2f3e 100%);
+  
+  /* Shadows with Electric Glow */
+  --shadow-electric: 0 0 20px rgba(0, 212, 255, 0.3);
+  --shadow-neon: 0 0 20px rgba(57, 255, 20, 0.3);
+  --shadow-red: 0 0 20px rgba(255, 7, 58, 0.3);
+  --shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.5);
+  
+  /* Typography - Aviation HUD Font Style */
+  --font-family-display: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  --font-family-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Base Dark Theme */
+body.edgy-theme {
+  background: var(--gradient-primary);
+  color: var(--color-electric-blue);
+  font-family: var(--font-family-body);
+  min-height: 100vh;
+}
+
+/* Headers with Electric Glow */
+.edgy-theme h1,
+.edgy-theme h2,
+.edgy-theme h3 {
+  font-family: var(--font-family-display);
+  color: var(--color-electric-blue);
+  text-shadow: var(--shadow-electric);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.edgy-theme h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  background: var(--gradient-electric);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navigation - Cockpit Style */
+.edgy-theme .navigation {
+  background: rgba(10, 15, 28, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-electric-blue);
+  box-shadow: var(--shadow-dark);
+}
+
+.edgy-theme .nav-link {
+  color: var(--color-electric-blue);
+  transition: all 0.3s ease;
+  position: relative;
+  font-weight: 500;
+}
+
+.edgy-theme .nav-link:hover {
+  color: var(--color-electric-green);
+  text-shadow: var(--shadow-neon);
+}
+
+.edgy-theme .nav-link:hover::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-electric);
+  border-radius: 1px;
+}
+
+/* Buttons - High-Tech Aviation Style */
+.edgy-theme .btn {
+  font-family: var(--font-family-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.edgy-theme .btn-primary {
+  background: var(--gradient-electric);
+  color: var(--color-dark-900);
+  box-shadow: var(--shadow-electric);
+}
+
+.edgy-theme .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-electric), var(--shadow-dark);
+}
+
+.edgy-theme .btn-secondary {
+  background: transparent;
+  border-color: var(--color-electric-blue);
+  color: var(--color-electric-blue);
+}
+
+.edgy-theme .btn-secondary:hover {
+  background: var(--color-electric-blue);
+  color: var(--color-dark-900);
+  box-shadow: var(--shadow-electric);
+}
+
+.edgy-theme .btn-danger {
+  background: var(--gradient-cockpit);
+  color: white;
+  box-shadow: var(--shadow-red);
+}
+
+/* Cards - Futuristic Panels */
+.edgy-theme .card {
+  background: rgba(26, 31, 46, 0.9);
+  border: 1px solid var(--color-dark-600);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-dark);
+  transition: all 0.3s ease;
+}
+
+.edgy-theme .card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-electric-blue);
+  box-shadow: var(--shadow-electric), var(--shadow-dark);
+}
+
+.edgy-theme .card-header {
+  background: var(--gradient-dark);
+  border-bottom: 1px solid var(--color-electric-blue);
+  color: var(--color-electric-blue);
+  font-family: var(--font-family-display);
+  font-weight: 600;
+}
+
+/* Forms - HUD Interface Style */
+.edgy-theme .form-input {
+  background: rgba(26, 31, 46, 0.8);
+  border: 2px solid var(--color-dark-600);
+  color: var(--color-electric-blue);
+  border-radius: 8px;
+  font-family: var(--font-family-display);
+  transition: all 0.3s ease;
+}
+
+.edgy-theme .form-input:focus {
+  border-color: var(--color-electric-blue);
+  box-shadow: var(--shadow-electric);
+  background: rgba(26, 31, 46, 0.95);
+}
+
+.edgy-theme .form-input::placeholder {
+  color: var(--color-dark-400);
+  font-style: italic;
+}
+
+/* Hero Section - Cinematic */
+.edgy-theme .hero {
+  background: var(--gradient-neon);
+  position: relative;
+  overflow: hidden;
+}
+
+.edgy-theme .hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%2300d4ff" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.1;
+}
+
+/* Status Indicators - Aviation HUD Style */
+.edgy-theme .status-success {
+  background: rgba(57, 255, 20, 0.1);
+  border: 1px solid var(--color-electric-green);
+  color: var(--color-electric-green);
+  font-family: var(--font-family-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.edgy-theme .status-warning {
+  background: rgba(255, 176, 0, 0.1);
+  border: 1px solid var(--color-warning-amber);
+  color: var(--color-warning-amber);
+  font-family: var(--font-family-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.edgy-theme .status-error {
+  background: rgba(255, 7, 58, 0.1);
+  border: 1px solid var(--color-cockpit-red);
+  color: var(--color-cockpit-red);
+  font-family: var(--font-family-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Demo Widget - High-Tech Terminal */
+.edgy-theme .demo-widget {
+  background: var(--color-dark-900);
+  border: 2px solid var(--color-electric-blue);
+  border-radius: 16px;
+  box-shadow: var(--shadow-electric), inset 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.edgy-theme .demo-code {
+  background: var(--color-dark-900);
+  border: 1px solid var(--color-electric-green);
+  font-family: var(--font-family-display);
+  color: var(--color-electric-green);
+  text-shadow: var(--shadow-neon);
+}
+
+.edgy-theme .typing-cursor::after {
+  content: '▌';
+  color: var(--color-electric-green);
+  animation: blink 1s infinite;
+  text-shadow: var(--shadow-neon);
+}
+
+/* Progress Bars - Neon Style */
+.edgy-theme .progress-bar {
+  background: var(--gradient-electric);
+  box-shadow: var(--shadow-electric);
+  border-radius: 10px;
+  position: relative;
+}
+
+.edgy-theme .progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* Tables - Data Terminal Style */
+.edgy-theme table {
+  background: rgba(26, 31, 46, 0.9);
+  border: 1px solid var(--color-dark-600);
+  font-family: var(--font-family-display);
+}
+
+.edgy-theme th {
+  background: var(--gradient-dark);
+  color: var(--color-electric-blue);
+  border-bottom: 2px solid var(--color-electric-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.edgy-theme td {
+  color: var(--color-electric-blue);
+  border-bottom: 1px solid var(--color-dark-600);
+}
+
+.edgy-theme tr:hover {
+  background: rgba(0, 212, 255, 0.1);
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: var(--shadow-electric); }
+  50% { box-shadow: var(--shadow-neon); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .edgy-theme h1 {
+    font-size: 2.5rem;
+  }
+  
+  .edgy-theme .card {
+    margin: 0.5rem;
+  }
+  
+  .edgy-theme .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+  .edgy-theme {
+    --color-electric-blue: #00f0ff;
+    --color-electric-green: #50ff50;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .edgy-theme {
+    --color-electric-blue: #ffffff;
+    --color-electric-green: #00ff00;
+    --color-cockpit-red: #ff0000;
+  }
+}
