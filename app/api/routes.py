@@ -41,59 +41,86 @@ CANDIDATE_STORE: dict[str, CandidateSchedule] = {}
 
 
 @router.post("/parse_preferences", tags=["Parse"])
-def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
+async def parse_preferences(payload: dict[str, Any]) -> dict[str, Any]:
     """
-    Parse free-text preferences into structured format using NLP/LLM
+    PRIMARY: LLM parses natural language preferences
+    FALLBACK: Rule-based parsing if LLM fails
 
     Body:
       {
         "preferences_text": "I want weekends off and no red-eyes",
-        "persona": "family_first",
-        "context": {...}
+        "persona": "family_first", 
+        "airline": "UAL",
+        "pilot_context": {"base": "SFO", "equipment": ["737"], "seniority_percentile": 0.65}
       }
-    Returns: {"parsed_preferences": {...}, "confidence": 0.85}
+    Returns: {
+        "parsed_preferences": {...}, 
+        "confidence": 0.85,
+        "method": "llm|fallback",
+        "suggestions": [...],
+        "warnings": [...]
+    }
     """
     try:
+        from app.services.llm_parser import PreferenceParser
+        
         preferences_text = payload.get("preferences_text", "")
         persona = payload.get("persona")
-
-        # TODO: Implement actual NLP parsing logic
-        # For now, return mock parsed data
+        airline = payload.get("airline", "UAL")
+        pilot_context = payload.get("pilot_context", {})
+        
+        if not preferences_text.strip():
+            raise HTTPException(status_code=400, detail="preferences_text cannot be empty")
+        
+        # Initialize LLM parser
+        parser = PreferenceParser()
+        
+        # LLM-first parsing with fallback
+        result = await parser.parse_preferences(
+            text=preferences_text,
+            persona=persona,
+            airline=airline,
+            pilot_context=pilot_context
+        )
+        
+        return {
+            "parsed_preferences": result.preferences.model_dump(),
+            "confidence": result.confidence,
+            "method": result.parsing_method.value,
+            "reasoning": result.reasoning,
+            "suggestions": result.suggestions,
+            "warnings": result.warnings,
+            "model_version": result.model_version,
+            "tokens_used": result.tokens_used
+        }
+        
+    except ImportError:
+        # Fallback if LLM service not available
+        print("⚠️ LLM service not available, using basic parsing")
         parsed = {
             "hard_constraints": {
                 "no_weekends": "weekend" in preferences_text.lower(),
-                "no_redeyes": "red-eye" in preferences_text.lower()
-                or "redeye" in preferences_text.lower(),
-                "max_duty_days": 4 if "short trip" in preferences_text.lower() else 6,
+                "no_redeyes": "red-eye" in preferences_text.lower() or "redeye" in preferences_text.lower(),
             },
-            "soft_preferences": {
-                "morning_departures": (0.8 if "morning" in preferences_text.lower() else 0.3),
-                "domestic_preferred": (0.7 if "domestic" in preferences_text.lower() else 0.4),
-                "weekend_priority": (0.9 if "weekend" in preferences_text.lower() else 0.2),
+            "soft_prefs": {
+                "weekend_priority": 0.8 if "weekend" in preferences_text.lower() else 0.3,
+                "departure_time_weight": 0.6 if "morning" in preferences_text.lower() else 0.3,
             },
-            "confidence": 0.85,
-            "parsed_items": [
-                {
-                    "text": "Weekends off",
-                    "confidence": 0.9,
-                    "category": "hard_constraint",
-                },
-                {
-                    "text": "Morning departures preferred",
-                    "confidence": 0.8,
-                    "category": "soft_preference",
-                },
-            ],
+            "confidence": 0.6,
+            "source": {"method": "basic_fallback"}
         }
 
         return {
-            "original_text": preferences_text,
             "parsed_preferences": parsed,
-            "persona_influence": persona,
+            "confidence": 0.6,
+            "method": "basic_fallback", 
+            "reasoning": "LLM service unavailable, used basic keyword matching",
             "suggestions": [
+                "Install LLM dependencies for better parsing",
                 "Consider specifying layover preferences",
                 "Add aircraft type preferences",
             ],
+            "warnings": ["Basic parsing may miss nuanced preferences"]
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

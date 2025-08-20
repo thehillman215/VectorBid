@@ -1,190 +1,119 @@
 {% extends "layouts/marketing.html" %}
 
-{% block title %}{{ page_title }} - VectorBid{% endblock %}
-{% block description %}{{ page_description }}{% endblock %}
+{% block title %}Get the Best Schedule Possible with Your Constraints - VectorBid{% endblock %}
+{% block description %}VectorBid guarantees optimal PBS bid strategies that maximize your quality of life while respecting every hard constraint you set. 100% constraint compliance guaranteed.{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="section hero-section">
+<!-- Focused Hero Section -->
+<section class="hero-focused">
     <div class="container">
-        <div class="grid grid-cols-2 gap-8 items-center">
-            <div>
-                <h1 class="text-5xl font-bold text-gray-900 mb-6">
-                    Win the schedule you want with AI precision
-                </h1>
-                <p class="text-xl text-gray-600 mb-8">
-                    VectorBid reads your contract and preferences to build PBS bids that maximize time at home. 
-                    Join {{ stats.pilots_served }} pilots already using AI to optimize their schedules.
-                </p>
-                <div class="flex gap-4 mb-8">
-                    <a href="/signup" class="btn btn-primary btn-lg">
-                        <i class="fas fa-rocket"></i>
-                        Start Free Trial
-                    </a>
-                    <a href="/demo" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-play"></i>
-                        Watch Demo
-                    </a>
+        <div class="hero-content">
+            <h1 class="hero-headline">
+                Get the best schedule possible with your constraints
+            </h1>
+            <h2 class="hero-subheadline">
+                VectorBid guarantees optimal PBS bid strategies that maximize your quality of life while respecting every hard constraint you set
+            </h2>
+            
+            <div class="hero-proof">
+                <div class="proof-stat">
+                    <span class="proof-number">{{ stats.success_rate }}</span>
+                    <span class="proof-label">get their optimal schedule</span>
                 </div>
-                <div class="flex items-center gap-6 text-sm text-gray-500">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check text-success"></i>
-                        <span>No credit card required</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check text-success"></i>
-                        <span>7-day free trial</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check text-success"></i>
-                        <span>{{ stats.success_rate }} success rate</span>
-                    </div>
+                <div class="proof-stat">
+                    <span class="proof-number">100%</span>
+                    <span class="proof-label">constraint compliance guaranteed</span>
                 </div>
             </div>
-            <div class="text-center">
-                <div class="card card-elevated p-8">
-                    <h3 class="text-2xl font-semibold mb-6">Real Results</h3>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.success_rate }}</div>
-                            <div class="text-sm text-gray-600">Success Rate</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.time_saved }}</div>
-                            <div class="text-sm text-gray-600">Hours Saved</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.days_gained }}</div>
-                            <div class="text-sm text-gray-600">Extra Days Home</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-primary-blue mb-2">{{ stats.pilots_served }}</div>
-                            <div class="text-sm text-gray-600">Pilots Served</div>
-                        </div>
-                    </div>
+            
+            <div class="hero-cta">
+                <a href="/demo" class="btn-primary-large">
+                    Get Your Optimal Schedule
+                </a>
+                <p class="cta-subtext">Test with your constraints • See guaranteed results • Free demo</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Guarantee Box -->
+<section class="guarantee-section">
+    <div class="container">
+        <div class="guarantee-box">
+            <div class="guarantee-icon">🎯</div>
+            <div class="guarantee-content">
+                <h3>The VectorBid Guarantee</h3>
+                <p>We guarantee you'll get the mathematically optimal schedule possible within your hard constraints. If you don't get a better schedule than manual bidding, we'll refund 100% of your money.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works - Simple 3 Steps -->
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">How it works</h2>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Set your hard constraints</h3>
+                    <p>Must-haves: weekends off, no red-eyes, specific days, commute limits - whatever cannot be compromised</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Upload bid package</h3>
+                    <p>VectorBid reads your airline's PBS system, contract rules, and available pairings</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Get guaranteed optimal strategy</h3>
+                    <p>Mathematically proven best possible schedule within your constraints - or your money back</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="section bg-gray-50">
+<!-- Social Proof - Real Results -->
+<section class="social-proof">
     <div class="container">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Built for Professional Pilots</h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Stop manually calculating PBS layers. Let AI do the heavy lifting while you focus on flying.
-            </p>
-        </div>
+        <h2 class="section-title">Real pilots, real results</h2>
         
-        <div class="cards-grid cards-grid-3">
-            <div class="card card-feature">
-                <div class="card-feature-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h3 class="card-title">AI-Powered Analysis</h3>
-                <p class="card-description">
-                    Advanced algorithms understand your preferences and constraints to generate optimal bid strategies.
-                </p>
-            </div>
-            
-            <div class="card card-feature">
-                <div class="card-feature-icon">
-                    <i class="fas fa-file-contract"></i>
-                </div>
-                <h3 class="card-title">Contract Aware</h3>
-                <p class="card-description">
-                    Knows your airline's specific rules, PBS logic, and FAR regulations to ensure compliant bids.
-                </p>
-            </div>
-            
-            <div class="card card-feature">
-                <div class="card-feature-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <h3 class="card-title">Save Hours</h3>
-                <p class="card-description">
-                    What used to take hours of manual work now takes minutes. Get your bid done faster and more accurately.
-                </p>
-            </div>
-            
-            <div class="card card-feature">
-                <div class="card-feature-icon">
-                    <i class="fas fa-download"></i>
-                </div>
-                <h3 class="card-title">Instant Export</h3>
-                <p class="card-description">
-                    Export your optimized PBS layers directly to your airline's bidding system. No manual copy-paste needed.
-                </p>
-            </div>
-            
-            <div class="card card-feature">
-                <div class="card-feature-icon">
-                    <i class="fas fa-user-friends"></i>
-                </div>
-                <h3 class="card-title">Pilot Personas</h3>
-                <p class="card-description">
-                    Choose from common pilot personas or customize your own preferences. VectorBid adapts to your lifestyle.
-                </p>
-            </div>
-            
-            <div class="card card-feature">
-                <div class="card-feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3 class="card-title">Smart Optimization</h3>
-                <p class="card-description">
-                    Maximize quality of life metrics like days off, commute efficiency, and preferred destinations.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="section">
-    <div class="container">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">What Pilots Are Saying</h2>
-            <p class="text-xl text-gray-600">Join thousands of pilots who've transformed their bidding strategy</p>
-        </div>
-        
-        <div class="cards-grid cards-grid-2">
+        <div class="testimonials">
             {% for testimonial in featured_testimonials %}
-            <div class="card card-testimonial">
-                <div class="card-testimonial-content">
+            <div class="testimonial">
+                <div class="testimonial-quote">
                     "{{ testimonial.quote }}"
                 </div>
-                <div class="card-testimonial-author">
-                    <div class="card-testimonial-avatar">{{ testimonial.avatar }}</div>
-                    <div class="card-testimonial-details">
-                        <h4>{{ testimonial.author }}</h4>
-                        <p>{{ testimonial.company }}</p>
-                    </div>
+                <div class="testimonial-author">
+                    <strong>{{ testimonial.author }}</strong> • {{ testimonial.company }}
                 </div>
             </div>
             {% endfor %}
         </div>
+        
+        <div class="pilot-count">
+            <span class="count-number">{{ stats.pilots_served }}</span> pilots getting their optimal schedules with VectorBid
+        </div>
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="section bg-primary-blue text-white">
-    <div class="container text-center">
-        <h2 class="text-3xl font-bold mb-4">Ready to Win Your Schedule?</h2>
-        <p class="text-xl mb-8 opacity-90">
-            Join thousands of pilots using AI to optimize their PBS bids
-        </p>
-        <div class="flex justify-center gap-4">
-            <a href="/signup" class="btn btn-lg" style="background: white; color: var(--primary-blue);">
-                <i class="fas fa-rocket"></i>
-                Start Free Trial
-            </a>
-            <a href="/demo" class="btn btn-lg btn-outline" style="border-color: white; color: white;">
-                <i class="fas fa-play"></i>
-                Try Demo
-            </a>
+<!-- Final CTA -->
+<section class="final-cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to guarantee your optimal schedule?</h2>
+            <p>Test VectorBid with your actual constraints and see the mathematically best strategy</p>
+            <a href="/demo" class="btn-primary-large">Get Your Optimal Schedule</a>
+            <p class="cta-guarantee">100% constraint compliance • Money-back guarantee • Works with any airline</p>
         </div>
     </div>
 </section>
@@ -192,15 +121,291 @@
 
 {% block extra_scripts %}
 <style>
-.hero-section {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+/* Focused PBS Landing Page Styles */
+.hero-focused {
+    background: linear-gradient(135deg, #1e40af 0%, #1e293b 100%);
+    color: white;
+    padding: 120px 0 80px;
+    text-align: center;
 }
 
-.hero-section h1 {
-    background: linear-gradient(135deg, var(--gray-900) 0%, var(--primary-blue) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-headline {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 24px;
+}
+
+.hero-subheadline {
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.4;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.hero-proof {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-bottom: 50px;
+}
+
+.proof-stat {
+    text-align: center;
+}
+
+.proof-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin-bottom: 8px;
+}
+
+.proof-label {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.hero-cta {
+    text-align: center;
+}
+
+.btn-primary-large {
+    background: #60a5fa;
+    color: white;
+    padding: 20px 40px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
+}
+
+.btn-primary-large:hover {
+    background: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
+    color: white;
+}
+
+.cta-subtext {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Guarantee Section */
+.guarantee-section {
+    padding: 60px 0;
+    background: #f0f9ff;
+}
+
+.guarantee-box {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: white;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(30, 64, 175, 0.15);
+    border: 2px solid #60a5fa;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.guarantee-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+}
+
+.guarantee-content h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 12px;
+}
+
+.guarantee-content p {
+    font-size: 1.1rem;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* How It Works Section */
+.how-it-works {
+    padding: 80px 0;
+    background: #f8fafc;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 60px;
+}
+
+.steps {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.step {
+    text-align: center;
+    max-width: 300px;
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: #1e40af;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 auto 24px;
+}
+
+.step-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.step-content p {
+    font-size: 1rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Social Proof Section */
+.social-proof {
+    padding: 80px 0;
+    background: white;
+}
+
+.testimonials {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.testimonial {
+    max-width: 400px;
+    text-align: center;
+}
+
+.testimonial-quote {
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #1e293b;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.testimonial-author {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.pilot-count {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #64748b;
+}
+
+.count-number {
+    font-weight: 700;
+    color: #1e40af;
+}
+
+/* Final CTA Section */
+.final-cta {
+    padding: 80px 0;
+    background: #1e293b;
+    color: white;
+    text-align: center;
+}
+
+.cta-content h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.cta-content p {
+    font-size: 1.25rem;
+    margin-bottom: 32px;
+    opacity: 0.9;
+}
+
+.cta-guarantee {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .hero-headline {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subheadline {
+        font-size: 1.25rem;
+    }
+    
+    .hero-proof {
+        flex-direction: column;
+        gap: 24px;
+    }
+    
+    .steps {
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+    }
+    
+    .testimonials {
+        flex-direction: column;
+        gap: 32px;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .cta-content h2 {
+        font-size: 2rem;
+    }
+    
+    .guarantee-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px;
+    }
+    
+    .guarantee-icon {
+        font-size: 2.5rem;
+    }
 }
 </style>
 {% endblock %}
