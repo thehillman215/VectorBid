@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - VectorBid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/design-system.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col justify-center">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="flex justify-center">
+            <i class="fas fa-plane text-blue-600 text-4xl"></i>
+        </div>
+        <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">
+            Start your free trial
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Join thousands of pilots using AI-powered bidding
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" id="signup-form">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">
+                        Email address
+                    </label>
+                    <div class="mt-1">
+                        <input id="email" name="email" type="email" autocomplete="email" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            placeholder="pilot@airline.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="airline" class="block text-sm font-medium text-gray-700">
+                        Airline
+                    </label>
+                    <div class="mt-1">
+                        <select id="airline" name="airline" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">Select your airline</option>
+                            <option value="UAL">United Airlines</option>
+                            <option value="DAL">Delta Air Lines</option>
+                            <option value="AAL">American Airlines</option>
+                            <option value="SWA">Southwest Airlines</option>
+                            <option value="ALK">Alaska Airlines</option>
+                            <option value="JBU">JetBlue Airways</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="base" class="block text-sm font-medium text-gray-700">
+                            Base
+                        </label>
+                        <div class="mt-1">
+                            <input id="base" name="base" type="text" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder="SFO">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="seat" class="block text-sm font-medium text-gray-700">
+                            Position
+                        </label>
+                        <div class="mt-1">
+                            <select id="seat" name="seat" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="">Select</option>
+                                <option value="FO">First Officer</option>
+                                <option value="CA">Captain</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">
+                        Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="password" name="password" type="password" autocomplete="new-password" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-700">
+                        Confirm Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="confirm-password" name="confirm-password" type="password" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input id="terms" name="terms" type="checkbox" required
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="terms" class="ml-2 block text-sm text-gray-900">
+                        I agree to the <a href="/terms" class="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="/privacy" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <div>
+                    <button type="submit" id="signup-btn"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <i class="fas fa-rocket text-blue-500 group-hover:text-blue-400"></i>
+                        </span>
+                        Start Free Trial
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300" />
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Already have an account?</span>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <a href="/auth/login"
+                        class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Sign in instead
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="message-container" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('signup-btn');
+            const email = document.getElementById('email').value;
+            const airline = document.getElementById('airline').value;
+            const base = document.getElementById('base').value;
+            const seat = document.getElementById('seat').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Basic validation
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showMessage('Password must be at least 8 characters', 'error');
+                return;
+            }
+            
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
+            
+            try {
+                // Simulate API call for now
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // For demo purposes, just show success and redirect
+                showMessage('Account created successfully! Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '/demo';
+                }, 2000);
+                
+            } catch (error) {
+                showMessage('Failed to create account. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="absolute left-0 inset-y-0 flex items-center pl-3"><i class="fas fa-rocket text-blue-500 group-hover:text-blue-400"></i></span>Start Free Trial';
+            }
+        });
+        
+        function showMessage(text, type = 'info') {
+            const container = document.getElementById('message-container');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500', 
+                info: 'bg-blue-500'
+            };
+            
+            const message = document.createElement('div');
+            message.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg mb-2 transition-all duration-300`;
+            message.textContent = text;
+            
+            container.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

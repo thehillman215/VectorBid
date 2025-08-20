@@ -26,6 +26,7 @@ from app.models import (
     PreferenceSchema,
     StrategyDirectives,
 )
+from app.routes.auth import router as auth_router
 from app.routes.faq import router as faq_router
 from app.routes.ingestion import router as ingestion_router
 from app.routes.marketing import router as marketing_router
@@ -90,14 +91,15 @@ static_path = Path(__file__).parent / "static"
 if static_path.exists():
     app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
-# Mount routers
+# Mount routers - Marketing router first to take precedence for root route
+app.include_router(marketing_router, tags=["Marketing"])
 app.include_router(api_router, prefix="/api", tags=["API"])
 app.include_router(ingestion_router, tags=["Ingestion"])
 app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
 app.include_router(ui_router, tags=["UI"])
 app.include_router(faq_router, tags=["FAQ"])
-app.include_router(marketing_router, tags=["Marketing"])
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(products_router, prefix="/products", tags=["Products"])
 app.include_router(solutions_router, prefix="/solutions", tags=["Solutions"])
 
