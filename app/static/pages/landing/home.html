@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VectorBid - World's First AI-Powered Pilot Bidding System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/static/css/design-system.css" rel="stylesheet">
     <style>
@@ -76,7 +77,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="hero-gradient text-white py-20">
+    <section class="hero hero-gradient text-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
                 <div class="mb-6">
@@ -205,6 +206,30 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Flow Architecture -->
+    <section class="py-16 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    AI Data Flow Architecture
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    See how VectorBid processes your preferences through advanced AI layers
+                </p>
+            </div>
+            
+            <div class="bg-black rounded-2xl p-4 mb-8">
+                <div id="data-flow-container" class="w-full h-96"></div>
+            </div>
+            
+            <div class="text-center">
+                <button id="flow-demo-btn" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-play mr-2"></i>Start Data Flow Demo
+                </button>
             </div>
         </div>
     </section>
@@ -514,7 +539,7 @@
                 if (index < text.length) {
                     demoInput.textContent = text.slice(0, index + 1);
                     index++;
-                    setTimeout(typeText, 50);
+                    setTimeout(typeText, 15);
                 } else {
                     setTimeout(() => {
                         index = 0;
@@ -534,6 +559,31 @@
                 document.querySelector(this.getAttribute('href')).scrollIntoView({
                     behavior: 'smooth'
                 });
+            });
+        });
+    </script>
+    
+    <!-- Data Flow Visualization -->
+    <script src="/static/js/data-flow-viz.js"></script>
+    
+    <!-- Interactive Demo with Real APIs -->
+    <script src="/static/js/interactive-demo.js"></script>
+    <script>
+        // Initialize data flow visualization
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataFlowViz = new DataFlowVisualization('data-flow-container');
+            
+            // Demo button functionality
+            document.getElementById('flow-demo-btn').addEventListener('click', function() {
+                dataFlowViz.startAnimation();
+                this.textContent = '🔄 Processing...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-play mr-2"></i>Start Data Flow Demo';
+                    this.disabled = false;
+                    dataFlowViz.stopAnimation();
+                }, 5000);
             });
         });
     </script>
