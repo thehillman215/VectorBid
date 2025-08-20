@@ -1,0 +1,613 @@
+/* VectorBid Feedback Components CSS */
+/* Comprehensive styling for error handling, loading states, and user feedback */
+
+/* Toast Notifications */
+.toast {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid;
+    animation: slideInRight 0.3s ease-out;
+    backdrop-filter: blur(10px);
+    border-radius: 0.5rem;
+    max-width: 400px;
+    word-wrap: break-word;
+    z-index: 9999;
+}
+
+.toast-error { 
+    border-left-color: #ef4444; 
+    background-color: rgba(239, 68, 68, 0.95);
+    color: white;
+}
+
+.toast-success { 
+    border-left-color: #10b981; 
+    background-color: rgba(16, 185, 129, 0.95);
+    color: white;
+}
+
+.toast-warning { 
+    border-left-color: #f59e0b; 
+    background-color: rgba(245, 158, 11, 0.95);
+    color: white;
+}
+
+.toast-info { 
+    border-left-color: #3b82f6; 
+    background-color: rgba(59, 130, 246, 0.95);
+    color: white;
+}
+
+.toast-retry {
+    border-left-color: #f59e0b;
+    background-color: rgba(245, 158, 11, 0.95);
+    color: white;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Toast action buttons */
+.toast-action {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+}
+
+.toast-action:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.toast-dismiss {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.toast-dismiss:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Loading States */
+.loading-overlay {
+    transition: opacity 0.2s ease-in-out;
+    backdrop-filter: blur(3px);
+    border-radius: 0.5rem;
+}
+
+.loading-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    min-width: 200px;
+    text-align: center;
+}
+
+.loading-content h3 {
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.loading-content p {
+    color: #6b7280;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+/* Enhanced spinner styles */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+    border: 0.25em solid rgba(59, 130, 246, 0.1);
+    border-top: 0.25em solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Alternative loading animations */
+.loading-pulse {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.loading-pulse > div {
+    width: 0.75rem;
+    height: 0.75rem;
+    background-color: #3b82f6;
+    border-radius: 50%;
+    animation: pulse-dot 1.4s infinite ease-in-out;
+}
+
+.loading-pulse > div:nth-child(1) { animation-delay: -0.32s; }
+.loading-pulse > div:nth-child(2) { animation-delay: -0.16s; }
+.loading-pulse > div:nth-child(3) { animation-delay: 0s; }
+
+@keyframes pulse-dot {
+    0%, 80%, 100% {
+        transform: scale(0.5);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.loading-bars {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.loading-bars > div {
+    width: 0.25rem;
+    height: 1.5rem;
+    background-color: #3b82f6;
+    border-radius: 0.125rem;
+    animation: bar-scale 1.2s infinite ease-in-out;
+}
+
+.loading-bars > div:nth-child(1) { animation-delay: -1.1s; }
+.loading-bars > div:nth-child(2) { animation-delay: -1.0s; }
+.loading-bars > div:nth-child(3) { animation-delay: -0.9s; }
+.loading-bars > div:nth-child(4) { animation-delay: -0.8s; }
+
+@keyframes bar-scale {
+    0%, 40%, 100% {
+        transform: scaleY(0.4);
+    }
+    20% {
+        transform: scaleY(1);
+    }
+}
+
+/* Progress bars */
+.progress-container {
+    width: 100%;
+    background-color: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 0.5rem;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+    animation: progress-shimmer 2s infinite linear;
+}
+
+@keyframes progress-shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+/* Form validation states */
+.form-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    animation: shake 0.3s ease-in-out;
+}
+
+.form-success {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: fadeInDown 0.2s ease-out;
+}
+
+.error-message::before {
+    content: '⚠';
+    font-size: 0.75rem;
+}
+
+.success-message {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: fadeInDown 0.2s ease-out;
+}
+
+.success-message::before {
+    content: '✓';
+    font-size: 0.75rem;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Network status indicator */
+.network-status {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.network-status.offline {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    transform: translateY(0);
+}
+
+.network-status.reconnecting {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    transform: translateY(0);
+}
+
+.network-status.online {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    transform: translateY(0);
+}
+
+/* Button loading states */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.btn-loading .btn-text {
+    opacity: 0;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.status-badge.processing {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .toast {
+        left: 1rem !important;
+        right: 1rem !important;
+        max-width: none;
+        margin: 0;
+        font-size: 0.875rem;
+    }
+    
+    .loading-content {
+        padding: 1.5rem 1rem;
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+    }
+    
+    .loading-content h3 {
+        font-size: 1rem;
+    }
+    
+    .loading-content p {
+        font-size: 0.875rem;
+    }
+    
+    .network-status {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+    
+    .error-message,
+    .success-message {
+        font-size: 0.75rem;
+    }
+    
+    .status-badge {
+        font-size: 0.625rem;
+        padding: 0.125rem 0.375rem;
+    }
+    
+    /* Touch-friendly close buttons */
+    .toast-dismiss {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .toast-action {
+        min-height: 36px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .toast {
+        border-width: 2px;
+        border-style: solid;
+    }
+    
+    .toast-error {
+        border-color: #dc2626;
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .toast-success {
+        border-color: #059669;
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .toast-warning {
+        border-color: #d97706;
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .toast-info {
+        border-color: #2563eb;
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .loading-content {
+        border: 2px solid #374151;
+    }
+    
+    .form-error {
+        border-width: 2px !important;
+    }
+    
+    .form-success {
+        border-width: 2px !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .toast,
+    .loading-overlay,
+    .error-message,
+    .success-message,
+    .form-error,
+    .network-status {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .spinner-border,
+    .loading-pulse > div,
+    .loading-bars > div,
+    .progress-bar {
+        animation: none !important;
+    }
+    
+    .btn-loading::after {
+        animation: none !important;
+        content: '⏳';
+        border: none;
+        font-size: 1rem;
+    }
+    
+    /* Show static indicators instead of animations */
+    .loading-pulse > div {
+        background-color: #6b7280;
+        opacity: 0.8;
+    }
+    
+    .loading-bars > div {
+        height: 1rem;
+        background-color: #6b7280;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .loading-content {
+        background-color: #374151;
+        color: #f9fafb;
+        border-color: #4b5563;
+    }
+    
+    .loading-content h3 {
+        color: #f9fafb;
+    }
+    
+    .loading-content p {
+        color: #d1d5db;
+    }
+    
+    .status-badge.processing {
+        background-color: #1e3a8a;
+        color: #dbeafe;
+    }
+    
+    .status-badge.success {
+        background-color: #14532d;
+        color: #dcfce7;
+    }
+    
+    .status-badge.error {
+        background-color: #7f1d1d;
+        color: #fee2e2;
+    }
+    
+    .status-badge.warning {
+        background-color: #78350f;
+        color: #fef3c7;
+    }
+}
+
+/* Print styles - hide feedback components */
+@media print {
+    .toast,
+    .loading-overlay,
+    .network-status,
+    .error-message,
+    .success-message,
+    .status-badge {
+        display: none !important;
+    }
+}
+
+/* Focus management for accessibility */
+.toast:focus-within,
+.loading-content:focus-within {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Screen reader improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Toast stack management */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+.toast-container .toast {
+    pointer-events: auto;
+    position: relative;
+}
+
+@media (max-width: 768px) {
+    .toast-container {
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+        max-height: calc(100vh - 2rem);
+    }
+}
