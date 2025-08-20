@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -190,6 +191,142 @@ def optimize(payload: dict[str, Any]) -> dict[str, Any]:
     return {"candidates": [c.model_dump() for c in topk]}
 
 
+@router.post("/optimize_enhanced", tags=["Optimize"])
+async def optimize_enhanced(payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Enhanced optimization with LLM-guided analysis
+    
+    Body:
+      {
+        "feature_bundle": {...},
+        "K": 50,
+        "use_llm": true,
+        "pilot_context": {...}
+      }
+    Returns: {
+        "enhanced_candidates": [...],
+        "optimization_analysis": {...},
+        "recommendations": {...},
+        "ai_insights": {...}
+    }
+    """
+    try:
+        # Step 1: Mathematical optimization (existing pipeline)
+        bundle = FeatureBundle(**payload["feature_bundle"])
+        K = int(payload.get("K", 50))
+        use_llm = payload.get("use_llm", True)
+        pilot_context = payload.get("pilot_context", {})
+        
+        # Get mathematical optimization results
+        topk = select_topk(bundle, K)
+        report = validate_feasibility(bundle, _RULES)
+        
+        for cand in topk:
+            cand.rationale.notes.extend(explain_legal(cand, report))
+            CANDIDATE_STORE[cand.candidate_id] = cand
+        
+        # Step 2: LLM enhancement (if enabled)
+        if use_llm and topk:
+            try:
+                from app.services.llm_optimizer import LLMOptimizer
+                
+                optimizer = LLMOptimizer()
+                
+                # Extract preferences from bundle
+                preferences = bundle.preference_schema
+                
+                # Run LLM-guided optimization
+                llm_result = await optimizer.optimize_candidates(
+                    candidates=topk,
+                    preferences=preferences,
+                    pilot_context=pilot_context,
+                    feature_bundle=bundle
+                )
+                
+                # Return enhanced results
+                return {
+                    "enhanced_candidates": [c.model_dump() for c in llm_result.enhanced_candidates],
+                    "optimization_analysis": {
+                        "quality": llm_result.optimization_quality,
+                        "preference_alignment": llm_result.preference_alignment,
+                        "trade_off_analysis": llm_result.trade_off_analysis,
+                        "missing_opportunities": llm_result.missing_opportunities,
+                        "risk_assessment": llm_result.risk_assessment
+                    },
+                    "recommendations": {
+                        "recommended_candidate_id": llm_result.recommended_candidate_id,
+                        "explanation": llm_result.explanation,
+                        "alternative_choices": llm_result.alternative_choices,
+                        "bidding_strategy": llm_result.bidding_strategy
+                    },
+                    "ai_insights": {
+                        "confidence": llm_result.confidence,
+                        "model_insights": llm_result.model_insights,
+                        "method": llm_result.optimization_method.value,
+                        "model_version": llm_result.model_version,
+                        "tokens_used": llm_result.tokens_used
+                    }
+                }
+                
+            except Exception as llm_error:
+                print(f"❌ LLM optimization failed: {llm_error}")
+                # Fallback: Return mathematical results with notice
+                return {
+                    "enhanced_candidates": [c.model_dump() for c in topk],
+                    "optimization_analysis": {
+                        "quality": 0.7,
+                        "preference_alignment": 0.6,
+                        "trade_off_analysis": "AI analysis unavailable - mathematical optimization only",
+                        "missing_opportunities": ["AI insights not available"],
+                        "risk_assessment": ["Manual review recommended"]
+                    },
+                    "recommendations": {
+                        "recommended_candidate_id": topk[0].candidate_id if topk else "",
+                        "explanation": "Top mathematical candidate - AI analysis unavailable",
+                        "alternative_choices": [],
+                        "bidding_strategy": "Enable AI features for enhanced guidance"
+                    },
+                    "ai_insights": {
+                        "confidence": 0.5,
+                        "model_insights": ["AI analysis failed - check API configuration"],
+                        "method": "mathematical_only",
+                        "model_version": "fallback",
+                        "tokens_used": 0
+                    }
+                }
+        else:
+            # Mathematical optimization only
+            return {
+                "enhanced_candidates": [c.model_dump() for c in topk],
+                "optimization_analysis": {
+                    "quality": 0.8,
+                    "preference_alignment": 0.7,
+                    "trade_off_analysis": "Mathematical optimization completed successfully",
+                    "missing_opportunities": ["Enable AI analysis for enhanced insights"],
+                    "risk_assessment": []
+                },
+                "recommendations": {
+                    "recommended_candidate_id": topk[0].candidate_id if topk else "",
+                    "explanation": "Top candidate from mathematical optimization",
+                    "alternative_choices": [],
+                    "bidding_strategy": "Mathematical optimization based on preferences"
+                },
+                "ai_insights": {
+                    "confidence": 0.7,
+                    "model_insights": ["Mathematical optimization only"],
+                    "method": "mathematical_only", 
+                    "model_version": "n/a",
+                    "tokens_used": 0
+                }
+            }
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Enhanced optimization failed: {str(e)}"
+        )
+
+
 @router.get("/candidates/{candidate_id}", tags=["Candidates"])
 def get_candidate(candidate_id: str) -> dict[str, Any]:
     cand = CANDIDATE_STORE.get(candidate_id)
@@ -344,3 +481,296 @@ def get_audit(ctx_id: str) -> dict[str, Any]:
             for r in rows
         ]
     return {"events": events}
+
+
+@router.post("/chat/start", tags=["AI Chat"])
+async def start_chat_session(payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Start a new conversation with VectorBot AI Assistant
+    
+    Body:
+      {
+        "user_id": "pilot_123",
+        "pilot_context": {
+          "base": "SFO",
+          "equipment": ["737"],
+          "seniority_percentile": 0.65,
+          "career_stage": "captain"
+        }
+      }
+    Returns: {
+        "session_id": "pilot_123",
+        "conversation": {...},
+        "greeting_message": "...",
+        "status": "active"
+    }
+    """
+    try:
+        from app.services.chat_assistant import VectorBidChatAssistant
+        
+        user_id = payload.get("user_id")
+        pilot_context = payload.get("pilot_context", {})
+        
+        if not user_id:
+            raise HTTPException(status_code=400, detail="user_id is required")
+        
+        assistant = VectorBidChatAssistant()
+        conversation = await assistant.start_conversation(user_id, pilot_context)
+        
+        # Get the greeting message
+        greeting_message = conversation.messages[-1] if conversation.messages else None
+        
+        return {
+            "session_id": user_id,
+            "conversation": conversation.model_dump(),
+            "greeting_message": greeting_message.content if greeting_message else "Hello! I'm VectorBot, ready to help with your bidding questions!",
+            "status": "active",
+            "created_at": conversation.created_at.isoformat()
+        }
+        
+    except ImportError:
+        raise HTTPException(
+            status_code=503, 
+            detail="Chat assistant not available - check AI dependencies"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to start chat session: {str(e)}")
+
+
+@router.post("/chat/message", tags=["AI Chat"])
+async def send_chat_message(payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Send a message to VectorBot and get AI response
+    
+    Body:
+      {
+        "user_id": "pilot_123",
+        "message": "How should I set my preferences for maximum family time?",
+        "context_update": {
+          "current_preferences": {...},
+          "current_schedules": [...]
+        }
+      }
+    Returns: {
+        "response": "...",
+        "timestamp": "...",
+        "conversation_id": "pilot_123"
+    }
+    """
+    try:
+        from app.services.chat_assistant import VectorBidChatAssistant
+        
+        user_id = payload.get("user_id")
+        message = payload.get("message")
+        context_update = payload.get("context_update")
+        
+        if not user_id or not message:
+            raise HTTPException(status_code=400, detail="user_id and message are required")
+        
+        assistant = VectorBidChatAssistant()
+        response = await assistant.chat(user_id, message, context_update)
+        
+        return {
+            "response": response.content,
+            "timestamp": response.timestamp.isoformat(),
+            "conversation_id": user_id,
+            "message_role": response.role,
+            "context": response.context or {}
+        }
+        
+    except ImportError:
+        raise HTTPException(
+            status_code=503, 
+            detail="Chat assistant not available - check AI dependencies"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process chat message: {str(e)}")
+
+
+@router.get("/chat/history/{user_id}", tags=["AI Chat"])
+async def get_chat_history(user_id: str) -> dict[str, Any]:
+    """
+    Get conversation history for a user
+    
+    Returns: {
+        "conversation": {...},
+        "message_count": 10,
+        "last_updated": "..."
+    }
+    """
+    try:
+        from app.services.chat_assistant import VectorBidChatAssistant
+        
+        assistant = VectorBidChatAssistant()
+        conversation = assistant.get_conversation_history(user_id)
+        
+        if not conversation:
+            raise HTTPException(status_code=404, detail="No conversation found for this user")
+        
+        return {
+            "conversation": conversation.model_dump(),
+            "message_count": len(conversation.messages),
+            "last_updated": conversation.updated_at.isoformat(),
+            "context": conversation.context
+        }
+        
+    except ImportError:
+        raise HTTPException(
+            status_code=503, 
+            detail="Chat assistant not available - check AI dependencies"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get chat history: {str(e)}")
+
+
+@router.delete("/chat/{user_id}", tags=["AI Chat"])
+async def clear_chat_history(user_id: str) -> dict[str, Any]:
+    """Clear conversation history for a user"""
+    try:
+        from app.services.chat_assistant import VectorBidChatAssistant
+        
+        assistant = VectorBidChatAssistant()
+        cleared = assistant.clear_conversation(user_id)
+        
+        return {
+            "user_id": user_id,
+            "cleared": cleared,
+            "message": "Conversation history cleared" if cleared else "No conversation found"
+        }
+        
+    except ImportError:
+        raise HTTPException(
+            status_code=503, 
+            detail="Chat assistant not available - check AI dependencies"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clear chat history: {str(e)}")
+
+
+@router.post("/chat/analyze_preferences", tags=["AI Chat"])
+async def chat_analyze_preferences(payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Get AI analysis of pilot preferences through chat interface
+    
+    Body:
+      {
+        "user_id": "pilot_123",
+        "preferences_text": "I want weekends off and good credit hours",
+        "current_preferences": {...}
+      }
+    Returns: {
+        "analysis": "...",
+        "suggestions": [...],
+        "conversation_updated": true
+    }
+    """
+    try:
+        from app.services.chat_assistant import VectorBidChatAssistant
+        
+        user_id = payload.get("user_id")
+        preferences_text = payload.get("preferences_text")
+        current_preferences = payload.get("current_preferences")
+        
+        if not user_id or not preferences_text:
+            raise HTTPException(status_code=400, detail="user_id and preferences_text are required")
+        
+        assistant = VectorBidChatAssistant()
+        analysis = await assistant.analyze_preferences(user_id, preferences_text, current_preferences)
+        
+        return {
+            "analysis": analysis,
+            "user_id": user_id,
+            "conversation_updated": True,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except ImportError:
+        raise HTTPException(
+            status_code=503, 
+            detail="Chat assistant not available - check AI dependencies"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to analyze preferences: {str(e)}")
+
+
+@router.post("/chat/compare_schedules", tags=["AI Chat"])
+async def chat_compare_schedules(payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Get AI comparison of schedule options through chat interface
+    
+    Body:
+      {
+        "user_id": "pilot_123",
+        "schedules": [...],
+        "pilot_priorities": "family time and decent credit hours"
+      }
+    Returns: {
+        "comparison": "...",
+        "recommendation": "...",
+        "conversation_updated": true
+    }
+    """
+    try:
+        from app.services.chat_assistant import VectorBidChatAssistant
+        from app.models import CandidateSchedule
+        
+        user_id = payload.get("user_id")
+        schedules_data = payload.get("schedules", [])
+        pilot_priorities = payload.get("pilot_priorities")
+        
+        if not user_id or not schedules_data:
+            raise HTTPException(status_code=400, detail="user_id and schedules are required")
+        
+        # Convert to CandidateSchedule objects
+        schedules = [CandidateSchedule(**s) for s in schedules_data]
+        
+        assistant = VectorBidChatAssistant()
+        comparison = await assistant.compare_schedules(user_id, schedules, pilot_priorities)
+        
+        return {
+            "comparison": comparison,
+            "user_id": user_id,
+            "schedules_analyzed": len(schedules),
+            "conversation_updated": True,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except ImportError:
+        raise HTTPException(
+            status_code=503, 
+            detail="Chat assistant not available - check AI dependencies"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to compare schedules: {str(e)}")
+
+
+@router.get("/chat/tips/{category}", tags=["AI Chat"])
+async def get_quick_tips(category: str = "general") -> dict[str, Any]:
+    """
+    Get quick bidding tips by category
+    
+    Categories: general, family, commuting, career
+    """
+    try:
+        from app.services.chat_assistant import VectorBidChatAssistant
+        
+        valid_categories = ["general", "family", "commuting", "career"]
+        if category not in valid_categories:
+            category = "general"
+        
+        assistant = VectorBidChatAssistant()
+        tips = await assistant.get_quick_tips(category)
+        
+        return {
+            "category": category,
+            "tips": tips,
+            "available_categories": valid_categories
+        }
+        
+    except ImportError:
+        raise HTTPException(
+            status_code=503, 
+            detail="Chat assistant not available - check AI dependencies"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get tips: {str(e)}")

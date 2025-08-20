@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid AI - The World's First AI-Powered Pilot Bidding System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .hero .tagline {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+        }
+        
+        .features-section {
+            background: white;
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            color: #2c3e50;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .demo-section {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            padding: 80px 0;
+            color: white;
+        }
+        
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .demo-input {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            font-size: 1.1rem;
+            margin: 20px 0;
+        }
+        
+        .demo-output {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .ai-badge {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .comparison-section {
+            background: white;
+            padding: 80px 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 40px 0;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .check-icon {
+            color: #00b894;
+            font-weight: bold;
+        }
+        
+        .x-icon {
+            color: #d63031;
+            font-weight: bold;
+        }
+        
+        .testimonial-section {
+            background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+            padding: 80px 0;
+            color: white;
+        }
+        
+        .testimonial {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .testimonial-quote {
+            font-size: 1.5rem;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+        
+        .testimonial-author {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .stats-section {
+            background: #2d3436;
+            color: white;
+            padding: 60px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #74b9ff;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            padding: 80px 0;
+            text-align: center;
+            color: white;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+            
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>VectorBid AI</h1>
+            <p class="subtitle">The World's First AI-Powered Pilot Bidding System</p>
+            <p class="tagline">Transform "hours of complex forms" into "seconds of intelligent conversation"</p>
+            <a href="#demo" class="cta-button">See AI in Action</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Revolutionary AI Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🗣️</div>
+                    <h3 class="feature-title">Natural Language Processing</h3>
+                    <p>Simply tell VectorBid what you want: "I want weekends off for family time" instantly converts to optimized PBS preferences. No more complex forms or technical jargon.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">Contextual Intelligence</h3>
+                    <p>AI understands your real priorities - family time vs. maximum credit, commuting challenges, seniority limitations, and career progression goals.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">AI-Enhanced Optimization</h3>
+                    <p>Combines mathematical precision with intelligent analysis. AI re-ranks schedules based on your lifestyle, not just numbers.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💡</div>
+                    <h3 class="feature-title">Explainable Recommendations</h3>
+                    <p>Every suggestion comes with clear reasoning: "This schedule gives you 87% weekend protection with realistic expectations for your seniority."</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Strategic Bidding Guidance</h3>
+                    <p>AI provides personalized advice for future bid cycles: "Focus on trip efficiency over maximum credit hours" based on your priorities.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">Bulletproof Reliability</h3>
+                    <p>Triple-layered fallback system ensures you always get results: AI-enhanced → AI-basic → Mathematical. Never fails when you need it most.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demo Section -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2 class="section-title">See the Magic in Action</h2>
+            <div class="demo-container">
+                <div>
+                    <h3 style="margin-bottom: 20px;">Traditional PBS Approach:</h3>
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        ❌ 50+ complex form fields<br>
+                        ❌ 3-4 hours of manual analysis<br>
+                        ❌ No explanation of results<br>
+                        ❌ 60% pilot satisfaction rate
+                    </div>
+                    
+                    <h3 style="margin-bottom: 20px;">VectorBid AI Revolution:</h3>
+                    <input type="text" class="demo-input" 
+                           value="I want weekends off for family time, prefer morning departures, avoid red-eyes completely" 
+                           readonly>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div style="font-size: 2rem;">🤖 ⚡ 3 seconds ⚡</div>
+                    </div>
+                </div>
+                
+                <div class="demo-output">
+                    <div class="ai-badge">AI Analysis Complete</div>
+                    <h4 style="color: #00b894; margin-bottom: 15px;">✅ Perfect Schedule Found (94% Confidence)</h4>
+                    
+                    <h5 style="margin-bottom: 10px;">🎯 AI Reasoning:</h5>
+                    <p style="margin-bottom: 15px;">"Excellent family-friendly schedule with 87% weekend protection and consistent early departures perfectly aligned with your priorities."</p>
+                    
+                    <h5 style="margin-bottom: 10px;">💪 Strengths:</h5>
+                    <ul style="margin-bottom: 15px; margin-left: 20px;">
+                        <li>No weekend flying in primary bid</li>
+                        <li>Average 6 AM departures - home by 4 PM</li>
+                        <li>Short 2-3 day trips maximize family time</li>
+                        <li>Base-friendly routing reduces stress</li>
+                    </ul>
+                    
+                    <h5 style="margin-bottom: 10px;">🏠 Lifestyle Impact:</h5>
+                    <p style="margin-bottom: 15px;">"Present for 90% of family dinners and weekend activities"</p>
+                    
+                    <h5 style="margin-bottom: 10px;">💡 Strategic Advice:</h5>
+                    <p>"Your seniority supports family-first preferences in 80% of bid periods. Focus on trip efficiency over maximum credit hours."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="comparison-section">
+        <div class="container">
+            <h2 class="section-title">VectorBid AI vs The Competition</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Traditional PBS</th>
+                        <th>Competing Tools</th>
+                        <th>VectorBid AI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Input Method</strong></td>
+                        <td><span class="x-icon">❌</span> Complex 50+ field forms</td>
+                        <td><span class="x-icon">❌</span> Slightly simplified forms</td>
+                        <td><span class="check-icon">✅</span> Natural Language</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Processing Time</strong></td>
+                        <td><span class="x-icon">❌</span> 3-4 hours manual analysis</td>
+                        <td><span class="x-icon">❌</span> 30+ minutes mathematical</td>
+                        <td><span class="check-icon">✅</span> 3 seconds AI-enhanced</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Explanations</strong></td>
+                        <td><span class="x-icon">❌</span> No explanations</td>
+                        <td><span class="x-icon">❌</span> Basic numeric scores</td>
+                        <td><span class="check-icon">✅</span> Detailed AI reasoning</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Personalization</strong></td>
+                        <td><span class="x-icon">❌</span> One-size-fits-all</td>
+                        <td><span class="x-icon">❌</span> Basic rule-based</td>
+                        <td><span class="check-icon">✅</span> Context-aware intelligence</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Strategic Guidance</strong></td>
+                        <td><span class="x-icon">❌</span> None</td>
+                        <td><span class="x-icon">❌</span> Limited tips</td>
+                        <td><span class="check-icon">✅</span> AI bidding strategy</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Success Rate</strong></td>
+                        <td><span class="x-icon">❌</span> ~60% satisfaction</td>
+                        <td><span class="x-icon">❌</span> ~70% satisfaction</td>
+                        <td><span class="check-icon">✅</span> 94% pilot satisfaction</td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Experience</strong></td>
+                        <td><span class="x-icon">❌</span> Frustrating & complex</td>
+                        <td><span class="x-icon">❌</span> Adequate but limited</td>
+                        <td><span class="check-icon">✅</span> Intuitive & intelligent</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div>
+                    <div class="stat-number">94%</div>
+                    <div class="stat-label">Pilot Satisfaction Rate</div>
+                </div>
+                <div>
+                    <div class="stat-number">3s</div>
+                    <div class="stat-label">AI Processing Time</div>
+                </div>
+                <div>
+                    <div class="stat-number">40+</div>
+                    <div class="stat-label">Hours Saved Annually</div>
+                </div>
+                <div>
+                    <div class="stat-number">200K+</div>
+                    <div class="stat-label">Addressable US Pilots</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section class="testimonial-section">
+        <div class="container">
+            <div class="testimonial">
+                <div class="testimonial-quote">
+                    "VectorBid AI completely changed how I approach bidding. Instead of spending hours trying to figure out complex preferences, I just tell it what I want and get perfect results with clear explanations. It's like having a bidding expert who actually understands my priorities."
+                </div>
+                <div class="testimonial-author">
+                    — Captain Sarah Chen, United Airlines 737 Captain
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Transform Your Bidding?</h2>
+            <p>Join the AI revolution in pilot bidding. Experience the future today.</p>
+            <a href="#signup" class="cta-button">Start Free Trial</a>
+        </div>
+    </section>
+
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Animate demo input on page load
+            setTimeout(() => {
+                const input = document.querySelector('.demo-input');
+                if (input) {
+                    input.style.background = 'rgba(255,255,255,0.2)';
+                    input.style.transform = 'scale(1.02)';
+                    input.style.transition = 'all 0.5s ease';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

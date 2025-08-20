@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBot Chat Demo - AI Pilot Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-container {
+            width: 900px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .chat-sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+        }
+        
+        .pilot-info {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .pilot-info h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .pilot-info .detail {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .quick-actions {
+            margin-top: 20px;
+        }
+        
+        .quick-actions h4 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .quick-btn {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .quick-btn:hover {
+            border-color: #74b9ff;
+            background: #f0f8ff;
+        }
+        
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .bot-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .chat-info h2 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+        
+        .chat-info p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafbfc;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: #74b9ff;
+        }
+        
+        .message.assistant .message-avatar {
+            background: #00b894;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 15px;
+            border-radius: 15px;
+            line-height: 1.4;
+        }
+        
+        .message.user .message-content {
+            background: #74b9ff;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #74b9ff;
+        }
+        
+        .send-btn {
+            margin-left: 10px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 15px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .status-indicator {
+            padding: 10px 20px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .status-indicator.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .status-indicator.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .chat-sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Sidebar -->
+        <div class="chat-sidebar">
+            <div class="pilot-info">
+                <h3>👨‍✈️ Captain Sarah Chen</h3>
+                <div class="detail">📍 Base: SFO</div>
+                <div class="detail">✈️ Equipment: 737/757</div>
+                <div class="detail">📊 Seniority: 45th percentile</div>
+                <div class="detail">👨‍👩‍👧‍👦 Priority: Family time</div>
+            </div>
+            
+            <div class="quick-actions">
+                <h4>💡 Quick Actions</h4>
+                <button class="quick-btn" onclick="sendQuickMessage('How should I set my preferences for maximum family time?')">
+                    🏠 Family-focused bidding
+                </button>
+                <button class="quick-btn" onclick="sendQuickMessage('What are the best strategies for weekend protection with my seniority?')">
+                    📅 Weekend strategies
+                </button>
+                <button class="quick-btn" onclick="sendQuickMessage('Should I consider international flying for career progression?')">
+                    🌍 Career advice
+                </button>
+                <button class="quick-btn" onclick="sendQuickMessage('Analyze these schedule options and help me choose the best one')">
+                    ⚖️ Schedule comparison
+                </button>
+                <button class="quick-btn" onclick="getTips('family')">
+                    💡 Family bidding tips
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="bot-avatar">🤖</div>
+                <div class="chat-info">
+                    <h2>VectorBot</h2>
+                    <p>Your AI Pilot Bidding Assistant</p>
+                </div>
+            </div>
+            
+            <div id="status-area"></div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be added here -->
+            </div>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                🤖 VectorBot is thinking...
+            </div>
+            
+            <div class="chat-input">
+                <input 
+                    type="text" 
+                    class="input-field" 
+                    id="message-input" 
+                    placeholder="Ask VectorBot about bidding strategy, preferences, or career advice..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="send-btn" onclick="sendMessage()" id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:8000/api';
+        const USER_ID = 'demo_pilot_sarah';
+        const PILOT_CONTEXT = {
+            base: 'SFO',
+            equipment: ['737', '757'],
+            seniority_percentile: 0.45,
+            career_stage: 'captain',
+            priorities: ['family_time', 'work_life_balance']
+        };
+
+        // State
+        let chatInitialized = false;
+        let isProcessing = false;
+
+        // Initialize chat on page load
+        window.addEventListener('load', async () => {
+            showStatus('Initializing VectorBot...', 'info');
+            await initializeChat();
+        });
+
+        async function initializeChat() {
+            try {
+                const response = await fetch(`${API_BASE}/chat/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: USER_ID,
+                        pilot_context: PILOT_CONTEXT
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    addMessage('assistant', result.greeting_message);
+                    chatInitialized = true;
+                    showStatus('VectorBot is ready to help!', 'success');
+                    setTimeout(() => hideStatus(), 3000);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Chat initialization failed:', error);
+                addMessage('assistant', 
+                    "Hello! I'm VectorBot, your AI bidding assistant. " +
+                    "I'm currently in demo mode. In a live environment, I'd connect to our AI servers " +
+                    "to provide personalized bidding advice, schedule analysis, and career guidance!"
+                );
+                showStatus('Demo mode - AI features simulated', 'info');
+                chatInitialized = true;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message || isProcessing) return;
+            
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            isProcessing = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: USER_ID,
+                        message: message
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    addMessage('assistant', result.response);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Message failed:', error);
+                addMessage('assistant', getDemoResponse(message));
+            }
+            
+            hideTyping();
+            isProcessing = false;
+        }
+
+        function sendQuickMessage(message) {
+            document.getElementById('message-input').value = message;
+            sendMessage();
+        }
+
+        async function getTips(category) {
+            showTyping();
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat/tips/${category}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    const tipsText = `Here are some ${category} bidding tips:\n\n` + 
+                        result.tips.slice(0, 3).map((tip, i) => `${i + 1}. ${tip}`).join('\n\n');
+                    addMessage('assistant', tipsText);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Tips failed:', error);
+                addMessage('assistant', getDemoTips(category));
+            }
+            
+            hideTyping();
+        }
+
+        function addMessage(role, content) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? '👨‍✈️' : '🤖';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            document.getElementById('typing-indicator').style.display = 'block';
+            document.getElementById('send-btn').disabled = true;
+        }
+
+        function hideTyping() {
+            document.getElementById('typing-indicator').style.display = 'none';
+            document.getElementById('send-btn').disabled = false;
+        }
+
+        function showStatus(message, type) {
+            const statusArea = document.getElementById('status-area');
+            statusArea.innerHTML = `<div class="status-indicator ${type}">${message}</div>`;
+        }
+
+        function hideStatus() {
+            document.getElementById('status-area').innerHTML = '';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Demo responses for when API isn't available
+        function getDemoResponse(message) {
+            const responses = {
+                'family': "For family-focused bidding with your 45th percentile seniority, I recommend prioritizing trip efficiency over maximum credit hours. Look for 3-4 day trips that maximize days off, and consider domestic routes with good layovers. Weekend protection is achievable about 70% of the time at your seniority level.",
+                'weekend': "Weekend protection strategies for mid-seniority pilots: 1) Bid for trip patterns that end Friday and start Tuesday, 2) Consider efficient 4-day trips that give you 3 days off, 3) International routes sometimes offer better weekend protection due to crew rest requirements.",
+                'career': "For career progression, consider adding some international preferences to build experience for future Captain upgrades. However, balance this with your family priorities. International flying can offer good earning potential and career development.",
+                'default': "I understand you're looking for bidding guidance. As an AI assistant, I'd analyze your specific situation considering your SFO base, 737/757 equipment, and family priorities to provide personalized recommendations. In a live system, I'd have access to current route patterns and can give you specific advice!"
+            };
+            
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('family')) return responses.family;
+            if (lowerMessage.includes('weekend')) return responses.weekend;
+            if (lowerMessage.includes('career') || lowerMessage.includes('progression')) return responses.career;
+            
+            return responses.default;
+        }
+
+        function getDemoTips(category) {
+            const tips = {
+                family: "Family Bidding Tips:\n\n1. 🎯 Quality over quantity - sometimes fewer credit hours mean better family time\n2. 👨‍👩‍👧‍👦 Weekend protection is often worth the credit hour trade-off\n3. 🏠 Short trips can be better than high-credit long trips for family time",
+                career: "Career Tips:\n\n1. 📈 Build experience across different route types early in career\n2. 🎓 International flying helps Captain upgrade competitiveness\n3. 🤝 Network with senior pilots for mentorship and advice"
+            };
+            
+            return tips[category] || tips.family;
+        }
+    </script>
+</body>
+</html>

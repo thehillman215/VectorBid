@@ -133,3 +133,79 @@ class FAQItem(BaseModel):
     question: str
     answer: str
     rationale: Optional[str] = None
+
+
+# Enhanced models for LLM integration
+from enum import Enum
+from typing import Dict, List
+
+
+class OptimizationMethod(str, Enum):
+    """Method used for schedule optimization"""
+    LLM_ENHANCED = "llm_enhanced"
+    MATHEMATICAL_ONLY = "mathematical_only"
+    HYBRID = "hybrid"
+    FALLBACK = "fallback"
+
+
+class ConversationMessage(BaseModel):
+    """Single message in a conversation history"""
+    role: str  # "user", "assistant", "system"
+    content: str
+    timestamp: datetime = Field(default_factory=datetime.now)
+    context: Optional[Dict[str, Any]] = None
+
+
+class ConversationHistory(BaseModel):
+    """Complete conversation history for a user"""
+    messages: List[ConversationMessage] = Field(default_factory=list)
+    context: Dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+
+class LLMParseResult(BaseModel):
+    """Result from LLM-based preference parsing"""
+    parsed_preferences: "PreferenceSchema"
+    confidence: float = Field(ge=0.0, le=1.0)
+    method: str  # "llm", "fallback", "hybrid"
+    reasoning: str
+    suggestions: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    model_version: Optional[str] = None
+    tokens_used: Optional[int] = None
+    parse_timestamp: datetime = Field(default_factory=datetime.now)
+
+
+class EnhancedCandidateSchedule(CandidateSchedule):
+    """CandidateSchedule enhanced with AI analysis"""
+    enhanced_score: Optional[float] = None
+    ai_reasoning: Optional[str] = None
+    strengths: List[str] = Field(default_factory=list)
+    weaknesses: List[str] = Field(default_factory=list)
+    pilot_fit_score: Optional[float] = None
+    lifestyle_impact: Optional[str] = None
+    improvement_suggestions: List[str] = Field(default_factory=list)
+    optimization_method: OptimizationMethod = OptimizationMethod.MATHEMATICAL_ONLY
+    ai_analysis_version: Optional[str] = None
+
+
+class LLMOptimizationResult(BaseModel):
+    """Result from LLM-enhanced optimization"""
+    enhanced_candidates: List[EnhancedCandidateSchedule]
+    original_candidates: List[CandidateSchedule]
+    optimization_quality: float = Field(ge=0.0, le=1.0)
+    preference_alignment: float = Field(ge=0.0, le=1.0)
+    trade_off_analysis: str
+    missing_opportunities: List[str] = Field(default_factory=list)
+    risk_assessment: List[str] = Field(default_factory=list)
+    recommended_candidate_id: str
+    explanation: str
+    alternative_choices: List[Dict[str, Any]] = Field(default_factory=list)
+    bidding_strategy: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    model_insights: List[str] = Field(default_factory=list)
+    optimization_method: OptimizationMethod
+    model_version: str
+    tokens_used: Optional[int] = None
+    analysis_timestamp: datetime = Field(default_factory=datetime.now)

@@ -26,6 +26,14 @@ class ConfidenceLevel(str, Enum):
     LOW = "low"
 
 
+class OptimizationMethod(str, Enum):
+    """Method used for schedule optimization"""
+    LLM_ENHANCED = "llm_enhanced"
+    MATHEMATICAL_ONLY = "mathematical_only"
+    HYBRID = "hybrid"
+    FALLBACK = "fallback"
+
+
 class LLMParseResult(BaseModel):
     """Result from LLM preference parsing"""
     preferences: PreferenceSchema

@@ -16,12 +16,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 import tiktoken
 
 from app.models import PreferenceSchema
-from app.models.enhanced import (
-    LLMParseResult, 
-    EnhancedPreferenceSchema, 
-    ParsingMethod,
-    to_enhanced_preference
-)
+from app.models import LLMParseResult
 
 
 class PreferenceParser:
@@ -276,7 +271,7 @@ Focus on extracting the pilot's true intent and providing actionable, realistic 
         original_text: str,
         model_version: str,
         tokens_used: int,
-        method: ParsingMethod
+                    method: str
     ) -> LLMParseResult:
         """Create LLMParseResult from parsed JSON"""
         
@@ -392,7 +387,7 @@ Focus on extracting the pilot's true intent and providing actionable, realistic 
         persona: Optional[str] = None,
         airline: str = "UAL",
         pilot_context: Optional[Dict[str, Any]] = None
-    ) -> EnhancedPreferenceSchema:
+    ) -> PreferenceSchema:
         """Parse preferences and return enhanced schema"""
         
         llm_result = await self.parse_preferences(text, persona, airline, pilot_context)
