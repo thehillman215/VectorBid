@@ -301,6 +301,11 @@ class VectorBidApp {
             
             const optimizeResult = await optimizeResponse.json();
             
+            // Validate that we got candidates back
+            if (!optimizeResult || !optimizeResult.candidates) {
+                throw new Error('No candidates returned from optimization');
+            }
+            
             // 3. Generate bid layers
             const layersResponse = await fetch('/api/generate_layers', {
                 method: 'POST',
@@ -364,7 +369,17 @@ class VectorBidApp {
 
     renderCandidates() {
         const container = document.getElementById('candidates-list');
-        const candidates = this.results.optimization.candidates;
+        const candidates = this.results?.optimization?.candidates || [];
+
+        if (candidates.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-search text-4xl mb-4"></i>
+                    <p>No candidate schedules found. Try adjusting your preferences.</p>
+                </div>
+            `;
+            return;
+        }
 
         container.innerHTML = candidates.map((candidate, index) => `
             <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -452,7 +467,17 @@ class VectorBidApp {
 
     renderLayers() {
         const container = document.getElementById('layers-list');
-        const layers = this.results.layers.display ? this.results.layers.display.layers : this.results.layers.layers;
+        const layers = this.results?.layers?.display?.layers || this.results?.layers?.layers || [];
+
+        if (layers.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-layer-group text-4xl mb-4"></i>
+                    <p>No PBS layers generated. This may occur if optimization failed.</p>
+                </div>
+            `;
+            return;
+        }
 
         container.innerHTML = layers.map(layer => `
             <div class="bg-white border border-gray-200 rounded-lg p-4">
@@ -557,7 +582,7 @@ class VectorBidApp {
     }
 
     generateContextId() {
-        return 'demo_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+        return 'demo_' + Date.now().toString(36) + Math.random().toString(36).substring(2);
     }
 
     getHardConstraints() {

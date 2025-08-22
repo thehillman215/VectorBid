@@ -190,8 +190,25 @@ class EnhancedCandidateSchedule(CandidateSchedule):
     ai_analysis_version: Optional[str] = None
 
 
+class PBSStrategy(BaseModel):
+    """PBS bidding strategy with syntax"""
+    strategy_name: str
+    description: str
+    pbs_layers: List[Dict[str, Any]] = Field(default_factory=list)
+    award_probability: float = Field(ge=0.0, le=1.0)
+    fallback_plan: str
+
+
+class PilotWisdom(BaseModel):
+    """Pilot expertise insights"""
+    enabled: bool = True
+    insights: List[str] = Field(default_factory=list)
+    career_advice: str = ""
+    contract_notes: List[str] = Field(default_factory=list)
+
+
 class LLMOptimizationResult(BaseModel):
-    """Result from LLM-enhanced optimization"""
+    """Result from LLM-enhanced optimization with PBS syntax generation"""
     enhanced_candidates: List[EnhancedCandidateSchedule]
     original_candidates: List[CandidateSchedule]
     optimization_quality: float = Field(ge=0.0, le=1.0)
@@ -203,6 +220,8 @@ class LLMOptimizationResult(BaseModel):
     explanation: str
     alternative_choices: List[Dict[str, Any]] = Field(default_factory=list)
     bidding_strategy: str
+    pbs_syntax_strategies: List[PBSStrategy] = Field(default_factory=list)
+    pilot_wisdom: Optional[PilotWisdom] = None
     confidence: float = Field(ge=0.0, le=1.0)
     model_insights: List[str] = Field(default_factory=list)
     optimization_method: OptimizationMethod

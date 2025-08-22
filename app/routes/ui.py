@@ -66,6 +66,15 @@ async def demo_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@router.get("/test-llm", response_class=HTMLResponse)
+async def test_llm_ui():
+    """Test interface for LLM and scoring features"""
+    test_path = Path(__file__).parent.parent / "static" / "test_llm_ui.html"
+    if test_path.exists():
+        return FileResponse(test_path)
+    return HTMLResponse("<h1>Test UI not found</h1>", status_code=404)
+
+
 @router.post("/run", response_class=HTMLResponse)
 async def run_pipeline(request: Request, preferences: str = Form(...)):
     pbs_layers = [

@@ -15,6 +15,7 @@ import tiktoken
 
 from app.models import CandidateSchedule, PreferenceSchema, FeatureBundle
 from app.models import EnhancedCandidateSchedule, LLMOptimizationResult, OptimizationMethod
+from app.models import PBSStrategy, PilotWisdom
 
 
 class LLMOptimizer:
@@ -137,67 +138,100 @@ class LLMOptimizer:
         )
     
     def _build_optimization_system_prompt(self) -> str:
-        """Build system prompt for optimization enhancement"""
+        """Build system prompt for optimization enhancement with PBS syntax generation focus"""
         
-        return """You are an expert airline pilot, schedule optimizer, and PBS (Preferential Bidding System) specialist.
+        return """You are Captain Sarah, an expert airline pilot with 25 years of experience, schedule optimizer, and PBS (Preferential Bidding System) specialist.
 
-Your job is to analyze mathematically optimized schedule candidates and provide AI-enhanced insights, reordering, and explanations.
+You have access to the entire schedule from the uploaded trip sheet and deep knowledge of:
+- Contract rules and FAR117 regulations for duty time, rest requirements
+- PBS 2.0 syntax for creating effective bid layers, groups, and filters
+- Pilot lifestyle optimization strategies across different career stages
+- Award probabilities and bidding psychology at different seniority levels
 
-OPTIMIZATION GUIDELINES:
-1. Analyze each candidate's quality based on pilot preferences and aviation context
-2. Identify hidden patterns and trade-offs in the mathematical optimization
-3. Rerank candidates based on holistic pilot satisfaction (not just mathematical scores)
-4. Provide clear explanations for why certain schedules are better for this specific pilot
-5. Highlight potential issues, conflicts, or opportunities for improvement
-6. Consider real-world factors that mathematical optimization might miss
-7. Factor in pilot experience, seniority, base location, and lifestyle priorities
+Your job is to:
+1. Analyze mathematically optimized schedule candidates with pilot expertise
+2. Generate at least 3 different PBS bidding strategy options
+3. Create actual PBS 2.0 syntax that pilots can use in their bids
+4. Provide contract-compliant and regulation-aware recommendations
+5. Include optional pilot wisdom insights (can be toggled off)
 
-AVIATION EXPERTISE:
-- Understand duty time regulations, rest requirements, and contract rules
-- Recognize commuter vs. domicile pilot needs
-- Evaluate layover quality, trip efficiency, and schedule sustainability
-- Consider seasonal factors, equipment preferences, and career stage
-- Assess work-life balance implications of different schedule patterns
+OPTIMIZATION PROCESS:
+1. Review candidates against contract rules and FAR117 compliance
+2. Assess pilot lifestyle fit and career progression implications
+3. Identify hidden patterns in trip sequences and layover combinations
+4. Generate multiple bidding strategies for different award scenarios
+5. Create PBS syntax layers with proper filters and preferences
+6. Provide pilot-to-pilot wisdom and real-world insights
+7. Output forward-strategy PBS syntax for immediate use
+
+PBS SYNTAX EXPERTISE:
+- Layer construction: preference order, filters, and award logic
+- Filter types: equipment, base, layover cities, duty patterns, credit ranges
+- Award probability optimization based on seniority and historical data
+- Fallback strategies and contingency planning
+- Integration with pilot lifestyle and career goals
 
 RESPONSE FORMAT:
-Return ONLY valid JSON matching this exact structure:
+Return ONLY valid JSON with PBS syntax generation focus:
 {
     "reranked_candidates": [
         {
             "candidate_id": "string",
             "enhanced_score": number 0.0-1.0,
-            "ai_reasoning": "detailed explanation of why this schedule ranks here",
-            "strengths": ["list of schedule strengths"],
-            "weaknesses": ["list of potential issues"],
+            "ai_reasoning": "detailed pilot expertise explanation",
+            "strengths": ["contract and lifestyle advantages"],
+            "weaknesses": ["potential compliance or lifestyle issues"],
             "pilot_fit_score": number 0.0-1.0,
-            "lifestyle_impact": "string describing work-life balance impact",
-            "improvement_suggestions": ["specific actionable improvements"]
+            "lifestyle_impact": "work-life balance and career implications",
+            "improvement_suggestions": ["specific PBS bidding improvements"]
         }
     ],
     "overall_analysis": {
         "optimization_quality": number 0.0-1.0,
         "preference_alignment": number 0.0-1.0,
-        "trade_off_analysis": "description of key trade-offs in the optimization",
-        "missing_opportunities": ["list of potentially better alternatives"],
-        "risk_assessment": ["potential problems with top candidates"]
+        "trade_off_analysis": "key trade-offs in schedule optimization",
+        "missing_opportunities": ["better alternatives from trip sheet"],
+        "risk_assessment": ["contract and regulation compliance risks"]
     },
     "pilot_guidance": {
-        "recommended_candidate": "candidate_id of best overall choice",
-        "explanation": "why this is the best choice for this pilot",
+        "recommended_candidate": "candidate_id of best choice",
+        "explanation": "pilot-to-pilot reasoning for this choice",
         "alternative_choices": [
             {
                 "candidate_id": "string",
-                "scenario": "when this choice might be better",
-                "reasoning": "explanation"
+                "scenario": "when this strategy works better",
+                "reasoning": "pilot expertise explanation"
             }
         ],
-        "bidding_strategy": "advice for future bid cycles"
+        "bidding_strategy": "comprehensive PBS strategy advice"
+    },
+    "pbs_syntax_strategies": [
+        {
+            "strategy_name": "Primary Strategy",
+            "description": "Main bidding approach for this pilot",
+            "pbs_layers": [
+                {
+                    "layer_number": 1,
+                    "preference": "YES",
+                    "filters": ["EQUIP 737", "BASE SFO", "CREDIT 85-95"],
+                    "rationale": "Target optimal credit with home base preference"
+                }
+            ],
+            "award_probability": number 0.0-1.0,
+            "fallback_plan": "what to do if this doesn't award"
+        }
+    ],
+    "pilot_wisdom": {
+        "enabled": true,
+        "insights": ["real-world pilot tips and warnings"],
+        "career_advice": "long-term strategy recommendations",
+        "contract_notes": ["important contract considerations"]
     },
     "confidence": number 0.0-1.0,
-    "model_insights": ["unique insights only AI analysis could provide"]
+    "model_insights": ["unique AI analysis only Captain Sarah could provide"]
 }
 
-Be specific and actionable. Focus on insights that help the pilot make informed decisions about their career and lifestyle."""
+Provide actionable PBS syntax that pilots can immediately use in their bidding systems."""
     
     def _build_optimization_user_prompt(
         self,
@@ -214,33 +248,38 @@ Be specific and actionable. Focus on insights that help the pilot make informed 
             summary = {
                 "candidate_id": candidate.candidate_id,
                 "mathematical_score": candidate.score,
-                "total_credit": candidate.total_credit,
-                "total_duty": candidate.total_duty,
-                "trip_count": len(candidate.trips) if candidate.trips else 0,
-                "rationale_summary": candidate.rationale.summary if candidate.rationale else "No rationale"
+                "hard_ok": candidate.hard_ok,
+                "soft_breakdown": candidate.soft_breakdown,
+                "pairings": candidate.pairings,
+                "rationale_summary": candidate.rationale.summary if candidate.rationale and hasattr(candidate.rationale, 'summary') else "No rationale"
             }
             candidate_summaries.append(summary)
         
-        prompt = f"""Analyze and enhance these mathematically optimized schedule candidates for an airline pilot:
+        prompt = f"""Captain Sarah, analyze these mathematically optimized schedule candidates using your complete knowledge of the trip sheet and 25 years of pilot experience:
 
-PILOT PREFERENCES:
+PILOT PROFILE AND PREFERENCES:
 {json.dumps(preferences.model_dump(), indent=2)}
 
-PILOT CONTEXT:
+PILOT CONTEXT AND LIFESTYLE:
 {json.dumps(pilot_context, indent=2)}
 
-MATHEMATICAL OPTIMIZATION RESULTS:
+MATHEMATICAL OPTIMIZATION CANDIDATES:
 {json.dumps(candidate_summaries, indent=2)}
 
-ANALYSIS TASK:
-1. Re-evaluate each candidate considering real-world pilot priorities
-2. Rerank based on holistic pilot satisfaction, not just mathematical scores
-3. Provide detailed explanations for ranking decisions
-4. Identify patterns and insights that mathematical optimization missed
-5. Recommend the best choice with clear reasoning
-6. Suggest improvements for future optimization cycles
+CAPTAIN SARAH'S ANALYSIS TASKS:
+1. Review all candidates against contract rules and FAR117 compliance
+2. Apply your complete trip sheet knowledge to identify better combinations
+3. Generate at least 3 different PBS bidding strategy options
+4. Create actual PBS 2.0 syntax layers with proper filters and preferences
+5. Provide pilot-to-pilot wisdom and real-world insights
+6. Include contract considerations and regulation compliance notes
+7. Output forward-strategy PBS syntax for immediate pilot use
 
-Focus on practical pilot concerns: quality of life, career progression, schedule sustainability, commuting considerations, and personal preferences that may not be fully captured in the mathematical model."""
+IMPORTANT: Your Step 7 response must include actual PBS syntax that this pilot can copy and paste into their bidding system. Focus on creating multiple strategic approaches with proper layer construction, filter combinations, and award probability optimization.
+
+Apply your expertise in: schedule sustainability, commuting logistics, career progression, family considerations, contract interpretation, and PBS bidding psychology at this pilot's seniority level.
+
+Generate practical, actionable PBS bidding strategies with syntax-ready output."""
         
         if feature_bundle:
             prompt += f"\n\nADDITIONAL CONTEXT:\n{json.dumps(feature_bundle.model_dump(), indent=2)}"
@@ -258,10 +297,12 @@ Focus on practical pilot concerns: quality of life, career progression, schedule
     ) -> LLMOptimizationResult:
         """Create LLMOptimizationResult from parsed JSON"""
         
-        # Extract fields
+        # Extract fields including new PBS syntax and pilot wisdom
         reranked_data = parsed_json.get('reranked_candidates', [])
         overall_analysis = parsed_json.get('overall_analysis', {})
         pilot_guidance = parsed_json.get('pilot_guidance', {})
+        pbs_syntax_strategies = parsed_json.get('pbs_syntax_strategies', [])
+        pilot_wisdom = parsed_json.get('pilot_wisdom', {})
         confidence = parsed_json.get('confidence', 0.7)
         model_insights = parsed_json.get('model_insights', [])
         
@@ -301,6 +342,29 @@ Focus on practical pilot concerns: quality of life, career progression, schedule
                 )
                 enhanced_candidates.append(enhanced)
         
+        # Parse PBS strategies
+        pbs_strategies = []
+        for strategy_data in pbs_syntax_strategies:
+            from app.models import PBSStrategy
+            pbs_strategies.append(PBSStrategy(
+                strategy_name=strategy_data.get('strategy_name', ''),
+                description=strategy_data.get('description', ''),
+                pbs_layers=strategy_data.get('pbs_layers', []),
+                award_probability=strategy_data.get('award_probability', 0.5),
+                fallback_plan=strategy_data.get('fallback_plan', '')
+            ))
+        
+        # Parse pilot wisdom
+        wisdom_data = None
+        if pilot_wisdom:
+            from app.models import PilotWisdom
+            wisdom_data = PilotWisdom(
+                enabled=pilot_wisdom.get('enabled', True),
+                insights=pilot_wisdom.get('insights', []),
+                career_advice=pilot_wisdom.get('career_advice', ''),
+                contract_notes=pilot_wisdom.get('contract_notes', [])
+            )
+        
         return LLMOptimizationResult(
             enhanced_candidates=enhanced_candidates,
             original_candidates=original_candidates,
@@ -313,6 +377,8 @@ Focus on practical pilot concerns: quality of life, career progression, schedule
             explanation=pilot_guidance.get('explanation', ''),
             alternative_choices=pilot_guidance.get('alternative_choices', []),
             bidding_strategy=pilot_guidance.get('bidding_strategy', ''),
+            pbs_syntax_strategies=pbs_strategies,
+            pilot_wisdom=wisdom_data,
             confidence=confidence,
             model_insights=model_insights,
             optimization_method=method,

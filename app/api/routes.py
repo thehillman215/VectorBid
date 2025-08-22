@@ -35,6 +35,14 @@ from app.strategy.engine import propose_strategy
 
 router = APIRouter()
 
+# Import satisfaction engine (with fallback if not available)
+try:
+    from app.services.satisfaction import SatisfactionEngine, create_default_request
+    from app.services.satisfaction.types import BidLayer, PilotContext
+    SATISFACTION_AVAILABLE = True
+except ImportError:
+    SATISFACTION_AVAILABLE = False
+
 
 RULE_PACK_PATH = "rule_packs/UAL/2025.08.yml"
 _RULES = load_rule_pack(RULE_PACK_PATH)
@@ -774,3 +782,142 @@ async def get_quick_tips(category: str = "general") -> dict[str, Any]:
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get tips: {str(e)}")
+
+
+@router.post("/satisfaction_probability", tags=["Satisfaction"])
+async def calculate_satisfaction_probability(payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Calculate realistic satisfaction probability for bid request.
+    
+    Body:
+      {
+        "pilot_context": {
+          "base": "ORD",
+          "equipment": "737", 
+          "seniority_number": 150,
+          "total_pilots": 400,
+          "seniority_pct": 0.375
+        },
+        "bid_layers": [
+          {
+            "layer_id": "layer_1",
+            "layer_type": "SET",
+            "hard_constraints": ["weekends_off", "no_redeye"],
+            "priority": 1
+          }
+        ],
+        "month": 7
+      }
+    Returns: {
+        "satisfaction_probability": 65.4,
+        "satisfaction_ceiling": 70.0,
+        "confidence_interval": [58.1, 72.7],
+        "seniority_reality": "As #150 of 400 pilots...",
+        "limiting_factors": [...],
+        "improvement_suggestions": [...],
+        "supply_demand_analysis": {...}
+    }
+    """
+    if not SATISFACTION_AVAILABLE:
+        raise HTTPException(
+            status_code=503, 
+            detail="Satisfaction probability engine not available"
+        )
+    
+    try:
+        pilot_data = payload.get("pilot_context", {})
+        layers_data = payload.get("bid_layers", [])
+        month = payload.get("month", 6)
+        
+        if not pilot_data:
+            raise HTTPException(status_code=400, detail="pilot_context is required")
+        
+        # Create pilot context
+        pilot = PilotContext(**pilot_data)
+        
+        # Create bid layers
+        layers = []
+        for layer_data in layers_data:
+            layers.append(BidLayer(**layer_data))
+        
+        # Calculate satisfaction
+        engine = SatisfactionEngine()
+        request = create_default_request(pilot, layers, month)
+        result = engine.calculate_satisfaction(request)
+        
+        return {
+            "satisfaction_probability": result.overall_satisfaction,
+            "satisfaction_ceiling": result.satisfaction_ceiling,
+            "confidence_interval": result.confidence_interval,
+            "seniority_reality": result.seniority_reality,
+            "limiting_factors": result.limiting_factors,
+            "improvement_suggestions": result.improvement_levers,
+            "supply_demand_analysis": result.supply_demand_analysis,
+            "layer_probabilities": result.layer_probabilities,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Satisfaction calculation failed: {str(e)}")
+
+
+@router.post("/satisfaction_quick_test", tags=["Satisfaction"])
+async def satisfaction_quick_test() -> dict[str, Any]:
+    """Quick test endpoint for satisfaction engine - returns sample results."""
+    if not SATISFACTION_AVAILABLE:
+        return {
+            "status": "unavailable",
+            "message": "Satisfaction probability engine not installed"
+        }
+    
+    try:
+        # Test with a few sample pilots
+        engine = SatisfactionEngine()
+        
+        test_results = []
+        
+        # Senior pilot test
+        senior_pilot = PilotContext(
+            base="ORD", equipment="777", seniority_number=1, total_pilots=400, seniority_pct=0.0
+        )
+        senior_layers = [
+            BidLayer(layer_id="1", layer_type="SET", hard_constraints=["weekends_off", "hawaii_layover"], priority=1)
+        ]
+        senior_result = engine.calculate_satisfaction(create_default_request(senior_pilot, senior_layers, 3))
+        
+        test_results.append({
+            "pilot_type": "Senior (#1 of 400)",
+            "satisfaction": senior_result.overall_satisfaction,
+            "ceiling": senior_result.satisfaction_ceiling,
+            "reality": senior_result.seniority_reality
+        })
+        
+        # Junior pilot test
+        junior_pilot = PilotContext(
+            base="DEN", equipment="737", seniority_number=350, total_pilots=400, seniority_pct=0.875
+        )
+        junior_layers = [
+            BidLayer(layer_id="1", layer_type="SET", hard_constraints=["weekends_off"], priority=1)
+        ]
+        junior_result = engine.calculate_satisfaction(create_default_request(junior_pilot, junior_layers, 12))
+        
+        test_results.append({
+            "pilot_type": "Junior (#350 of 400)",
+            "satisfaction": junior_result.overall_satisfaction,
+            "ceiling": junior_result.satisfaction_ceiling,
+            "reality": junior_result.seniority_reality
+        })
+        
+        return {
+            "status": "success",
+            "message": "Satisfaction engine is working correctly",
+            "test_results": test_results,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Satisfaction engine test failed: {str(e)}",
+            "timestamp": datetime.utcnow().isoformat()
+        }

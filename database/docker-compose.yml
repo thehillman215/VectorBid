@@ -1,0 +1,93 @@
+# VectorBid Database Development Environment
+# Provides PostgreSQL with all necessary extensions and configurations
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: vectorbid-postgres
+    environment:
+      POSTGRES_DB: vectorbid
+      POSTGRES_USER: vectorbid
+      POSTGRES_PASSWORD: vectorbid_dev_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
+      - ./schemas:/docker-entrypoint-initdb.d/schemas
+      - ./seeds:/docker-entrypoint-initdb.d/seeds
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vectorbid -d vectorbid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vectorbid-network
+
+  # Redis for session management and caching
+  redis:
+    image: redis:7-alpine
+    container_name: vectorbid-redis
+    command: redis-server --appendonly yes --requirepass vectorbid_redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vectorbid-network
+
+  # PgAdmin for database management (development only)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: vectorbid-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@vectorbid.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - vectorbid-network
+    profiles:
+      - dev-tools
+
+  # Database migration service
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    container_name: vectorbid-migrations
+    environment:
+      DATABASE_URL: postgresql://vectorbid:vectorbid_dev_password@postgres:5432/vectorbid
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vectorbid-network
+    profiles:
+      - migration
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  vectorbid-network:
+    driver: bridge
