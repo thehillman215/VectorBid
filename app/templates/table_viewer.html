@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ table_name }} - VectorBid Database</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
+        th { background-color: #2563eb; color: white; position: sticky; top: 0; }
+        .header { background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
+        .back-link { color: white; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .table-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .data-type { color: #6b7280; font-size: 0.8em; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .null-value { color: #9ca3af; font-style: italic; }
+        .json-value { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 {{ table_name }}</h1>
+        <p><a href="/db" class="back-link">← Back to Database Overview</a></p>
+    </div>
+
+    <div class="table-info">
+        <h3>Table Information</h3>
+        <ul>
+            <li><strong>Columns:</strong> {{ columns|length }}</li>
+            <li><strong>Rows Shown:</strong> {{ rows|length }} (limited to 50)</li>
+            <li><strong>Table:</strong> {{ table_name }}</li>
+        </ul>
+    </div>
+
+    {% if columns %}
+    <h3>Column Schema</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Column Name</th>
+                <th>Data Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for column_name, data_type in columns %}
+            <tr>
+                <td><strong>{{ column_name }}</strong></td>
+                <td class="data-type">{{ data_type }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if rows %}
+    <h3>Table Data ({{ rows|length }} rows)</h3>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    {% for column_name, data_type in columns %}
+                    <th>{{ column_name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    {% for value in row %}
+                    <td>
+                        {% if value is none %}
+                            <span class="null-value">NULL</span>
+                        {% elif value is mapping or value is sequence and value is not string %}
+                            <div class="json-value" title="{{ value }}">{{ value|string|truncate(100) }}</div>
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: #6b7280;">
+        <p>No data found in this table.</p>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 20px; color: #6b7280; font-size: 0.9em;">
+        <p><strong>Note:</strong> Limited to first 50 rows. For full data access, use pgAdmin or psql command line.</p>
+    </div>
+</body>
+</html>

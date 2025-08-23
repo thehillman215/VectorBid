@@ -26,6 +26,7 @@ from app.models import (
     PreferenceSchema,
     StrategyDirectives,
 )
+# from app.routes.auth import router as auth_router
 from app.routes.faq import router as faq_router
 from app.routes.ingestion import router as ingestion_router
 from app.routes.marketing import router as marketing_router
@@ -35,6 +36,7 @@ from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
 from app.routes.rule_packs import router as rule_packs_router
 from app.routes.ui import router as ui_router
+from app.routes.db_viewer import router as db_viewer_router
 from app.security.api_key import require_api_key
 
 MODELS = [
@@ -93,6 +95,7 @@ if static_path.exists():
 
 # Mount routers
 app.include_router(api_router, prefix="/api", tags=["API"])
+# app.include_router(auth_router, tags=["Authentication"])  # Temporarily disabled
 app.include_router(ingestion_router, tags=["Ingestion"])
 app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
@@ -102,6 +105,7 @@ app.include_router(faq_router, tags=["FAQ"])
 app.include_router(marketing_router, tags=["Marketing"])
 app.include_router(products_router, prefix="/products", tags=["Products"])
 app.include_router(solutions_router, prefix="/solutions", tags=["Solutions"])
+app.include_router(db_viewer_router, tags=["Database"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VectorBid Database Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .header { background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
+        .table-link { color: #2563eb; text-decoration: none; }
+        .table-link:hover { text-decoration: underline; }
+        .count { color: #6b7280; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗄️ VectorBid Database Viewer</h1>
+        <p>Browse your PostgreSQL database tables and data</p>
+    </div>
+
+    <h2>Database Tables ({{ tables|length }} total)</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Table Name</th>
+                <th>Row Count</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for table in tables %}
+            <tr>
+                <td><strong>{{ table }}</strong></td>
+                <td class="count">{{ table_counts[table] }} rows</td>
+                <td>
+                    <a href="/db/{{ table }}" class="table-link">View Data</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+        <h3>Quick Stats</h3>
+        <ul>
+            <li><strong>Users:</strong> {{ table_counts.get('users', 0) }}</li>
+            <li><strong>Pilots:</strong> {{ table_counts.get('pilots', 0) }}</li>
+            <li><strong>Audit Events:</strong> {{ table_counts.get('audit', 0) }}</li>
+            <li><strong>Preferences:</strong> {{ table_counts.get('preferences', 0) }}</li>
+            <li><strong>Exports:</strong> {{ table_counts.get('exports', 0) }}</li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 20px; color: #6b7280; font-size: 0.9em;">
+        <p><strong>Note:</strong> This is a read-only viewer. Data is limited to 50 rows per table.</p>
+        <p>For full database management, use pgAdmin or command line tools.</p>
+    </div>
+</body>
+</html>
