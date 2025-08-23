@@ -1,0 +1,119 @@
+{% extends "layouts/marketing.html" %}
+
+{% block title %}{{ page_title }} - VectorBid{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="section bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="text-5xl font-bold mb-4">{{ hero.headline }}</h1>
+            <p class="text-xl mb-8 opacity-90 max-w-3xl mx-auto">{{ hero.subheadline }}</p>
+            <div class="flex justify-center gap-4">
+                <a href="/signup" class="btn btn-lg" style="background: white; color: #1e40af;">
+                    {{ hero.cta_primary }}
+                </a>
+                <a href="/demo" class="btn btn-outline btn-lg" style="border-color: white; color: white;">
+                    {{ hero.cta_secondary }}
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Benefits -->
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Pilots Choose Bid Optimizer</h2>
+        </div>
+        
+        {% if key_benefits %}
+        <div class="cards-grid cards-grid-3">
+            {% for benefit in key_benefits %}
+            <div class="card card-feature">
+                <div class="card-feature-icon">
+                    <i class="{{ benefit.icon }}"></i>
+                </div>
+                <h3 class="card-title">{{ benefit.title }}</h3>
+                <p class="card-description">{{ benefit.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- How It Works -->
+{% if how_it_works %}
+<section class="section bg-gray-50">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p class="text-xl text-gray-600">From upload to optimized bid in four simple steps</p>
+        </div>
+        
+        <div class="cards-grid cards-grid-4">
+            {% for step in how_it_works %}
+            <div class="card text-center">
+                <div class="w-16 h-16 bg-primary-blue text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                    {{ step.step }}
+                </div>
+                <h3 class="card-title">{{ step.title }}</h3>
+                <p class="card-description">{{ step.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Testimonials -->
+{% if testimonials %}
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">What Pilots Are Saying</h2>
+        </div>
+        
+        <div class="cards-grid cards-grid-2">
+            {% for testimonial in testimonials %}
+            <div class="card card-testimonial">
+                <div class="card-testimonial-content">
+                    "{{ testimonial.quote }}"
+                </div>
+                <div class="card-testimonial-author">
+                    <div class="card-testimonial-avatar">
+                        {{ testimonial.author.split()[0][0] }}{{ testimonial.author.split()[1][0] if testimonial.author.split()|length > 1 else '' }}
+                    </div>
+                    <div class="card-testimonial-details">
+                        <h4>{{ testimonial.author }}</h4>
+                        <p>{{ testimonial.airline }} • {{ testimonial.years_experience }} years</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="section bg-primary-blue text-white">
+    <div class="container text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to Optimize Your Bids?</h2>
+        <p class="text-xl mb-8 opacity-90">
+            Join thousands of pilots using AI to win better schedules
+        </p>
+        <div class="flex justify-center gap-4">
+            <a href="/signup" class="btn btn-lg" style="background: white; color: var(--primary-blue);">
+                Start Free Trial
+            </a>
+            {% if pricing %}
+            <span class="text-lg opacity-90">Only ${{ pricing.monthly }}/month</span>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

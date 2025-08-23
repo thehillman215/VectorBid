@@ -1,0 +1,64 @@
+{% extends "layouts/marketing.html" %}
+
+{% block title %}{{ page_title }} - VectorBid{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ page_title }}</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">{{ page_description }}</p>
+        </div>
+        
+        <div class="cards-grid cards-grid-3">
+            {% for plan in plans %}
+            <div class="card card-pricing {% if plan.popular %}card-pricing-popular{% endif %}">
+                {% if plan.popular %}
+                <div class="card-pricing-badge">Most Popular</div>
+                {% endif %}
+                
+                <h3 class="card-title">{{ plan.name }}</h3>
+                <div class="card-pricing-price">
+                    {% if plan.price == "Custom" %}
+                    <span>{{ plan.price }}</span>
+                    {% else %}
+                    <span class="currency">$</span>{{ plan.price }}<span class="period">/{{ plan.period }}</span>
+                    {% endif %}
+                </div>
+                <p class="card-description">{{ plan.description }}</p>
+                
+                <ul class="card-pricing-features">
+                    {% for feature in plan.features %}
+                    <li>{{ feature }}</li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="card-footer">
+                    <a href="{{ plan.cta_url }}" class="btn {% if plan.popular %}btn-primary{% else %}btn-secondary{% endif %} btn-block">
+                        {{ plan.cta }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if faq %}
+        <div class="section-sm">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            </div>
+            
+            <div class="max-w-3xl mx-auto">
+                {% for item in faq %}
+                <div class="card mb-4">
+                    <h3 class="font-semibold text-gray-900 mb-2">{{ item.question }}</h3>
+                    <p class="text-gray-600">{{ item.answer }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

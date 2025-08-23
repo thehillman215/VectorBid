@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Schema - VectorBid Database</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        /* Salesforce Lightning Design System */
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Salesforce Sans', 'SalesforceSans-Regular', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; 
+            background: #f3f2f2;
+            color: #080707;
+        }
+        
+        .slds-global-header {
+            background: #16325c;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        .slds-global-header__logo {
+            font-size: 18px;
+            font-weight: 700;
+            margin-right: 24px;
+        }
+        
+        .slds-global-header__icon {
+            margin-right: 8px;
+            color: #5eb3fd;
+        }
+        
+        .slds-page-content {
+            padding: 24px;
+        }
+        
+        .slds-page-header {
+            background: white;
+            padding: 24px;
+            border-radius: 4px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .slds-page-header__title {
+            font-size: 28px;
+            font-weight: 300;
+            margin: 0 0 8px 0;
+            color: #080707;
+        }
+        
+        .slds-page-header__meta {
+            color: #706e6b;
+            font-size: 14px;
+        }
+        
+        .slds-card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .slds-card__header {
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid #dddbda;
+        }
+        
+        .slds-card__header-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #080707;
+            margin: 0;
+        }
+        
+        .slds-card__body {
+            padding: 24px;
+        }
+        
+        .slds-breadcrumb {
+            padding: 8px 0;
+            font-size: 12px;
+        }
+        
+        .slds-breadcrumb a {
+            color: #0176d3;
+            text-decoration: none;
+        }
+        
+        .slds-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .slds-button {
+            background: transparent;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            color: #0176d3;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 400;
+            padding: 6px 12px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.15s linear;
+            display: inline-block;
+        }
+        
+        .slds-button:hover {
+            background: #f4f6fe;
+            border-color: #0176d3;
+            text-decoration: none;
+        }
+        
+        /* Professional Schema Visualization - LucidChart Style */
+        .schema-container {
+            display: flex;
+            height: 700px;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+        
+        .object-sidebar {
+            width: 280px;
+            background: #f8f9fa;
+            border-right: 1px solid #dddbda;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #dddbda;
+            background: #ffffff;
+        }
+        
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #080707;
+            margin: 0 0 8px 0;
+        }
+        
+        .object-search {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #c9c7c5;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        
+        .object-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        
+        .object-item:hover {
+            background: #f4f6fe;
+        }
+        
+        .object-item.selected {
+            background: #e1f5fe;
+            border: 1px solid #0176d3;
+        }
+        
+        .object-toggle {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #c9c7c5;
+            border-radius: 3px;
+            position: relative;
+            background: white;
+        }
+        
+        .object-toggle.visible {
+            background: #0176d3;
+            border-color: #0176d3;
+        }
+        
+        .object-toggle.visible::after {
+            content: '✓';
+            position: absolute;
+            top: -2px;
+            left: 2px;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .object-info {
+            flex: 1;
+        }
+        
+        .object-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #080707;
+        }
+        
+        .object-details {
+            font-size: 10px;
+            color: #706e6b;
+            margin-top: 2px;
+        }
+        
+        .object-stats {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        
+        .stat-badge {
+            background: #ecebea;
+            color: #514f4d;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .sidebar-controls {
+            padding: 12px;
+            border-top: 1px solid #dddbda;
+            background: #ffffff;
+        }
+        
+        .control-button {
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            color: #0176d3;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: all 0.15s ease;
+        }
+        
+        .control-button:hover {
+            background: #f4f6fe;
+            border-color: #0176d3;
+        }
+        
+        #schema-canvas {
+            flex: 1;
+            position: relative;
+            background: #ffffff;
+        }
+        
+        .table-container {
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .table-container:hover {
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+        }
+        
+        .table-container.selected {
+            filter: drop-shadow(0 4px 16px rgba(1,118,211,0.3));
+        }
+        
+        /* Table Box Styling */
+        .table-box {
+            fill: #ffffff;
+            stroke: #c9c7c5;
+            stroke-width: 1.5;
+            rx: 6;
+            ry: 6;
+        }
+        
+        .table-box:hover {
+            stroke: #0176d3;
+            stroke-width: 2;
+        }
+        
+        .table-header-rect {
+            fill: #f4f6fe;
+            stroke: none;
+            rx: 6;
+            ry: 6;
+        }
+        
+        .table-header-separator {
+            stroke: #c9c7c5;
+            stroke-width: 1;
+        }
+        
+        .table-title {
+            fill: #080707;
+            font-size: 14px;
+            font-weight: 700;
+            text-anchor: middle;
+        }
+        
+        .table-type {
+            fill: #706e6b;
+            font-size: 10px;
+            font-weight: 400;
+            text-anchor: middle;
+        }
+        
+        .field-row {
+            fill: transparent;
+        }
+        
+        .field-row:hover {
+            fill: #f8f9fa;
+        }
+        
+        .field-name {
+            fill: #080707;
+            font-size: 11px;
+            font-weight: 400;
+        }
+        
+        .field-type {
+            fill: #706e6b;
+            font-size: 10px;
+            font-weight: 400;
+        }
+        
+        .field-key-indicator {
+            fill: #0176d3;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        
+        .field-fk-indicator {
+            fill: #4bca81;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        
+        /* Enhanced Relationship Lines - Data Focused */
+        .relationship-line {
+            fill: none;
+            stroke-width: 2;
+            opacity: 0.9;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .relationship-line.one-to-one {
+            stroke: #0176d3;
+            stroke-dasharray: none;
+        }
+        
+        .relationship-line.one-to-many {
+            stroke: #4bca81;
+            stroke-width: 2.5;
+        }
+        
+        .relationship-line.many-to-many {
+            stroke: #ff6b35;
+            stroke-width: 3;
+            stroke-dasharray: 5,5;
+        }
+        
+        .relationship-line.cascade-delete {
+            stroke: #c23934;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 3px rgba(195, 57, 52, 0.3));
+        }
+        
+        .relationship-line:hover {
+            opacity: 1;
+            stroke-width: 4;
+            filter: drop-shadow(0 0 6px rgba(0,0,0,0.3));
+        }
+        
+        .relationship-arrow {
+            opacity: 0.9;
+            transition: all 0.2s ease;
+        }
+        
+        .relationship-arrow.one-to-one { fill: #0176d3; }
+        .relationship-arrow.one-to-many { fill: #4bca81; }
+        .relationship-arrow.many-to-many { fill: #ff6b35; }
+        .relationship-arrow.cascade-delete { fill: #c23934; }
+        
+        /* Enhanced Labels */
+        .relationship-info-panel {
+            fill: white;
+            stroke: #dddbda;
+            stroke-width: 1;
+            rx: 6;
+            opacity: 0.95;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        
+        .relationship-field-label {
+            fill: #080707;
+            font-size: 11px;
+            font-weight: 600;
+            text-anchor: middle;
+        }
+        
+        .relationship-type-label {
+            fill: #706e6b;
+            font-size: 9px;
+            font-weight: 500;
+            text-anchor: middle;
+        }
+        
+        .cardinality-indicator {
+            fill: #514f4d;
+            font-size: 12px;
+            font-weight: 700;
+            text-anchor: middle;
+        }
+        
+        /* Connection points */
+        .connection-point {
+            fill: #0176d3;
+            stroke: white;
+            stroke-width: 2;
+            r: 4;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .relationship-line:hover + .connection-point,
+        .connection-point:hover {
+            opacity: 1;
+        }
+        
+        /* Minimap */
+        .minimap {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 150px;
+            height: 100px;
+            border: 1px solid #c9c7c5;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.9);
+            pointer-events: none;
+        }
+        
+        .minimap-viewport {
+            fill: rgba(1,118,211,0.2);
+            stroke: #0176d3;
+            stroke-width: 1;
+        }
+        
+        .controls {
+            margin-bottom: 16px;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Salesforce Global Header -->
+    <div class="slds-global-header">
+        <div class="slds-global-header__logo">
+            <i class="fas fa-database slds-global-header__icon"></i>
+            VectorBid Database
+        </div>
+        <div style="margin-left: auto; font-size: 14px;">
+            <i class="fas fa-project-diagram" style="margin-right: 4px;"></i>
+            Schema View
+        </div>
+    </div>
+
+    <div class="slds-page-content">
+        <!-- Breadcrumb -->
+        <nav class="slds-breadcrumb">
+            <a href="/db">
+                <i class="fas fa-home" style="margin-right: 4px;"></i>
+                Database Objects
+            </a>
+            <span style="margin: 0 8px;">/</span>
+            <span>Schema</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="slds-page-header">
+            <h1 class="slds-page-header__title">Database Schema</h1>
+            <p class="slds-page-header__meta">
+                {{ tables|length }} objects • {{ relationships|length }} relationships • Visual relationship map
+            </p>
+        </div>
+
+        <!-- Controls -->
+        <div class="slds-card">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-sliders-h" style="margin-right: 8px; color: #0176d3;"></i>
+                    View Options
+                </h2>
+            </div>
+            <div class="slds-card__body">
+                <div class="controls">
+                    <button id="reset-zoom" class="slds-button">
+                        <i class="fas fa-expand-arrows-alt" style="margin-right: 4px;"></i>
+                        Reset View
+                    </button>
+                    <button id="center-schema" class="slds-button" style="margin-left: 8px;">
+                        <i class="fas fa-crosshairs" style="margin-right: 4px;"></i>
+                        Center
+                    </button>
+                    <button id="toggle-labels" class="slds-button" style="margin-left: 8px;">
+                        <i class="fas fa-tags" style="margin-right: 4px;"></i>
+                        Toggle Labels
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schema Visualization -->
+        <div class="slds-card">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-project-diagram" style="margin-right: 8px; color: #0176d3;"></i>
+                    Relationship Diagram
+                </h2>
+            </div>
+            <div class="slds-card__body">
+                <div class="schema-container">
+                    <!-- Object List Sidebar -->
+                    <div class="object-sidebar">
+                        <div class="sidebar-header">
+                            <div class="sidebar-title">Database Objects</div>
+                            <input type="text" class="object-search" placeholder="Search objects..." id="object-search">
+                        </div>
+                        <div class="sidebar-content" id="object-list">
+                            <!-- Object list will be populated by JavaScript -->
+                        </div>
+                        <div class="sidebar-controls">
+                            <button class="control-button" id="show-all-objects">Show All Objects</button>
+                            <button class="control-button" id="hide-all-objects">Hide All Objects</button>
+                            <div style="margin: 8px 0; font-size: 11px; font-weight: 600; color: #706e6b;">DATA LAYOUTS</div>
+                            <button class="control-button" id="arrange-data-flow">Data Flow View</button>
+                            <button class="control-button" id="arrange-domain">Domain Grouping</button>
+                            <button class="control-button" id="arrange-dependency">Dependency Chain</button>
+                            <button class="control-button" id="arrange-hub">Hub & Spoke</button>
+                            <button class="control-button" id="arrange-timeline">Audit Timeline</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Schema Canvas -->
+                    <div id="schema-canvas"></div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #0176d3;"></div>
+                        <span>One-to-One</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4bca81;"></div>
+                        <span>One-to-Many</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff6b35;"></div>
+                        <span>Many-to-Many</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #c23934;"></div>
+                        <span>Cascade Delete</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div>
+            <a href="/db" class="slds-button">
+                <i class="fas fa-arrow-left" style="margin-right: 4px;"></i>
+                Back to Database Objects
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Professional Schema Visualization - LucidChart Style
+        let relationships = {{ relationships | safe }};
+        let tables = {{ tables | safe }};
+        let selectedTable = null;
+        let tableColumns = {};
+        let objectVisibility = {};
+        let tablePositions = {};
+        
+        // Initialize visibility - all tables visible by default
+        tables.forEach(table => {
+            objectVisibility[table] = true;
+        });
+        
+        // Set up SVG with proper dimensions
+        const containerElement = document.getElementById("schema-canvas");
+        const width = containerElement.clientWidth - 280; // Account for sidebar
+        const height = 700;
+        
+        const svg = d3.select("#schema-canvas")
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", height);
+        
+        // Create zoom behavior with smoother controls
+        const zoom = d3.zoom()
+            .scaleExtent([0.2, 2])
+            .on("zoom", (event) => {
+                mainGroup.attr("transform", event.transform);
+                updateMinimap();
+            });
+        
+        svg.call(zoom);
+        
+        // Main drawing group
+        const mainGroup = svg.append("g").attr("class", "main-group");
+        
+        // Background for click-to-deselect
+        svg.append("rect")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("fill", "transparent")
+            .on("click", () => deselectAll());
+        
+        // Load table schemas first
+        async function loadTableSchemas() {
+            const schemaPromises = tables.map(async table => {
+                try {
+                    const response = await fetch(`/api/table-schema/${table}`);
+                    if (response.ok) {
+                        const schema = await response.json();
+                        tableColumns[table] = schema.columns || [];
+                    } else {
+                        // Fallback - generate mock columns for demo
+                        tableColumns[table] = generateMockColumns(table);
+                    }
+                } catch (error) {
+                    console.warn(`Could not load schema for ${table}, using mock data`);
+                    tableColumns[table] = generateMockColumns(table);
+                }
+            });
+            await Promise.all(schemaPromises);
+            populateObjectList();
+        }
+
+        // Populate the sidebar object list
+        function populateObjectList() {
+            const objectList = document.getElementById('object-list');
+            objectList.innerHTML = '';
+            
+            tables.forEach(table => {
+                const columns = tableColumns[table] || [];
+                const relationshipCount = relationships.filter(r => 
+                    r.from_table === table || r.to_table === table
+                ).length;
+                
+                const objectItem = document.createElement('div');
+                objectItem.className = 'object-item';
+                objectItem.dataset.table = table;
+                
+                objectItem.innerHTML = `
+                    <div class="object-toggle ${objectVisibility[table] ? 'visible' : ''}" data-table="${table}"></div>
+                    <div class="object-info">
+                        <div class="object-name">${table.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                        <div class="object-details">${table}</div>
+                        <div class="object-stats">
+                            <span class="stat-badge">${columns.length} fields</span>
+                            <span class="stat-badge">${relationshipCount} relations</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Toggle visibility when clicking the checkbox
+                const toggle = objectItem.querySelector('.object-toggle');
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleObjectVisibility(table);
+                });
+                
+                // Select object when clicking the item
+                objectItem.addEventListener('click', () => {
+                    selectObjectFromSidebar(table);
+                });
+                
+                objectList.appendChild(objectItem);
+            });
+        }
+        
+        // Toggle object visibility
+        function toggleObjectVisibility(tableName) {
+            objectVisibility[tableName] = !objectVisibility[tableName];
+            
+            // Update sidebar toggle
+            const toggle = document.querySelector(`[data-table="${tableName}"].object-toggle`);
+            toggle.classList.toggle('visible', objectVisibility[tableName]);
+            
+            // Update schema visualization
+            updateSchemaVisibility();
+        }
+        
+        // Update schema visualization based on visibility settings
+        function updateSchemaVisibility() {
+            mainGroup.selectAll('.table-container')
+                .style('display', d => objectVisibility[d.name] ? 'block' : 'none');
+            
+            // Update relationships - only show if both tables are visible
+            mainGroup.selectAll('.relationship-line')
+                .style('display', function() {
+                    const rel = d3.select(this).datum();
+                    if (!rel) return 'none';
+                    const visible = objectVisibility[rel.from_table] && objectVisibility[rel.to_table];
+                    return visible ? 'block' : 'none';
+                });
+                
+            mainGroup.selectAll('.relationship-label, .relationship-label-bg')
+                .style('display', function() {
+                    const rel = d3.select(this).datum();
+                    if (!rel) return 'none';
+                    const visible = objectVisibility[rel.from_table] && objectVisibility[rel.to_table];
+                    return visible ? 'block' : 'none';
+                });
+                
+            // Force relationship line update after visibility change
+            setTimeout(() => {
+                updateRelationshipLines();
+            }, 50);
+        }
+        
+        // Select object from sidebar
+        function selectObjectFromSidebar(tableName) {
+            // Clear previous selection in sidebar
+            document.querySelectorAll('.object-item.selected').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Select in sidebar
+            const objectItem = document.querySelector(`[data-table="${tableName}"].object-item`);
+            if (objectItem) {
+                objectItem.classList.add('selected');
+            }
+            
+            // Select in schema
+            const tableElement = mainGroup.selectAll('.table-container')
+                .filter(d => d.name === tableName)
+                .node();
+            
+            if (tableElement) {
+                const tableData = d3.select(tableElement).datum();
+                selectTable(tableData, tableElement);
+                
+                // Pan to the selected table
+                panToTable(tableData);
+            }
+        }
+        
+        function generateMockColumns(tableName) {
+            // Generate realistic columns based on table name patterns
+            const baseColumns = [
+                { name: 'id', type: 'uuid', is_primary: true, is_foreign: false },
+                { name: 'created_at', type: 'timestamp', is_primary: false, is_foreign: false },
+                { name: 'updated_at', type: 'timestamp', is_primary: false, is_foreign: false }
+            ];
+            
+            // Add table-specific columns based on name
+            if (tableName.includes('user')) {
+                baseColumns.splice(1, 0, 
+                    { name: 'email', type: 'varchar', is_primary: false, is_foreign: false },
+                    { name: 'username', type: 'varchar', is_primary: false, is_foreign: false }
+                );
+            } else if (tableName.includes('pilot')) {
+                baseColumns.splice(1, 0,
+                    { name: 'pilot_id', type: 'varchar', is_primary: false, is_foreign: false },
+                    { name: 'user_id', type: 'uuid', is_primary: false, is_foreign: true }
+                );
+            } else if (tableName.includes('contract')) {
+                baseColumns.splice(1, 0,
+                    { name: 'airline', type: 'varchar', is_primary: false, is_foreign: true },
+                    { name: 'status', type: 'varchar', is_primary: false, is_foreign: false }
+                );
+            }
+            
+            return baseColumns;
+        }
+        
+        // Create table visualization
+        function createTableBox(tableData, x, y) {
+            const columns = tableColumns[tableData.name] || [];
+            const rowHeight = 18;
+            const headerHeight = 40;
+            const boxWidth = 200;
+            const boxHeight = headerHeight + (columns.length * rowHeight) + 10;
+            
+            const tableGroup = mainGroup.append("g")
+                .attr("class", "table-container")
+                .attr("transform", `translate(${x}, ${y})`)
+                .datum({...tableData, x, y, width: boxWidth, height: boxHeight});
+            
+            // Main table box
+            tableGroup.append("rect")
+                .attr("class", "table-box")
+                .attr("width", boxWidth)
+                .attr("height", boxHeight)
+                .attr("rx", 6);
+            
+            // Header area
+            tableGroup.append("rect")
+                .attr("class", "table-header-rect")
+                .attr("width", boxWidth)
+                .attr("height", headerHeight)
+                .attr("rx", 6);
+            
+            // Header separator line
+            tableGroup.append("line")
+                .attr("class", "table-header-separator")
+                .attr("x1", 0)
+                .attr("y1", headerHeight)
+                .attr("x2", boxWidth)
+                .attr("y2", headerHeight);
+            
+            // Table title
+            tableGroup.append("text")
+                .attr("class", "table-title")
+                .attr("x", boxWidth / 2)
+                .attr("y", 20)
+                .text(tableData.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+            
+            // Table type
+            tableGroup.append("text")
+                .attr("class", "table-type")
+                .attr("x", boxWidth / 2)
+                .attr("y", 32)
+                .text("Standard Object");
+            
+            // Field rows
+            columns.forEach((column, index) => {
+                const fieldY = headerHeight + 8 + (index * rowHeight);
+                
+                // Field row background (for hover)
+                tableGroup.append("rect")
+                    .attr("class", "field-row")
+                    .attr("x", 2)
+                    .attr("y", fieldY - 10)
+                    .attr("width", boxWidth - 4)
+                    .attr("height", rowHeight - 2)
+                    .attr("rx", 2);
+                
+                // Key indicators
+                let keyIndicator = "";
+                if (column.is_primary) keyIndicator = "🔑";
+                else if (column.is_foreign) keyIndicator = "🔗";
+                
+                if (keyIndicator) {
+                    tableGroup.append("text")
+                        .attr("class", column.is_primary ? "field-key-indicator" : "field-fk-indicator")
+                        .attr("x", 8)
+                        .attr("y", fieldY)
+                        .text(keyIndicator);
+                }
+                
+                // Field name
+                tableGroup.append("text")
+                    .attr("class", "field-name")
+                    .attr("x", keyIndicator ? 24 : 8)
+                    .attr("y", fieldY)
+                    .text(column.name);
+                
+                // Field type
+                tableGroup.append("text")
+                    .attr("class", "field-type")
+                    .attr("x", boxWidth - 8)
+                    .attr("y", fieldY)
+                    .attr("text-anchor", "end")
+                    .text(column.type.toUpperCase());
+            });
+            
+            // Add drag behavior
+            const drag = d3.drag()
+                .on("start", function(event, d) {
+                    d3.select(this).raise();
+                    event.sourceEvent.stopPropagation();
+                })
+                .on("drag", function(event, d) {
+                    d.x = event.x;
+                    d.y = event.y;
+                    tablePositions[d.name] = { x: d.x, y: d.y };
+                    
+                    d3.select(this).attr("transform", `translate(${d.x}, ${d.y})`);
+                    updateRelationshipLines();
+                })
+                .on("end", function(event, d) {
+                    // Save position for persistence
+                    tablePositions[d.name] = { x: d.x, y: d.y };
+                });
+
+            // Click handler
+            tableGroup
+                .style("cursor", "move")
+                .call(drag)
+                .on("click", function(event, d) {
+                    if (event.defaultPrevented) return; // Ignore drag
+                    event.stopPropagation();
+                    selectTable(d, this);
+                })
+                .on("dblclick", function(event, d) {
+                    event.stopPropagation();
+                    window.open(`/db/${d.name}`, '_blank');
+                });
+            
+            return tableGroup;
+        }
+        
+        // Create enhanced relationship lines with data meaning
+        function createRelationshipLines() {
+            const relationshipGroup = mainGroup.append("g").attr("class", "relationships");
+            
+            relationships.forEach(rel => {
+                const relInfo = analyzeRelationship(rel);
+                
+                // Enhanced relationship line with data-aware styling
+                const line = relationshipGroup.append("path")
+                    .attr("class", `relationship-line ${relInfo.cssClass}`)
+                    .attr("marker-end", `url(#arrow-${relInfo.arrowType})`)
+                    .datum(rel)
+                    .on("mouseover", function(event, d) {
+                        showRelationshipTooltip(event, d, relInfo);
+                    })
+                    .on("mouseout", hideRelationshipTooltip)
+                    .on("click", function(event, d) {
+                        highlightDataPath(d);
+                    });
+                
+                // Connection points
+                const sourcePoint = relationshipGroup.append("circle")
+                    .attr("class", "connection-point")
+                    .datum(rel);
+                    
+                const targetPoint = relationshipGroup.append("circle")
+                    .attr("class", "connection-point")
+                    .datum(rel);
+                
+                // Enhanced information panel
+                const infoPanel = relationshipGroup.append("g")
+                    .attr("class", "relationship-info")
+                    .datum(rel);
+                
+                // Info panel background
+                infoPanel.append("rect")
+                    .attr("class", "relationship-info-panel")
+                    .attr("width", 120)
+                    .attr("height", 40)
+                    .attr("rx", 6);
+                
+                // Field relationship
+                infoPanel.append("text")
+                    .attr("class", "relationship-field-label")
+                    .attr("x", 60)
+                    .attr("y", 15)
+                    .text(`${rel.from_column}`);
+                
+                // Relationship type
+                infoPanel.append("text")
+                    .attr("class", "relationship-type-label")
+                    .attr("x", 60)
+                    .attr("y", 28)
+                    .text(relInfo.description);
+                
+                // Cardinality indicators
+                relationshipGroup.append("text")
+                    .attr("class", "cardinality-indicator")
+                    .datum(rel)
+                    .text(relInfo.sourceCardinality);
+                    
+                relationshipGroup.append("text")
+                    .attr("class", "cardinality-indicator")
+                    .datum(rel)
+                    .text(relInfo.targetCardinality);
+            });
+            
+            updateRelationshipLines();
+        }
+        
+        // Analyze relationship to determine its data meaning
+        function analyzeRelationship(rel) {
+            const isCascade = rel.delete_rule === 'CASCADE';
+            const fieldName = rel.from_column.toLowerCase();
+            
+            // Determine relationship type and cardinality
+            let relationshipType = 'one-to-many'; // Default
+            let sourceCardinality = '1';
+            let targetCardinality = 'M';
+            let description = 'References';
+            let cssClass = 'one-to-many';
+            let arrowType = 'one-to-many';
+            
+            // Analyze based on field patterns and delete rules
+            if (isCascade) {
+                cssClass = 'cascade-delete';
+                arrowType = 'cascade-delete';
+                description = 'Owns (Cascade)';
+                relationshipType = 'composition';
+            } else if (fieldName.includes('id') || fieldName.endsWith('_id')) {
+                if (fieldName === 'id') {
+                    relationshipType = 'one-to-one';
+                    cssClass = 'one-to-one';
+                    arrowType = 'one-to-one';
+                    sourceCardinality = '1';
+                    targetCardinality = '1';
+                    description = 'Extends';
+                } else {
+                    relationshipType = 'one-to-many';
+                    cssClass = 'one-to-many';
+                    arrowType = 'one-to-many';
+                    description = 'Belongs to';
+                }
+            }
+            
+            // Check for many-to-many patterns (junction tables)
+            if (isJunctionTable(rel.from_table)) {
+                relationshipType = 'many-to-many';
+                cssClass = 'many-to-many';
+                arrowType = 'many-to-many';
+                sourceCardinality = 'M';
+                targetCardinality = 'M';
+                description = 'Many-to-Many';
+            }
+            
+            return {
+                relationshipType,
+                cssClass,
+                arrowType,
+                sourceCardinality,
+                targetCardinality,
+                description,
+                isCascade
+            };
+        }
+        
+        // Check if table is a junction/bridge table
+        function isJunctionTable(tableName) {
+            const junctionPatterns = ['_junction', '_bridge', '_link', '_mapping', 'junction_', 'bridge_'];
+            const hasMultipleIds = relationships.filter(r => 
+                r.from_table === tableName && r.from_column.endsWith('_id')
+            ).length >= 2;
+            
+            return junctionPatterns.some(pattern => tableName.includes(pattern)) || hasMultipleIds;
+        }
+        
+        // Show relationship tooltip
+        function showRelationshipTooltip(event, rel, relInfo) {
+            // Create tooltip with relationship details
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "relationship-tooltip")
+                .style("position", "absolute")
+                .style("background", "white")
+                .style("border", "1px solid #ccc")
+                .style("border-radius", "4px")
+                .style("padding", "8px")
+                .style("font-size", "12px")
+                .style("box-shadow", "0 2px 8px rgba(0,0,0,0.2)")
+                .style("pointer-events", "none")
+                .style("opacity", 0);
+            
+            tooltip.html(`
+                <strong>${rel.from_table}.${rel.from_column}</strong> → <strong>${rel.to_table}</strong><br>
+                Type: ${relInfo.description}<br>
+                Cardinality: ${relInfo.sourceCardinality}:${relInfo.targetCardinality}<br>
+                Delete: ${rel.delete_rule}
+            `);
+            
+            tooltip.style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 10) + "px")
+                .transition().duration(200).style("opacity", 1);
+        }
+        
+        // Hide relationship tooltip
+        function hideRelationshipTooltip() {
+            d3.selectAll(".relationship-tooltip").remove();
+        }
+        
+        // Highlight data path
+        function highlightDataPath(rel) {
+            // Reset previous highlights
+            mainGroup.selectAll('.table-container').classed('highlighted', false);
+            mainGroup.selectAll('.relationship-line').classed('highlighted', false);
+            
+            // Highlight related tables and relationships
+            mainGroup.selectAll('.table-container')
+                .classed('highlighted', d => d.name === rel.from_table || d.name === rel.to_table);
+                
+            mainGroup.selectAll('.relationship-line')
+                .classed('highlighted', d => d === rel);
+        }
+        
+        // Update relationship line positions (called during drag)
+        function updateRelationshipLines() {
+            const relationshipGroup = mainGroup.select('.relationships');
+            if (relationshipGroup.empty()) return;
+            
+            relationships.forEach(rel => {
+                // Skip if either table is not visible
+                if (!objectVisibility[rel.from_table] || !objectVisibility[rel.to_table]) return;
+                
+                const sourceTable = mainGroup.selectAll(".table-container").data().find(d => d.name === rel.from_table);
+                const targetTable = mainGroup.selectAll(".table-container").data().find(d => d.name === rel.to_table);
+                
+                if (!sourceTable || !targetTable) return;
+                
+                // Calculate optimal connection points
+                const connectionPoints = calculateOptimalConnectionPoints(sourceTable, targetTable);
+                
+                // Create smooth curved line path
+                const pathData = createSmoothPath(connectionPoints.source, connectionPoints.target);
+                
+                // Update line
+                relationshipGroup.selectAll('.relationship-line')
+                    .filter(d => d && d.from_table === rel.from_table && d.to_table === rel.to_table)
+                    .attr("d", pathData);
+                
+                // Update label position
+                const labelPos = calculateLabelPosition(connectionPoints.source, connectionPoints.target);
+                
+                relationshipGroup.selectAll('.relationship-label-bg')
+                    .filter(d => d && d.from_table === rel.from_table && d.to_table === rel.to_table)
+                    .attr("x", labelPos.x - 30)
+                    .attr("y", labelPos.y - 8)
+                    .attr("width", 60)
+                    .attr("height", 16);
+                    
+                relationshipGroup.selectAll('.relationship-label')
+                    .filter(d => d && d.from_table === rel.from_table && d.to_table === rel.to_table)
+                    .attr("x", labelPos.x)
+                    .attr("y", labelPos.y + 4);
+            });
+        }
+        
+        // Calculate optimal connection points to avoid overlaps
+        function calculateOptimalConnectionPoints(sourceTable, targetTable) {
+            const source = {
+                x: sourceTable.x,
+                y: sourceTable.y,
+                width: sourceTable.width,
+                height: sourceTable.height
+            };
+            
+            const target = {
+                x: targetTable.x,
+                y: targetTable.y,
+                width: targetTable.width,
+                height: targetTable.height
+            };
+            
+            // Calculate center points
+            const sourceCenterX = source.x + source.width / 2;
+            const sourceCenterY = source.y + source.height / 2;
+            const targetCenterX = target.x + target.width / 2;
+            const targetCenterY = target.y + target.height / 2;
+            
+            // Determine best connection points based on relative positions
+            let sourcePoint, targetPoint;
+            
+            if (sourceCenterX < targetCenterX) {
+                // Source is to the left of target
+                sourcePoint = { x: source.x + source.width, y: sourceCenterY };
+                targetPoint = { x: target.x, y: targetCenterY };
+            } else {
+                // Source is to the right of target
+                sourcePoint = { x: source.x, y: sourceCenterY };
+                targetPoint = { x: target.x + target.width, y: targetCenterY };
+            }
+            
+            return { source: sourcePoint, target: targetPoint };
+        }
+        
+        // Create smooth curved path between two points
+        function createSmoothPath(source, target) {
+            const dx = target.x - source.x;
+            const dy = target.y - source.y;
+            
+            // Control point offset based on distance
+            const offset = Math.min(Math.abs(dx) * 0.5, 100);
+            
+            const cp1x = source.x + (dx > 0 ? offset : -offset);
+            const cp1y = source.y;
+            const cp2x = target.x + (dx > 0 ? -offset : offset);
+            const cp2y = target.y;
+            
+            return `M ${source.x} ${source.y} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${target.x} ${target.y}`;
+        }
+        
+        // Calculate label position along the curve
+        function calculateLabelPosition(source, target) {
+            return {
+                x: (source.x + target.x) / 2,
+                y: (source.y + target.y) / 2 - 10
+            };
+        }
+        
+        // Define enhanced arrow markers for different relationship types
+        function createArrowMarkers() {
+            const defs = svg.append("defs");
+            
+            // One-to-One arrow
+            defs.append("marker")
+                .attr("id", "arrow-one-to-one")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 8)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("class", "relationship-arrow one-to-one");
+            
+            // One-to-Many arrow (filled triangle)
+            defs.append("marker")
+                .attr("id", "arrow-one-to-many")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 8)
+                .attr("refY", 0)
+                .attr("markerWidth", 7)
+                .attr("markerHeight", 7)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5Z")
+                .attr("class", "relationship-arrow one-to-many");
+            
+            // Many-to-Many arrow (diamond)
+            defs.append("marker")
+                .attr("id", "arrow-many-to-many")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 8)
+                .attr("refY", 0)
+                .attr("markerWidth", 8)
+                .attr("markerHeight", 8)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,0L5,-3L10,0L5,3Z")
+                .attr("class", "relationship-arrow many-to-many");
+            
+            // Cascade Delete arrow (double arrow)
+            defs.append("marker")
+                .attr("id", "arrow-cascade-delete")
+                .attr("viewBox", "0 -5 15 10")
+                .attr("refX", 12)
+                .attr("refY", 0)
+                .attr("markerWidth", 8)
+                .attr("markerHeight", 8)
+                .attr("orient", "auto")
+                .append("g")
+                .selectAll("path")
+                .data([
+                    "M0,-5L8,0L0,5",
+                    "M5,-5L13,0L5,5"
+                ])
+                .enter()
+                .append("path")
+                .attr("d", d => d)
+                .attr("class", "relationship-arrow cascade-delete");
+        }
+        
+        // Layout algorithm - simple grid with relationship-aware positioning
+        function layoutTables() {
+            const padding = 50;
+            const cols = Math.ceil(Math.sqrt(tables.length));
+            const rows = Math.ceil(tables.length / cols);
+            
+            tables.forEach((table, index) => {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                
+                // Use saved position if available, otherwise use grid layout
+                const savedPos = tablePositions[table];
+                const x = savedPos ? savedPos.x : padding + col * 280;
+                const y = savedPos ? savedPos.y : padding + row * 200;
+                
+                createTableBox({ name: table, id: table }, x, y);
+            });
+        }
+        
+        // Pan to a specific table
+        function panToTable(tableData) {
+            const scale = d3.zoomTransform(svg.node()).k || 1;
+            const translateX = width / 2 - (tableData.x + tableData.width / 2) * scale;
+            const translateY = height / 2 - (tableData.y + tableData.height / 2) * scale;
+            
+            svg.transition().duration(500).call(
+                zoom.transform,
+                d3.zoomIdentity.translate(translateX, translateY).scale(scale)
+            );
+        }
+        
+        // Data-meaningful layout algorithms
+        function autoArrangeTables(layoutType = 'data-flow') {
+            const visibleTables = tables.filter(t => objectVisibility[t]);
+            const tableCount = visibleTables.length;
+            
+            if (tableCount === 0) return;
+            
+            let positions = [];
+            
+            switch (layoutType) {
+                case 'data-flow':
+                    positions = calculateDataFlowLayout(visibleTables);
+                    break;
+                case 'domain':
+                    positions = calculateDomainLayout(visibleTables);
+                    break;
+                case 'dependency':
+                    positions = calculateDependencyChainLayout(visibleTables);
+                    break;
+                case 'hub':
+                    positions = calculateHubSpokeLayout(visibleTables);
+                    break;
+                case 'timeline':
+                    positions = calculateTimelineLayout(visibleTables);
+                    break;
+                default:
+                    positions = calculateDataFlowLayout(visibleTables);
+            }
+            
+            // Apply positions with animation
+            positions.forEach(pos => {
+                const tableElement = mainGroup.selectAll('.table-container')
+                    .filter(d => d.name === pos.table);
+                
+                if (!tableElement.empty()) {
+                    const d = tableElement.datum();
+                    d.x = pos.x;
+                    d.y = pos.y;
+                    tablePositions[pos.table] = { x: pos.x, y: pos.y };
+                    
+                    tableElement.transition().duration(750)
+                        .attr("transform", `translate(${pos.x}, ${pos.y})`);
+                }
+            });
+            
+            // Update relationships after animation
+            setTimeout(() => {
+                updateRelationshipLines();
+            }, 800);
+        }
+        
+        // Data Flow Layout - Shows how data flows through the system
+        function calculateDataFlowLayout(visibleTables) {
+            const levels = calculateDataFlowLevels(visibleTables);
+            const maxLevel = Math.max(...Object.values(levels));
+            const padding = 80;
+            const levelWidth = 300;
+            
+            // Group tables by their data flow level
+            const levelGroups = {};
+            for (const table of visibleTables) {
+                const level = levels[table] || 0;
+                if (!levelGroups[level]) levelGroups[level] = [];
+                levelGroups[level].push(table);
+            }
+            
+            const positions = [];
+            
+            // Position tables from left (sources) to right (destinations)
+            Object.keys(levelGroups).sort((a, b) => parseInt(a) - parseInt(b)).forEach(level => {
+                const tablesInLevel = levelGroups[level];
+                const totalHeight = tablesInLevel.length * 180;
+                const startY = (height - totalHeight) / 2;
+                const x = padding + parseInt(level) * levelWidth;
+                
+                tablesInLevel.forEach((table, index) => {
+                    positions.push({
+                        table,
+                        x: x,
+                        y: startY + index * 180
+                    });
+                });
+            });
+            
+            return positions;
+        }
+        
+        // Calculate data flow levels (sources → processing → destinations)
+        function calculateDataFlowLevels(visibleTables) {
+            const levels = {};
+            const incomingCounts = {};
+            const outgoingCounts = {};
+            
+            // Initialize counts
+            visibleTables.forEach(table => {
+                incomingCounts[table] = 0;
+                outgoingCounts[table] = 0;
+            });
+            
+            // Count relationships
+            relationships.forEach(rel => {
+                if (visibleTables.includes(rel.from_table) && visibleTables.includes(rel.to_table)) {
+                    outgoingCounts[rel.from_table]++;
+                    incomingCounts[rel.to_table]++;
+                }
+            });
+            
+            // Assign levels: sources (0), processors (1), destinations (2)
+            visibleTables.forEach(table => {
+                if (incomingCounts[table] === 0 && outgoingCounts[table] > 0) {
+                    levels[table] = 0; // Source
+                } else if (incomingCounts[table] > 0 && outgoingCounts[table] === 0) {
+                    levels[table] = 2; // Destination
+                } else if (incomingCounts[table] > 0 && outgoingCounts[table] > 0) {
+                    levels[table] = 1; // Processor
+                } else {
+                    levels[table] = 1; // Standalone
+                }
+            });
+            
+            return levels;
+        }
+        
+        // Domain Layout - Groups tables by business domain
+        function calculateDomainLayout(visibleTables) {
+            const domains = classifyTablesByDomain(visibleTables);
+            const domainNames = Object.keys(domains);
+            const cols = Math.ceil(Math.sqrt(domainNames.length));
+            const positions = [];
+            
+            domainNames.forEach((domain, domainIndex) => {
+                const col = domainIndex % cols;
+                const row = Math.floor(domainIndex / cols);
+                const domainX = 100 + col * 400;
+                const domainY = 100 + row * 350;
+                
+                domains[domain].forEach((table, tableIndex) => {
+                    positions.push({
+                        table,
+                        x: domainX + (tableIndex % 2) * 200,
+                        y: domainY + Math.floor(tableIndex / 2) * 120
+                    });
+                });
+            });
+            
+            return positions;
+        }
+        
+        // Classify tables by business domain
+        function classifyTablesByDomain(visibleTables) {
+            const domains = {
+                'User Management': [],
+                'Security & Audit': [],
+                'Contracts': [],
+                'Operations': [],
+                'System': []
+            };
+            
+            visibleTables.forEach(table => {
+                const tableLower = table.toLowerCase();
+                if (tableLower.includes('user') || tableLower.includes('pilot')) {
+                    domains['User Management'].push(table);
+                } else if (tableLower.includes('security') || tableLower.includes('audit') || tableLower.includes('log')) {
+                    domains['Security & Audit'].push(table);
+                } else if (tableLower.includes('contract') || tableLower.includes('agreement')) {
+                    domains['Contracts'].push(table);
+                } else if (tableLower.includes('session') || tableLower.includes('preference')) {
+                    domains['Operations'].push(table);
+                } else {
+                    domains['System'].push(table);
+                }
+            });
+            
+            // Remove empty domains
+            Object.keys(domains).forEach(domain => {
+                if (domains[domain].length === 0) {
+                    delete domains[domain];
+                }
+            });
+            
+            return domains;
+        }
+        
+        // Dependency Chain Layout - Shows clear dependency chains
+        function calculateDependencyChainLayout(visibleTables) {
+            const chains = findDependencyChains(visibleTables);
+            const positions = [];
+            let currentY = 100;
+            
+            chains.forEach(chain => {
+                chain.forEach((table, index) => {
+                    positions.push({
+                        table,
+                        x: 100 + index * 250,
+                        y: currentY
+                    });
+                });
+                currentY += 150;
+            });
+            
+            return positions;
+        }
+        
+        // Find dependency chains in the data
+        function findDependencyChains(visibleTables) {
+            const chains = [];
+            const visited = new Set();
+            
+            // Find root tables (no dependencies)
+            const rootTables = visibleTables.filter(table => {
+                return !relationships.some(rel => 
+                    rel.to_table === table && visibleTables.includes(rel.from_table)
+                );
+            });
+            
+            // Build chains from each root
+            rootTables.forEach(root => {
+                if (!visited.has(root)) {
+                    const chain = buildChainFrom(root, visibleTables, visited);
+                    if (chain.length > 0) {
+                        chains.push(chain);
+                    }
+                }
+            });
+            
+            return chains;
+        }
+        
+        // Build dependency chain from a root table
+        function buildChainFrom(table, visibleTables, visited) {
+            const chain = [table];
+            visited.add(table);
+            
+            // Find next table in chain
+            const nextRel = relationships.find(rel => 
+                rel.from_table === table && 
+                visibleTables.includes(rel.to_table) && 
+                !visited.has(rel.to_table)
+            );
+            
+            if (nextRel) {
+                const subChain = buildChainFrom(nextRel.to_table, visibleTables, visited);
+                chain.push(...subChain);
+            }
+            
+            return chain;
+        }
+        
+        // Hub & Spoke Layout - Centers most connected tables
+        function calculateHubSpokeLayout(visibleTables) {
+            const connections = {};
+            visibleTables.forEach(table => connections[table] = 0);
+            
+            // Count connections for each table
+            relationships.forEach(rel => {
+                if (visibleTables.includes(rel.from_table)) connections[rel.from_table]++;
+                if (visibleTables.includes(rel.to_table)) connections[rel.to_table]++;
+            });
+            
+            // Find hub (most connected table)
+            const hub = visibleTables.reduce((a, b) => connections[a] > connections[b] ? a : b);
+            const spokes = visibleTables.filter(t => t !== hub);
+            
+            const positions = [];
+            
+            // Center hub
+            positions.push({
+                table: hub,
+                x: width / 2 - 100,
+                y: height / 2 - 75
+            });
+            
+            // Arrange spokes around hub
+            const radius = Math.min(width, height) / 3;
+            spokes.forEach((table, index) => {
+                const angle = (2 * Math.PI * index) / spokes.length;
+                positions.push({
+                    table,
+                    x: (width / 2) + radius * Math.cos(angle) - 100,
+                    y: (height / 2) + radius * Math.sin(angle) - 75
+                });
+            });
+            
+            return positions;
+        }
+        
+        // Timeline Layout - Arranges audit and temporal tables chronologically
+        function calculateTimelineLayout(visibleTables) {
+            const temporalTables = visibleTables.filter(table => 
+                table.toLowerCase().includes('audit') || 
+                table.toLowerCase().includes('log') || 
+                table.toLowerCase().includes('history') ||
+                table.toLowerCase().includes('event')
+            );
+            
+            const otherTables = visibleTables.filter(table => !temporalTables.includes(table));
+            const positions = [];
+            
+            // Arrange temporal tables on timeline
+            temporalTables.forEach((table, index) => {
+                positions.push({
+                    table,
+                    x: 100 + index * 200,
+                    y: 100
+                });
+            });
+            
+            // Arrange other tables below
+            otherTables.forEach((table, index) => {
+                const col = index % 3;
+                const row = Math.floor(index / 3);
+                positions.push({
+                    table,
+                    x: 100 + col * 200,
+                    y: 300 + row * 150
+                });
+            });
+            
+            return positions;
+        }
+        
+        // Grid Layout - Traditional grid arrangement
+        function calculateGridLayout(visibleTables) {
+            const padding = 60;
+            const tableWidth = 200;
+            const tableHeight = 150;
+            const spacingX = tableWidth + 80;
+            const spacingY = tableHeight + 60;
+            
+            const cols = Math.ceil(Math.sqrt(visibleTables.length));
+            
+            return visibleTables.map((table, index) => {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                
+                return {
+                    table,
+                    x: padding + col * spacingX,
+                    y: padding + row * spacingY
+                };
+            });
+        }
+        
+        // Circular Layout - Arrange in a circle
+        function calculateCircularLayout(visibleTables) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 3;
+            
+            return visibleTables.map((table, index) => {
+                const angle = (2 * Math.PI * index) / visibleTables.length;
+                
+                return {
+                    table,
+                    x: centerX + radius * Math.cos(angle) - 100,
+                    y: centerY + radius * Math.sin(angle) - 75
+                };
+            });
+        }
+        
+        // Hierarchical Layout - Based on relationship depth
+        function calculateHierarchicalLayout(visibleTables) {
+            const levels = calculateTableLevels(visibleTables);
+            const maxLevel = Math.max(...Object.values(levels));
+            const padding = 80;
+            const levelHeight = 200;
+            
+            // Group tables by level
+            const levelGroups = {};
+            for (const table of visibleTables) {
+                const level = levels[table] || 0;
+                if (!levelGroups[level]) levelGroups[level] = [];
+                levelGroups[level].push(table);
+            }
+            
+            const positions = [];
+            
+            // Position each level
+            Object.keys(levelGroups).forEach(level => {
+                const tablesInLevel = levelGroups[level];
+                const totalWidth = tablesInLevel.length * 280;
+                const startX = (width - totalWidth) / 2;
+                const y = padding + parseInt(level) * levelHeight;
+                
+                tablesInLevel.forEach((table, index) => {
+                    positions.push({
+                        table,
+                        x: startX + index * 280,
+                        y: y
+                    });
+                });
+            });
+            
+            return positions;
+        }
+        
+        // Calculate table hierarchy levels based on relationships
+        function calculateTableLevels(visibleTables) {
+            const levels = {};
+            const visited = new Set();
+            
+            // Find root tables (tables with no incoming relationships)
+            const incomingCounts = {};
+            visibleTables.forEach(table => incomingCounts[table] = 0);
+            
+            relationships.forEach(rel => {
+                if (visibleTables.includes(rel.from_table) && visibleTables.includes(rel.to_table)) {
+                    incomingCounts[rel.to_table]++;
+                }
+            });
+            
+            const rootTables = visibleTables.filter(table => incomingCounts[table] === 0);
+            
+            // BFS to assign levels
+            const queue = rootTables.map(table => ({ table, level: 0 }));
+            
+            while (queue.length > 0) {
+                const { table, level } = queue.shift();
+                
+                if (!visited.has(table)) {
+                    visited.add(table);
+                    levels[table] = level;
+                    
+                    // Add children to queue
+                    relationships.forEach(rel => {
+                        if (rel.from_table === table && visibleTables.includes(rel.to_table) && !visited.has(rel.to_table)) {
+                            queue.push({ table: rel.to_table, level: level + 1 });
+                        }
+                    });
+                }
+            }
+            
+            // Handle unvisited tables (cycles or disconnected)
+            visibleTables.forEach(table => {
+                if (!visited.has(table)) {
+                    levels[table] = 0;
+                }
+            });
+            
+            return levels;
+        }
+        
+        // Force-directed Layout - Physics-based positioning
+        function calculateForceLayout(visibleTables) {
+            // Simple force-directed algorithm
+            const nodes = visibleTables.map(table => ({
+                table,
+                x: Math.random() * (width - 200) + 100,
+                y: Math.random() * (height - 150) + 75,
+                vx: 0,
+                vy: 0
+            }));
+            
+            const nodeMap = {};
+            nodes.forEach(node => nodeMap[node.table] = node);
+            
+            // Run simulation
+            for (let i = 0; i < 100; i++) {
+                // Repulsion between all nodes
+                for (let j = 0; j < nodes.length; j++) {
+                    for (let k = j + 1; k < nodes.length; k++) {
+                        const nodeA = nodes[j];
+                        const nodeB = nodes[k];
+                        const dx = nodeB.x - nodeA.x;
+                        const dy = nodeB.y - nodeA.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                        const force = 5000 / (distance * distance);
+                        
+                        const fx = (dx / distance) * force;
+                        const fy = (dy / distance) * force;
+                        
+                        nodeA.vx -= fx;
+                        nodeA.vy -= fy;
+                        nodeB.vx += fx;
+                        nodeB.vy += fy;
+                    }
+                }
+                
+                // Attraction for connected nodes
+                relationships.forEach(rel => {
+                    const nodeA = nodeMap[rel.from_table];
+                    const nodeB = nodeMap[rel.to_table];
+                    if (nodeA && nodeB) {
+                        const dx = nodeB.x - nodeA.x;
+                        const dy = nodeB.y - nodeA.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                        const force = distance * 0.01;
+                        
+                        const fx = (dx / distance) * force;
+                        const fy = (dy / distance) * force;
+                        
+                        nodeA.vx += fx;
+                        nodeA.vy += fy;
+                        nodeB.vx -= fx;
+                        nodeB.vy -= fy;
+                    }
+                });
+                
+                // Apply velocity and damping
+                nodes.forEach(node => {
+                    node.x += node.vx;
+                    node.y += node.vy;
+                    node.vx *= 0.9;
+                    node.vy *= 0.9;
+                    
+                    // Keep within bounds
+                    node.x = Math.max(50, Math.min(width - 250, node.x));
+                    node.y = Math.max(50, Math.min(height - 200, node.y));
+                });
+            }
+            
+            return nodes.map(node => ({
+                table: node.table,
+                x: node.x,
+                y: node.y
+            }));
+        }
+        
+        // Smart Layout - Chooses best layout based on data
+        function calculateSmartLayout(visibleTables) {
+            const tableCount = visibleTables.length;
+            const relationshipCount = relationships.filter(r => 
+                visibleTables.includes(r.from_table) && visibleTables.includes(r.to_table)
+            ).length;
+            
+            // Choose layout based on characteristics
+            if (tableCount <= 3) {
+                return calculateCircularLayout(visibleTables);
+            } else if (relationshipCount > tableCount) {
+                return calculateForceLayout(visibleTables);
+            } else if (hasHierarchicalStructure(visibleTables)) {
+                return calculateHierarchicalLayout(visibleTables);
+            } else {
+                return calculateGridLayout(visibleTables);
+            }
+        }
+        
+        // Check if tables have hierarchical structure
+        function hasHierarchicalStructure(visibleTables) {
+            const levels = calculateTableLevels(visibleTables);
+            const levelCount = new Set(Object.values(levels)).size;
+            return levelCount > 1 && levelCount < visibleTables.length;
+        }
+        
+        // Selection handling
+        function selectTable(tableData, element) {
+            deselectAll();
+            selectedTable = tableData;
+            d3.select(element).classed("selected", true);
+            
+            // Highlight related relationships
+            highlightRelatedRelationships(tableData.name);
+        }
+        
+        function deselectAll() {
+            selectedTable = null;
+            mainGroup.selectAll(".table-container").classed("selected", false);
+            mainGroup.selectAll(".relationship-line").style("opacity", 0.8);
+        }
+        
+        function highlightRelatedRelationships(tableName) {
+            mainGroup.selectAll(".relationship-line")
+                .style("opacity", function() {
+                    const relData = d3.select(this).datum();
+                    return (relData && (relData.from_table === tableName || relData.to_table === tableName)) ? 1 : 0.3;
+                });
+        }
+        
+        // Minimap functionality
+        function createMinimap() {
+            const minimap = svg.append("g")
+                .attr("class", "minimap")
+                .attr("transform", `translate(${width - 160}, ${height - 110})`);
+            
+            minimap.append("rect")
+                .attr("width", 150)
+                .attr("height", 100)
+                .attr("fill", "rgba(255,255,255,0.9)")
+                .attr("stroke", "#c9c7c5");
+        }
+        
+        function updateMinimap() {
+            // Minimap update logic would go here
+        }
+        
+        // Control button functionality
+        document.getElementById("reset-zoom").addEventListener("click", () => {
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity
+            );
+        });
+        
+        document.getElementById("center-schema").addEventListener("click", () => {
+            const bounds = mainGroup.node().getBBox();
+            const scale = Math.min(width / bounds.width, height / bounds.height) * 0.8;
+            const translateX = (width - bounds.width * scale) / 2 - bounds.x * scale;
+            const translateY = (height - bounds.height * scale) / 2 - bounds.y * scale;
+            
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity.translate(translateX, translateY).scale(scale)
+            );
+        });
+        
+        let showLabels = true;
+        document.getElementById("toggle-labels").addEventListener("click", () => {
+            showLabels = !showLabels;
+            mainGroup.selectAll(".relationship-label, .relationship-label-bg")
+                .style("opacity", showLabels ? 1 : 0);
+        });
+        
+        // Sidebar control event listeners
+        document.getElementById("show-all-objects").addEventListener("click", () => {
+            tables.forEach(table => {
+                objectVisibility[table] = true;
+            });
+            populateObjectList();
+            updateSchemaVisibility();
+        });
+        
+        document.getElementById("hide-all-objects").addEventListener("click", () => {
+            tables.forEach(table => {
+                objectVisibility[table] = false;
+            });
+            populateObjectList();
+            updateSchemaVisibility();
+        });
+        
+        // Data-focused layout control event listeners
+        document.getElementById("arrange-data-flow").addEventListener("click", () => {
+            autoArrangeTables('data-flow');
+        });
+        
+        document.getElementById("arrange-domain").addEventListener("click", () => {
+            autoArrangeTables('domain');
+        });
+        
+        document.getElementById("arrange-dependency").addEventListener("click", () => {
+            autoArrangeTables('dependency');
+        });
+        
+        document.getElementById("arrange-hub").addEventListener("click", () => {
+            autoArrangeTables('hub');
+        });
+        
+        document.getElementById("arrange-timeline").addEventListener("click", () => {
+            autoArrangeTables('timeline');
+        });
+        
+        // Search functionality
+        document.getElementById("object-search").addEventListener("input", (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const objectItems = document.querySelectorAll('.object-item');
+            
+            objectItems.forEach(item => {
+                const tableName = item.dataset.table.toLowerCase();
+                const displayName = tableName.replace(/_/g, ' ');
+                
+                if (tableName.includes(searchTerm) || displayName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // Initialize the schema
+        async function initSchema() {
+            await loadTableSchemas();
+            createArrowMarkers();
+            layoutTables();
+            createRelationshipLines();
+            createMinimap();
+            
+            // Auto-center on load
+            setTimeout(() => {
+                document.getElementById("center-schema").click();
+            }, 100);
+        }
+        
+        // Start the visualization
+        initSchema();
+    </script>
+</body>
+</html>

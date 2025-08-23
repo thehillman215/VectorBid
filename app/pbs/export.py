@@ -4,7 +4,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, cast, Union
+from typing import Any, Union, cast
 
 from app.models import BidLayerArtifact
 

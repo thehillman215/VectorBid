@@ -1,0 +1,36 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Plane Icon -->
+  <g transform="translate(100, 200)">
+    <path d="M0 30L30 0L60 30L50 40L30 30L20 40L0 30Z" fill="white" opacity="0.9"/>
+    <circle cx="30" cy="50" r="4" fill="white" opacity="0.9"/>
+  </g>
+  
+  <!-- Main Text -->
+  <text x="200" y="280" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="white">
+    VectorBid
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="340" font-family="Arial, sans-serif" font-size="32" fill="white" opacity="0.9">
+    AI-Powered Pilot Bidding Assistant
+  </text>
+  
+  <!-- Feature Points -->
+  <text x="200" y="400" font-family="Arial, sans-serif" font-size="24" fill="white" opacity="0.8">
+    ✓ Contract &amp; FAR Aware  ✓ Instant Export  ✓ Private &amp; Secure
+  </text>
+  
+  <!-- Background Elements -->
+  <circle cx="1000" cy="150" r="80" fill="white" opacity="0.1"/>
+  <circle cx="1100" cy="400" r="60" fill="white" opacity="0.1"/>
+  <circle cx="900" cy="500" r="40" fill="white" opacity="0.1"/>
+</svg>

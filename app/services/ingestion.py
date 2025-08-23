@@ -1,14 +1,24 @@
-"""Ingestion service for bid packages using existing PBS parser."""
+"""Ingestion service for bid packages with PostgreSQL storage."""
 
+import json
 import tempfile
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
+import uuid
 
 from app.models import BidPackage, IngestionRequest, IngestionResponse
 from app.services.pbs_parser.contracts import Pairing, Trip
 from app.services.pbs_parser.reader import load_csv, load_jsonl
 from app.services.store import bid_package_store
+from app.db.models import PilotContract, ContractRule
+from app.db.database import AsyncSessionLocal
+
+
+class PDFParsingError(Exception):
+    """Raised when PDF parsing fails."""
+
+    pass
 
 
 class IngestionService:
@@ -21,6 +31,182 @@ class IngestionService:
             ".pdf": self._parse_pdf,
             ".txt": self._parse_txt,
         }
+    
+    async def save_to_database(
+        self, 
+        file_content: bytes, 
+        filename: str, 
+        request: IngestionRequest,
+        parsed_data: dict,
+        user_id: str = None
+    ) -> str:
+        """Save uploaded trip sheet to PostgreSQL database using actual schema"""
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as session:
+            try:
+                # Create a user first if none exists (for testing)
+                if not user_id:
+                    user_query = text("""
+                        INSERT INTO users (id, email, password_hash, first_name, last_name, role)
+                        VALUES (gen_random_uuid(), :email, 'dummy_hash', 'Test', 'User', 'pilot')
+                        ON CONFLICT (email) DO NOTHING
+                        RETURNING id
+                    """)
+                    result = await session.execute(user_query, {"email": "test@vectorbid.com"})
+                    user_result = result.fetchone()
+                    if user_result:
+                        user_id = str(user_result[0])
+                    else:
+                        # Get existing user
+                        existing_query = text("SELECT id FROM users WHERE email = :email LIMIT 1")
+                        result = await session.execute(existing_query, {"email": "test@vectorbid.com"})
+                        user_result = result.fetchone()
+                        user_id = str(user_result[0]) if user_result else str(uuid.uuid4())
+                
+                # Create airline record if it doesn't exist
+                airline_query = text("""
+                    INSERT INTO airlines (code, name)
+                    VALUES (:code, :name)
+                    ON CONFLICT (code) DO NOTHING
+                """)
+                await session.execute(airline_query, {
+                    "code": request.airline, 
+                    "name": f"{request.airline} Airlines"
+                })
+                
+                # Create contract record using actual schema
+                contract_id = uuid.uuid4()
+                contract_query = text("""
+                    INSERT INTO pilot_contracts (
+                        id, airline, contract_version, contract_type, title, description,
+                        uploaded_by, status, parsing_method, metadata
+                    ) VALUES (
+                        :id, :airline, :contract_version, :contract_type, :title, :description,
+                        :uploaded_by, :status, :parsing_method, :metadata
+                    )
+                """)
+                
+                await session.execute(contract_query, {
+                    "id": contract_id,
+                    "airline": request.airline,
+                    "contract_version": f"{request.month}-{request.base}",
+                    "contract_type": "trip_sheet",
+                    "title": f"{request.airline} Trip Sheet - {request.month}",
+                    "description": f"Trip sheet for {request.base} base, {request.fleet} fleet",
+                    "uploaded_by": user_id,
+                    "status": "uploaded",
+                    "parsing_method": "automated",
+                    "metadata": json.dumps({
+                        "filename": filename,
+                        "file_size": len(file_content),
+                        "base": request.base,
+                        "fleet": request.fleet,
+                        "seat": request.seat,
+                        "pilot_id": request.pilot_id,
+                        "parsed_data": parsed_data
+                    })
+                })
+                
+                
+                # Extract and save individual rules if available
+                if 'trips' in parsed_data:
+                    for i, trip in enumerate(parsed_data['trips'][:10]):  # Limit to first 10 trips
+                        rule_id = uuid.uuid4()
+                        rule_query = text("""
+                            INSERT INTO contract_rules (
+                                id, contract_id, rule_id, category, subcategory, 
+                                description, rule_text, parameters
+                            ) VALUES (
+                                :id, :contract_id, :rule_id, :category, :subcategory,
+                                :description, :rule_text, :parameters
+                            )
+                        """)
+                        
+                        await session.execute(rule_query, {
+                            "id": rule_id,
+                            "contract_id": contract_id,
+                            "rule_id": f"trip_{i+1}",
+                            "category": "trip_data",
+                            "subcategory": "pairing",
+                            "description": f"Trip {i+1} from {filename}",
+                            "rule_text": str(trip),
+                            "parameters": json.dumps(trip if isinstance(trip, dict) else {})
+                        })
+                
+                await session.commit()
+                return str(contract_id)
+                
+            except Exception as e:
+                await session.rollback()
+                raise Exception(f"Database save failed: {e}")
+
+    async def ingest_async(
+        self, file_content: bytes, filename: str, request: IngestionRequest
+    ) -> IngestionResponse:
+        """Async version of ingest that saves to PostgreSQL database"""
+        try:
+            # Determine file format
+            file_ext = Path(filename).suffix.lower()
+            if file_ext not in self.supported_formats:
+                return IngestionResponse(
+                    success=False,
+                    summary={},
+                    error=(
+                        f"Unsupported file format: {file_ext}. "
+                        f"Supported: {list(self.supported_formats.keys())}"
+                    ),
+                )
+
+            # Parse the file
+            parse_func = self.supported_formats[file_ext]
+            parsed_data = parse_func(file_content, filename)
+
+            # Create summary
+            summary = self._create_summary(parsed_data, request)
+
+            # Save to PostgreSQL database
+            try:
+                contract_id = await self.save_to_database(
+                    file_content, filename, request, parsed_data
+                )
+                summary["database_id"] = contract_id
+                summary["storage"] = "postgresql"
+            except Exception as db_error:
+                # Still return success but note database issue
+                summary["database_error"] = str(db_error)
+                summary["storage"] = "memory_only"
+
+            # Also store in existing system for compatibility
+            bid_package = BidPackage(
+                pilot_id=request.pilot_id,
+                airline=request.airline,
+                month=request.month,
+                meta={
+                    "filename": filename,
+                    "file_size": len(file_content),
+                    "file_type": file_ext,
+                    "base": request.base,
+                    "fleet": request.fleet,
+                    "seat": request.seat,
+                    "parsed_data": summary,
+                },
+            )
+
+            package_id = bid_package_store.store(bid_package, file_content)
+            summary["package_id"] = package_id
+
+            return IngestionResponse(
+                success=True,
+                summary=summary,
+                message=f"Successfully ingested {filename} with {summary.get('trip_count', 0)} trips"
+            )
+
+        except Exception as e:
+            return IngestionResponse(
+                success=False,
+                summary={},
+                error=str(e)
+            )
 
     def ingest(
         self, file_content: bytes, filename: str, request: IngestionRequest
@@ -73,6 +259,8 @@ class IngestionService:
                 message=f"Successfully ingested {filename}",
             )
 
+        except PDFParsingError as e:
+            return IngestionResponse(success=False, summary={}, error=str(e))
         except Exception as e:
             return IngestionResponse(
                 success=False, summary={}, error=f"Failed to ingest file: {str(e)}"
@@ -203,11 +391,23 @@ class IngestionService:
                 # Fallback to mock data if parsing fails
                 return self._create_mock_pairings()
 
-    def _parse_pdf(self, file_content: bytes, filename: str) -> list[dict[str, Any]]:
-        """Parse PDF format - placeholder for future implementation."""
-        # TODO: Integrate with existing PDF parser from src/lib/schedule_parser/
-        # For now, return mock data
-        return self._create_mock_trips()
+    def _parse_pdf(self, file_content: bytes, filename: str) -> list[Pairing]:
+        """Parse UAL PDF format using existing parser."""
+        try:
+            # Extract text from PDF
+            pdf_text = self._extract_pdf_text(file_content)
+
+            # Use existing UAL PDF parser to parse the text
+            from app.parsers.ual_pdf import _parse_text
+
+            ual_trips = _parse_text(pdf_text)
+
+            # Convert UAL Trip objects to Pairing objects
+            pairings = self._convert_to_pairings(ual_trips, filename)
+            return pairings
+
+        except Exception as e:
+            raise PDFParsingError(f"Failed to parse PDF {filename}: {str(e)}") from e
 
     def _parse_txt(self, file_content: bytes, filename: str) -> list[dict[str, Any]]:
         """Parse TXT format - placeholder for future implementation."""
@@ -295,6 +495,81 @@ class IngestionService:
                 trips=trips,
             )
         ]
+
+    def _extract_pdf_text(self, file_content: bytes) -> str:
+        """Extract text content from PDF bytes."""
+        try:
+            import io
+
+            from pypdf import PdfReader
+
+            pdf_reader = PdfReader(io.BytesIO(file_content))
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+
+            if not text.strip():
+                raise ValueError("No text content found in PDF")
+
+            return text
+        except ImportError as e:
+            raise PDFParsingError(
+                "pypdf library not installed. Please install with: pip install pypdf"
+            ) from e
+        except Exception as e:
+            raise PDFParsingError(f"Failed to extract text from PDF: {str(e)}") from e
+
+    def _convert_to_pairings(self, ual_trips: list, filename: str) -> list[Pairing]:
+        """Convert UAL PDF parser Trip objects to Pairing objects."""
+        from app.parsers.ual_pdf import Trip as UALTrip
+
+        # Group trips by base pairing logic
+        # For UAL trips, we'll create one pairing per trip for simplicity
+        pairings = []
+
+        for ual_trip in ual_trips:
+            if not isinstance(ual_trip, UALTrip):
+                continue
+
+            # Extract base and fleet information from the trip if available
+            # Default values for required fields
+            base = "UNK"  # Unknown base
+            fleet = "UNK"  # Unknown fleet
+
+            # Try to extract base from first leg if available
+            if ual_trip.legs:
+                first_leg = ual_trip.legs[0]
+                base = first_leg.departure_airport
+                if first_leg.equipment:
+                    fleet = first_leg.equipment
+
+            # Create pairing ID based on trip ID
+            pairing_id = f"PDF-{ual_trip.trip_id}"
+
+            # Convert UAL legs to PBS Trip objects
+            pbs_trips = []
+            for j, leg in enumerate(ual_trip.legs):
+                trip_id = f"{ual_trip.trip_id}-L{j + 1}"
+                pbs_trip = Trip(
+                    trip_id=trip_id,
+                    pairing_id=pairing_id,
+                    day=j + 1,  # Assign sequential days for legs
+                    origin=leg.departure_airport,
+                    destination=leg.arrival_airport,
+                )
+                pbs_trips.append(pbs_trip)
+
+            # Create Pairing object
+            pairing = Pairing(
+                pairing_id=pairing_id,
+                base=base,
+                fleet=fleet,
+                month=date.today().replace(day=1),  # Default to current month
+                trips=pbs_trips,
+            )
+            pairings.append(pairing)
+
+        return pairings
 
     def _create_mock_trips(self) -> list[dict[str, Any]]:
         """Create mock trips for testing."""

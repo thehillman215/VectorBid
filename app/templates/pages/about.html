@@ -1,0 +1,63 @@
+{% extends "layouts/marketing.html" %}
+
+{% block title %}{{ page_title }} - VectorBid{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ page_title }}</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">{{ page_description }}</p>
+        </div>
+        
+        <div class="max-w-4xl mx-auto">
+            <div class="card card-spacious mb-12">
+                <h2 class="text-2xl font-semibold mb-4">Our Mission</h2>
+                <p class="text-lg text-gray-600 mb-6">
+                    To give every pilot the schedule they deserve through AI-powered optimization that understands both the complexity of airline operations and the importance of work-life balance.
+                </p>
+                <p class="text-gray-600">
+                    Founded by airline pilots who experienced firsthand the frustration of manual bidding, VectorBid combines deep aviation industry knowledge with cutting-edge artificial intelligence to transform how pilots approach schedule optimization.
+                </p>
+            </div>
+            
+            {% if team %}
+            <div class="mb-12">
+                <h2 class="text-2xl font-semibold text-center mb-8">Meet Our Team</h2>
+                <div class="cards-grid cards-grid-2">
+                    {% for member in team %}
+                    <div class="card text-center">
+                        <div class="mb-4">
+                            <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                <i class="fas fa-user-tie text-3xl text-gray-400"></i>
+                            </div>
+                            <h3 class="card-title">{{ member.name }}</h3>
+                            <p class="text-primary-blue font-medium">{{ member.role }}</p>
+                        </div>
+                        <p class="text-gray-600">{{ member.background }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if milestones %}
+            <div class="card card-spacious">
+                <h2 class="text-2xl font-semibold mb-6">Our Journey</h2>
+                <div class="space-y-4">
+                    {% for milestone in milestones %}
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-primary-blue text-white rounded-full flex items-center justify-center font-bold">
+                            {{ milestone.year }}
+                        </div>
+                        <p class="text-gray-600">{{ milestone.event }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -26,11 +26,19 @@ from app.models import (
     PreferenceSchema,
     StrategyDirectives,
 )
+# from app.routes.auth import router as auth_router
 from app.routes.faq import router as faq_router
 from app.routes.ingestion import router as ingestion_router
+from app.routes.marketing import router as marketing_router
+from app.routes.products import router as products_router
+from app.routes.solutions import router as solutions_router
 from app.routes.meta import router as meta_router
 from app.routes.ops import router as ops_router
+from app.routes.rule_packs import router as rule_packs_router
 from app.routes.ui import router as ui_router
+from app.routes.db_viewer import router as db_viewer_router
+from app.routes.admin_contracts import router as admin_contracts_router
+from app.routes.pilot_contracts import router as pilot_contracts_router
 from app.security.api_key import require_api_key
 
 MODELS = [
@@ -89,11 +97,19 @@ if static_path.exists():
 
 # Mount routers
 app.include_router(api_router, prefix="/api", tags=["API"])
+# app.include_router(auth_router, tags=["Authentication"])  # Temporarily disabled
 app.include_router(ingestion_router, tags=["Ingestion"])
 app.include_router(meta_router, tags=["Meta"])
 app.include_router(ops_router, tags=["Ops"])
+app.include_router(rule_packs_router, tags=["Rule Packs"])
 app.include_router(ui_router, tags=["UI"])
 app.include_router(faq_router, tags=["FAQ"])
+app.include_router(marketing_router, tags=["Marketing"])
+app.include_router(products_router, prefix="/products", tags=["Products"])
+app.include_router(solutions_router, prefix="/solutions", tags=["Solutions"])
+app.include_router(db_viewer_router, tags=["Database"])
+app.include_router(admin_contracts_router, tags=["Admin Contracts"])
+app.include_router(pilot_contracts_router, tags=["Pilot Contracts"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
@@ -110,14 +126,17 @@ app.add_api_route(
 )
 
 
-# Serve the SPA
-@app.get("/")
-async def serve_spa():
-    """Serve the single page application"""
-    spa_path = Path(__file__).parent / "static" / "index.html"
-    if spa_path.exists():
-        return FileResponse(spa_path)
-    return {"message": "SPA not found - please build frontend"}
+# Root route now handled by marketing router
+# Professional landing page served by /app/routes/marketing.py
+
+# A/B testing route for landing page v2
+@app.get("/landing/v2")
+async def serve_landing_v2():
+    """Alternative landing page for A/B testing"""
+    landing_path = Path(__file__).parent / "static" / "pages" / "landing" / "v2.html"
+    if landing_path.exists():
+        return FileResponse(landing_path)
+    return {"message": "Landing page v2 not found"}
 
 
 # Mock data for development

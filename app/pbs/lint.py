@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, cast, Union
+from typing import Any, Union, cast
 
 from app.models import BidLayerArtifact
 

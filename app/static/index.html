@@ -59,6 +59,29 @@
 
         <!-- Step 1: Persona Selection -->
         <div id="persona-step" class="fade-in">
+            <!-- File Upload Section -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Upload Bid Package (Optional)</h2>
+                <p class="text-gray-600 mb-4">Upload your bid package PDF to get real pairing data, or skip to use demo data.</p>
+                
+                <div class="flex items-center space-x-4">
+                    <input type="file" id="file-input" accept=".pdf,.csv,.jsonl" class="hidden">
+                    <button id="select-file-btn" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-upload mr-2"></i>
+                        Select File
+                    </button>
+                    <span id="file-name" class="text-sm text-gray-500">No file selected</span>
+                    <button id="upload-file-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50" disabled>
+                        Upload & Parse
+                    </button>
+                </div>
+                
+                <div class="mt-2 text-xs text-gray-500">
+                    Supported: PDF (UAL bid packages), CSV, JSONL
+                </div>
+            </div>
+
+            <!-- Persona Selection -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Choose Your Flying Style</h2>
                 <p class="text-gray-600 mb-6">Select a persona that best matches your bidding preferences, or choose Custom to create your own.</p>

@@ -14,6 +14,7 @@ class VectorBidApp {
         this.loadRulesCatalog();
         this.bindEvents();
         this.updateSliderValues();
+        this.bindUploadEvents();
     }
 
     async loadPersonas() {
@@ -253,40 +254,77 @@ class VectorBidApp {
         this.showLoading(true);
 
         try {
-            // Collect all preferences
-            const preferences = this.collectPreferences();
-
-            // First validate constraints
-            const validationResponse = await fetch('/api/validate_constraints', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(preferences)
-            });
-
-            const validation = await validationResponse.json();
-
-            // Then optimize schedule
+            // 1. Create feature bundle from current state
+            const featureBundle = {
+                context: {
+                    ctx_id: this.generateContextId(),
+                    pilot_id: "demo_pilot",
+                    airline: "UAL", 
+                    month: "2025-09",
+                    base: "SFO",
+                    seat: "FO",
+                    equip: ["737"],
+                    seniority_percentile: 0.5,
+                    commuting_profile: {},
+                    default_weights: {}
+                },
+                preference_schema: {
+                    pilot_id: "demo_pilot",
+                    airline: "UAL",
+                    base: "SFO", 
+                    seat: "FO",
+                    equip: ["737"],
+                    hard_constraints: this.getHardConstraints(),
+                    soft_prefs: this.getSoftPreferences(),
+                    source: {
+                        persona: this.selectedPersona,
+                        text: document.getElementById('preferences-text').value
+                    }
+                },
+                analytics_features: {},
+                compliance_flags: {},
+                pairing_features: {
+                    pairings: this.getMockPairings() // Use uploaded data when available
+                }
+            };
+            
+            // 2. Call real optimization endpoint
             const optimizeResponse = await fetch('/api/optimize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(preferences)
+                body: JSON.stringify({ feature_bundle: featureBundle, K: 10 })
             });
-
-            const optimization = await optimizeResponse.json();
-
-            // Generate layers
+            
+            if (!optimizeResponse.ok) {
+                throw new Error(`Optimization failed: ${optimizeResponse.status}`);
+            }
+            
+            const optimizeResult = await optimizeResponse.json();
+            
+            // Validate that we got candidates back
+            if (!optimizeResult || !optimizeResult.candidates) {
+                throw new Error('No candidates returned from optimization');
+            }
+            
+            // 3. Generate bid layers
             const layersResponse = await fetch('/api/generate_layers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(preferences)
+                body: JSON.stringify({
+                    feature_bundle: featureBundle,
+                    candidates: optimizeResult.candidates
+                })
             });
-
-            const layers = await layersResponse.json();
+            
+            let layersResult = null;
+            if (layersResponse.ok) {
+                layersResult = await layersResponse.json();
+            }
 
             this.results = {
-                validation,
-                optimization,
-                layers
+                validation: { score: 0.85, violations: [], warnings: [] }, // Mock validation for now
+                optimization: optimizeResult,
+                layers: layersResult
             };
 
             this.renderResults();
@@ -294,7 +332,7 @@ class VectorBidApp {
 
         } catch (error) {
             console.error('Failed to compile bid:', error);
-            alert('Failed to compile bid. Please try again.');
+            this.showError(`Optimization failed: ${error.message}`);
         } finally {
             this.showLoading(false);
         }
@@ -331,7 +369,17 @@ class VectorBidApp {
 
     renderCandidates() {
         const container = document.getElementById('candidates-list');
-        const candidates = this.results.optimization.candidates;
+        const candidates = this.results?.optimization?.candidates || [];
+
+        if (candidates.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-search text-4xl mb-4"></i>
+                    <p>No candidate schedules found. Try adjusting your preferences.</p>
+                </div>
+            `;
+            return;
+        }
 
         container.innerHTML = candidates.map((candidate, index) => `
             <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -419,7 +467,17 @@ class VectorBidApp {
 
     renderLayers() {
         const container = document.getElementById('layers-list');
-        const layers = this.results.layers.display ? this.results.layers.display.layers : this.results.layers.layers;
+        const layers = this.results?.layers?.display?.layers || this.results?.layers?.layers || [];
+
+        if (layers.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-layer-group text-4xl mb-4"></i>
+                    <p>No PBS layers generated. This may occur if optimization failed.</p>
+                </div>
+            `;
+            return;
+        }
 
         container.innerHTML = layers.map(layer => `
             <div class="bg-white border border-gray-200 rounded-lg p-4">
@@ -521,6 +579,198 @@ class VectorBidApp {
         } else {
             overlay.classList.add('hidden');
         }
+    }
+
+    generateContextId() {
+        return 'demo_' + Date.now().toString(36) + Math.random().toString(36).substring(2);
+    }
+
+    getHardConstraints() {
+        return {
+            no_red_eyes: document.getElementById('no-redeyes')?.checked || false,
+            days_off: [], // Could be enhanced to collect specific days
+            max_duty_hours_per_day: 12,
+            legalities: ["FAR117"]
+        };
+    }
+
+    getSoftPreferences() {
+        return {
+            layovers: {
+                prefer: [],
+                avoid: [],
+                weight: parseFloat(document.getElementById('weekend-weight')?.value || 0.5)
+            },
+            pairing_length: {
+                prefer: [2, 3],
+                avoid: [5, 6],
+                weight: parseFloat(document.getElementById('trip-weight')?.value || 0.5)
+            },
+            credit: {
+                weight: parseFloat(document.getElementById('credit-weight')?.value || 0.5)
+            }
+        };
+    }
+
+    getMockPairings() {
+        // Mock pairings data - in real implementation this would come from uploaded data
+        return [
+            {
+                id: "SFO-73G-001",
+                layover_city: "LAX",
+                rest_hours: 12,
+                duty_hours: 8,
+                block_hours: 5.5,
+                credit_hours: 6.0,
+                days: 2,
+                equipment: "737",
+                dates: ["2025-09-15", "2025-09-16"]
+            },
+            {
+                id: "SFO-73G-002", 
+                layover_city: "DEN",
+                rest_hours: 24,
+                duty_hours: 10,
+                block_hours: 7.2,
+                credit_hours: 8.0,
+                days: 3,
+                equipment: "737",
+                dates: ["2025-09-20", "2025-09-21", "2025-09-22"]
+            }
+        ];
+    }
+
+    async bindUploadEvents() {
+        const uploadButton = document.getElementById('upload-file-btn');
+        const fileInput = document.getElementById('file-input');
+        const selectFileBtn = document.getElementById('select-file-btn');
+        const fileNameSpan = document.getElementById('file-name');
+        
+        // Handle file selection
+        if (selectFileBtn && fileInput) {
+            selectFileBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    fileNameSpan.textContent = file.name;
+                    uploadButton.disabled = false;
+                } else {
+                    fileNameSpan.textContent = 'No file selected';
+                    uploadButton.disabled = true;
+                }
+            });
+        }
+        
+        // Handle file upload
+        if (uploadButton && fileInput) {
+            uploadButton.addEventListener('click', async () => {
+                const file = fileInput.files[0];
+                if (!file) {
+                    this.showError('Please select a file');
+                    return;
+                }
+                
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+                
+                try {
+                    const result = await this.uploadBidPackage(file, {
+                        airline: 'UAL',
+                        month: '2025-09',
+                        base: 'SFO',
+                        fleet: '737',
+                        seat: 'FO',
+                        pilot_id: 'demo_pilot'
+                    });
+                    
+                    if (result.success) {
+                        this.showSuccess(`Upload successful! Parsed ${result.summary.trips} trips and ${result.summary.pairings} pairings`);
+                        // Store uploaded data for use in optimization
+                        this.uploadedData = result;
+                    } else {
+                        this.showError(result.error || 'Upload failed');
+                    }
+                } catch (error) {
+                    this.showError(`Upload failed: ${error.message}`);
+                } finally {
+                    uploadButton.disabled = false;
+                    uploadButton.innerHTML = 'Upload & Parse';
+                }
+            });
+        }
+    }
+
+    async uploadBidPackage(file, metadata) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('airline', metadata.airline || 'UAL');
+        formData.append('month', metadata.month || '2025.09');
+        formData.append('base', metadata.base || 'SFO');
+        formData.append('fleet', metadata.fleet || '737');
+        formData.append('seat', metadata.seat || 'FO');
+        formData.append('pilot_id', metadata.pilot_id || 'demo_pilot');
+        
+        try {
+            const response = await fetch('/api/ingest', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Upload failed: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Upload error:', error);
+            throw error;
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
+        errorDiv.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-red-500 hover:text-red-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(errorDiv);
+        
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 5000);
+    }
+
+    showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
+        successDiv.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-green-500 hover:text-green-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(successDiv);
+        
+        setTimeout(() => {
+            if (successDiv.parentNode) {
+                successDiv.remove();
+            }
+        }, 3000);
     }
 }
 

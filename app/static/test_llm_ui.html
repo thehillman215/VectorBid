@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VectorBid LLM & Scoring Test Interface</title>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-running { color: #059669; }
+        .status-failed { color: #DC2626; }
+        .status-pending { color: #D97706; }
+        .result-container { max-height: 400px; overflow-y: auto; }
+        .json-output { font-family: 'Courier New', monospace; font-size: 12px; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-plane text-blue-600 text-2xl mr-3"></i>
+                        <h1 class="text-2xl font-bold text-gray-900">VectorBid LLM & Scoring Test</h1>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        Test AI-powered optimization features
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Pilot Profile Setup -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-user-pilot mr-2 text-blue-600"></i>
+                    Pilot Profile
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilot ID</label>
+                        <input type="text" id="pilotId" value="test_pilot_001" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Base</label>
+                        <select id="base" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="SFO">SFO - San Francisco</option>
+                            <option value="ORD">ORD - Chicago</option>
+                            <option value="DEN">DEN - Denver</option>
+                            <option value="LAX">LAX - Los Angeles</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Seat</label>
+                        <select id="seat" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="CA">Captain</option>
+                            <option value="FO">First Officer</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Equipment</label>
+                        <select id="equipment" multiple class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="737" selected>Boeing 737</option>
+                            <option value="757">Boeing 757</option>
+                            <option value="777">Boeing 777</option>
+                            <option value="A320">Airbus A320</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Seniority %</label>
+                        <input type="range" id="seniority" min="0" max="100" value="65" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="text-center text-sm text-gray-600 mt-1">
+                            <span id="seniorityValue">65</span>%
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lifestyle</label>
+                        <select id="lifestyle" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="family_first">Family First</option>
+                            <option value="credit_max">Credit Maximizer</option>
+                            <option value="commuter">Commuter</option>
+                            <option value="balanced">Balanced</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-flask mr-2 text-green-600"></i>
+                    Test Controls
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button onclick="testMathematicalScoring()" 
+                            class="btn-test bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Test Mathematical Scoring
+                    </button>
+                    
+                    <button onclick="testLLMOptimization()" 
+                            class="btn-test bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md">
+                        <i class="fas fa-brain mr-2"></i>
+                        Test Captain Sarah LLM
+                    </button>
+                    
+                    <button onclick="testBidStrategy()" 
+                            class="btn-test bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+                        <i class="fas fa-chess mr-2"></i>
+                        Test Bid Strategy
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of Candidates (K)</label>
+                    <input type="number" id="candidateCount" value="10" min="1" max="50"
+                           class="w-32 px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+            </div>
+
+            <!-- Status Dashboard -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-chart-line mr-2 text-orange-600"></i>
+                    Test Status
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="test-status-card p-4 border rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Mathematical Scoring</span>
+                            <i id="mathStatus" class="fas fa-clock status-pending"></i>
+                        </div>
+                        <div id="mathResults" class="text-sm text-gray-600 mt-2">Ready to test</div>
+                    </div>
+                    
+                    <div class="test-status-card p-4 border rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Captain Sarah LLM</span>
+                            <i id="llmStatus" class="fas fa-clock status-pending"></i>
+                        </div>
+                        <div id="llmResults" class="text-sm text-gray-600 mt-2">Ready to test PBS syntax generation</div>
+                    </div>
+                    
+                    <div class="test-status-card p-4 border rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Bid Strategy</span>
+                            <i id="strategyStatus" class="fas fa-clock status-pending"></i>
+                        </div>
+                        <div id="strategyResults" class="text-sm text-gray-600 mt-2">Ready to test</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Area -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-chart-bar mr-2 text-indigo-600"></i>
+                    Test Results
+                </h2>
+                
+                <div class="result-container bg-gray-50 rounded-lg p-4">
+                    <pre id="resultsOutput" class="json-output text-sm">
+Click a test button above to see results here...
+                    </pre>
+                </div>
+                
+                <div class="mt-4 flex space-x-2">
+                    <button onclick="clearResults()" 
+                            class="text-gray-600 hover:text-gray-800 px-3 py-1 text-sm">
+                        <i class="fas fa-trash mr-1"></i>
+                        Clear Results
+                    </button>
+                    
+                    <button onclick="exportResults()" 
+                            class="text-blue-600 hover:text-blue-800 px-3 py-1 text-sm">
+                        <i class="fas fa-download mr-1"></i>
+                        Export Results
+                    </button>
+                    
+                    <button onclick="copyPBSStrategies()" 
+                            class="text-green-600 hover:text-green-800 px-3 py-1 text-sm">
+                        <i class="fas fa-copy mr-1"></i>
+                        Copy PBS Syntax
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Update seniority display
+        document.getElementById('seniority').addEventListener('input', function() {
+            document.getElementById('seniorityValue').textContent = this.value;
+        });
+
+        // Get pilot profile data
+        function getPilotProfile() {
+            const equipment = Array.from(document.getElementById('equipment').selectedOptions)
+                .map(option => option.value);
+                
+            return {
+                pilot_id: document.getElementById('pilotId').value,
+                airline: "UAL",
+                base: document.getElementById('base').value,
+                seat: document.getElementById('seat').value,
+                equip: equipment,
+                seniority_percentile: parseFloat(document.getElementById('seniority').value) / 100,
+                lifestyle: document.getElementById('lifestyle').value
+            };
+        }
+
+        // Create test bundle
+        function createTestBundle() {
+            const profile = getPilotProfile();
+            
+            return {
+                feature_bundle: {
+                    context: {
+                        ctx_id: `test_${Date.now()}`,
+                        pilot_id: profile.pilot_id,
+                        airline: profile.airline,
+                        month: "2025.08",
+                        base: profile.base,
+                        seat: profile.seat,
+                        equip: profile.equip,
+                        seniority_percentile: profile.seniority_percentile
+                    },
+                    preference_schema: {
+                        pilot_id: profile.pilot_id,
+                        airline: profile.airline,
+                        base: profile.base,
+                        seat: profile.seat,
+                        equip: profile.equip,
+                        hard_constraints: {
+                            no_red_eyes: profile.lifestyle === 'family_first',
+                            days_off: profile.lifestyle === 'family_first' ? ['SAT', 'SUN'] : []
+                        },
+                        soft_prefs: {
+                            weekend_priority: profile.lifestyle === 'family_first' ? {"weight": 0.9} : {"weight": 0.5},
+                            credit: profile.lifestyle === 'credit_max' ? {"weight": 0.9} : {"weight": 0.6},
+                            layovers: {"prefer": ["LAX", "SFO"], "avoid": ["ORD"], "weight": 0.8}
+                        }
+                    },
+                    analytics_features: {
+                        base_stats: {
+                            "LAX": {"award_rate": 0.8},
+                            "DEN": {"award_rate": 0.9},
+                            "ORD": {"award_rate": 0.7},
+                            "SFO": {"award_rate": 0.85}
+                        }
+                    },
+                    compliance_flags: {},
+                    pairing_features: {
+                        pairings: [
+                            {
+                                id: `${profile.base}-LAX-FAMILY`,
+                                layover_city: "LAX",
+                                block_hours: 8.5,
+                                duty_hours: 11.0,
+                                rest_hours: 24.0,
+                                equipment: profile.equip[0] || "737",
+                                report_time: "0900",
+                                trip_length: 2,
+                                is_commutable: true
+                            },
+                            {
+                                id: `${profile.base}-DEN-CREDIT`,
+                                layover_city: "DEN", 
+                                block_hours: 12.2,
+                                duty_hours: 14.5,
+                                rest_hours: 15.0,
+                                equipment: profile.equip[0] || "737",
+                                report_time: "0600",
+                                trip_length: 3,
+                                is_commutable: false
+                            },
+                            {
+                                id: `${profile.base}-ORD-BALANCED`,
+                                layover_city: "ORD",
+                                block_hours: 9.8,
+                                duty_hours: 12.5,
+                                rest_hours: 20.0,
+                                equipment: profile.equip[0] || "737",
+                                report_time: "1200",
+                                trip_length: 2,
+                                is_commutable: true
+                            }
+                        ]
+                    }
+                },
+                K: parseInt(document.getElementById('candidateCount').value),
+                pilot_context: {
+                    lifestyle: profile.lifestyle,
+                    base: profile.base,
+                    seniority_percentile: profile.seniority_percentile,
+                    commuting: profile.base !== 'SFO'
+                }
+            };
+        }
+
+        // Update status
+        function updateStatus(testType, status, message) {
+            const statusIcon = document.getElementById(testType + 'Status');
+            const resultsDiv = document.getElementById(testType + 'Results');
+            
+            statusIcon.className = 'fas ' + 
+                (status === 'running' ? 'fa-spinner fa-spin status-running' :
+                 status === 'success' ? 'fa-check-circle status-running' :
+                 status === 'error' ? 'fa-times-circle status-failed' :
+                 'fa-clock status-pending');
+                 
+            resultsDiv.textContent = message;
+        }
+
+        // Display results with enhanced PBS formatting
+        function displayResults(title, data) {
+            const output = document.getElementById('resultsOutput');
+            output.textContent = `=== ${title} ===\n\n${JSON.stringify(data, null, 2)}`;
+        }
+        
+        // Display PBS strategies in a special copyable format
+        function displayPBSStrategies(strategies) {
+            const output = document.getElementById('resultsOutput');
+            let pbsContent = '\n\n=== 🎯 CAPTAIN SARAH\'S PBS BIDDING STRATEGIES ===\n';
+            
+            strategies.forEach((strategy, index) => {
+                pbsContent += `\n📋 STRATEGY ${index + 1}: ${strategy.strategy_name}\n`;
+                pbsContent += `Description: ${strategy.description}\n`;
+                pbsContent += `Award Probability: ${(strategy.award_probability * 100).toFixed(0)}%\n`;
+                pbsContent += `\n--- PBS SYNTAX (Copy & Paste Ready) ---\n`;
+                
+                strategy.pbs_layers.forEach((layer, layerIndex) => {
+                    pbsContent += `Layer ${layer.layer_number || layerIndex + 1}: ${layer.preference || 'YES'}\n`;
+                    if (layer.filters && layer.filters.length > 0) {
+                        layer.filters.forEach(filter => {
+                            pbsContent += `  ${filter}\n`;
+                        });
+                    }
+                    if (layer.rationale) {
+                        pbsContent += `  // ${layer.rationale}\n`;
+                    }
+                    pbsContent += '\n';
+                });
+                
+                pbsContent += `Fallback Plan: ${strategy.fallback_plan}\n`;
+                pbsContent += '\n' + '='.repeat(50) + '\n';
+            });
+            
+            output.textContent += pbsContent;
+        }
+
+        // Test Mathematical Scoring
+        async function testMathematicalScoring() {
+            updateStatus('math', 'running', 'Testing mathematical scoring...');
+            
+            try {
+                const bundle = createTestBundle();
+                
+                const response = await fetch('/api/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bundle)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}\n${errorText}`);
+                }
+                
+                const result = await response.json();
+                
+                updateStatus('math', 'success', 
+                    `Generated ${result.candidates?.length || 0} candidates`);
+                    
+                displayResults('Mathematical Scoring Results', {
+                    candidates: result.candidates?.slice(0, 5),
+                    summary: {
+                        total_candidates: result.candidates?.length,
+                        top_score: result.candidates?.[0]?.score,
+                        method: 'Mathematical optimization',
+                        execution_time: result.execution_time
+                    }
+                });
+                
+            } catch (error) {
+                updateStatus('math', 'error', `Error: ${error.message}`);
+                displayResults('Mathematical Scoring Error', { error: error.message });
+            }
+        }
+
+        // Test LLM Optimization
+        async function testLLMOptimization() {
+            updateStatus('llm', 'running', 'Testing LLM optimization...');
+            
+            try {
+                const bundle = createTestBundle();
+                bundle.use_llm = true;
+                
+                const response = await fetch('/api/optimize_enhanced', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bundle)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}\n${errorText}`);
+                }
+                
+                const result = await response.json();
+                
+                updateStatus('llm', 'success', 
+                    `Enhanced ${result.enhanced_candidates?.length || 0} candidates`);
+                    
+                // Enhanced display for Captain Sarah results
+                const displayData = {
+                    enhanced_candidates: result.enhanced_candidates?.slice(0, 2),
+                    optimization_analysis: result.optimization_analysis,
+                    recommendations: result.recommendations,
+                    ai_insights: result.ai_insights
+                };
+                
+                // Add PBS syntax strategies if available
+                if (result.pbs_syntax_strategies) {
+                    displayData.pbs_syntax_strategies = result.pbs_syntax_strategies;
+                }
+                
+                // Add pilot wisdom if available
+                if (result.pilot_wisdom) {
+                    displayData.pilot_wisdom = result.pilot_wisdom;
+                }
+                
+                displayResults('Captain Sarah LLM Analysis', displayData);
+                
+                // Show PBS strategies in a special format
+                if (result.pbs_syntax_strategies && result.pbs_syntax_strategies.length > 0) {
+                    displayPBSStrategies(result.pbs_syntax_strategies);
+                }
+                
+            } catch (error) {
+                updateStatus('llm', 'error', `Error: ${error.message}`);
+                displayResults('LLM Optimization Error', { error: error.message });
+            }
+        }
+
+        // Test Bid Strategy Generation
+        async function testBidStrategy() {
+            updateStatus('strategy', 'running', 'Generating bid strategy...');
+            
+            try {
+                const bundle = createTestBundle();
+                
+                // First get candidates from optimization
+                const optimizeResponse = await fetch('/api/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bundle)
+                });
+                
+                if (!optimizeResponse.ok) {
+                    throw new Error(`Optimization failed: ${optimizeResponse.status}`);
+                }
+                
+                const optimizeResult = await optimizeResponse.json();
+                
+                // Then generate layers from candidates
+                const layerPayload = {
+                    feature_bundle: bundle.feature_bundle,
+                    candidates: optimizeResult.candidates || []
+                };
+                
+                const layerResponse = await fetch('/api/generate_layers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(layerPayload)
+                });
+                
+                if (!layerResponse.ok) {
+                    throw new Error(`Layer generation failed: ${layerResponse.status}`);
+                }
+                
+                const result = await layerResponse.json();
+                
+                updateStatus('strategy', 'success', 
+                    `Generated ${result.artifact?.layers?.length || 0} bid layers`);
+                    
+                displayResults('Bid Strategy Results', {
+                    bid_artifact: result.artifact,
+                    source_candidates: optimizeResult.candidates?.length || 0,
+                    summary: {
+                        layers_count: result.artifact?.layers?.length,
+                        format: result.artifact?.format,
+                        airline: result.artifact?.airline,
+                        month: result.artifact?.month
+                    }
+                });
+                
+            } catch (error) {
+                updateStatus('strategy', 'error', `Error: ${error.message}`);
+                displayResults('Bid Strategy Error', { error: error.message });
+            }
+        }
+
+        // Utility functions
+        function clearResults() {
+            document.getElementById('resultsOutput').textContent = 'Results cleared...';
+        }
+
+        function exportResults() {
+            const results = document.getElementById('resultsOutput').textContent;
+            const blob = new Blob([results], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `captain_sarah_analysis_${new Date().toISOString().slice(0,19)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Copy PBS strategies to clipboard
+        function copyPBSStrategies() {
+            const results = document.getElementById('resultsOutput').textContent;
+            const pbsSection = results.split('=== 🎯 CAPTAIN SARAH\'S PBS BIDDING STRATEGIES ===')[1];
+            
+            if (pbsSection) {
+                navigator.clipboard.writeText(pbsSection.trim()).then(() => {
+                    // Show success message
+                    const btn = event.target.closest('button');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+                    btn.className = 'text-green-600 hover:text-green-800 px-3 py-1 text-sm';
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.className = 'text-green-600 hover:text-green-800 px-3 py-1 text-sm';
+                    }, 2000);
+                }).catch(() => {
+                    alert('PBS strategies copied to clipboard!');
+                });
+            } else {
+                alert('No PBS strategies found. Run the LLM Optimization test first.');
+            }
+        }
+
+        // Initialize
+        console.log('VectorBid LLM & Scoring Test Interface loaded');
+    </script>
+</body>
+</html>

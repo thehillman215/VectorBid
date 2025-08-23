@@ -5,7 +5,13 @@ from operator import itemgetter
 from typing import Any
 
 from app.audit import log_event
-from app.db import Candidate, SessionLocal
+try:
+    from app.db import Candidate, SessionLocal
+    DB_AVAILABLE = True
+except Exception:
+    DB_AVAILABLE = False
+    Candidate = None
+    SessionLocal = None
 from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 
 
@@ -40,8 +46,90 @@ def _generate_rationale(pairing: Any, breakdown: dict[str, float]) -> list[str]:
 
 
 def _rule_hits_misses(bundle: FeatureBundle, pairing: Any) -> tuple[list[str], list[str]]:
-    """Determine which hard rules are satisfied or violated."""
+    """Determine which hard rules are satisfied using rule pack."""
+    from app.services.rule_pack_loader import rule_pack_loader
+    from app.rules_engine.validator import RulePackValidator
+    
+    hits: list[str] = []
+    misses: list[str] = []
+    
+    airline = bundle.context.airline
+    month = getattr(bundle.context, 'month', '2025.09')  # Fallback if month not set
+    
+    try:
+        rule_pack = rule_pack_loader.load_rule_pack(airline, month)
+        
+        # Create validation context from bundle
+        context = {
+            "ctx_id": bundle.context.ctx_id,
+            "pilot_id": bundle.context.pilot_id,
+            "base": bundle.context.base,
+            "seniority": bundle.context.seniority_percentile,
+            "airline": bundle.context.airline,
+            "month": month,
+            # Add pairing data to context for rule evaluation
+            "days_off": _get(pairing, "days_off", 0),
+            "duty_hours": _get(pairing, "duty_hours", _get(pairing, "duty_time", 0)),
+            "flight_time": _get(pairing, "flight_time", _get(pairing, "block_hours", 0)),
+            "rest_hours": _get(pairing, "rest_hours", 999),
+            "break_minutes": _get(pairing, "break_minutes", 0),
+            "max_duty_hours": 12,  # Default limits
+            "max_flight_time": 8,
+            "min_rest_hours": 10,
+        }
+        
+        # Create a simple validator for hard rules
+        # Note: Full RulePackValidator might not exist yet, so we'll use simple evaluation
+        for rule in rule_pack.hard_rules:
+            try:
+                # Simple evaluation context for basic rules
+                trip = {
+                    "duty_hours": _get(pairing, "duty_hours", _get(pairing, "duty_time", 0)),
+                    "flight_time": _get(pairing, "flight_time", _get(pairing, "block_hours", 0)),
+                    "rest_hours": _get(pairing, "rest_hours", 999),
+                    "break_minutes": _get(pairing, "break_minutes", 0),
+                }
+                
+                # Basic evaluation of rule expressions
+                if _evaluate_rule_expression(rule.check, context, trip):
+                    hits.append(rule.name)
+                else:
+                    misses.append(rule.name)
+            except Exception:
+                # If rule evaluation fails, assume it's violated
+                misses.append(rule.name)
+                
+    except Exception:
+        # Fallback to legacy validation if rule pack loading fails
+        return _legacy_rule_hits_misses(bundle, pairing)
+    
+    return hits, misses
 
+
+def _evaluate_rule_expression(expression: str, context: dict, trip: dict) -> bool:
+    """Safely evaluate a rule expression with given context and trip data.
+    
+    This is a simple implementation that handles basic rule expressions.
+    A full DSL parser would be more robust.
+    """
+    try:
+        # Create a safe evaluation environment
+        safe_globals = {
+            "__builtins__": {},
+            "context": context,
+            "trip": trip,
+        }
+        
+        # Evaluate the expression
+        result = eval(expression, safe_globals)
+        return bool(result)
+    except Exception:
+        # If evaluation fails, assume rule is violated
+        return False
+
+
+def _legacy_rule_hits_misses(bundle: FeatureBundle, pairing: Any) -> tuple[list[str], list[str]]:
+    """Legacy hard rule validation for backward compatibility."""
     hits: list[str] = []
     misses: list[str] = []
 
@@ -97,8 +185,56 @@ PERSONA_WEIGHTS: dict[str, dict[str, float]] = {
 
 
 def _get_scoring_weights(bundle: FeatureBundle) -> dict[str, float]:
-    """Return normalized scoring weights for available factors."""
+    """Return normalized scoring weights from rule pack or fallback to defaults."""
+    from app.services.rule_pack_loader import rule_pack_loader
+    
+    airline = bundle.context.airline
+    month = getattr(bundle.context, 'month', '2025.09')  # Fallback if month not set
+    
+    try:
+        # Try to load rule pack and extract soft rule weights
+        rule_pack = rule_pack_loader.load_rule_pack(airline, month)
+        
+        # Extract weights from soft rules
+        weights = {}
+        for soft_rule in rule_pack.soft_rules:
+            weights[soft_rule.name] = soft_rule.weight
+            
+        # If no soft rules found, use default weights
+        if not weights:
+            weights = DEFAULT_WEIGHTS.copy()
+        else:
+            # Add any missing default weights that aren't in rule pack
+            for key, default_val in DEFAULT_WEIGHTS.items():
+                if key not in weights:
+                    weights[key] = default_val
+            
+        # Apply persona adjustments (optional)
+        source_d = _to_dict(_get(bundle.preference_schema, "source", {}))
+        persona = source_d.get("persona")
+        if persona in PERSONA_WEIGHTS:
+            for key, multiplier in PERSONA_WEIGHTS[persona].items():
+                if key in weights:
+                    weights[key] *= multiplier
+        
+        # Apply context-specific weight overrides
+        ctx_weights = _to_dict(_get(bundle.context, "default_weights", {}))
+        weights.update(ctx_weights)
+        
+        # Normalize weights
+        total = sum(weights.values()) or 1.0
+        return {k: v / total for k, v in weights.items()}
+        
+    except (FileNotFoundError, Exception) as e:
+        # Fallback to legacy weights if rule pack loading fails
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Failed to load rule pack {airline}/{month}: {e}")
+        return _get_legacy_weights(bundle)
 
+
+def _get_legacy_weights(bundle: FeatureBundle) -> dict[str, float]:
+    """Legacy weight calculation for backward compatibility."""
     source_d = _to_dict(_get(bundle.preference_schema, "source", {}))
     persona = source_d.get("persona")
 
@@ -299,10 +435,14 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
         )
 
     ctx_id = bundle.context.ctx_id
-    with SessionLocal() as db:
-        for cand in result:
-            db.add(Candidate(ctx_id=ctx_id, data=cand.model_dump()))
-        db.commit()
+    if DB_AVAILABLE:
+        try:
+            with SessionLocal() as db:
+                for cand in result:
+                    db.add(Candidate(ctx_id=ctx_id, data=cand.model_dump()))
+                db.commit()
+        except Exception as e:
+            log_event(ctx_id, "db_warning", {"message": f"Failed to save candidates to legacy DB: {e}"})
 
     log_event(ctx_id, "optimize", {"candidates": [c.candidate_id for c in result]})
 

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>users - VectorBid Database</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
+        th { background-color: #2563eb; color: white; position: sticky; top: 0; }
+        .header { background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
+        .back-link { color: white; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .table-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .data-type { color: #6b7280; font-size: 0.8em; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .null-value { color: #9ca3af; font-style: italic; }
+        .json-value { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 users</h1>
+        <p><a href="/db" class="back-link">← Back to Database Overview</a></p>
+    </div>
+
+    <div class="table-info">
+        <h3>Table Information</h3>
+        <ul>
+            <li><strong>Columns:</strong> 15</li>
+            <li><strong>Rows Shown:</strong> 1 (limited to 50)</li>
+            <li><strong>Table:</strong> users</li>
+        </ul>
+    </div>
+
+    
+    <h3>Column Schema</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Column Name</th>
+                <th>Data Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td><strong>id</strong></td>
+                <td class="data-type">uuid</td>
+            </tr>
+            
+            <tr>
+                <td><strong>email</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>password_hash</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>first_name</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>last_name</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>role</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>status</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>email_verified</strong></td>
+                <td class="data-type">boolean</td>
+            </tr>
+            
+            <tr>
+                <td><strong>email_verification_token</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>password_reset_token</strong></td>
+                <td class="data-type">character varying</td>
+            </tr>
+            
+            <tr>
+                <td><strong>password_reset_expires_at</strong></td>
+                <td class="data-type">timestamp with time zone</td>
+            </tr>
+            
+            <tr>
+                <td><strong>last_login_at</strong></td>
+                <td class="data-type">timestamp with time zone</td>
+            </tr>
+            
+            <tr>
+                <td><strong>login_count</strong></td>
+                <td class="data-type">integer</td>
+            </tr>
+            
+            <tr>
+                <td><strong>created_at</strong></td>
+                <td class="data-type">timestamp with time zone</td>
+            </tr>
+            
+            <tr>
+                <td><strong>updated_at</strong></td>
+                <td class="data-type">timestamp with time zone</td>
+            </tr>
+            
+        </tbody>
+    </table>
+    
+
+    
+    <h3>Table Data (1 rows)</h3>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    
+                    <th>id</th>
+                    
+                    <th>email</th>
+                    
+                    <th>password_hash</th>
+                    
+                    <th>first_name</th>
+                    
+                    <th>last_name</th>
+                    
+                    <th>role</th>
+                    
+                    <th>status</th>
+                    
+                    <th>email_verified</th>
+                    
+                    <th>email_verification_token</th>
+                    
+                    <th>password_reset_token</th>
+                    
+                    <th>password_reset_expires_at</th>
+                    
+                    <th>last_login_at</th>
+                    
+                    <th>login_count</th>
+                    
+                    <th>created_at</th>
+                    
+                    <th>updated_at</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    
+                    <td>
+                        
+                            c1bd2776-1252-4ef1-a716-518dde5e0f2b
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            test@vectorbid.com
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            dummy_hash
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            Test
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            User
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            pilot
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            active
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            False
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            <span class="null-value">NULL</span>
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            <span class="null-value">NULL</span>
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            <span class="null-value">NULL</span>
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            <span class="null-value">NULL</span>
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            0
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            2025-08-22 19:56:58.148439-04:00
+                        
+                    </td>
+                    
+                    <td>
+                        
+                            2025-08-22 19:56:58.148439-04:00
+                        
+                    </td>
+                    
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    
+
+    <div style="margin-top: 20px; color: #6b7280; font-size: 0.9em;">
+        <p><strong>Note:</strong> Limited to first 50 rows. For full data access, use pgAdmin or psql command line.</p>
+    </div>
+</body>
+</html>

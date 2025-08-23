@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VectorBid Database Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .header { background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
+        .table-link { color: #2563eb; text-decoration: none; }
+        .table-link:hover { text-decoration: underline; }
+        .count { color: #6b7280; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗄️ VectorBid Database Viewer</h1>
+        <p>Browse your PostgreSQL database tables and data</p>
+    </div>
+
+    <h2>Database Tables (20 total)</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Table Name</th>
+                <th>Row Count</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td><strong>airlines</strong></td>
+                <td class="count">1 rows</td>
+                <td>
+                    <a href="/db/airlines" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>audit</strong></td>
+                <td class="count">17 rows</td>
+                <td>
+                    <a href="/db/audit" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>audit_log</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/audit_log" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>bid_packages</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/bid_packages" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>candidates</strong></td>
+                <td class="count">20 rows</td>
+                <td>
+                    <a href="/db/candidates" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>contract_improvements</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/contract_improvements" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>contract_reviews</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/contract_reviews" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>contract_rules</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/contract_rules" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>contract_statistics</strong></td>
+                <td class="count">1 rows</td>
+                <td>
+                    <a href="/db/contract_statistics" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>exports</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/exports" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>pilot_contract_assignments</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/pilot_contract_assignments" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>pilot_contracts</strong></td>
+                <td class="count">1 rows</td>
+                <td>
+                    <a href="/db/pilot_contracts" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>pilot_profiles</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/pilot_profiles" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>pilots</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/pilots" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>preferences</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/preferences" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>regulatory_rules</strong></td>
+                <td class="count">3 rows</td>
+                <td>
+                    <a href="/db/regulatory_rules" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>rule_packs</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/rule_packs" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>security_events</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/security_events" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>user_sessions</strong></td>
+                <td class="count">0 rows</td>
+                <td>
+                    <a href="/db/user_sessions" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><strong>users</strong></td>
+                <td class="count">1 rows</td>
+                <td>
+                    <a href="/db/users" class="table-link">View Data</a>
+                </td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+        <h3>Quick Stats</h3>
+        <ul>
+            <li><strong>Users:</strong> 1</li>
+            <li><strong>Pilots:</strong> 0</li>
+            <li><strong>Audit Events:</strong> 17</li>
+            <li><strong>Preferences:</strong> 0</li>
+            <li><strong>Exports:</strong> 0</li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 20px; color: #6b7280; font-size: 0.9em;">
+        <p><strong>Note:</strong> This is a read-only viewer. Data is limited to 50 rows per table.</p>
+        <p>For full database management, use pgAdmin or command line tools.</p>
+    </div>
+</body>
+</html>

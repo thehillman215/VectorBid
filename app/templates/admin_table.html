@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage {{ table_name.title() }} - VectorBid Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Salesforce Lightning Design System - Admin Theme */
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Salesforce Sans', 'SalesforceSans-Regular', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; 
+            background: #f3f2f2;
+            color: #080707;
+        }
+        
+        .slds-global-header {
+            background: #c23934;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        .slds-global-header__logo {
+            font-size: 18px;
+            font-weight: 700;
+            margin-right: 24px;
+        }
+        
+        .slds-global-header__icon {
+            margin-right: 8px;
+            color: #ffd6d6;
+        }
+        
+        .slds-page-content {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .slds-breadcrumb {
+            padding: 8px 0;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .slds-breadcrumb a {
+            color: #0176d3;
+            text-decoration: none;
+        }
+        
+        .slds-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 300;
+            color: #080707;
+        }
+        
+        .page-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .slds-button {
+            background: transparent;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            color: #0176d3;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 16px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.15s linear;
+            display: inline-block;
+        }
+        
+        .slds-button:hover {
+            background: #f4f6fe;
+            border-color: #0176d3;
+            text-decoration: none;
+        }
+        
+        .slds-button--brand {
+            background: #0176d3;
+            color: white;
+            border-color: #0176d3;
+        }
+        
+        .slds-button--brand:hover {
+            background: #014486;
+        }
+        
+        .slds-button--destructive {
+            color: #c23934;
+            border-color: #c23934;
+        }
+        
+        .slds-button--destructive:hover {
+            background: #fdf2f2;
+        }
+        
+        .slds-card {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .slds-card__header {
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid #dddbda;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .slds-card__header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #080707;
+            margin: 0;
+        }
+        
+        .search-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .slds-input {
+            padding: 8px 12px;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .data-table thead th {
+            background: #fafaf9;
+            border-top: 1px solid #dddbda;
+            border-bottom: 2px solid #dddbda;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 700;
+            color: #514f4d;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table tbody td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #dddbda;
+            vertical-align: top;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f4f6fe;
+        }
+        
+        .primary-key {
+            color: #0176d3;
+            font-weight: 700;
+        }
+        
+        .record-actions {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #dddbda;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .btn-icon:hover {
+            background: #f4f6fe;
+            border-color: #0176d3;
+        }
+        
+        .btn-icon.delete:hover {
+            background: #fdf2f2;
+            border-color: #c23934;
+            color: #c23934;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-top: 1px solid #dddbda;
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: #706e6b;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 24px;
+            border-radius: 6px;
+            width: 600px;
+            max-width: 90%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #dddbda;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #080707;
+            margin: 0;
+        }
+        
+        .close {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #706e6b;
+        }
+        
+        .close:hover {
+            color: #080707;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            color: #514f4d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #0176d3;
+            box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1);
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #f3f9f1;
+            color: #2e844a;
+            border: 1px solid #a7d69d;
+        }
+        
+        .alert-error {
+            background: #fdf2f2;
+            color: #c23934;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <div class="slds-global-header">
+        <div class="slds-global-header__logo">
+            <i class="fas fa-shield-alt slds-global-header__icon"></i>
+            VectorBid Admin Panel
+        </div>
+    </div>
+
+    <div class="slds-page-content">
+        <!-- Breadcrumb -->
+        <nav class="slds-breadcrumb">
+            <a href="/admin">
+                <i class="fas fa-home" style="margin-right: 4px;"></i>
+                Admin
+            </a>
+            <span style="margin: 0 8px;">/</span>
+            <span>{{ table_name.title() }}</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Manage {{ table_name.title() }} ({{ total_records }} records)</h1>
+            <div class="page-actions">
+                <button class="slds-button slds-button--brand" onclick="openCreateModal()">
+                    <i class="fas fa-plus" style="margin-right: 4px;"></i>
+                    Add Record
+                </button>
+                <a href="/db/{{ table_name }}" class="slds-button">
+                    <i class="fas fa-eye" style="margin-right: 4px;"></i>
+                    View Only
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alert-success" class="alert alert-success">
+            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+            <span id="success-message"></span>
+        </div>
+        <div id="alert-error" class="alert alert-error">
+            <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+            <span id="error-message"></span>
+        </div>
+
+        <!-- Data Table -->
+        <div class="slds-card">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-table" style="margin-right: 8px; color: #0176d3;"></i>
+                    Records
+                </h2>
+                <div class="search-controls">
+                    <form method="get">
+                        <input type="text" name="search" class="slds-input" placeholder="Search records..." 
+                               value="{{ search or '' }}" style="width: 250px;">
+                        <button type="submit" class="slds-button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            {% if records %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        {% for column in columns %}
+                        <th>
+                            {{ column.column_name }}
+                            {% if column.is_primary %}
+                            <i class="fas fa-key" style="color: #0176d3; margin-left: 4px;"></i>
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        {% for column in columns %}
+                        <td {% if column.is_primary %}class="primary-key"{% endif %}>
+                            {{ record[column.column_name] or '' }}
+                        </td>
+                        {% endfor %}
+                        <td>
+                            <div class="record-actions">
+                                <button class="btn-icon" onclick="openEditModal('{{ record[columns[0].column_name] }}', {{ record | tojson | escape }})" 
+                                        title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon delete" onclick="deleteRecord('{{ record[columns[0].column_name] }}')" 
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <div class="pagination-info">
+                    Showing {{ ((current_page - 1) * page_size + 1) }} to {{ [current_page * page_size, total_records] | min }} 
+                    of {{ total_records }} records
+                </div>
+                <div class="pagination-controls">
+                    {% if current_page > 1 %}
+                    <a href="?page={{ current_page - 1 }}{% if search %}&search={{ search }}{% endif %}" class="slds-button">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                    {% endif %}
+                    
+                    <span style="padding: 8px 16px; color: #706e6b;">
+                        Page {{ current_page }} of {{ total_pages }}
+                    </span>
+                    
+                    {% if current_page < total_pages %}
+                    <a href="?page={{ current_page + 1 }}{% if search %}&search={{ search }}{% endif %}" class="slds-button">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div style="padding: 48px; text-align: center; color: #706e6b;">
+                <i class="fas fa-database" style="font-size: 48px; color: #dddbda; margin-bottom: 16px;"></i>
+                <h3>No Records Found</h3>
+                <p>{% if search %}No records match your search.{% else %}This table is empty.{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="recordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Add Record</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <form id="recordForm">
+                {% for column in columns %}
+                {% if not column.is_primary or column.column_default %}
+                <div class="form-group">
+                    <label class="form-label" for="{{ column.column_name }}">
+                        {{ column.column_name.replace('_', ' ').title() }}
+                        {% if column.is_nullable == 'NO' %}<span style="color: #c23934;">*</span>{% endif %}
+                    </label>
+                    <input 
+                        type="{% if column.data_type in ['integer', 'bigint'] %}number{% elif column.data_type == 'boolean' %}checkbox{% elif 'timestamp' in column.data_type %}datetime-local{% else %}text{% endif %}"
+                        id="{{ column.column_name }}"
+                        name="{{ column.column_name }}"
+                        class="form-input"
+                        {% if column.is_nullable == 'NO' %}required{% endif %}
+                        {% if column.data_type == 'boolean' %}style="width: auto;"{% endif %}
+                    >
+                    <small style="color: #706e6b; font-size: 11px;">{{ column.data_type }}</small>
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                <div class="modal-actions">
+                    <button type="button" class="slds-button" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="slds-button slds-button--brand" id="save-button">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentRecordId = null;
+        let isEditMode = false;
+
+        function showAlert(type, message) {
+            const alertElement = document.getElementById(`alert-${type}`);
+            document.getElementById(`${type}-message`).textContent = message;
+            alertElement.style.display = 'block';
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        function openCreateModal() {
+            isEditMode = false;
+            currentRecordId = null;
+            document.getElementById('modal-title').textContent = 'Add Record';
+            document.getElementById('save-button').textContent = 'Create';
+            document.getElementById('recordForm').reset();
+            document.getElementById('recordModal').style.display = 'block';
+        }
+
+        function openEditModal(recordId, recordData) {
+            isEditMode = true;
+            currentRecordId = recordId;
+            document.getElementById('modal-title').textContent = 'Edit Record';
+            document.getElementById('save-button').textContent = 'Update';
+            
+            // Populate form with existing data
+            const form = document.getElementById('recordForm');
+            form.reset();
+            
+            Object.keys(recordData).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = recordData[key];
+                    } else {
+                        input.value = recordData[key] || '';
+                    }
+                }
+            });
+            
+            document.getElementById('recordModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('recordModal').style.display = 'none';
+        }
+
+        async function deleteRecord(recordId) {
+            if (!confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/{{ table_name }}/${recordId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showAlert('success', result.message);
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'An error occurred while deleting the record.');
+            }
+        }
+
+        // Form submission
+        document.getElementById('recordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const url = isEditMode 
+                ? `/admin/{{ table_name }}/${currentRecordId}`
+                : `/admin/{{ table_name }}/create`;
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    closeModal();
+                    showAlert('success', result.message);
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'An error occurred while saving the record.');
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === document.getElementById('recordModal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
