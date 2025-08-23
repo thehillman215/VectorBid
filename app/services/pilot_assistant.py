@@ -7,7 +7,7 @@ Runtime service for pilots using fast LLM models with full contract context.
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 

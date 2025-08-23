@@ -6,14 +6,13 @@ Pilot-facing endpoints for using contracts (read-only access to active contracts
 
 import logging
 from datetime import date, datetime
-from typing import Optional, List
+from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 
+from app.auth.dependencies import require_pilot_role
 from app.services.pilot_assistant import PilotAssistant
-from app.services.vector_store import VectorStoreService
-from app.auth.dependencies import get_current_user, require_pilot_role
 
 logger = logging.getLogger(__name__)
 
@@ -66,9 +65,10 @@ async def get_active_contract(
         Active contract information
     """
     
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
     
     async with AsyncSessionLocal() as session:
         # Find active contract
@@ -133,9 +133,10 @@ async def evaluate_schedule(
     """
     
     # Get active contract version
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
     
     async with AsyncSessionLocal() as session:
         # Find active contract
@@ -212,9 +213,10 @@ async def search_contract_rules(
         Matching rules from active contract
     """
     
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
     
     async with AsyncSessionLocal() as session:
         # Get active contract
@@ -273,9 +275,10 @@ async def get_available_airlines(
         List of airline codes with active contracts
     """
     
+    from sqlalchemy import distinct, select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select, distinct
     
     async with AsyncSessionLocal() as session:
         # Find all airlines with active contracts
@@ -316,10 +319,10 @@ async def get_pilot_preferences(
         Pilot's saved preferences
     """
     
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import Pilot, Preference
-    from sqlalchemy import select
-    from sqlalchemy.orm import joinedload
     
     async with AsyncSessionLocal() as session:
         # Get pilot profile

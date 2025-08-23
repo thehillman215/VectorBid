@@ -4,14 +4,13 @@ LLM Service Abstraction
 Provides unified interface for different LLM models optimized for specific tasks.
 """
 
-import asyncio
 import json
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from openai import AsyncOpenAI
 from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)

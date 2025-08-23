@@ -4,16 +4,13 @@ Contract Extraction Service V2
 Enhanced extraction pipeline using dual-model architecture and vector storage.
 """
 
-import asyncio
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import PyPDF2
 import yaml
-from pydantic import BaseModel, Field
 
 from .llm_service import LLMModel, LLMService
 from .vector_store import VectorStoreService
@@ -178,10 +175,10 @@ class ContractExtractorV2:
     ):
         """Save contract and rules to database"""
         
-        from app.db.database import AsyncSessionLocal
-        from app.db.models import PilotContract, ContractRule
-        from sqlalchemy import text
         import uuid
+
+        from app.db.database import AsyncSessionLocal
+        from app.db.models import ContractRule, PilotContract
         
         async with AsyncSessionLocal() as session:
             try:

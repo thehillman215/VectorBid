@@ -8,16 +8,16 @@ import logging
 import os
 from datetime import date, datetime
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Depends, Query, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from fastapi.security import HTTPBearer
 from pydantic import BaseModel, Field
 
+from app.auth.dependencies import require_admin_role
 from app.services.contract_extractor_v2 import ContractExtractorV2
 from app.services.llm_service import LLMService
 from app.services.vector_store import VectorStoreService
-from app.auth.dependencies import require_admin_role
 
 logger = logging.getLogger(__name__)
 
@@ -150,9 +150,10 @@ async def upload_contract(
             f.write(content)
         
         # Store in database
+        import uuid
+
         from app.db.database import AsyncSessionLocal
         from app.db.models import PilotContract
-        import uuid
         
         async with AsyncSessionLocal() as session:
             contract_id = uuid.uuid4()
@@ -255,10 +256,11 @@ async def list_contracts(
         List of contracts with metadata
     """
     
-    from app.db.database import AsyncSessionLocal
-    from app.db.models import PilotContract, User
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload
+
+    from app.db.database import AsyncSessionLocal
+    from app.db.models import PilotContract, User
     
     async with AsyncSessionLocal() as session:
         query = select(PilotContract).options(joinedload(PilotContract.uploaded_by))
@@ -316,10 +318,12 @@ async def update_contract_status(
         Updated contract status
     """
     
+    import uuid
+
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
-    import uuid
     
     async with AsyncSessionLocal() as session:
         query = select(PilotContract).where(PilotContract.id == uuid.UUID(contract_id))
@@ -380,10 +384,12 @@ async def process_contract(
         Processing status and results
     """
     
+    import uuid
+
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
-    import uuid
     
     async with AsyncSessionLocal() as session:
         query = select(PilotContract).where(PilotContract.id == uuid.UUID(contract_id))
@@ -477,10 +483,12 @@ async def delete_contract(
         Deletion confirmation
     """
     
+    import uuid
+
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
-    import uuid
     
     async with AsyncSessionLocal() as session:
         query = select(PilotContract).where(PilotContract.id == uuid.UUID(contract_id))
@@ -533,10 +541,12 @@ async def _deactivate_existing_contracts(
         exclude_id: Contract ID to exclude from deactivation
     """
     
+    import uuid
+
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
-    import uuid
     
     async with AsyncSessionLocal() as session:
         query = select(PilotContract).where(PilotContract.airline == airline)

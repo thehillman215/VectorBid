@@ -10,8 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Depends, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
 from app.services.contract_extractor_v2 import ContractExtractorV2
@@ -167,9 +166,10 @@ async def list_contracts(
         List of contract metadata
     """
     
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
     from app.db.models import PilotContract
-    from sqlalchemy import select
     
     async with AsyncSessionLocal() as session:
         query = select(PilotContract)
@@ -328,9 +328,10 @@ async def approve_contract_rules(
         Approval status
     """
     
+    from sqlalchemy import select
+
     from app.db.database import AsyncSessionLocal
-    from app.db.models import PilotContract, ContractRule
-    from sqlalchemy import select, update
+    from app.db.models import ContractRule, PilotContract
     
     async with AsyncSessionLocal() as session:
         # Update contract status

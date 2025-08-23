@@ -7,9 +7,9 @@ FastAPI dependencies for route protection and role-based access control.
 import logging
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import PyJWTError
 
 logger = logging.getLogger(__name__)
