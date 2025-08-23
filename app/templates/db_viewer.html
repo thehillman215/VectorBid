@@ -2,60 +2,363 @@
 <html>
 <head>
     <title>VectorBid Database Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .header { background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
-        .table-link { color: #2563eb; text-decoration: none; }
-        .table-link:hover { text-decoration: underline; }
-        .count { color: #6b7280; font-size: 0.9em; }
+        /* Salesforce Lightning Design System inspired styles */
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Salesforce Sans', 'SalesforceSans-Regular', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; 
+            background: #f3f2f2;
+            color: #080707;
+        }
+        
+        .slds-global-header {
+            background: #16325c;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        .slds-global-header__logo {
+            font-size: 18px;
+            font-weight: 700;
+            margin-right: 24px;
+        }
+        
+        .slds-global-header__icon {
+            margin-right: 8px;
+            color: #5eb3fd;
+        }
+        
+        .slds-page-content {
+            padding: 24px;
+        }
+        
+        .slds-page-header {
+            background: white;
+            padding: 24px;
+            border-radius: 4px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .slds-page-header__title {
+            font-size: 28px;
+            font-weight: 300;
+            margin: 0 0 8px 0;
+            color: #080707;
+        }
+        
+        .slds-page-header__meta {
+            color: #706e6b;
+            font-size: 14px;
+        }
+        
+        .slds-card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        .slds-card__header {
+            padding: 24px 24px 0 24px;
+            border-bottom: 1px solid #dddbda;
+            margin-bottom: 0;
+        }
+        
+        .slds-card__header-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #080707;
+        }
+        
+        .slds-card__body {
+            padding: 0;
+        }
+        
+        .slds-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+        
+        .slds-table thead th {
+            background: #fafaf9;
+            border-top: 1px solid #dddbda;
+            border-bottom: 2px solid #dddbda;
+            padding: 12px;
+            text-align: left;
+            font-weight: 700;
+            color: #514f4d;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .slds-table tbody td {
+            padding: 12px;
+            border-bottom: 1px solid #dddbda;
+            vertical-align: top;
+        }
+        
+        .slds-table tbody tr:hover {
+            background: #f4f6fe;
+        }
+        
+        .slds-table__record-name {
+            font-weight: 700;
+            color: #0176d3;
+        }
+        
+        .slds-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 12px;
+            background: #ecebea;
+            color: #514f4d;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .slds-badge--success {
+            background: #4bca81;
+            color: white;
+        }
+        
+        .slds-badge--warning {
+            background: #ffb75d;
+            color: white;
+        }
+        
+        .slds-badge--error {
+            background: #ea001e;
+            color: white;
+        }
+        
+        .slds-button {
+            background: transparent;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            color: #0176d3;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 400;
+            padding: 6px 12px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.15s linear;
+            display: inline-block;
+        }
+        
+        .slds-button:hover {
+            background: #f4f6fe;
+            border-color: #0176d3;
+            text-decoration: none;
+        }
+        
+        .slds-button--brand {
+            background: #0176d3;
+            border-color: #0176d3;
+            color: white;
+        }
+        
+        .slds-button--brand:hover {
+            background: #014486;
+            border-color: #014486;
+        }
+        
+        .slds-icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: text-bottom;
+            margin-right: 4px;
+        }
+        
+        .slds-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .slds-stat {
+            background: white;
+            padding: 16px;
+            border-radius: 4px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .slds-stat__value {
+            font-size: 32px;
+            font-weight: 300;
+            color: #0176d3;
+            display: block;
+        }
+        
+        .slds-stat__label {
+            font-size: 12px;
+            color: #706e6b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+        
+        .slds-breadcrumb {
+            padding: 8px 0;
+            font-size: 12px;
+        }
+        
+        .slds-breadcrumb a {
+            color: #0176d3;
+            text-decoration: none;
+        }
+        
+        .slds-breadcrumb a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🗄️ VectorBid Database Viewer</h1>
-        <p>Browse your PostgreSQL database tables and data</p>
+    <!-- Salesforce Global Header -->
+    <div class="slds-global-header">
+        <div class="slds-global-header__logo">
+            <i class="fas fa-database slds-global-header__icon"></i>
+            VectorBid Database
+        </div>
+        <div style="margin-left: auto; font-size: 14px;">
+            <i class="fas fa-shield-alt" style="margin-right: 4px;"></i>
+            Read-Only Mode
+        </div>
     </div>
 
-    <h2>Database Tables ({{ tables|length }} total)</h2>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Table Name</th>
-                <th>Row Count</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for table in tables %}
-            <tr>
-                <td><strong>{{ table }}</strong></td>
-                <td class="count">{{ table_counts[table] }} rows</td>
-                <td>
-                    <a href="/db/{{ table }}" class="table-link">View Data</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="slds-page-content">
+        <!-- Breadcrumb -->
+        <nav class="slds-breadcrumb">
+            <i class="fas fa-home" style="margin-right: 8px;"></i>
+            <span>Database Objects</span>
+        </nav>
 
-    <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <h3>Quick Stats</h3>
-        <ul>
-            <li><strong>Users:</strong> {{ table_counts.get('users', 0) }}</li>
-            <li><strong>Pilots:</strong> {{ table_counts.get('pilots', 0) }}</li>
-            <li><strong>Audit Events:</strong> {{ table_counts.get('audit', 0) }}</li>
-            <li><strong>Preferences:</strong> {{ table_counts.get('preferences', 0) }}</li>
-            <li><strong>Exports:</strong> {{ table_counts.get('exports', 0) }}</li>
-        </ul>
-    </div>
+        <!-- Page Header -->
+        <div class="slds-page-header">
+            <h1 class="slds-page-header__title">Database Objects</h1>
+            <p class="slds-page-header__meta">{{ tables|length }} total tables • PostgreSQL vectorbid database</p>
+        </div>
 
-    <div style="margin-top: 20px; color: #6b7280; font-size: 0.9em;">
-        <p><strong>Note:</strong> This is a read-only viewer. Data is limited to 50 rows per table.</p>
-        <p>For full database management, use pgAdmin or command line tools.</p>
+        <!-- Key Metrics Dashboard -->
+        <div class="slds-stats">
+            <div class="slds-stat">
+                <span class="slds-stat__value">{{ table_counts.get('users', 0) }}</span>
+                <span class="slds-stat__label">Users</span>
+            </div>
+            <div class="slds-stat">
+                <span class="slds-stat__value">{{ table_counts.get('pilots', 0) }}</span>
+                <span class="slds-stat__label">Pilots</span>
+            </div>
+            <div class="slds-stat">
+                <span class="slds-stat__value">{{ table_counts.get('candidates', 0) }}</span>
+                <span class="slds-stat__label">Candidates</span>
+            </div>
+            <div class="slds-stat">
+                <span class="slds-stat__value">{{ table_counts.get('audit', 0) }}</span>
+                <span class="slds-stat__label">Audit Events</span>
+            </div>
+            <div class="slds-stat">
+                <span class="slds-stat__value">{{ table_counts.get('exports', 0) }}</span>
+                <span class="slds-stat__label">Exports</span>
+            </div>
+        </div>
+
+        <!-- Database Tables Card -->
+        <div class="slds-card">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-table" style="margin-right: 8px; color: #0176d3;"></i>
+                    Database Tables
+                </h2>
+            </div>
+            <div class="slds-card__body">
+                <table class="slds-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Object Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Records</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for table in tables %}
+                        <tr>
+                            <td>
+                                <div class="slds-table__record-name">
+                                    <i class="fas fa-table slds-icon"></i>
+                                    {{ table|title }}
+                                </div>
+                            </td>
+                            <td>Standard Object</td>
+                            <td>
+                                <span class="slds-badge {% if table_counts[table] > 0 %}slds-badge--success{% else %}{% endif %}">
+                                    {{ table_counts[table] }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if table_counts[table] > 0 %}
+                                    <span class="slds-badge slds-badge--success">Active</span>
+                                {% else %}
+                                    <span class="slds-badge">Empty</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/db/{{ table }}" class="slds-button">
+                                    <i class="fas fa-eye slds-icon"></i>
+                                    View Records
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="slds-card" style="margin-top: 24px;">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-info-circle" style="margin-right: 8px; color: #0176d3;"></i>
+                    System Information
+                </h2>
+            </div>
+            <div class="slds-card__body" style="padding: 24px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                    <div>
+                        <strong>Database:</strong> vectorbid<br>
+                        <strong>Type:</strong> PostgreSQL<br>
+                        <strong>Access:</strong> Read-Only
+                    </div>
+                    <div>
+                        <strong>Total Objects:</strong> {{ tables|length }}<br>
+                        <strong>Active Objects:</strong> {{ tables|length - (tables|length - table_counts.values()|list|length) }}<br>
+                        <strong>Empty Objects:</strong> {% set empty_count = 0 %}{% for count in table_counts.values() %}{% if count == 0 %}{% set empty_count = empty_count + 1 %}{% endif %}{% endfor %}{{ empty_count }}
+                    </div>
+                </div>
+                <div style="margin-top: 16px; padding: 12px; background: #fef7e0; border-left: 3px solid #ffb75d; border-radius: 4px;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ffb75d; margin-right: 8px;"></i>
+                    <strong>Note:</strong> This interface provides read-only access to database records. Record limits apply (50 records per view). For full database administration, use pgAdmin or psql CLI.
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -90,7 +90,7 @@ class VectorBidTester:
                 "preference_schema": {
                     "pilot_id": "test", "airline": "UAL", "base": "SFO", 
                     "seat": "FO", "equip": ["73G"],
-                    "hard_constraints": {"no_red_eyes": false},
+                    "hard_constraints": {"no_red_eyes": False},
                     "soft_prefs": {"weekend_priority": {"weight": 0.9}}
                 },
                 "analytics_features": {}, "compliance_flags": {},
@@ -134,7 +134,7 @@ class VectorBidTester:
                 "preference_schema": {
                     "pilot_id": "test", "airline": "UAL", "base": "SFO",
                     "seat": "FO", "equip": ["73G"],
-                    "hard_constraints": {"no_red_eyes": false},
+                    "hard_constraints": {"no_red_eyes": False},
                     "soft_prefs": {"weekend_priority": {"weight": 0.9}}
                 },
                 "analytics_features": {}, "compliance_flags": {},

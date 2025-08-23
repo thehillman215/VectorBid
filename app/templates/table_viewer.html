@@ -1,95 +1,383 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ table_name }} - VectorBid Database</title>
+    <title>{{ table_name|title }} - VectorBid Database</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
-        th { background-color: #2563eb; color: white; position: sticky; top: 0; }
-        .header { background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
-        .back-link { color: white; text-decoration: none; }
-        .back-link:hover { text-decoration: underline; }
-        .table-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .data-type { color: #6b7280; font-size: 0.8em; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .null-value { color: #9ca3af; font-style: italic; }
-        .json-value { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+        /* Salesforce Lightning Design System inspired styles */
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Salesforce Sans', 'SalesforceSans-Regular', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; 
+            background: #f3f2f2;
+            color: #080707;
+        }
+        
+        .slds-global-header {
+            background: #16325c;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        .slds-global-header__logo {
+            font-size: 18px;
+            font-weight: 700;
+            margin-right: 24px;
+        }
+        
+        .slds-global-header__icon {
+            margin-right: 8px;
+            color: #5eb3fd;
+        }
+        
+        .slds-page-content {
+            padding: 24px;
+        }
+        
+        .slds-page-header {
+            background: white;
+            padding: 24px;
+            border-radius: 4px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .slds-page-header__title {
+            font-size: 28px;
+            font-weight: 300;
+            margin: 0 0 8px 0;
+            color: #080707;
+        }
+        
+        .slds-page-header__meta {
+            color: #706e6b;
+            font-size: 14px;
+        }
+        
+        .slds-card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .slds-card__header {
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid #dddbda;
+        }
+        
+        .slds-card__header-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #080707;
+            margin: 0;
+        }
+        
+        .slds-card__body {
+            padding: 0;
+        }
+        
+        .slds-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            font-size: 13px;
+        }
+        
+        .slds-table thead th {
+            background: #fafaf9;
+            border-top: 1px solid #dddbda;
+            border-bottom: 2px solid #dddbda;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 700;
+            color: #514f4d;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .slds-table tbody td {
+            padding: 8px;
+            border-bottom: 1px solid #dddbda;
+            vertical-align: top;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .slds-table tbody tr:hover {
+            background: #f4f6fe;
+        }
+        
+        .slds-table__record-name {
+            font-weight: 700;
+            color: #0176d3;
+        }
+        
+        .slds-button {
+            background: transparent;
+            border: 1px solid #dddbda;
+            border-radius: 4px;
+            color: #0176d3;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 400;
+            padding: 6px 12px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.15s linear;
+            display: inline-block;
+        }
+        
+        .slds-button:hover {
+            background: #f4f6fe;
+            border-color: #0176d3;
+            text-decoration: none;
+        }
+        
+        .slds-breadcrumb {
+            padding: 8px 0;
+            font-size: 12px;
+        }
+        
+        .slds-breadcrumb a {
+            color: #0176d3;
+            text-decoration: none;
+        }
+        
+        .slds-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .slds-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 12px;
+            background: #ecebea;
+            color: #514f4d;
+        }
+        
+        .slds-badge--info {
+            background: #0176d3;
+            color: white;
+        }
+        
+        .null-value { 
+            color: #c23934; 
+            font-style: italic; 
+            font-size: 11px;
+        }
+        
+        .json-value { 
+            font-family: 'Courier New', monospace; 
+            font-size: 11px;
+            background: #f4f6fe;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        
+        .field-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            padding: 16px 24px;
+        }
+        
+        .field-info-item {
+            font-size: 12px;
+        }
+        
+        .field-info-label {
+            color: #706e6b;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .field-info-value {
+            color: #080707;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📋 {{ table_name }}</h1>
-        <p><a href="/db" class="back-link">← Back to Database Overview</a></p>
+    <!-- Salesforce Global Header -->
+    <div class="slds-global-header">
+        <div class="slds-global-header__logo">
+            <i class="fas fa-database slds-global-header__icon"></i>
+            VectorBid Database
+        </div>
+        <div style="margin-left: auto; font-size: 14px;">
+            <i class="fas fa-shield-alt" style="margin-right: 4px;"></i>
+            Read-Only Mode
+        </div>
     </div>
 
-    <div class="table-info">
-        <h3>Table Information</h3>
-        <ul>
-            <li><strong>Columns:</strong> {{ columns|length }}</li>
-            <li><strong>Rows Shown:</strong> {{ rows|length }} (limited to 50)</li>
-            <li><strong>Table:</strong> {{ table_name }}</li>
-        </ul>
-    </div>
+    <div class="slds-page-content">
+        <!-- Breadcrumb -->
+        <nav class="slds-breadcrumb">
+            <a href="/db">
+                <i class="fas fa-home" style="margin-right: 4px;"></i>
+                Database Objects
+            </a>
+            <span style="margin: 0 8px;">/</span>
+            <span>{{ table_name|title }}</span>
+        </nav>
 
-    {% if columns %}
-    <h3>Column Schema</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Column Name</th>
-                <th>Data Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for column_name, data_type in columns %}
-            <tr>
-                <td><strong>{{ column_name }}</strong></td>
-                <td class="data-type">{{ data_type }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
+        <!-- Page Header -->
+        <div class="slds-page-header">
+            <h1 class="slds-page-header__title">{{ table_name|title }}</h1>
+            <p class="slds-page-header__meta">
+                {{ columns|length }} fields • {{ rows|length }} records shown (limited to 50) • Standard Object
+            </p>
+        </div>
 
-    {% if rows %}
-    <h3>Table Data ({{ rows|length }} rows)</h3>
-    <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    {% for column_name, data_type in columns %}
-                    <th>{{ column_name }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in rows %}
-                <tr>
-                    {% for value in row %}
-                    <td>
-                        {% if value is none %}
-                            <span class="null-value">NULL</span>
-                        {% elif value is mapping or value is sequence and value is not string %}
-                            <div class="json-value" title="{{ value }}">{{ value|string|truncate(100) }}</div>
-                        {% else %}
-                            {{ value }}
-                        {% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <div style="text-align: center; padding: 40px; color: #6b7280;">
-        <p>No data found in this table.</p>
-    </div>
-    {% endif %}
+        <!-- Object Information -->
+        <div class="slds-card">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-info-circle" style="margin-right: 8px; color: #0176d3;"></i>
+                    Object Information
+                </h2>
+            </div>
+            <div class="field-info">
+                <div class="field-info-item">
+                    <div class="field-info-label">Object Name</div>
+                    <div class="field-info-value">{{ table_name|title }}</div>
+                </div>
+                <div class="field-info-item">
+                    <div class="field-info-label">Total Fields</div>
+                    <div class="field-info-value">{{ columns|length }}</div>
+                </div>
+                <div class="field-info-item">
+                    <div class="field-info-label">Records Shown</div>
+                    <div class="field-info-value">{{ rows|length }}</div>
+                </div>
+                <div class="field-info-item">
+                    <div class="field-info-label">Object Type</div>
+                    <div class="field-info-value">Standard Object</div>
+                </div>
+            </div>
+        </div>
 
-    <div style="margin-top: 20px; color: #6b7280; font-size: 0.9em;">
-        <p><strong>Note:</strong> Limited to first 50 rows. For full data access, use pgAdmin or psql command line.</p>
+        {% if columns %}
+        <!-- Fields & Schema -->
+        <div class="slds-card">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-list" style="margin-right: 8px; color: #0176d3;"></i>
+                    Fields & Relationships
+                </h2>
+            </div>
+            <div class="slds-card__body">
+                <table class="slds-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Field Name</th>
+                            <th scope="col">Data Type</th>
+                            <th scope="col">Properties</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for column_name, data_type in columns %}
+                        <tr>
+                            <td>
+                                <div class="slds-table__record-name">
+                                    <i class="fas fa-circle" style="font-size: 8px; margin-right: 8px; color: {% if 'id' in column_name.lower() %}#0176d3{% elif 'created' in column_name.lower() or 'updated' in column_name.lower() %}#706e6b{% else %}#4bca81{% endif %};"></i>
+                                    {{ column_name|replace('_', ' ')|title }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="slds-badge slds-badge--info">{{ data_type|upper }}</span>
+                            </td>
+                            <td>
+                                {% if 'id' in column_name.lower() %}
+                                    <span class="slds-badge">Primary Key</span>
+                                {% elif 'created' in column_name.lower() or 'updated' in column_name.lower() %}
+                                    <span class="slds-badge">System</span>
+                                {% else %}
+                                    <span class="slds-badge">Standard</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if rows %}
+        <!-- Records -->
+        <div class="slds-card">
+            <div class="slds-card__header">
+                <h2 class="slds-card__header-title">
+                    <i class="fas fa-table" style="margin-right: 8px; color: #0176d3;"></i>
+                    Records ({{ rows|length }})
+                </h2>
+            </div>
+            <div class="slds-card__body">
+                <div style="overflow-x: auto;">
+                    <table class="slds-table">
+                        <thead>
+                            <tr>
+                                {% for column_name, data_type in columns %}
+                                <th scope="col">{{ column_name|replace('_', ' ')|title }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                {% for value in row %}
+                                <td>
+                                    {% if value is none %}
+                                        <span class="null-value">—</span>
+                                    {% elif value is mapping or value is sequence and value is not string %}
+                                        <div class="json-value" title="{{ value }}">{{ value|string|truncate(50) }}</div>
+                                    {% elif value|string|length > 50 %}
+                                        <div title="{{ value }}">{{ value|string|truncate(50) }}</div>
+                                    {% else %}
+                                        {{ value }}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="slds-card">
+            <div class="slds-card__body" style="padding: 48px; text-align: center;">
+                <i class="fas fa-inbox" style="font-size: 48px; color: #dddbda; margin-bottom: 16px;"></i>
+                <h3 style="color: #706e6b; margin: 0 0 8px 0;">No Records Found</h3>
+                <p style="color: #706e6b; margin: 0;">This object doesn't contain any records yet.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div style="margin-top: 24px;">
+            <a href="/db" class="slds-button">
+                <i class="fas fa-arrow-left" style="margin-right: 4px;"></i>
+                Back to Database Objects
+            </a>
+        </div>
     </div>
 </body>
 </html>
