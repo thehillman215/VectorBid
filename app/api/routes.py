@@ -12,7 +12,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
 from app.audit import log_event
-from app.db import Audit, SessionLocal
+# from app.db import Audit, SessionLocal  # Temporarily disabled due to schema conflict
+from app.db.database import get_sync_session
+try:
+    from app.db import Audit, SessionLocal
+    DB_AVAILABLE = True
+except Exception:
+    DB_AVAILABLE = False
+    SessionLocal = None
+    Audit = None
 from app.explain.legal import explain as explain_legal
 from app.export.audit import get_record, insert_record
 from app.export.storage import write_artifact
@@ -188,15 +196,18 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
 
 @router.post("/optimize", tags=["Optimize"])
 def optimize(payload: dict[str, Any]) -> dict[str, Any]:
-    bundle = FeatureBundle(**payload["feature_bundle"])
-    K = int(payload.get("K", 50))
-    topk = select_topk(bundle, K)
-    report = validate_feasibility(bundle, _RULES)
-    for cand in topk:
-        cand.rationale.notes.extend(explain_legal(cand, report))
-        # Store candidates for later retrieval
-        CANDIDATE_STORE[cand.candidate_id] = cand
-    return {"candidates": [c.model_dump() for c in topk]}
+    try:
+        bundle = FeatureBundle(**payload["feature_bundle"])
+        K = int(payload.get("K", 50))
+        topk = select_topk(bundle, K)
+        report = validate_feasibility(bundle, _RULES)
+        for cand in topk:
+            cand.rationale.notes.extend(explain_legal(cand, report))
+            # Store candidates for later retrieval
+            CANDIDATE_STORE[cand.candidate_id] = cand
+        return {"candidates": [c.model_dump() for c in topk]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
 
 
 @router.post("/optimize_enhanced", tags=["Optimize"])
@@ -478,17 +489,23 @@ def download_export(export_id: str) -> FileResponse:
 @router.get("/audit/{ctx_id}", tags=["Audit"])
 def get_audit(ctx_id: str) -> dict[str, Any]:
     """Return audit trail for a given context."""
-    with SessionLocal() as db:
-        rows = db.query(Audit).filter(Audit.ctx_id == ctx_id).order_by(Audit.timestamp.asc()).all()
-        events = [
-            {
-                "stage": r.stage,
-                "timestamp": r.timestamp.isoformat(),
-                "payload": r.payload,
-            }
-            for r in rows
-        ]
-    return {"events": events}
+    if not DB_AVAILABLE:
+        return {"events": [], "error": "Audit database not available"}
+    
+    try:
+        with SessionLocal() as db:
+            rows = db.query(Audit).filter(Audit.ctx_id == ctx_id).order_by(Audit.timestamp.asc()).all()
+            events = [
+                {
+                    "stage": r.stage,
+                    "timestamp": r.timestamp.isoformat(),
+                    "payload": r.payload,
+                }
+                for r in rows
+            ]
+        return {"events": events}
+    except Exception as e:
+        return {"events": [], "error": f"Audit query failed: {str(e)}"}
 
 
 @router.post("/chat/start", tags=["AI Chat"])

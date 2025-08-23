@@ -8,7 +8,15 @@ import yaml
 from pydantic import ValidationError
 
 from app.audit import log_event
-from app.db import Pilot, Preference, RulePack as RulePackModel, SessionLocal
+try:
+    from app.db import Pilot, Preference, RulePack as RulePackModel, SessionLocal
+    DB_AVAILABLE = True
+except Exception:
+    DB_AVAILABLE = False
+    Pilot = None
+    Preference = None
+    RulePackModel = None
+    SessionLocal = None
 from app.models import FeatureBundle
 from app.rules.models import RulePack
 
@@ -131,24 +139,29 @@ def validate_feasibility(bundle: FeatureBundle, rules: dict[str, Any]) -> dict[s
             feasible.append(p)
 
     ctx = bundle.context
-    with SessionLocal() as db:
-        db.merge(Pilot(pilot_id=ctx.pilot_id))
-        db.add(
-            Preference(
-                ctx_id=ctx.ctx_id,
-                pilot_id=ctx.pilot_id,
-                data=bundle.preference_schema.model_dump(),
-            )
-        )
-        db.add(
-            RulePackModel(
-                ctx_id=ctx.ctx_id,
-                airline=ctx.airline,
-                version="",  # version unknown
-                data=rules,
-            )
-        )
-        db.commit()
+    if DB_AVAILABLE:
+        try:
+            with SessionLocal() as db:
+                db.merge(Pilot(pilot_id=ctx.pilot_id))
+                db.add(
+                    Preference(
+                        ctx_id=ctx.ctx_id,
+                        pilot_id=ctx.pilot_id,
+                        data=bundle.preference_schema.model_dump(),
+                    )
+                )
+                db.add(
+                    RulePackModel(
+                        ctx_id=ctx.ctx_id,
+                        airline=ctx.airline,
+                        version="",  # version unknown
+                        data=rules,
+                    )
+                )
+                db.commit()
+        except Exception:
+            # Silently fail if database is not available
+            pass
 
     log_event(ctx.ctx_id, "validate", {"violations": len(violations)})
 

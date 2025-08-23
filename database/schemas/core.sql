@@ -175,10 +175,10 @@ CREATE TABLE pilot_contract_assignments (
     assigned_by UUID NOT NULL REFERENCES users(id), -- Self-assigned or admin
     status VARCHAR(20) NOT NULL DEFAULT 'active', -- active, inactive
     notes TEXT, -- Why this assignment was made
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     
-    -- One active contract per pilot
-    UNIQUE(pilot_id) WHERE status = 'active'
+    -- One active contract per pilot (enforced by unique index)
+    -- See unique index below
 );
 
 -- ============================================================================
@@ -283,6 +283,9 @@ CREATE INDEX idx_contract_rules_rule_id ON contract_rules(rule_id);
 -- Assignment and review indexes
 CREATE INDEX idx_pilot_contract_assignments_pilot_id ON pilot_contract_assignments(pilot_id);
 CREATE INDEX idx_pilot_contract_assignments_status ON pilot_contract_assignments(status);
+-- Unique index to ensure one active contract per pilot
+CREATE UNIQUE INDEX idx_pilot_contract_assignments_unique_active 
+    ON pilot_contract_assignments(pilot_id) WHERE status = 'active';
 CREATE INDEX idx_contract_reviews_contract_id ON contract_reviews(contract_id);
 CREATE INDEX idx_contract_reviews_reviewer_id ON contract_reviews(reviewer_id);
 

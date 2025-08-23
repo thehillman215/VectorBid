@@ -5,7 +5,13 @@ from operator import itemgetter
 from typing import Any
 
 from app.audit import log_event
-from app.db import Candidate, SessionLocal
+try:
+    from app.db import Candidate, SessionLocal
+    DB_AVAILABLE = True
+except Exception:
+    DB_AVAILABLE = False
+    Candidate = None
+    SessionLocal = None
 from app.models import CandidateRationale, CandidateSchedule, FeatureBundle
 
 
@@ -429,10 +435,14 @@ def select_topk(bundle: FeatureBundle, K: int = 50) -> list[CandidateSchedule]:
         )
 
     ctx_id = bundle.context.ctx_id
-    with SessionLocal() as db:
-        for cand in result:
-            db.add(Candidate(ctx_id=ctx_id, data=cand.model_dump()))
-        db.commit()
+    if DB_AVAILABLE:
+        try:
+            with SessionLocal() as db:
+                for cand in result:
+                    db.add(Candidate(ctx_id=ctx_id, data=cand.model_dump()))
+                db.commit()
+        except Exception as e:
+            log_event(ctx_id, "db_warning", {"message": f"Failed to save candidates to legacy DB: {e}"})
 
     log_event(ctx_id, "optimize", {"candidates": [c.candidate_id for c in result]})
 

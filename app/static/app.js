@@ -260,7 +260,7 @@ class VectorBidApp {
                     ctx_id: this.generateContextId(),
                     pilot_id: "demo_pilot",
                     airline: "UAL", 
-                    month: "2025.09",
+                    month: "2025-09",
                     base: "SFO",
                     seat: "FO",
                     equip: ["737"],
@@ -679,7 +679,7 @@ class VectorBidApp {
                 try {
                     const result = await this.uploadBidPackage(file, {
                         airline: 'UAL',
-                        month: '2025.09',
+                        month: '2025-09',
                         base: 'SFO',
                         fleet: '737',
                         seat: 'FO',
