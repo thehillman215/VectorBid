@@ -37,6 +37,8 @@ from app.routes.ops import router as ops_router
 from app.routes.rule_packs import router as rule_packs_router
 from app.routes.ui import router as ui_router
 from app.routes.db_viewer import router as db_viewer_router
+from app.routes.admin_contracts import router as admin_contracts_router
+from app.routes.pilot_contracts import router as pilot_contracts_router
 from app.security.api_key import require_api_key
 
 MODELS = [
@@ -106,6 +108,8 @@ app.include_router(marketing_router, tags=["Marketing"])
 app.include_router(products_router, prefix="/products", tags=["Products"])
 app.include_router(solutions_router, prefix="/solutions", tags=["Solutions"])
 app.include_router(db_viewer_router, tags=["Database"])
+app.include_router(admin_contracts_router, tags=["Admin Contracts"])
+app.include_router(pilot_contracts_router, tags=["Pilot Contracts"])
 
 # Legacy compatibility
 app.include_router(compat_validate_router)
